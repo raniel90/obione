@@ -176,24 +176,23 @@ def build_pdf():
         'para endereçar a principal lacuna identificada na literatura: a dificuldade de coleta e '
         'estruturação de dados de projetos a partir de fontes heterogêneas e não estruturadas. '
         'Adotando o <i>Design Science Research</i> (DSR) como método de pesquisa (Hevner <i>et al.</i>, '
-        '2004), o estudo concentra-se em um ciclo de desenvolvimento e avaliação composto por três '
-        'etapas: (1) <b>consciência do problema</b>, a partir dos <i>gaps</i> mapeados nos trabalhos '
-        'de Vieira (2022; 2025; 2026); (2) <b>desenvolvimento</b> de um <i>pipeline</i> de extração '
-        'baseado em LLM que, dado um documento de projeto em formato livre (.docx), identifica e '
-        'estrutura automaticamente os atributos previstos no MPO (nome, escopo, cronograma, orçamento, '
-        '<i>stakeholders</i>, riscos, lições aprendidas, entre outros) em formato estruturado (JSON), '
-        'alimentando um <i>dashboard</i> de observação do portfólio; e (3) <b>avaliação</b> do artefato '
-        'mediante estudo de caso com cinco projetos reais de domínios distintos (jurídico, saúde, '
-        'esporte e branding), comparando a extração automática com a manual para verificar a cobertura '
-        'dos conceitos do MPO e a acurácia da IA Generativa.'
+        '2004), o estudo concentra-se em um ciclo composto por três etapas: (1) consciência do '
+        'problema, a partir dos <i>gaps</i> mapeados nos trabalhos de Vieira (2022; 2025; 2026); '
+        '(2) desenvolvimento de um <i>pipeline</i> de extração baseado em LLM que, dado um documento '
+        'de projeto em formato livre (.docx), identifica e estrutura automaticamente os atributos '
+        'previstos no MPO em formato estruturado (JSON), alimentando um <i>dashboard</i> de observação '
+        'do portfólio; e (3) avaliação do artefato mediante estudo de caso com cinco projetos reais '
+        'de domínios distintos (jurídico, saúde, esporte e branding). A avaliação adota duas '
+        'perspectivas: quantitativa, mensurando precisão, <i>recall</i> e cobertura dos conceitos do '
+        'MPO (com a extração manual como <i>baseline</i>); e qualitativa, por meio de questionário '
+        'aplicado a <i>stakeholders</i> dos projetos sobre a utilidade e clareza do observatório.'
     )
 
     p4 = (
         'Espera-se que o Orion demonstre como a IA Generativa pode viabilizar a coleta automatizada '
-        'de dados de projetos a partir de documentos não estruturados, o desafio mais recorrente '
-        'reportado na literatura sobre observatórios, reduzindo a dependência de equipes dedicadas '
-        'e estendendo a aplicabilidade do MPO para contextos organizacionais privados e '
-        'multissetoriais.'
+        'de dados de projetos a partir de documentos não estruturados, reduzindo a dependência de '
+        'equipes dedicadas e estendendo a aplicabilidade do MPO para contextos organizacionais '
+        'privados e multissetoriais.'
     )
 
     elements.append(Paragraph(p1, style_body_first))
