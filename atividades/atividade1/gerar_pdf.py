@@ -179,7 +179,7 @@ def build_pdf():
         '2004), o estudo concentra-se em um ciclo composto por três etapas: (1) consciência do '
         'problema, a partir dos <i>gaps</i> mapeados nos trabalhos de Vieira (2022; 2025; 2026); '
         '(2) desenvolvimento de um <i>pipeline</i> de extração baseado em LLM que, dado um documento '
-        'de projeto em formato livre (.docx), identifica e estrutura automaticamente os atributos '
+        'de projeto em formato livre, identifica e estrutura automaticamente os atributos '
         'previstos no MPO em formato estruturado (JSON), alimentando um <i>dashboard</i> de observação '
         'do portfólio; e (3) avaliação do artefato mediante estudo de caso com cinco projetos reais '
         'de domínios distintos (jurídico, saúde, esporte e branding). A avaliação adota duas '
