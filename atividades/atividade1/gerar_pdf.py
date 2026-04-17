@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Gera PDF da proposta do Observatório Orion com identidade visual UPE-POLI."""
+"""Gera PDF da proposta do Observatório ObiOne com identidade visual UPE-POLI."""
 
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm, mm
@@ -24,7 +24,7 @@ BRANCO = HexColor('#FFFFFF')
 # --- Paths ---
 BASE = os.path.dirname(os.path.abspath(__file__))
 LOGO_PATH = os.path.join(BASE, 'upe_logo.png')
-OUTPUT_PATH = os.path.join(BASE, 'proposta_observatorio_orion.pdf')
+OUTPUT_PATH = os.path.join(BASE, 'proposta_observatorio_obione.pdf')
 
 # --- Fontes ---
 FONT_REGULAR = 'Helvetica'
@@ -119,8 +119,8 @@ def build_pdf():
 
     # --- Título ---
     elements.append(Paragraph(
-        "Orion: Um Observatório de Projetos Potencializado "
-        "por Inteligência Artificial Generativa",
+        "ObiOne: Um Observatório de Projetos Baseado "
+        "em Inteligência Artificial Generativa",
         style_title
     ))
 
@@ -172,7 +172,7 @@ def build_pdf():
     )
 
     p3 = (
-        'Este trabalho propõe o <b>Orion</b>, um observatório de projetos que utiliza IA Generativa '
+        'Este trabalho propõe o <b>ObiOne</b>, um observatório de projetos que utiliza IA Generativa '
         'para endereçar a principal lacuna identificada na literatura: a dificuldade de coleta e '
         'estruturação de dados de projetos a partir de fontes heterogêneas e não estruturadas. '
         'Adotando o <i>Design Science Research</i> (DSR) como método de pesquisa (Hevner <i>et al.</i>, '
@@ -189,7 +189,7 @@ def build_pdf():
     )
 
     p4 = (
-        'Espera-se que o Orion demonstre como a IA Generativa pode viabilizar a coleta automatizada '
+        'Espera-se que o ObiOne demonstre como a IA Generativa pode viabilizar a coleta automatizada '
         'de dados de projetos a partir de documentos não estruturados, reduzindo a dependência de '
         'equipes dedicadas e estendendo a aplicabilidade do MPO para contextos organizacionais '
         'privados e multissetoriais.'
