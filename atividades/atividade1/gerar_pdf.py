@@ -164,7 +164,7 @@ def build_pdf():
         'capacidade de extrair informações estruturadas de documentos não estruturados com elevada '
         'acurácia (Unstract, 2026), bem como sua relevância direta para competências de gestão de '
         'projetos (Karnouskos, 2024). Revisões sistemáticas apontam que a IA Generativa pode '
-        'potencializar a gestão do conhecimento em organizações, automatizando processos de coleta, '
+        'fortalecer a gestão do conhecimento em organizações, automatizando processos de coleta, '
         'categorização e disseminação (Nguyen <i>et al.</i>, 2025), além de viabilizar sistemas de '
         'informação mais transparentes e confiáveis (Kirchner, 2025). Ferramentas de IA para gestão '
         'de projetos já são investigadas sob uma perspectiva baseada em conhecimento, abrangendo '
@@ -173,28 +173,25 @@ def build_pdf():
 
     p3 = (
         'Este trabalho propõe o <b>ObiOne</b>, um observatório de projetos baseado no MPO com suporte '
-        'de IA Generativa para endereçar a principal lacuna identificada na literatura: a dificuldade de coleta e '
-        'estruturação de dados de projetos a partir de fontes heterogêneas e não estruturadas. '
-        'Adotando o <i>Design Science Research</i> (DSR) como método de pesquisa (Hevner <i>et al.</i>, '
-        '2004), o estudo concentra-se em um ciclo composto por três etapas: (1) consciência do '
-        'problema, a partir dos <i>gaps</i> mapeados nos trabalhos de Vieira (2022; 2025; 2026); '
-        '(2) desenvolvimento de um <i>pipeline</i> de extração baseado em LLM que, dado um documento '
-        'de projeto em formato livre, identifica e estrutura automaticamente os atributos '
-        'previstos no MPO em formato estruturado (JSON), alimentando um <i>dashboard</i> de observação '
-        'do portfólio; e (3) avaliação do artefato mediante estudo de caso com cinco projetos reais '
-        'de domínios distintos (jurídico, saúde, esporte e branding). A avaliação adota duas '
-        'perspectivas: quantitativa, mensurando precisão, <i>recall</i> e cobertura dos conceitos do '
-        'MPO (com a extração manual como <i>baseline</i>); e qualitativa, por meio de questionário '
-        'aplicado a <i>stakeholders</i> dos projetos sobre a utilidade e clareza do observatório.'
+        'de IA Generativa para endereçar as lacunas identificadas na literatura. Adotando o <i>Design '
+        'Science Research</i> (DSR) como método de pesquisa (Hevner <i>et al.</i>, 2004), o estudo '
+        'concentra-se em um ciclo composto por três etapas: (1) consciência do problema, a partir '
+        'dos <i>gaps</i> mapeados nos trabalhos de Vieira (2022; 2025; 2026); (2) desenvolvimento '
+        'do artefato, um observatório que utiliza LLMs para apoiar a coleta, a estruturação e a '
+        'análise de dados de projetos a partir de documentos em formato livre, organizando-os segundo '
+        'os conceitos do MPO e disponibilizando-os em um <i>dashboard</i> de observação do portfólio; '
+        'e (3) avaliação do artefato mediante estudo de caso com cinco projetos reais de domínios '
+        'distintos (jurídico, saúde, esporte e branding), adotando duas perspectivas: quantitativa, '
+        'mensurando precisão, <i>recall</i> e cobertura dos conceitos do MPO; e qualitativa, por meio '
+        'de questionário aplicado a <i>stakeholders</i> dos projetos sobre a utilidade e clareza do '
+        'observatório.'
     )
 
     p4 = (
-        'Espera-se que o ObiOne demonstre como a IA Generativa pode viabilizar a coleta automatizada '
-        'de dados de projetos a partir de documentos não estruturados, reduzindo a dependência de '
-        'equipes dedicadas e estendendo a aplicabilidade do MPO para contextos organizacionais '
-        'privados e multissetoriais. Espera-se, ainda, que o ObiOne contribua para a evolução dos '
-        'observatórios de projetos ao integrar inteligência artificial ao processo de geração de '
-        'conhecimento organizacional.'
+        'Espera-se que o ObiOne contribua para a evolução dos observatórios de projetos ao demonstrar '
+        'como a inteligência artificial generativa pode apoiar processos de coleta, estruturação e '
+        'geração de conhecimento sobre projetos, estendendo a aplicabilidade do MPO para contextos '
+        'organizacionais privados e multissetoriais.'
     )
 
     elements.append(Paragraph(p1, style_body_first))
