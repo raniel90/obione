@@ -192,7 +192,9 @@ def build_pdf():
         'Espera-se que o ObiOne demonstre como a IA Generativa pode viabilizar a coleta automatizada '
         'de dados de projetos a partir de documentos não estruturados, reduzindo a dependência de '
         'equipes dedicadas e estendendo a aplicabilidade do MPO para contextos organizacionais '
-        'privados e multissetoriais.'
+        'privados e multissetoriais. Espera-se, ainda, que o ObiOne contribua para a evolução dos '
+        'observatórios de projetos ao integrar inteligência artificial ao processo de geração de '
+        'conhecimento organizacional.'
     )
 
     elements.append(Paragraph(p1, style_body_first))
