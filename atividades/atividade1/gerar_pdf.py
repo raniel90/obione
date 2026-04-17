@@ -170,29 +170,28 @@ def build_pdf():
     )
 
     p3 = (
-        'Este trabalho propõe o <b>Orion</b>, um observatório de projetos que integra IA Generativa '
-        'ao MPO para endereçar as lacunas identificadas. Adotando o <i>Design Science Research</i> '
-        '(DSR) como método de pesquisa (Hevner <i>et al.</i>, 2004), o estudo contempla os ciclos '
-        'de: (1) <b>consciência do problema</b>, a partir dos <i>gaps</i> mapeados nos trabalhos de '
-        'Vieira (2022; 2025; 2026); (2) <b>sugestão e desenvolvimento</b> do artefato — um protótipo '
-        'de observatório que utiliza LLMs para extração automática de entidades de documentos de '
-        'projetos, normalização e padronização de dados heterogêneos, classificação temática por '
-        'similaridade semântica, geração de análises <i>cross-project</i> e relatórios automatizados, '
-        'e interface conversacional para consulta em linguagem natural; e (3) <b>avaliação</b> do '
-        'artefato mediante estudo de caso com um portfólio real de cinco projetos privados de domínios '
-        'distintos (jurídico, saúde, esporte e branding), avaliando a cobertura dos conceitos do MPO '
-        'e a contribuição da IA Generativa para os processos do observatório. Os projetos do estudo '
-        'de caso envolvem dados sensíveis, dados parciais e requisitos de LGPD, permitindo também '
-        'avaliar aspectos de governança e segurança previstos no modelo.'
+        'Este trabalho propõe o <b>Orion</b>, um observatório de projetos que utiliza IA Generativa '
+        'para endereçar a principal lacuna identificada na literatura: a dificuldade de coleta e '
+        'estruturação de dados de projetos a partir de fontes heterogêneas e não-estruturadas. '
+        'Adotando o <i>Design Science Research</i> (DSR) como método de pesquisa (Hevner <i>et al.</i>, '
+        '2004), o estudo concentra-se em um ciclo de desenvolvimento e avaliação composto por três '
+        'etapas: (1) <b>consciência do problema</b>, a partir dos <i>gaps</i> mapeados nos trabalhos '
+        'de Vieira (2022; 2025; 2026); (2) <b>desenvolvimento</b> de um <i>pipeline</i> de extração '
+        'baseado em LLM que, dado um documento de projeto em formato livre (.docx), identifica e '
+        'estrutura automaticamente os atributos previstos no MPO (nome, escopo, cronograma, orçamento, '
+        '<i>stakeholders</i>, riscos, lições aprendidas, entre outros) em formato estruturado (JSON), '
+        'alimentando um <i>dashboard</i> de observação do portfólio; e (3) <b>avaliação</b> do artefato '
+        'mediante estudo de caso com cinco projetos reais de domínios distintos (jurídico, saúde, '
+        'esporte e branding), comparando a extração automática com a manual para verificar a cobertura '
+        'dos conceitos do MPO e a acurácia da IA Generativa.'
     )
 
     p4 = (
-        'Espera-se que o Orion demonstre como a IA Generativa pode: (a) viabilizar a coleta '
-        'automatizada de dados de projetos a partir de fontes não-estruturadas; (b) reduzir a '
-        'dependência de equipes dedicadas nos processos de análise e disseminação; (c) ampliar a '
-        'interatividade e usabilidade do observatório; e (d) estender a aplicabilidade do MPO para '
-        'contextos organizacionais privados e multissetoriais, contribuindo para a evolução do '
-        'modelo e da pesquisa em observatórios de projetos.'
+        'Espera-se que o Orion demonstre como a IA Generativa pode viabilizar a coleta automatizada '
+        'de dados de projetos a partir de documentos não-estruturados — o desafio mais recorrente '
+        'reportado na literatura sobre observatórios — reduzindo a dependência de equipes dedicadas '
+        'e estendendo a aplicabilidade do MPO para contextos organizacionais privados e '
+        'multissetoriais.'
     )
 
     elements.append(Paragraph(p1, style_body_first))
