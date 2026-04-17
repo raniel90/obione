@@ -172,8 +172,8 @@ def build_pdf():
     )
 
     p3 = (
-        'Este trabalho propõe o <b>ObiOne</b>, um observatório de projetos que utiliza IA Generativa '
-        'para endereçar a principal lacuna identificada na literatura: a dificuldade de coleta e '
+        'Este trabalho propõe o <b>ObiOne</b>, um observatório de projetos baseado no MPO com suporte '
+        'de IA Generativa para endereçar a principal lacuna identificada na literatura: a dificuldade de coleta e '
         'estruturação de dados de projetos a partir de fontes heterogêneas e não estruturadas. '
         'Adotando o <i>Design Science Research</i> (DSR) como método de pesquisa (Hevner <i>et al.</i>, '
         '2004), o estudo concentra-se em um ciclo composto por três etapas: (1) consciência do '
