@@ -1,4 +1,4 @@
-# Orion: Detalhamento Metodológico
+# ObiOne: Detalhamento Metodológico
 
 ## 1. Método: Design Science Research (DSR)
 
@@ -9,8 +9,10 @@ Baseado em Hevner *et al.* (2004), o estudo segue um ciclo único de DSR com tr�
 ### 2.1 Consciência do problema (semanas 1-2)
 
 - Análise dos gaps nos papers de referência (Vieira 2021, 2025, 2026)
-- Definição dos atributos-alvo com base no Quadro 36 do MPO (atributos de projetos)
-- Mapeamento: quais conceitos específicos do MPO o pipeline deve cobrir
+- Definição dos atributos-alvo com base no **Quadro 37 (terceira versão do MPO — Vieira, 2022)**, abrangendo as 8 categorias de atributos de projetos: geral, stakeholders, escopo, cronograma, custos, riscos, mudanças e lições aprendidas
+- Categorização de cada atributo como `estruturado` (datas, valores, status) ou `texto_livre` (escopo, riscos narrativos, lições, etc.); atributos não-textuais (imagens/fotos) ficam fora do escopo do pipeline LLM
+- Definição do protocolo de avaliação híbrido (ver seção 2.3)
+- **Produção do gabarito manual** dos 5 projetos por dois avaliadores independentes — baseline para a comparação na seção 2.3. Valença Odontologia (complexidade Baixa) é anotada primeiro como piloto, calibrando a rubrica antes dos demais projetos
 
 ### 2.2 Desenvolvimento do artefato (semanas 3-8)
 
@@ -24,21 +26,27 @@ Baseado em Hevner *et al.* (2004), o estudo segue um ciclo único de DSR com tr�
 - Visão consolidada dos 5 projetos
 - Indicadores básicos: status, atrasos, cobertura de atributos
 
-### 2.3 Avaliação do artefato (semanas 9-11)
+### 2.3 Avaliação do artefato (semanas 9-10)
 
 Estudo de caso com 5 projetos reais de domínios distintos (jurídico, saúde, esporte, branding).
 
 #### Perspectiva quantitativa
 
-Extração manual como baseline (gabarito), comparada com extração automática do LLM.
+Extração manual como baseline (gabarito), comparada com extração automática do LLM. Adota-se um **critério híbrido de match**:
+
+- **Atributos `estruturado`** (datas, valores, status, nomes próprios formais): comparação normalizada exata; cálculo binário de TP/FP/FN.
+- **Atributos `texto_livre`** (escopo, riscos, lições, etc.): rubrica humana 0 / 0,5 / 1 aplicada por dois avaliadores independentes; concordância reportada via Cohen's Kappa.
 
 | Métrica | Fórmula | O que mede |
 |---|---|---|
-| Cobertura do MPO | conceitos extraídos / 50 conceitos totais | Abrangência do modelo |
+| Cobertura | atributos preenchidos / total de atributos-alvo (Quadro 37) | Abrangência da extração frente ao MPO |
 | Precisão | atributos corretos / atributos extraídos | Confiabilidade da extração |
 | Recall | atributos encontrados / atributos existentes no doc | Completude da extração |
 | F1-Score | 2 × (Precisão × Recall) / (Precisão + Recall) | Equilíbrio precisão/recall |
+| Kappa | concordância entre avaliadores (texto_livre) | Confiabilidade da rubrica |
 | Tempo | minutos por projeto (manual vs. automático) | Ganho de eficiência |
+
+Métricas reportadas separadamente para o grupo `estruturado` e `texto_livre`, mais agregado total.
 
 #### Perspectiva qualitativa
 

@@ -179,10 +179,11 @@ def build_pdf():
         'dos <i>gaps</i> mapeados nos trabalhos de Vieira (2022; 2025; 2026); (2) desenvolvimento '
         'do artefato, um observatório que utiliza LLMs para apoiar a coleta, a estruturação e a '
         'análise de dados de projetos a partir de documentos em formato livre, organizando-os segundo '
-        'os conceitos do MPO e disponibilizando-os em um <i>dashboard</i> de observação do portfólio; '
+        'os atributos previstos no Quadro 37 (terceira versão) do MPO e disponibilizando-os em um '
+        '<i>dashboard</i> de observação do portfólio; '
         'e (3) avaliação do artefato mediante estudo de caso com cinco projetos reais de domínios '
         'distintos (jurídico, saúde, esporte e branding), adotando duas perspectivas: quantitativa, '
-        'mensurando precisão, <i>recall</i> e cobertura dos conceitos do MPO; e qualitativa, por meio '
+        'mensurando precisão, <i>recall</i> e cobertura dos atributos do MPO; e qualitativa, por meio '
         'de questionário aplicado a <i>stakeholders</i> dos projetos sobre a utilidade e clareza do '
         'observatório.'
     )
