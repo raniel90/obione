@@ -4,6 +4,19 @@ Plano de trabalho para executar o ObiOne dentro do calendário da disciplina TAE
 
 Período: semana 7 (08/05) a semana 16 (10/07) — 10 semanas de trabalho.
 
+**Última atualização:** 07/05/2026 — T0.1 (requisitos) concluído.
+
+### Progresso (1/19 tarefas)
+
+| Bloco | Tarefas totais | Concluídas |
+|---|---|---|
+| 0 — Fundação | 4 | 1 (T0.1) |
+| 1 — Preparação avaliação | 4 | 0 |
+| 2 — Pipeline | 3 | 0 |
+| 3 — Dashboard | 2 | 0 |
+| 4 — Avaliação | 4 | 0 |
+| 5 — Documentação | 3 | 0 |
+
 ---
 
 ## 1. Equipe e Responsabilidades
@@ -86,8 +99,9 @@ Cada tarefa segue o formato:
 #### T0.1 — Requisitos (RF + RNF)
 - **Responsável:** Raniel (com input do grupo)
 - **Prazo:** sem 8 (15/05)
+- **Status:** ✅ Concluído em 07/05/2026 (commits `53845d1` e `7a2f854`).
 - **O que fazer:** Documentar requisitos funcionais (derivados das US01–US11 do backlog) e não-funcionais (performance básica, usabilidade, manutenibilidade).
-- **Entregável:** `atividades/requisitos.md` com RF01–RF11 + 5–7 RNFs.
+- **Entregável:** `atividades/requisitos.md` com RF01–RF11 + 7 RNFs. Cada RF traz seção própria de Backend (Raniel) e Frontend (Bruno), tornando cada requisito auto-contido para divisão paralela.
 - **Aceitação:** cada RF mapeia 1:1 para uma US do backlog; RNFs cobrem performance, usabilidade e manutenibilidade.
 
 #### T0.2 — Prototipação das telas
