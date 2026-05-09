@@ -32,6 +32,8 @@ O ObiOne ingere documentos não-estruturados de projetos (formato Word, `.docx`)
   - Campos obrigatórios: nome, domínio (jurídico, saúde, esporte, branding, outros), descrição.
   - Identificador único atribuído automaticamente.
   - Listagem dos projetos cadastrados disponível.
+- **Backend (Raniel):** Modelo `Project` (nome, domínio enum, descrição, UUID); endpoints `POST /projects` (criação) e `GET /projects` (listagem); validação de campos obrigatórios.
+- **Frontend (Bruno):** Tela de cadastro com formulário (input nome, dropdown de domínio, textarea descrição); tela de listagem com navegação para detalhe.
 - **Prioridade:** Alta
 
 ### RF02 — Fazer upload de documentos do projeto
@@ -41,6 +43,8 @@ O ObiOne ingere documentos não-estruturados de projetos (formato Word, `.docx`)
   - Suporte mínimo obrigatório: `.docx` (formato dos casos reais).
   - Múltiplos arquivos por projeto.
   - Persistência do arquivo bruto + metadados (nome, data, tamanho, hash).
+- **Backend (Raniel):** Endpoint `POST /projects/{id}/documents` aceitando `multipart/form-data`; validação de extensão `.docx`; persistência do arquivo bruto + metadados (nome, data, tamanho, hash) em Postgres; endpoint `GET /projects/{id}/documents` para listagem.
+- **Frontend (Bruno):** Componente de upload com drag-and-drop, suporte a múltiplos arquivos por interação, feedback visual de progresso, listagem dos arquivos já enviados do projeto.
 - **Prioridade:** Alta
 
 ### RF03 — Extrair atributos do MPO via LLM
@@ -52,6 +56,8 @@ O ObiOne ingere documentos não-estruturados de projetos (formato Word, `.docx`)
   - Atributos não encontrados marcados como `null` — nunca inventados.
   - Atributos marcados como `fora_de_escopo` (ex.: imagens/fotos) são ignorados pelo pipeline.
   - Versão do prompt e modelo LLM registrados na extração (rastreabilidade).
+- **Backend (Raniel):** Pipeline de extração — leitura do `.docx`, estratégia de chunking (se necessário), prompt estruturado a partir da lista de atributos-alvo, chamada ao LLM, parsing da resposta para o schema, marcação de `null` para ausentes; endpoint `POST /projects/{id}/extract` para disparar a extração.
+- **Frontend (Bruno):** Botão "Extrair com IA" no detalhe do projeto; indicador de processamento em andamento; notificação visual ao concluir (sucesso ou erro).
 - **Prioridade:** Alta
 
 ### RF04 — Persistir extração estruturada
@@ -61,6 +67,8 @@ O ObiOne ingere documentos não-estruturados de projetos (formato Word, `.docx`)
   - Schema do JSON deriva diretamente dos atributos do Quadro 37.
   - Cada extração registra: projeto, documento(s), versão do prompt, modelo LLM, timestamp, origem (`automatico` | `manual`).
   - Recuperável posteriormente para comparação com gabarito.
+- **Backend (Raniel):** Modelo `Extraction` com referências (FK para projeto e documentos), versão do prompt, identificador do modelo LLM, timestamp, origem, JSON dos atributos; endpoint `GET /projects/{id}/extractions` para recuperar.
+- **Frontend (Bruno):** Sem tela própria — dados consumidos pela tela de detalhe do projeto (RF06).
 - **Prioridade:** Alta
 
 ### RF05 — Visualizar portfólio de projetos
@@ -70,6 +78,8 @@ O ObiOne ingere documentos não-estruturados de projetos (formato Word, `.docx`)
   - Lista os projetos com: nome, domínio, status derivado (`cadastrado` → `ingerido` → `extraído` → `avaliado`), % de cobertura do MPO.
   - Status é derivado do estado dos dados, não editado manualmente.
   - Filtro por domínio.
+- **Backend (Raniel):** Endpoint `GET /projects` retornando lista com status derivado e cobertura calculada on-the-fly; lógica de derivação do status a partir do estado dos dados (cadastrado/ingerido/extraído/avaliado); cálculo do % de cobertura por projeto.
+- **Frontend (Bruno):** Tela de portfólio em formato tabela com colunas (nome, domínio, status, cobertura); filtro por domínio; clique navega para o detalhe do projeto.
 - **Prioridade:** Alta
 
 ### RF06 — Visualizar detalhe do projeto
@@ -79,6 +89,8 @@ O ObiOne ingere documentos não-estruturados de projetos (formato Word, `.docx`)
   - Exibe todos os atributos do Quadro 37 (preenchidos e vazios) agrupados por categoria.
   - Para cada atributo preenchido: valor + trecho de origem.
   - Acesso aos documentos originais carregados.
+- **Backend (Raniel):** Endpoint `GET /projects/{id}` retornando projeto + extração mais recente + lista de documentos; endpoint `GET /projects/{id}/documents/{doc_id}/download` para servir o arquivo original.
+- **Frontend (Bruno):** Tela de detalhe com atributos agrupados nas 8 categorias do Quadro 37; cada atributo preenchido exibe valor + trecho de origem; link para baixar os documentos originais.
 - **Prioridade:** Alta
 
 ### RF07 — Calcular e exibir cobertura do MPO
@@ -88,6 +100,8 @@ O ObiOne ingere documentos não-estruturados de projetos (formato Word, `.docx`)
   - Por projeto: % de atributos preenchidos vs. total de atributos-alvo (Quadro 37, excluindo `fora_de_escopo`).
   - No portfólio: tabela ou heatmap cruzando projetos × atributos.
   - Destaque visual quando cobertura < 50%; sinalização saudável quando ≥ 80%.
+- **Backend (Raniel):** Endpoint `GET /coverage` retornando matriz projetos × atributos com estado de cada célula (preenchido / vazio / `fora_de_escopo`); cálculo agregado por projeto e por atributo.
+- **Frontend (Bruno):** Componente de heatmap (ou tabela cruzada) com coloração por threshold — < 50% destaque de alerta, ≥ 80% sinalização saudável; tooltip com valor exato por célula.
 - **Prioridade:** Alta
 
 ### RF08 — Importar gabarito manual
@@ -98,6 +112,8 @@ O ObiOne ingere documentos não-estruturados de projetos (formato Word, `.docx`)
   - Validação de schema: cada gabarito conforma o schema de extração definido na T1.3.
   - Persistência no mesmo schema da extração automática, com `origem: manual`.
   - Validação de integridade: os 5 projetos têm gabarito completo antes da execução do RF09.
+- **Backend (Raniel):** Endpoint `POST /projects/{id}/baseline` aceitando JSON conforme schema; validação contra schema; persistência reusando o modelo `Extraction` com `origem: manual`; endpoint `GET /baseline-status` retornando quais dos 5 projetos já têm gabarito.
+- **Frontend (Bruno):** Componente de upload do arquivo JSON do gabarito por projeto; feedback de validação (sucesso ou erros de schema); indicador visual no portfólio mostrando "gabarito presente" / "gabarito ausente".
 - **Prioridade:** Alta
 
 ### RF09 — Comparar extração automática vs. gabarito (critério híbrido)
@@ -110,6 +126,8 @@ O ObiOne ingere documentos não-estruturados de projetos (formato Word, `.docx`)
   - Métricas reportadas separadamente para os grupos `estruturado` e `texto_livre`, mais agregado total.
   - Tempo de extração registrado: manual (reportado pelos avaliadores) vs. automático (medido pelo sistema).
   - Visualização tabular dos resultados por projeto e consolidados.
+- **Backend (Raniel):** Algoritmo híbrido — comparação normalizada exata para atributos `estruturado` (TP/FP/FN); persistência da rubrica 0/0,5/1 aplicada externamente para `texto_livre`; cálculo de precisão, recall, F1 por grupo e Cohen's Kappa para `texto_livre`; endpoint `POST /projects/{id}/rubric` para receber rubricas dos avaliadores; endpoint `GET /projects/{id}/evaluation` retornando resultados.
+- **Frontend (Bruno):** UI dedicada para Cynthia/Moisés aplicarem a rubrica 0/0,5/1 atributo por atributo (lado-a-lado: gabarito × extração automática, com botões 0 / 0,5 / 1); tela de visualização tabular dos resultados com métricas por projeto e consolidadas, separadas por grupo.
 - **Prioridade:** Alta
 
 ### RF10 — Coletar feedback qualitativo (Likert)
@@ -120,6 +138,8 @@ O ObiOne ingere documentos não-estruturados de projetos (formato Word, `.docx`)
   - Identificação do projeto e do respondente (anonimato opcional).
   - Implementação mínima viável: Google Forms externo + import dos resultados.
   - Persistência das respostas e relatório agregado (médias por dimensão por projeto e geral).
+- **Backend (Raniel):** Endpoint `POST /projects/{id}/likert-responses` para importar respostas (CSV ou JSON do Forms); endpoint `GET /likert-summary` retornando médias por dimensão por projeto e agregadas.
+- **Frontend (Bruno):** Tela de upload do CSV exportado do Google Forms; relatório agregado (gráfico de barras simples) com médias por dimensão (utilidade, clareza, completude, confiabilidade), por projeto e consolidado.
 - **Prioridade:** Alta
 
 ### RF11 — Exportar resultados consolidados
@@ -128,6 +148,8 @@ O ObiOne ingere documentos não-estruturados de projetos (formato Word, `.docx`)
 - **Critérios de aceitação:**
   - Exportação em CSV ou JSON contendo: extrações, cobertura, precisão/recall/F1 por grupo, Kappa, respostas Likert.
   - Cabeçalhos compatíveis com importação em planilha.
+- **Backend (Raniel):** Endpoint `GET /export?format=csv|json` que monta arquivo único com extrações, cobertura, métricas (precisão/recall/F1 por grupo, Kappa) e respostas Likert; cabeçalhos compatíveis com planilha (Excel, Google Sheets).
+- **Frontend (Bruno):** Botão "Exportar resultados" em local visível (ex.: tela de avaliação) que dispara o download do arquivo; seletor de formato (CSV / JSON).
 - **Prioridade:** Alta
 
 ---
