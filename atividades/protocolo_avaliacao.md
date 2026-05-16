@@ -203,7 +203,7 @@ Kappa calculado:
 | 0,61 – 0,80 | Substancial |
 | 0,81 – 1,00 | Quase perfeita |
 
-**Threshold de aceitação do projeto:** Kappa agregado ≥ **0,60** (substancial). Abaixo desse limite, registrar como limitação metodológica no relato (RF09 já prevê isso).
+**Threshold de aceitação do projeto:** Kappa agregado ≥ **0,60** (substancial). Abaixo desse limite, registrar como limitação metodológica no relato (RF15 já prevê isso).
 
 Atributos individuais com Kappa < 0,60 devem ser sinalizados no resultado da avaliação.
 
@@ -226,7 +226,7 @@ Separado das métricas de precisão/recall/F1 (que medem **acurácia**), a cober
 Cobertura_projeto = atributos_extraídos_com_valor / 43
 ```
 
-Calculada para **todos os 5 projetos** (não só os 3 com gabarito) — ver RF07. Não exige rubrica humana, apenas presença/ausência de valor na extração automática.
+Calculada para **todos os 5 projetos** (não só os 3 com gabarito) — ver RF09. Não exige rubrica humana, apenas presença/ausência de valor na extração automática.
 
 ---
 
@@ -245,7 +245,7 @@ Após executar este protocolo nos 3 projetos:
 | Lista de atributos com Kappa < 0,60 | Discussão como limitação no relato |
 | Lista de divergências fortes resolvidas | Por projeto |
 
-Tudo exportável via RF11.
+Tudo exportável via RF18.
 
 ---
 

@@ -130,19 +130,19 @@ Cada tarefa: **Responsável** | **Prazo** | **O que fazer** | **Entregável** | 
 
 ### Bloco 1 — Pipeline + Cadastro + Auth (semanas 9-10: 22/05-04/06, **M1 + SR1**)
 
-#### T1.1 — RF01 (Cadastro) + RF02 (Upload)
+#### T1.1 — RF03 (Cadastro) + RF04 (Upload)
 - **Responsável:** Bruno (frontend) + Raniel (backend)
 - **Prazo:** sem 9 (28/05)
 - **Entregável:** Endpoints + telas funcionais; consultor cadastra Valença e faz upload do `.docx`.
 - **Aceitação:** Fluxo de cadastro + upload funcionando end-to-end localmente.
 
-#### T1.2 — RF12 (Autenticação)
+#### T1.2 — RF01 (Autenticação)
 - **Responsável:** Raniel (backend) + Bruno (tela de login)
 - **Prazo:** sem 9 (28/05)
 - **Entregável:** Login com email+senha+JWT; logout funcional; senha com hash bcrypt.
 - **Aceitação:** Consultor faz login, recebe JWT, acessa rotas protegidas.
 
-#### T1.3 — RF03 (Extração LLM) + RF04 (Persistência)
+#### T1.3 — RF05 (Extração LLM) + RF06 (Persistência)
 - **Responsável:** Raniel
 - **Prazo:** sem 10 (04/06)
 - **Entregável:** Pipeline rodando para Valença com saída JSON conforme schema; metadados persistidos.
@@ -159,13 +159,13 @@ Cada tarefa: **Responsável** | **Prazo** | **O que fazer** | **Entregável** | 
 
 ### Bloco 2 — Dashboard + Cobertura + Perfis (semana 11: 05-11/06, **M2**)
 
-#### T2.1 — RF13 (Perfis e acesso semi-aberto)
+#### T2.1 — RF02 (Perfis e acesso semi-aberto)
 - **Responsável:** Raniel (backend) + Bruno (roteamento condicional)
 - **Prazo:** sem 11 (11/06)
 - **Entregável:** Modelo User com role; middleware de autorização; cliente acessa apenas seu projeto.
 - **Aceitação:** Cliente de Valença não vê outros projetos; tentativa de acesso indevido retorna 403.
 
-#### T2.2 — RF05 (Portfólio) + RF06 (Detalhe) + RF07 (Cobertura)
+#### T2.2 — RF07 (Portfólio) + RF08 (Detalhe) + RF09 (Cobertura)
 - **Responsável:** Bruno (frontend) + Raniel (endpoints)
 - **Prazo:** sem 11 (11/06)
 - **Entregável:** Tela de portfólio (consultor); tela de detalhe com atributos agrupados + trechos de origem; componente de cobertura (tabela/heatmap) com thresholds visuais.
@@ -182,19 +182,19 @@ Cada tarefa: **Responsável** | **Prazo** | **O que fazer** | **Entregável** | 
 
 ### Bloco 3 — Comunidade + IA-Assistente (semanas 12-13: 12-25/06, **M3 + SR2**)
 
-#### T3.1 — RF14 (Comentários) + RF15 (Feed in-app)
+#### T3.1 — RF10 (Comentários) + RF11 (Feed in-app)
 - **Responsável:** Bruno (frontend) + Raniel (backend)
 - **Prazo:** sem 12 (18/06)
 - **Entregável:** Comentários funcionais (thread + resposta); feed in-app com contador de não-lidos; eventos registrados em hooks.
 - **Aceitação:** Consultor e cliente daquele projeto comentam; feed mostra novidades; isolamento por perfil respeitado.
 
-#### T3.2 — RF16 (Resumo do Cliente)
+#### T3.2 — RF12 (Resumo do Cliente)
 - **Responsável:** Raniel (prompt + backend) + Bruno (UI)
 - **Prazo:** sem 12 (18/06)
 - **Entregável:** Endpoint que gera resumo a partir da extração; UI com modos rascunho (consultor edita) e publicado (cliente vê).
 - **Aceitação:** Consultor gera rascunho, edita, publica; cliente vê apenas resumo publicado.
 
-#### T3.3 — RF17 (Drafts de Próximos Passos)
+#### T3.3 — RF13 (Drafts de Próximos Passos)
 - **Responsável:** Raniel (prompt + backend) + Bruno (UI)
 - **Prazo:** sem 13 (25/06)
 - **Entregável:** Endpoint que gera drafts a partir da extração + comentários; UI para o consultor revisar antes de publicar.
@@ -211,30 +211,30 @@ Cada tarefa: **Responsável** | **Prazo** | **O que fazer** | **Entregável** | 
 
 ### Bloco 4 — Avaliação (semana 14: 26/06-02/07, **M4**)
 
-#### T4.1 — RF08 (Importar gabarito)
+#### T4.1 — RF14 (Importar gabarito)
 - **Responsável:** Raniel
 - **Prazo:** sem 13-14 (transição)
 - **Entregável:** Endpoint POST baseline carrega os 3 gabaritos consolidados; validação de schema.
 
-#### T4.2 — RF09 (Comparação automático vs. gabarito — critério híbrido)
+#### T4.2 — RF15 (Comparação automático vs. gabarito — critério híbrido)
 - **Responsável:** Raniel (algoritmo) + Cynthia + Moisés (aplicação da rubrica)
 - **Prazo:** sem 14 (02/07)
 - **Entregável:** Tabela completa com precisão, recall, F1 e Cohen's Kappa para os 3 projetos; atributos com Kappa < 0,6 sinalizados.
 - **Aceitação:** Métricas calculadas e visualizáveis na UI.
 
-#### T4.3 — RF10 (Likert Consultoria)
+#### T4.3 — RF16 (Likert Consultoria)
 - **Responsável:** Moisés (formulário + análise)
 - **Prazo:** sem 13-14 (lançar sem 13, consolidar sem 14)
 - **Entregável:** Formulário Google Forms (ou interno) com 4 dimensões; respostas dos 4 integrantes do grupo importadas; relatório agregado.
 - **Aceitação:** N = 4; médias por dimensão calculadas.
 
-#### T4.4 — RF18 (Likert Clientes)
+#### T4.4 — RF17 (Likert Clientes)
 - **Responsável:** Moisés (formulário + análise) + Bruno (intermediação dos contatos)
 - **Prazo:** sem 13-14 (lançar sem 13, consolidar sem 14)
 - **Entregável:** Formulário Google Forms com 4 dimensões dos clientes; respostas importadas; relatório agregado.
 - **Aceitação:** N ≥ 5 (1 por projeto) — ideal 8-10. Plano B: declarar limitação.
 
-#### T4.5 — RF11 (Exportação consolidada)
+#### T4.5 — RF18 (Exportação consolidada)
 - **Responsável:** Raniel
 - **Prazo:** sem 14 (02/07)
 - **Entregável:** Arquivo único (CSV ou JSON) com extrações, cobertura, métricas, Likert × 2, engajamento.
@@ -300,7 +300,7 @@ Os 12 riscos consolidados do pivot:
 | R9 | Prazo apertado pós-pivot (perdemos 1 semana) | Alta | Alto | Cortes feitos (Lições, notificações email); SR1 apresenta plano + protótipos, não código. |
 | R10 | Complexidade do auth e perfis (não estava previsto) | Média | Médio | Auth simples (JWT, sem OAuth); bibliotecas padrão FastAPI. |
 | R11 | Resistência dos clientes a participar do observatório | Média | Alto | Bruno inicia contato cedo; valor proposto: "ver o que estamos observando do seu projeto". |
-| R12 | Drafts da IA percebidos como pobres/enviesados | Média | Médio | Consultor SEMPRE revisa antes de publicar; medir percepção via Likert da consultoria (RF10). |
+| R12 | Drafts da IA percebidos como pobres/enviesados | Média | Médio | Consultor SEMPRE revisa antes de publicar; medir percepção via Likert da consultoria (RF16). |
 
 ---
 
@@ -310,18 +310,18 @@ A matriz da T2.3 e T5.1 segue este formato:
 
 | Requisito | US | Atributo do MPO (Quadro 37) ou Conceito | Categoria | Métrica de avaliação | Resultado |
 |---|---|---|---|---|---|
-| RF01 | US01 | — | — | (não avaliado, infra) | — |
-| RF03 | US03 | nome do projeto | geral | comparação exata | (preencher após T4.2) |
-| RF03 | US03 | escopo planejado | escopo | rubrica 0/0,5/1 + Kappa | (preencher após T4.2) |
-| RF03 | US03 | data início | cronograma | comparação exata | (preencher após T4.2) |
-| RF03 | US03 | riscos identificados | riscos | rubrica 0/0,5/1 + Kappa | (preencher após T4.2) |
-| RF07 | US07 | — | (todos) | cobertura agregada (%) | (preencher após T3.2 = RF07 implementada) |
-| RF09 | US09 | (todos do MPO) | (todos) | precisão/recall/F1/Kappa | (preencher após T4.2) |
-| RF10 | US10 | — | — | médias Likert consultoria | (preencher após T4.3) |
-| RF14 | US14 | Interatividade (Vieira p. 191) | Característica | engajamento (#comentários) | (preencher após T4.5) |
-| RF16 | US16 | Comunicar (Vieira p. 197) | Processo | Likert dimensão "clareza" | (preencher após T4.4) |
-| RF18 | US18 | — | — | médias Likert clientes | (preencher após T4.4) |
+| RF03 | US03 | — | — | (não avaliado, infra) | — |
+| RF05 | US05 | nome do projeto | geral | comparação exata | (preencher após T4.2) |
+| RF05 | US05 | escopo planejado | escopo | rubrica 0/0,5/1 + Kappa | (preencher após T4.2) |
+| RF05 | US05 | data início | cronograma | comparação exata | (preencher após T4.2) |
+| RF05 | US05 | riscos identificados | riscos | rubrica 0/0,5/1 + Kappa | (preencher após T4.2) |
+| RF09 | US09 | — | (todos) | cobertura agregada (%) | (preencher após T3.2 = RF09 implementada) |
+| RF15 | US15 | (todos do MPO) | (todos) | precisão/recall/F1/Kappa | (preencher após T4.2) |
+| RF16 | US16 | — | — | médias Likert consultoria | (preencher após T4.3) |
+| RF10 | US10 | Interatividade (Vieira p. 191) | Característica | engajamento (#comentários) | (preencher após T4.5) |
+| RF12 | US12 | Comunicar (Vieira p. 197) | Processo | Likert dimensão "clareza" | (preencher após T4.4) |
+| RF17 | US17 | — | — | médias Likert clientes | (preencher após T4.4) |
 
-Linhas novas adicionadas pós-pivot: cada RF de comunidade (RF14, RF15) e de IA-Assistente (RF16, RF17) também mapeia para um **conceito do MPO** (não atributo), reforçando a fundamentação teórica.
+Linhas novas adicionadas pós-pivot: cada RF de comunidade (RF10, RF11) e de IA-Assistente (RF12, RF13) também mapeia para um **conceito do MPO** (não atributo), reforçando a fundamentação teórica.
 
 A matriz é viva: T2.3 (semente), T5.1 (finalização).

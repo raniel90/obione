@@ -59,17 +59,29 @@ Entregáveis acima + alinhamento do grupo no pivot.
 
 ## Sprint 1 — Cadastro, Upload, Auth e Pipeline (semanas 9-10: 22/05-04/06)
 
-### US01 — Cadastrar projeto
+### US01 — Autenticar usuário
+**Como** usuário, **quero** acessar o observatório com login **para** que minhas permissões sejam respeitadas.
+
+Critérios:
+- Login com email + senha; JWT como token de sessão.
+- Sem OAuth, sem cadastro público — usuários criados pela equipe da consultoria.
+- Logout funcional.
+
+> Característica **Segurança** do MPO (Vieira, p. 192). Sem auth, modelo semi-aberto não é possível.
+
+---
+
+### US03 — Cadastrar projeto
 **Como** consultor, **quero** cadastrar um projeto **para** ancorar documentos e extrações.
 
 Critérios:
 - Campos: nome, domínio (jurídico, saúde, esporte, branding, outros), descrição livre.
 - Identificador único.
-- Listagem dos projetos cadastrados (filtrada por perfil — ver US13).
+- Listagem dos projetos cadastrados (filtrada por perfil — ver US02).
 
 ---
 
-### US02 — Fazer upload de documentos do projeto
+### US04 — Fazer upload de documentos do projeto
 **Como** consultor, **quero** anexar arquivos `.docx` **para** alimentar a extração.
 
 Critérios:
@@ -78,7 +90,7 @@ Critérios:
 
 ---
 
-### US03 — Extrair atributos do MPO via LLM
+### US05 — Extrair atributos do MPO via LLM
 **Como** sistema, **devo** processar os documentos e extrair os atributos previstos no Quadro 37.
 
 Critérios:
@@ -91,7 +103,7 @@ Critérios:
 
 ---
 
-### US04 — Persistir extração estruturada
+### US06 — Persistir extração estruturada
 **Como** sistema, **devo** salvar a extração com metadados.
 
 Critérios:
@@ -100,53 +112,9 @@ Critérios:
 
 ---
 
-### US12 — Autenticar usuário
-**Como** usuário, **quero** acessar o observatório com login **para** que minhas permissões sejam respeitadas.
-
-Critérios:
-- Login com email + senha; JWT como token de sessão.
-- Sem OAuth, sem cadastro público — usuários criados pela equipe da consultoria.
-- Logout funcional.
-
-> Característica **Segurança** do MPO (Vieira, p. 192). Sem auth, modelo semi-aberto não é possível.
-
----
-
 ## Sprint 2 — Dashboard, Cobertura e Perfis (semana 11: 05-11/06)
 
-### US05 — Visualizar portfólio (perfil-aware)
-**Como** consultor, **quero** uma visão consolidada de todos os projetos **para** observar o portfólio.
-
-Critérios:
-- Lista projetos com: nome, domínio, status derivado, % de cobertura do MPO.
-- Status derivado dos dados: `cadastrado` → `ingerido` → `extraído` → `avaliado`.
-- Filtro por domínio.
-- **Restrito ao perfil Consultor** — Cliente não acessa essa tela (ver US13).
-
----
-
-### US06 — Visualizar detalhe do projeto
-**Como** consultor ou cliente daquele projeto, **quero** ver os atributos extraídos **para** inspecionar o conteúdo do observatório.
-
-Critérios:
-- Atributos do Quadro 37 agrupados por categoria; preenchidos e vazios visíveis.
-- Cada atributo preenchido: valor + trecho de origem.
-- Acesso aos documentos originais.
-- **Cliente vê apenas o seu projeto**; Consultor vê todos (ver US13).
-
----
-
-### US07 — Indicador de cobertura do MPO
-**Como** consultor, **quero** saber quais atributos do MPO foram preenchidos pela IA **para** avaliar a abrangência do pipeline.
-
-Critérios:
-- Por projeto: % de atributos preenchidos vs. total de atributos-alvo (excluindo `fora_de_escopo`).
-- No portfólio: tabela ou heatmap projetos × atributos.
-- Destaque visual quando < 50%; sinalização saudável quando ≥ 80%.
-
----
-
-### US13 — Gerenciar perfis e acesso semi-aberto
+### US02 — Gerenciar perfis e acesso semi-aberto
 **Como** sistema, **devo** garantir que cada usuário acessa apenas o que seu perfil permite.
 
 Critérios:
@@ -159,9 +127,41 @@ Critérios:
 
 ---
 
+### US07 — Visualizar portfólio (perfil-aware)
+**Como** consultor, **quero** uma visão consolidada de todos os projetos **para** observar o portfólio.
+
+Critérios:
+- Lista projetos com: nome, domínio, status derivado, % de cobertura do MPO.
+- Status derivado dos dados: `cadastrado` → `ingerido` → `extraído` → `avaliado`.
+- Filtro por domínio.
+- **Restrito ao perfil Consultor** — Cliente não acessa essa tela (ver US02).
+
+---
+
+### US08 — Visualizar detalhe do projeto
+**Como** consultor ou cliente daquele projeto, **quero** ver os atributos extraídos **para** inspecionar o conteúdo do observatório.
+
+Critérios:
+- Atributos do Quadro 37 agrupados por categoria; preenchidos e vazios visíveis.
+- Cada atributo preenchido: valor + trecho de origem.
+- Acesso aos documentos originais.
+- **Cliente vê apenas o seu projeto**; Consultor vê todos (ver US02).
+
+---
+
+### US09 — Indicador de cobertura do MPO
+**Como** consultor, **quero** saber quais atributos do MPO foram preenchidos pela IA **para** avaliar a abrangência do pipeline.
+
+Critérios:
+- Por projeto: % de atributos preenchidos vs. total de atributos-alvo (excluindo `fora_de_escopo`).
+- No portfólio: tabela ou heatmap projetos × atributos.
+- Destaque visual quando < 50%; sinalização saudável quando ≥ 80%.
+
+---
+
 ## Sprint 3 — Comunidade e IA-Assistente (semanas 12-13: 12-25/06)
 
-### US14 — Comentar no projeto
+### US10 — Comentar no projeto
 **Como** consultor ou cliente daquele projeto, **quero** comentar e responder comentários **para** dialogar sobre o conteúdo observado.
 
 Critérios:
@@ -174,7 +174,7 @@ Critérios:
 
 ---
 
-### US15 — Visualizar feed in-app de novidades
+### US11 — Visualizar feed in-app de novidades
 **Como** consultor ou cliente, **quero** ver as novidades dos meus projetos **para** acompanhar o que mudou.
 
 Critérios:
@@ -187,7 +187,7 @@ Critérios:
 
 ---
 
-### US16 — Gerar Resumo do Projeto para o Cliente
+### US12 — Gerar Resumo do Projeto para o Cliente
 **Como** sistema, **devo** gerar uma narrativa acessível do projeto a partir da extração técnica **para** que o cliente compreenda o que está sendo observado.
 
 Critérios:
@@ -200,7 +200,7 @@ Critérios:
 
 ---
 
-### US17 — Gerar drafts de "Próximos Passos / Pontos de Atenção"
+### US13 — Gerar drafts de "Próximos Passos / Pontos de Atenção"
 **Como** consultor, **quero** drafts gerados pela IA dos próximos passos e pontos de atenção do projeto **para** reduzir o tempo de manutenção do observatório.
 
 Critérios:
@@ -215,7 +215,7 @@ Critérios:
 
 ## Sprint 4 — Avaliação (semana 14: 26/06-02/07)
 
-### US08 — Importar e validar gabarito manual
+### US14 — Importar e validar gabarito manual
 **Como** sistema, **devo** carregar os gabaritos produzidos na fase preparatória **para** servir de baseline na comparação.
 
 Critérios:
@@ -225,7 +225,7 @@ Critérios:
 
 ---
 
-### US09 — Comparar extração automática vs. gabarito (critério híbrido)
+### US15 — Comparar extração automática vs. gabarito (critério híbrido)
 **Como** pesquisador, **quero** métricas de precisão, recall, F1 e Kappa **para** avaliar quantitativamente o pipeline.
 
 Critérios:
@@ -240,7 +240,7 @@ Critérios:
 
 ---
 
-### US10 — Coletar feedback Likert da consultoria
+### US16 — Coletar feedback Likert da consultoria
 **Como** pesquisador, **quero** registrar a percepção da equipe da consultoria **para** avaliar a redução de fricção e qualidade da assistência da IA.
 
 Critérios:
@@ -251,7 +251,7 @@ Critérios:
 
 ---
 
-### US18 — Coletar feedback Likert dos clientes
+### US17 — Coletar feedback Likert dos clientes
 **Como** pesquisador, **quero** registrar a percepção dos clientes finais **para** avaliar a clareza do resumo e a qualidade do diálogo no observatório.
 
 Critérios:
@@ -264,7 +264,7 @@ Critérios:
 
 ---
 
-### US11 — Exportar resultados consolidados
+### US18 — Exportar resultados consolidados
 **Como** pesquisador, **quero** exportar todos os resultados **para** alimentar o relato e o artigo.
 
 Critérios:
@@ -307,12 +307,12 @@ Critérios:
 | Sem | Data | Atividade | Sprint | Marco |
 |---|---|---|---|---|
 | 8 | 15-21/05 | Fase preparatória (atributos, protocolo, schema, protótipos, setup) + alinhamento do grupo no pivot | Sprint 0 | — |
-| 9 | 22-28/05 | US01, US02, US12; iniciar gabarito (3 projetos) | Sprint 1 | M1 + SR1 |
-| 10 | 29/05-04/06 | US03, US04; finalizar gabarito; matriz semente | Sprint 1 | — |
-| 11 | 05-11/06 | US05, US06, US07, US13 (perfis) | Sprint 2 | M2 |
-| 12 | 12-18/06 | US14, US15, US16 (Resumo), US17 (Drafts) | Sprint 3 | — |
+| 9 | 22-28/05 | US01 (auth), US03 (cadastro), US04 (upload); iniciar gabarito (3 projetos) | Sprint 1 | M1 + SR1 |
+| 10 | 29/05-04/06 | US05 (extração), US06 (persistência); finalizar gabarito; matriz semente | Sprint 1 | — |
+| 11 | 05-11/06 | US02 (perfis), US07 (portfólio), US08 (detalhe), US09 (cobertura) | Sprint 2 | M2 |
+| 12 | 12-18/06 | US10, US11, US12 (Resumo), US13 (Drafts) | Sprint 3 | — |
 | 13 | 19-25/06 | Polish + aplicação da rubrica nos 3 projetos + lançar Likert | Sprint 3 | M3 + SR2 |
-| 14 | 26/06-02/07 | US08, US09, US10, US18, US11 (avaliação consolidada) | Sprint 4 | M4 |
+| 14 | 26/06-02/07 | US14, US15, US16, US17, US18 (avaliação consolidada) | Sprint 4 | M4 |
 | 15 | 03-09/07 | Escrita do relato + slides + screencast | — | — |
 | 16 | 10/07 | **Apresentação final + entrega do artigo** | — | Entrega |
 
@@ -347,7 +347,7 @@ Critérios:
 | R9 | Prazo apertado pós-pivot (perdemos 1 semana) | Alta | Alto | Cortes já feitos (Lições, notificações email); SR1 apresenta pivot + plano + protótipos, não código. |
 | R10 | Complexidade do auth e perfis (não estava previsto) | Média | Médio | Auth simples (email+senha+JWT); sem OAuth; bibliotecas padrão FastAPI (passlib + python-jose). |
 | R11 | Resistência dos clientes a participar do observatório | Média | Alto | Bruno inicia contato cedo; valor proposto: "ver o que estamos observando do seu projeto". |
-| R12 | Drafts da IA percebidos como pobres ou enviesados | Média | Médio | Consultor SEMPRE revisa antes de publicar; medir percepção via Likert da consultoria (US10). |
+| R12 | Drafts da IA percebidos como pobres ou enviesados | Média | Médio | Consultor SEMPRE revisa antes de publicar; medir percepção via Likert da consultoria (US16). |
 
 ---
 

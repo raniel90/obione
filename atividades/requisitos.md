@@ -34,24 +34,24 @@ Os 18 RFs em ordem de construção (do mais fundacional ao mais derivado).
 
 | # | ID | Título | Bloco | Sprint | MoSCoW |
 |---|---|---|---|---|---|
-| 1 | RF12 | Autenticar usuário | 1 — Fundação técnica e ingestão | 1 | Must |
-| 2 | RF13 | Gerenciar perfis e acesso semi-aberto | 1 | 2 | Must |
-| 3 | RF01 | Cadastrar projeto | 1 | 1 | Must |
-| 4 | RF02 | Fazer upload de documentos do projeto | 1 | 1 | Must |
-| 5 | RF03 | Extrair atributos do MPO via LLM | 2 — Pipeline LLM | 1 | Must |
-| 6 | RF04 | Persistir extração estruturada | 2 | 1 | Must |
-| 7 | RF05 | Visualizar portfólio (perfil-aware) | 3 — Observação e visualização | 2 | Must |
-| 8 | RF06 | Visualizar detalhe do projeto | 3 | 2 | Must |
-| 9 | RF07 | Calcular e exibir cobertura do MPO | 3 | 2 | Must |
-| 10 | RF14 | Comentar no projeto | 4 — Comunidade e IA-Assistente | 3 | Must |
-| 11 | RF15 | Visualizar feed in-app de novidades | 4 | 3 | **Should** |
-| 12 | RF16 | Gerar Resumo do Projeto para o Cliente | 4 | 3 | Must |
-| 13 | RF17 | Gerar drafts de "Próximos Passos / Pontos de Atenção" | 4 | 3 | Must |
-| 14 | RF08 | Importar e validar gabarito manual | 5 — Avaliação DSR | 4 | Must |
-| 15 | RF09 | Comparar extração automática vs. gabarito | 5 | 4 | Must |
-| 16 | RF10 | Coletar feedback Likert da consultoria | 5 | 4 | Must |
-| 17 | RF18 | Coletar feedback Likert dos clientes | 5 | 4 | Must |
-| 18 | RF11 | Exportar resultados consolidados | 5 | 4 | **Should** |
+| 1 | RF01 | Autenticar usuário | 1 — Fundação técnica e ingestão | 1 | Must |
+| 2 | RF02 | Gerenciar perfis e acesso semi-aberto | 1 | 2 | Must |
+| 3 | RF03 | Cadastrar projeto | 1 | 1 | Must |
+| 4 | RF04 | Fazer upload de documentos do projeto | 1 | 1 | Must |
+| 5 | RF05 | Extrair atributos do MPO via LLM | 2 — Pipeline LLM | 1 | Must |
+| 6 | RF06 | Persistir extração estruturada | 2 | 1 | Must |
+| 7 | RF07 | Visualizar portfólio (perfil-aware) | 3 — Observação e visualização | 2 | Must |
+| 8 | RF08 | Visualizar detalhe do projeto | 3 | 2 | Must |
+| 9 | RF09 | Calcular e exibir cobertura do MPO | 3 | 2 | Must |
+| 10 | RF10 | Comentar no projeto | 4 — Comunidade e IA-Assistente | 3 | Must |
+| 11 | RF11 | Visualizar feed in-app de novidades | 4 | 3 | **Should** |
+| 12 | RF12 | Gerar Resumo do Projeto para o Cliente | 4 | 3 | Must |
+| 13 | RF13 | Gerar drafts de "Próximos Passos / Pontos de Atenção" | 4 | 3 | Must |
+| 14 | RF14 | Importar e validar gabarito manual | 5 — Avaliação DSR | 4 | Must |
+| 15 | RF15 | Comparar extração automática vs. gabarito | 5 | 4 | Must |
+| 16 | RF16 | Coletar feedback Likert da consultoria | 5 | 4 | Must |
+| 17 | RF17 | Coletar feedback Likert dos clientes | 5 | 4 | Must |
+| 18 | RF18 | Exportar resultados consolidados | 5 | 4 | **Should** |
 
 ### Convenção de prioridade — MoSCoW
 
@@ -60,8 +60,8 @@ Os 18 RFs em ordem de construção (do mais fundacional ao mais derivado).
 - **Could**: desejável, sem comprometer o MVP. **Nenhum no MVP atual** — os Could-itens foram movidos para o backlog futuro no pivot (ex.: Lições Aprendidas cross-project, notificações por email externo).
 
 **Justificativa dos "Should"**:
-- **RF15 (Feed in-app)**: comunicação interna do observatório. Se Sprint 3 atrasar, pode ser cortado — usuários ainda recebem notificações ao acessar comentários/resumos individualmente.
-- **RF11 (Exportação consolidada)**: facilita escrita do relato, mas fallback é fazer queries manuais no banco direto (mais trabalhoso porém viável).
+- **RF11 (Feed in-app)**: comunicação interna do observatório. Se Sprint 3 atrasar, pode ser cortado — usuários ainda recebem notificações ao acessar comentários/resumos individualmente.
+- **RF18 (Exportação consolidada)**: facilita escrita do relato, mas fallback é fazer queries manuais no banco direto (mais trabalhoso porém viável).
 
 ---
 
@@ -69,14 +69,14 @@ Os 18 RFs em ordem de construção (do mais fundacional ao mais derivado).
 
 ### 3.1 Bloco 1 — Fundação técnica e ingestão
 
-Autenticação, perfis e ingestão de dados. **Sem este bloco, nada mais funciona.** Embora RF13 (perfis) seja implementado no Sprint 2, aparece aqui por dependência conceitual com RF12.
+Autenticação, perfis e ingestão de dados. **Sem este bloco, nada mais funciona.** Embora RF02 (perfis) seja implementado no Sprint 2, aparece aqui por dependência conceitual com RF01.
 
 ---
 
-### RF12 — Autenticar usuário
+### RF01 — Autenticar usuário
 
 **1. Identificação**
-- ID: RF12
+- ID: RF01
 - Título: Autenticar usuário
 - Prioridade: Must
 - Status: Backlog
@@ -96,10 +96,10 @@ Autenticação, perfis e ingestão de dados. **Sem este bloco, nada mais funcion
 
 ---
 
-### RF13 — Gerenciar perfis e acesso semi-aberto
+### RF02 — Gerenciar perfis e acesso semi-aberto
 
 **1. Identificação**
-- ID: RF13
+- ID: RF02
 - Título: Gerenciar perfis e acesso semi-aberto
 - Prioridade: Must
 - Status: Backlog
@@ -109,7 +109,7 @@ Autenticação, perfis e ingestão de dados. **Sem este bloco, nada mais funcion
 - Descrição: Garantir que cada usuário acessa apenas o que seu perfil permite. Dois perfis: Consultor (todos os projetos) e Cliente (apenas o seu projeto associado).
 - Justificativa de negócio: Materializa a característica "Acesso semi-aberto" do MPO e é fundamental para LGPD.
 - Stakeholder: Consultoria + clientes.
-- Dependências: RF12 (autenticação).
+- Dependências: RF01 (autenticação).
 
 **3. Validação**
 - Critérios de aceite: Vínculo cliente ↔ projeto persistido; endpoints e telas filtram conforme perfil; tentativa de acesso indevido retorna 403; equipe da consultoria cria contas; cliente recebe convite por email com senha provisória.
@@ -119,10 +119,10 @@ Autenticação, perfis e ingestão de dados. **Sem este bloco, nada mais funcion
 
 ---
 
-### RF01 — Cadastrar projeto
+### RF03 — Cadastrar projeto
 
 **1. Identificação**
-- ID: RF01
+- ID: RF03
 - Título: Cadastrar projeto
 - Prioridade: Must
 - Status: Backlog
@@ -132,20 +132,20 @@ Autenticação, perfis e ingestão de dados. **Sem este bloco, nada mais funcion
 - Descrição: Permitir que o consultor cadastre um projeto informando nome, domínio e descrição livre.
 - Justificativa de negócio: Toda extração, visualização e interação ancora em um projeto cadastrado. Sem cadastro, nada acontece.
 - Stakeholder: Consultoria (cria projetos para clientes).
-- Dependências: RF12 (autenticação) — apenas perfil Consultor pode cadastrar.
+- Dependências: RF01 (autenticação) — apenas perfil Consultor pode cadastrar.
 
 **3. Validação**
 - Critérios de aceite: Campos obrigatórios validados (nome, domínio, descrição); ID único gerado automaticamente; listagem dos projetos cadastrados disponível.
 - Regras de negócio: Domínio limitado a enum (jurídico, saúde, esporte, branding, outros). Apenas perfil Consultor cria projetos.
 - Rastreabilidade MPO: — (infraestrutura — habilita as demais funcionalidades sem mapear diretamente a um conceito do MPO).
-- Observações: **Backend (Raniel):** modelo `Project` + endpoints `POST /projects`, `GET /projects`. **Frontend (Bruno):** formulário de cadastro + tela de listagem (filtrada por perfil — ver RF13).
+- Observações: **Backend (Raniel):** modelo `Project` + endpoints `POST /projects`, `GET /projects`. **Frontend (Bruno):** formulário de cadastro + tela de listagem (filtrada por perfil — ver RF02).
 
 ---
 
-### RF02 — Fazer upload de documentos do projeto
+### RF04 — Fazer upload de documentos do projeto
 
 **1. Identificação**
-- ID: RF02
+- ID: RF04
 - Título: Fazer upload de documentos do projeto
 - Prioridade: Must
 - Status: Backlog
@@ -155,7 +155,7 @@ Autenticação, perfis e ingestão de dados. **Sem este bloco, nada mais funcion
 - Descrição: Permitir anexar arquivos `.docx` a um projeto cadastrado, com suporte a múltiplos arquivos.
 - Justificativa de negócio: Documentos são a fonte da extração do pipeline LLM.
 - Stakeholder: Consultoria.
-- Dependências: RF01 (cadastro), RF12 (autenticação), RF13 (perfil).
+- Dependências: RF03 (cadastro), RF01 (autenticação), RF02 (perfil).
 
 **3. Validação**
 - Critérios de aceite: Suporte mínimo `.docx`; múltiplos arquivos por projeto; persistência do arquivo bruto + metadados (nome, data, tamanho, hash).
@@ -171,10 +171,10 @@ Coração técnico da contribuição. A IA Generativa entra aqui pela primeira v
 
 ---
 
-### RF03 — Extrair atributos do MPO via LLM
+### RF05 — Extrair atributos do MPO via LLM
 
 **1. Identificação**
-- ID: RF03
+- ID: RF05
 - Título: Extrair atributos do MPO via LLM
 - Prioridade: Must
 - Status: Backlog
@@ -184,7 +184,7 @@ Coração técnico da contribuição. A IA Generativa entra aqui pela primeira v
 - Descrição: Processar os documentos do projeto e extrair automaticamente os atributos previstos no Quadro 37 (terceira versão do MPO).
 - Justificativa de negócio: É o coração da contribuição técnica do trabalho — o pipeline LLM que materializa o Trabalho Futuro #8 do MPO.
 - Stakeholder: Consultoria + pesquisa.
-- Dependências: RF02 (upload prévio), `docs/schema_extracao.json`, `docs/atributos_alvo_mpo.md` (fase preparatória).
+- Dependências: RF04 (upload prévio), `docs/schema_extracao.json`, `docs/atributos_alvo_mpo.md` (fase preparatória).
 
 **3. Validação**
 - Critérios de aceite: Saída JSON conforme schema; 8 categorias do Quadro 37 contempladas; para cada atributo preenchido, valor + trecho de origem; atributos não encontrados como `null`; atributos `fora_de_escopo` (imagens) ignorados; versão do prompt e modelo registrados.
@@ -194,10 +194,10 @@ Coração técnico da contribuição. A IA Generativa entra aqui pela primeira v
 
 ---
 
-### RF04 — Persistir extração estruturada
+### RF06 — Persistir extração estruturada
 
 **1. Identificação**
-- ID: RF04
+- ID: RF06
 - Título: Persistir extração estruturada
 - Prioridade: Must
 - Status: Backlog
@@ -207,13 +207,13 @@ Coração técnico da contribuição. A IA Generativa entra aqui pela primeira v
 - Descrição: Salvar a extração JSON associada ao projeto e aos documentos de origem, com metadados de rastreabilidade.
 - Justificativa de negócio: Sem persistência, não há comparação posterior nem auditoria humana.
 - Stakeholder: Pesquisa + consultoria.
-- Dependências: RF03.
+- Dependências: RF05.
 
 **3. Validação**
 - Critérios de aceite: Cada extração registra projeto, documento(s), versão do prompt, modelo LLM, timestamp, `origem` (`automatico` | `manual`); recuperável via API.
 - Regras de negócio: Histórico de extrações preservado — nunca sobrescrever silenciosamente.
 - Rastreabilidade MPO: Processo **Armazenar** (Vieira, 2022, p. 196).
-- Observações: **Backend (Raniel):** modelo `Extraction` com FKs e metadados; endpoints `GET /projects/{id}/extractions`. **Frontend (Bruno):** sem tela própria — dados consumidos por RF06.
+- Observações: **Backend (Raniel):** modelo `Extraction` com FKs e metadados; endpoints `GET /projects/{id}/extractions`. **Frontend (Bruno):** sem tela própria — dados consumidos por RF08.
 
 ---
 
@@ -223,10 +223,10 @@ Dashboard sobre os dados extraídos, respeitando os perfis. Aqui o observatório
 
 ---
 
-### RF05 — Visualizar portfólio de projetos (perfil-aware)
+### RF07 — Visualizar portfólio de projetos (perfil-aware)
 
 **1. Identificação**
-- ID: RF05
+- ID: RF07
 - Título: Visualizar portfólio de projetos
 - Prioridade: Must
 - Status: Backlog
@@ -236,20 +236,20 @@ Dashboard sobre os dados extraídos, respeitando os perfis. Aqui o observatório
 - Descrição: Apresentar visão consolidada de projetos, com status derivado e cobertura, restrita ao perfil Consultor.
 - Justificativa de negócio: Permite ao consultor curar e priorizar o que precisa de atenção no observatório.
 - Stakeholder: Consultoria.
-- Dependências: RF13 (perfis), RF07 (cobertura).
+- Dependências: RF02 (perfis), RF09 (cobertura).
 
 **3. Validação**
 - Critérios de aceite: Lista projetos com nome, domínio, status derivado (`cadastrado` → `ingerido` → `extraído` → `avaliado`), % de cobertura; filtro por domínio.
-- Regras de negócio: Cliente NÃO acessa esta tela (redirecionado ao seu próprio detalhe — RF06). Status é derivado, nunca editado.
+- Regras de negócio: Cliente NÃO acessa esta tela (redirecionado ao seu próprio detalhe — RF08). Status é derivado, nunca editado.
 - Rastreabilidade MPO: Característica **Abrangência** (Vieira, 2022, p. 189) + processo **Disponibilizar** (p. 196) — visão consolidada dos projetos do observatório.
 - Observações: **Backend (Raniel):** endpoint `GET /projects` com cálculo de status + cobertura; filtro por perfil. **Frontend (Bruno):** tabela com colunas, filtro por domínio, navegação para detalhe.
 
 ---
 
-### RF06 — Visualizar detalhe do projeto
+### RF08 — Visualizar detalhe do projeto
 
 **1. Identificação**
-- ID: RF06
+- ID: RF08
 - Título: Visualizar detalhe do projeto
 - Prioridade: Must
 - Status: Backlog
@@ -259,7 +259,7 @@ Dashboard sobre os dados extraídos, respeitando os perfis. Aqui o observatório
 - Descrição: Exibir todos os atributos extraídos de um projeto, agrupados por categoria do Quadro 37, com trecho de origem.
 - Justificativa de negócio: É a tela onde o conhecimento do observatório se materializa. Consultor inspeciona; cliente entende.
 - Stakeholder: Consultoria + cliente daquele projeto.
-- Dependências: RF13 (perfis), RF03/RF04 (extração).
+- Dependências: RF02 (perfis), RF05/RF06 (extração).
 
 **3. Validação**
 - Critérios de aceite: Atributos das 8 categorias agrupados; preenchidos e vazios visíveis; valor + trecho de origem por atributo; acesso aos documentos originais.
@@ -269,10 +269,10 @@ Dashboard sobre os dados extraídos, respeitando os perfis. Aqui o observatório
 
 ---
 
-### RF07 — Calcular e exibir cobertura do MPO
+### RF09 — Calcular e exibir cobertura do MPO
 
 **1. Identificação**
-- ID: RF07
+- ID: RF09
 - Título: Calcular e exibir cobertura do MPO
 - Prioridade: Must
 - Status: Backlog
@@ -282,7 +282,7 @@ Dashboard sobre os dados extraídos, respeitando os perfis. Aqui o observatório
 - Descrição: Calcular cobertura (% atributos preenchidos vs. total de atributos-alvo) por projeto e exibir matriz cruzada no portfólio.
 - Justificativa de negócio: Indicador-chave da avaliação quantitativa — abrangência da extração frente ao MPO.
 - Stakeholder: Pesquisa + consultoria.
-- Dependências: RF03 (extração).
+- Dependências: RF05 (extração).
 
 **3. Validação**
 - Critérios de aceite: Por projeto, % calculada; matriz projetos × atributos no portfólio (tabela ou heatmap); destaque visual quando < 50%; sinalização saudável quando ≥ 80%.
@@ -298,10 +298,10 @@ Onde o pivot acontece. Comunidade vira primeira-classe; IA assume os papéis de 
 
 ---
 
-### RF14 — Comentar no projeto
+### RF10 — Comentar no projeto
 
 **1. Identificação**
-- ID: RF14
+- ID: RF10
 - Título: Comentar no projeto
 - Prioridade: Must
 - Status: Backlog
@@ -311,7 +311,7 @@ Onde o pivot acontece. Comunidade vira primeira-classe; IA assume os papéis de 
 - Descrição: Permitir que consultor e cliente daquele projeto comentem livremente no projeto, respondendo a comentários.
 - Justificativa de negócio: Materializa a característica Interatividade e o processo Interagir do MPO. Sem comentários, não há comunidade — apenas dashboard.
 - Stakeholder: Consultoria + clientes.
-- Dependências: RF13 (perfis).
+- Dependências: RF02 (perfis).
 
 **3. Validação**
 - Critérios de aceite: Thread livre por projeto; identificação do autor visível; resposta com 1 nível de aninhamento; edição/exclusão pelo próprio autor; consultor pode moderar.
@@ -321,10 +321,10 @@ Onde o pivot acontece. Comunidade vira primeira-classe; IA assume os papéis de 
 
 ---
 
-### RF15 — Visualizar feed in-app de novidades
+### RF11 — Visualizar feed in-app de novidades
 
 **1. Identificação**
-- ID: RF15
+- ID: RF11
 - Título: Visualizar feed in-app de novidades
 - Prioridade: Should
 - Status: Backlog
@@ -334,7 +334,7 @@ Onde o pivot acontece. Comunidade vira primeira-classe; IA assume os papéis de 
 - Descrição: Mostrar feed das novidades dos projetos do usuário: novo comentário, novo resumo gerado, nova extração, novo draft publicado.
 - Justificativa de negócio: Materializa o processo Acompanhar do MPO. Mantém comunidade viva sem precisar de email.
 - Stakeholder: Consultoria + clientes.
-- Dependências: RF13 (perfis), RF14 (comentários), RF16 (resumos), RF17 (drafts).
+- Dependências: RF02 (perfis), RF10 (comentários), RF12 (resumos), RF13 (drafts).
 
 **3. Validação**
 - Critérios de aceite: Feed filtrado por perfil (cliente vê só seu projeto; consultor vê todos); indicador de "não lido" (contador); navegação direta para o evento.
@@ -344,10 +344,10 @@ Onde o pivot acontece. Comunidade vira primeira-classe; IA assume os papéis de 
 
 ---
 
-### RF16 — Gerar Resumo do Projeto para o Cliente
+### RF12 — Gerar Resumo do Projeto para o Cliente
 
 **1. Identificação**
-- ID: RF16
+- ID: RF12
 - Título: Gerar Resumo do Projeto para o Cliente
 - Prioridade: Must
 - Status: Backlog
@@ -357,7 +357,7 @@ Onde o pivot acontece. Comunidade vira primeira-classe; IA assume os papéis de 
 - Descrição: IA Generativa lê a extração JSON do projeto e produz texto narrativo em linguagem acessível ao cliente.
 - Justificativa de negócio: Materializa o papel de IA-tradutora do pivot. Permite que o cliente entenda o que está sendo observado sem precisar ler JSON.
 - Stakeholder: Cliente (consumidor); consultoria (mediadora).
-- Dependências: RF03/RF04 (extração persistida).
+- Dependências: RF05/RF06 (extração persistida).
 
 **3. Validação**
 - Critérios de aceite: IA gera texto em linguagem cidadã cobrindo objetivos, escopo, status, riscos relevantes; sempre revisável pelo consultor antes de publicar; versão do prompt + modelo registrados.
@@ -367,10 +367,10 @@ Onde o pivot acontece. Comunidade vira primeira-classe; IA assume os papéis de 
 
 ---
 
-### RF17 — Gerar drafts de "Próximos Passos / Pontos de Atenção"
+### RF13 — Gerar drafts de "Próximos Passos / Pontos de Atenção"
 
 **1. Identificação**
-- ID: RF17
+- ID: RF13
 - Título: Gerar drafts de "Próximos Passos / Pontos de Atenção"
 - Prioridade: Must
 - Status: Backlog
@@ -380,7 +380,7 @@ Onde o pivot acontece. Comunidade vira primeira-classe; IA assume os papéis de 
 - Descrição: IA propõe rascunhos de próximos passos e pontos de atenção a partir da extração + comentários recentes; consultor revisa antes de publicar.
 - Justificativa de negócio: Materializa o papel de IA-redutora-de-fricção do pivot. Reduz o trabalho do consultor de manter o observatório informativo.
 - Stakeholder: Consultoria (autor mediado pela IA); cliente (consumidor do resultado revisado).
-- Dependências: RF03/RF04 (extração), RF14 (comentários).
+- Dependências: RF05/RF06 (extração), RF10 (comentários).
 
 **3. Validação**
 - Critérios de aceite: IA gera drafts a partir da extração + comentários; consultor edita antes de publicar; drafts em rascunho não aparecem para o cliente; versão do prompt + modelo registrados.
@@ -396,10 +396,10 @@ Fecha o ciclo de pesquisa. Sem este bloco, o DSR não tem evidência empírica p
 
 ---
 
-### RF08 — Importar e validar gabarito manual
+### RF14 — Importar e validar gabarito manual
 
 **1. Identificação**
-- ID: RF08
+- ID: RF14
 - Título: Importar e validar gabarito manual
 - Prioridade: Must
 - Status: Backlog
@@ -409,20 +409,20 @@ Fecha o ciclo de pesquisa. Sem este bloco, o DSR não tem evidência empírica p
 - Descrição: Carregar os gabaritos manuais produzidos na fase preparatória (3 projetos) e validá-los contra o schema.
 - Justificativa de negócio: Sem gabarito, não há baseline para precisão/recall/F1.
 - Stakeholder: Pesquisa (Cynthia + Moisés).
-- Dependências: Fase preparatória (gabaritos produzidos), RF03/RF04 (schema versionado).
+- Dependências: Fase preparatória (gabaritos produzidos), RF05/RF06 (schema versionado).
 
 **3. Validação**
-- Critérios de aceite: Carga via arquivo JSON; validação contra `docs/schema_extracao.json`; persistência com `origem: manual`; integridade verificada antes de RF09.
+- Critérios de aceite: Carga via arquivo JSON; validação contra `docs/schema_extracao.json`; persistência com `origem: manual`; integridade verificada antes de RF15.
 - Regras de negócio: Apenas 3 projetos (Valença piloto + Freire Batista + Kaka JJ). Bem Viver e Dinoah avaliados apenas por cobertura + Likert.
 - Rastreabilidade MPO: — (infraestrutura de avaliação DSR — não mapeia diretamente a um conceito do MPO).
 - Observações: **Backend (Raniel):** endpoint `POST /projects/{id}/baseline` reusando modelo `Extraction` com origem manual; endpoint `GET /baseline-status`. **Frontend (Bruno):** upload do JSON + feedback de validação + indicador "gabarito presente/ausente" no portfólio.
 
 ---
 
-### RF09 — Comparar extração automática vs. gabarito (critério híbrido)
+### RF15 — Comparar extração automática vs. gabarito (critério híbrido)
 
 **1. Identificação**
-- ID: RF09
+- ID: RF15
 - Título: Comparar extração automática vs. gabarito (critério híbrido)
 - Prioridade: Must
 - Status: Backlog
@@ -432,7 +432,7 @@ Fecha o ciclo de pesquisa. Sem este bloco, o DSR não tem evidência empírica p
 - Descrição: Calcular precisão, recall, F1 e Cohen's Kappa comparando extração automática com gabarito manual, aplicando critério híbrido por tipo de atributo.
 - Justificativa de negócio: Essência da avaliação quantitativa do DSR.
 - Stakeholder: Pesquisa.
-- Dependências: RF08 (gabarito carregado), RF03 (extração automática).
+- Dependências: RF14 (gabarito carregado), RF05 (extração automática).
 
 **3. Validação**
 - Critérios de aceite: Atributos `estruturado` por comparação normalizada exata (TP/FP/FN); atributos `texto_livre` por rubrica 0/0,5/1 aplicada por dois avaliadores; Kappa por atributo e agregado; métricas separadas por grupo + agregado total; tempo manual vs. automático registrado; visualização tabular.
@@ -442,10 +442,10 @@ Fecha o ciclo de pesquisa. Sem este bloco, o DSR não tem evidência empírica p
 
 ---
 
-### RF10 — Coletar feedback Likert da consultoria
+### RF16 — Coletar feedback Likert da consultoria
 
 **1. Identificação**
-- ID: RF10
+- ID: RF16
 - Título: Coletar feedback Likert da consultoria
 - Prioridade: Must
 - Status: Backlog
@@ -455,7 +455,7 @@ Fecha o ciclo de pesquisa. Sem este bloco, o DSR não tem evidência empírica p
 - Descrição: Registrar percepção da equipe da consultoria sobre redução de fricção e qualidade da assistência da IA.
 - Justificativa de negócio: Metade da avaliação qualitativa do DSR. Valida a hipótese do pivot (IA reduz fricção).
 - Stakeholder: Pesquisa.
-- Dependências: RF16 (resumo gerado), RF17 (drafts gerados).
+- Dependências: RF12 (resumo gerado), RF13 (drafts gerados).
 
 **3. Validação**
 - Critérios de aceite: Formulário com 4 dimensões em escala 1-5 (utilidade dos drafts, redução de fricção, qualidade do resumo gerado, manutenibilidade); N esperado ~4 (toda a equipe); persistência + relatório agregado.
@@ -465,10 +465,10 @@ Fecha o ciclo de pesquisa. Sem este bloco, o DSR não tem evidência empírica p
 
 ---
 
-### RF18 — Coletar feedback Likert dos clientes
+### RF17 — Coletar feedback Likert dos clientes
 
 **1. Identificação**
-- ID: RF18
+- ID: RF17
 - Título: Coletar feedback Likert dos clientes
 - Prioridade: Must
 - Status: Backlog
@@ -478,7 +478,7 @@ Fecha o ciclo de pesquisa. Sem este bloco, o DSR não tem evidência empírica p
 - Descrição: Registrar percepção dos clientes finais sobre clareza do resumo, utilidade do espaço, qualidade do diálogo e sentido de inclusão.
 - Justificativa de negócio: Metade da avaliação qualitativa do DSR. Valida a hipótese do pivot do lado do cliente.
 - Stakeholder: Pesquisa.
-- Dependências: RF16 (resumos visíveis), RF14 (comentários), RF15 (feed).
+- Dependências: RF12 (resumos visíveis), RF10 (comentários), RF11 (feed).
 
 **3. Validação**
 - Critérios de aceite: Formulário com 4 dimensões em escala 1-5 (clareza do resumo, utilidade do espaço, qualidade do diálogo, sentido de inclusão); identificação do projeto (respondente anônimo opcional); N esperado 5-10.
@@ -488,10 +488,10 @@ Fecha o ciclo de pesquisa. Sem este bloco, o DSR não tem evidência empírica p
 
 ---
 
-### RF11 — Exportar resultados consolidados
+### RF18 — Exportar resultados consolidados
 
 **1. Identificação**
-- ID: RF11
+- ID: RF18
 - Título: Exportar resultados consolidados
 - Prioridade: Should
 - Status: Backlog
@@ -501,7 +501,7 @@ Fecha o ciclo de pesquisa. Sem este bloco, o DSR não tem evidência empírica p
 - Descrição: Gerar exportação única (CSV/JSON) com todos os dados de avaliação para alimentar relato e artigo.
 - Justificativa de negócio: Sem exportação, o trabalho de escrita do relato fica refém de queries manuais.
 - Stakeholder: Pesquisa (Cynthia para relato; Moisés para apresentação).
-- Dependências: RF09 (métricas), RF10 + RF18 (Likert), RF07 (cobertura).
+- Dependências: RF15 (métricas), RF16 + RF17 (Likert), RF09 (cobertura).
 
 **3. Validação**
 - Critérios de aceite: Arquivo único contendo extrações, cobertura, métricas (precisão/recall/F1/Kappa) por grupo, respostas Likert (consultoria + clientes), métricas de engajamento (#comentários, #drafts publicados).
@@ -521,19 +521,19 @@ Fecha o ciclo de pesquisa. Sem este bloco, o DSR não tem evidência empírica p
 - Categoria: Confiabilidade
 - Prioridade: Must
 - Status: Backlog
-- Sprint/Release: Cross-cutting; aplicado em RF03 (Sprint 1), RF16 e RF17 (Sprint 3)
+- Sprint/Release: Cross-cutting; aplicado em RF05 (Sprint 1), RF12 e RF13 (Sprint 3)
 
 **2. Detalhamento**
 - Descrição: Toda extração registra versão do prompt, identificador do modelo LLM, timestamp e parâmetros relevantes.
 - Justificativa de negócio: Sem reprodutibilidade, resultados não defendem academicamente.
 - Stakeholder: Pesquisa.
-- Dependências: RF03, RF16, RF17.
+- Dependências: RF05, RF12, RF13.
 
 **3. Validação**
 - Critérios de aceite: Cada saída de IA carrega versão do prompt + modelo + timestamp + parâmetros.
 - Regras de negócio: Mudança de prompt incrementa versão registrada.
 - Rastreabilidade MPO: — (qualidade de método científico aplicado ao artefato).
-- Observações: Aplicado a extração (RF03), resumo (RF16) e drafts (RF17).
+- Observações: Aplicado a extração (RF05), resumo (RF12) e drafts (RF13).
 
 ---
 
@@ -545,19 +545,19 @@ Fecha o ciclo de pesquisa. Sem este bloco, o DSR não tem evidência empírica p
 - Categoria: Confiabilidade
 - Prioridade: Must
 - Status: Backlog
-- Sprint/Release: Sprint 1 (gerado em RF03) + Sprint 2 (exibido em RF06)
+- Sprint/Release: Sprint 1 (gerado em RF05) + Sprint 2 (exibido em RF08)
 
 **2. Detalhamento**
 - Descrição: Toda informação extraída automaticamente carrega o trecho do documento original que a justifica.
 - Justificativa de negócio: Permite auditoria humana e mitiga risco de alucinação da IA.
 - Stakeholder: Pesquisa + consultoria.
-- Dependências: RF03.
+- Dependências: RF05.
 
 **3. Validação**
 - Critérios de aceite: Para cada atributo preenchido, o sistema persiste e exibe o trecho de origem.
 - Regras de negócio: Se a IA não conseguir identificar trecho, atributo deve ficar `null`.
 - Rastreabilidade MPO: Processo **Tratar** (Vieira, 2022, p. 195) — qualidade e auditabilidade dos dados coletados/extraídos.
-- Observações: Visível na tela de detalhe (RF06).
+- Observações: Visível na tela de detalhe (RF08).
 
 ---
 
@@ -617,16 +617,16 @@ Fecha o ciclo de pesquisa. Sem este bloco, o DSR não tem evidência empírica p
 - Categoria: Segurança / Compliance
 - Prioridade: Must
 - Status: Backlog
-- Sprint/Release: Cross-cutting; principal aplicação em Sprint 1 (RF12) e Sprint 2 (RF13)
+- Sprint/Release: Cross-cutting; principal aplicação em Sprint 1 (RF01) e Sprint 2 (RF02)
 
 **2. Detalhamento**
 - Descrição: Dados de marketing dos clientes em formato semi-aberto exigem medidas mínimas de proteção e consentimento.
 - Justificativa de negócio: Lei Geral de Proteção de Dados (Lei nº 13.709/2018) aplicável. Sem conformidade, há risco legal real para a consultoria participante.
 - Stakeholder: Consultoria + clientes + pesquisa.
-- Dependências: RF12, RF13.
+- Dependências: RF01, RF02.
 
 **3. Validação**
-- Critérios de aceite: NDA assinado com clientes participantes; consentimento explícito para uso anonimizado dos resultados; isolamento por perfil (RF13); criptografia em trânsito (HTTPS local via certificado autoassinado para o ambiente); logs de acesso ao observatório.
+- Critérios de aceite: NDA assinado com clientes participantes; consentimento explícito para uso anonimizado dos resultados; isolamento por perfil (RF02); criptografia em trânsito (HTTPS local via certificado autoassinado para o ambiente); logs de acesso ao observatório.
 - Regras de negócio: Cliente A nunca acessa dados do Cliente B. Logs de acesso preservados.
 - Rastreabilidade MPO: Característica **Segurança** (Vieira, 2022, p. 192) — explicitamente menciona "política de segurança aderente à Lei Geral de Proteção de Dados (LGPD)".
 - Observações: NDA gerenciado fora do sistema.
@@ -641,13 +641,13 @@ Fecha o ciclo de pesquisa. Sem este bloco, o DSR não tem evidência empírica p
 - Categoria: Performance
 - Prioridade: Should
 - Status: Backlog
-- Sprint/Release: Sprint 1 — semana 10 (medido ao concluir RF03)
+- Sprint/Release: Sprint 1 — semana 10 (medido ao concluir RF05)
 
 **2. Detalhamento**
 - Descrição: O pipeline LLM deve processar um documento `.docx` de tamanho médio (~10 páginas) em tempo aceitável para o ciclo de uso da pesquisa.
 - Justificativa de negócio: Latência inviabiliza demos e testes iterativos.
 - Stakeholder: Equipe técnica + apresentação final.
-- Dependências: RF03.
+- Dependências: RF05.
 
 **3. Validação**
 - Critérios de aceite: Tempo médio ≤ 3 minutos por documento, medido sobre os 5 projetos.
@@ -665,16 +665,16 @@ Fecha o ciclo de pesquisa. Sem este bloco, o DSR não tem evidência empírica p
 - Categoria: Usabilidade
 - Prioridade: Should
 - Status: Backlog
-- Sprint/Release: Cross-cutting; avaliado via RF18 (Sprint 4)
+- Sprint/Release: Cross-cutting; avaliado via RF17 (Sprint 4)
 
 **2. Detalhamento**
 - Descrição: Um cliente sem conhecimento técnico deve conseguir acessar seu projeto, ler o resumo, comentar e navegar pelo feed sem treinamento.
 - Justificativa de negócio: Sem usabilidade para o cliente final, o observatório não viabiliza comunidade.
 - Stakeholder: Clientes.
-- Dependências: RF06, RF14, RF15, RF16.
+- Dependências: RF08, RF10, RF11, RF12.
 
 **3. Validação**
-- Critérios de aceite: Avaliado via dimensão "clareza do resumo" e "utilidade do espaço" do Likert dos clientes (RF18).
+- Critérios de aceite: Avaliado via dimensão "clareza do resumo" e "utilidade do espaço" do Likert dos clientes (RF17).
 - Regras de negócio: —
 - Rastreabilidade MPO: Característica **Usabilidade** (Vieira, 2022, p. 192) — linguagem cidadã, simplicidade e acessibilidade.
 - Observações: —
@@ -719,7 +719,7 @@ Fecha o ciclo de pesquisa. Sem este bloco, o DSR não tem evidência empírica p
 - Descrição: As três chamadas adicionais de IA por projeto (extração + resumo + drafts) ampliam o custo de tokens. O sistema deve permitir controle e visibilidade.
 - Justificativa de negócio: Sem controle, o orçamento de tokens pode estourar antes da entrega.
 - Stakeholder: Equipe técnica.
-- Dependências: RF03, RF16, RF17.
+- Dependências: RF05, RF12, RF13.
 
 **3. Validação**
 - Critérios de aceite: Cada chamada LLM registra tokens consumidos (input + output) e custo estimado; relatório agregado de custo por projeto e total.
@@ -749,6 +749,6 @@ Fecha o ciclo de pesquisa. Sem este bloco, o DSR não tem evidência empírica p
 - Detecção automática de padrões, alertas, recomendações.
 - Chat com IA.
 - Sugestão automática de Lições Aprendidas (cortada pelo prazo).
-- Notificações por email externo (substituídas por feed in-app — RF15).
+- Notificações por email externo (substituídas por feed in-app — RF11).
 - Extração de imagens/fotos.
 - OAuth, multi-tenancy, deploy em produção.
