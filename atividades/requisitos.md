@@ -4,7 +4,7 @@ Documento de especificação de requisitos do ObiOne, observatório-comunidade d
 
 Reformulado em 16/05/2026 após o pivot que introduziu a dimensão de comunidade (ver `pivot_observatorio_comunidade.md`).
 
-Os requisitos funcionais (RF01–RF18) são derivados 1:1 das user stories do backlog. Os requisitos não funcionais (RNF01–RNF09) cobrem qualidade do produto, reprodutibilidade científica, restrições do ambiente acadêmico, conformidade LGPD e controle de custo de LLM.
+Os requisitos funcionais (RF01–RF18) são derivados 1:1 das user stories do backlog. Os requisitos não funcionais (RNF01–RNF09) cobrem qualidade do produto, reprodutibilidade científica, restrições do ambiente acadêmico, conformidade LGPD e controle de custo de LLM. **Cada ficha registra explicitamente a rastreabilidade com o MPO** (Quadro 37 e/ou conceitos do modelo).
 
 ---
 
@@ -46,6 +46,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **3. Validação**
 - Critérios de aceite: Campos obrigatórios validados (nome, domínio, descrição); ID único gerado automaticamente; listagem dos projetos cadastrados disponível.
 - Regras de negócio: Domínio limitado a enum (jurídico, saúde, esporte, branding, outros). Apenas perfil Consultor cria projetos.
+- Rastreabilidade MPO: — (infraestrutura — habilita as demais funcionalidades sem mapear diretamente a um conceito do MPO).
 - Observações: **Backend (Raniel):** modelo `Project` + endpoints `POST /projects`, `GET /projects`. **Frontend (Bruno):** formulário de cadastro + tela de listagem (filtrada por perfil — ver RF13).
 
 ---
@@ -68,6 +69,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **3. Validação**
 - Critérios de aceite: Suporte mínimo `.docx`; múltiplos arquivos por projeto; persistência do arquivo bruto + metadados (nome, data, tamanho, hash).
 - Regras de negócio: Tamanho máximo por arquivo a definir; rejeitar arquivos inválidos com mensagem clara. Apenas perfil Consultor faz upload.
+- Rastreabilidade MPO: Processo **Coletar** (Vieira, 2022, p. 195) — captura de dados sobre os projetos para o observatório.
 - Observações: **Backend (Raniel):** endpoint `POST /projects/{id}/documents` aceitando `multipart/form-data`; persistência em Postgres + storage local. **Frontend (Bruno):** componente drag-and-drop, suporte a múltiplos arquivos, feedback visual de progresso, listagem dos arquivos do projeto.
 
 ---
@@ -90,6 +92,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **3. Validação**
 - Critérios de aceite: Saída JSON conforme schema; 8 categorias do Quadro 37 contempladas; para cada atributo preenchido, valor + trecho de origem; atributos não encontrados como `null`; atributos `fora_de_escopo` (imagens) ignorados; versão do prompt e modelo registrados.
 - Regras de negócio: Nunca inventar valor (alucinação) — preferir `null`. Sempre registrar versão do prompt e modelo para reprodutibilidade.
+- Rastreabilidade MPO: **Quadro 37 — Atributos relacionados aos projetos** (Vieira, 2022, p. 264) — todas as 8 categorias (geral, stakeholders, escopo, cronograma, custos, riscos, mudanças, lições aprendidas) + processo **Transformar** (p. 196).
 - Observações: **Backend (Raniel):** pipeline completo de extração — leitura `.docx`, chunking se necessário, prompt estruturado, chamada LLM, parsing, validação contra schema, endpoint `POST /projects/{id}/extract`. **Frontend (Bruno):** botão "Extrair com IA" no detalhe do projeto; loading visual; notificação ao concluir.
 
 ---
@@ -112,6 +115,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **3. Validação**
 - Critérios de aceite: Cada extração registra projeto, documento(s), versão do prompt, modelo LLM, timestamp, `origem` (`automatico` | `manual`); recuperável via API.
 - Regras de negócio: Histórico de extrações preservado — nunca sobrescrever silenciosamente.
+- Rastreabilidade MPO: Processo **Armazenar** (Vieira, 2022, p. 196).
 - Observações: **Backend (Raniel):** modelo `Extraction` com FKs e metadados; endpoints `GET /projects/{id}/extractions`. **Frontend (Bruno):** sem tela própria — dados consumidos por RF06.
 
 ---
@@ -134,6 +138,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **3. Validação**
 - Critérios de aceite: Lista projetos com nome, domínio, status derivado (`cadastrado` → `ingerido` → `extraído` → `avaliado`), % de cobertura; filtro por domínio.
 - Regras de negócio: Cliente NÃO acessa esta tela (redirecionado ao seu próprio detalhe — RF06). Status é derivado, nunca editado.
+- Rastreabilidade MPO: Característica **Abrangência** (Vieira, 2022, p. 189) + processo **Disponibilizar** (p. 196) — visão consolidada dos projetos do observatório.
 - Observações: **Backend (Raniel):** endpoint `GET /projects` com cálculo de status + cobertura; filtro por perfil. **Frontend (Bruno):** tabela com colunas, filtro por domínio, navegação para detalhe.
 
 ---
@@ -156,6 +161,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **3. Validação**
 - Critérios de aceite: Atributos das 8 categorias agrupados; preenchidos e vazios visíveis; valor + trecho de origem por atributo; acesso aos documentos originais.
 - Regras de negócio: Cliente acessa **apenas o seu** projeto; consultor acessa todos. Tentativa de acesso indevido retorna 403.
+- Rastreabilidade MPO: Conteúdo **Projetos** (Vieira, 2022, p. 186) — exposição dos atributos do Quadro 37; processo **Disponibilizar** (p. 196).
 - Observações: **Backend (Raniel):** endpoint `GET /projects/{id}` com check de perfil; endpoint `GET /projects/{id}/documents/{doc_id}/download`. **Frontend (Bruno):** layout de detalhe agrupado por categoria + visualização de citações.
 
 ---
@@ -178,6 +184,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **3. Validação**
 - Critérios de aceite: Por projeto, % calculada; matriz projetos × atributos no portfólio (tabela ou heatmap); destaque visual quando < 50%; sinalização saudável quando ≥ 80%.
 - Regras de negócio: Atributos `fora_de_escopo` excluídos do denominador.
+- Rastreabilidade MPO: Característica **Abrangência** (Vieira, 2022, p. 189) — operacionalizada como % de atributos do Quadro 37 cobertos por projeto + processo **Avaliar** (p. 198).
 - Observações: **Backend (Raniel):** endpoint `GET /coverage` retornando matriz. **Frontend (Bruno):** componente heatmap/tabela com coloração por threshold; tooltip com valor por célula.
 
 ---
@@ -200,6 +207,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **3. Validação**
 - Critérios de aceite: Carga via arquivo JSON; validação contra `docs/schema_extracao.json`; persistência com `origem: manual`; integridade verificada antes de RF09.
 - Regras de negócio: Apenas 3 projetos (Valença piloto + Freire Batista + Kaka JJ). Bem Viver e Dinoah avaliados apenas por cobertura + Likert.
+- Rastreabilidade MPO: — (infraestrutura de avaliação DSR — não mapeia diretamente a um conceito do MPO).
 - Observações: **Backend (Raniel):** endpoint `POST /projects/{id}/baseline` reusando modelo `Extraction` com origem manual; endpoint `GET /baseline-status`. **Frontend (Bruno):** upload do JSON + feedback de validação + indicador "gabarito presente/ausente" no portfólio.
 
 ---
@@ -222,6 +230,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **3. Validação**
 - Critérios de aceite: Atributos `estruturado` por comparação normalizada exata (TP/FP/FN); atributos `texto_livre` por rubrica 0/0,5/1 aplicada por dois avaliadores; Kappa por atributo e agregado; métricas separadas por grupo + agregado total; tempo manual vs. automático registrado; visualização tabular.
 - Regras de negócio: Atributos com Kappa < 0,6 sinalizados como limitação. Métricas calculadas apenas nos 3 projetos com gabarito.
+- Rastreabilidade MPO: Processo **Avaliar** (Vieira, 2022, p. 198) — avaliação colaborativa dos dados extraídos do observatório.
 - Observações: **Backend (Raniel):** algoritmo híbrido; endpoint `POST /projects/{id}/rubric` (rubrica externa) + `GET /projects/{id}/evaluation`. **Frontend (Bruno):** UI dedicada para Cynthia/Moisés aplicarem a rubrica 0/0,5/1 (lado-a-lado: extração × gabarito); tela tabular de resultados.
 
 ---
@@ -244,6 +253,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **3. Validação**
 - Critérios de aceite: Formulário com 4 dimensões em escala 1-5 (utilidade dos drafts, redução de fricção, qualidade do resumo gerado, manutenibilidade); N esperado ~4 (toda a equipe); persistência + relatório agregado.
 - Regras de negócio: Aplicado após a equipe ter usado o sistema com os 5 projetos.
+- Rastreabilidade MPO: Agente **Equipe de Gestão e Desenvolvimento do Observatório** (Vieira, 2022, p. 201) + motivações **Conhecimento** e **Engajamento** (p. 204).
 - Observações: **Backend (Raniel):** endpoint `POST /likert-responses?audience=consultoria`. **Frontend (Bruno):** formulário simples + relatório de médias por dimensão.
 
 ---
@@ -266,6 +276,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **3. Validação**
 - Critérios de aceite: Arquivo único contendo extrações, cobertura, métricas (precisão/recall/F1/Kappa) por grupo, respostas Likert (consultoria + clientes), métricas de engajamento (#comentários, #drafts publicados).
 - Regras de negócio: Cabeçalhos compatíveis com planilha (Excel, Google Sheets).
+- Rastreabilidade MPO: — (infraestrutura de avaliação — não mapeia diretamente a um conceito do MPO).
 - Observações: **Backend (Raniel):** endpoint `GET /export?format=csv|json`. **Frontend (Bruno):** botão "Exportar resultados" com seletor de formato.
 
 ---
@@ -288,6 +299,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **3. Validação**
 - Critérios de aceite: Login funcional; tokens JWT; logout funcional; senha armazenada com hash (bcrypt ou similar).
 - Regras de negócio: Sem cadastro público — usuários criados pela equipe da consultoria. Sem OAuth. Senha mínima de 8 caracteres.
+- Rastreabilidade MPO: Característica **Segurança** (Vieira, 2022, p. 192) — controle de acesso e autenticação de usuários.
 - Observações: **Backend (Raniel):** endpoints `POST /auth/login`, `POST /auth/logout`; middleware JWT; bibliotecas FastAPI padrão (passlib + python-jose). **Frontend (Bruno):** tela de login + gerenciamento de token na sessão.
 
 ---
@@ -303,13 +315,14 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 
 **2. Detalhamento**
 - Descrição: Garantir que cada usuário acessa apenas o que seu perfil permite. Dois perfis: Consultor (todos os projetos) e Cliente (apenas o seu projeto associado).
-- Justificativa de negócio: Materializa a característica "Acesso semi-aberto" do MPO (Vieira, 2022, p. 189) e é fundamental para LGPD.
+- Justificativa de negócio: Materializa a característica "Acesso semi-aberto" do MPO e é fundamental para LGPD.
 - Stakeholder: Consultoria + clientes.
 - Dependências: RF12 (autenticação).
 
 **3. Validação**
 - Critérios de aceite: Vínculo cliente ↔ projeto persistido; endpoints e telas filtram conforme perfil; tentativa de acesso indevido retorna 403; equipe da consultoria cria contas; cliente recebe convite por email com senha provisória.
 - Regras de negócio: Um cliente vinculado a no máximo 1 projeto (no MVP). Consultor pode acessar todos. Cliente A nunca acessa dados do Cliente B.
+- Rastreabilidade MPO: Característica **Acesso semi-aberto** (Vieira, 2022, p. 189) + agentes **Equipe de Gestão** e **Usuários do Observatório** (pp. 200-201).
 - Observações: **Backend (Raniel):** modelo `User` com role (`consultor` | `cliente`) + FK opcional para `Project`; middleware de autorização aplicado em todos os endpoints relevantes. **Frontend (Bruno):** roteamento condicional por perfil; tela de gerenciamento de usuários (apenas Consultor).
 
 ---
@@ -325,13 +338,14 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 
 **2. Detalhamento**
 - Descrição: Permitir que consultor e cliente daquele projeto comentem livremente no projeto, respondendo a comentários.
-- Justificativa de negócio: Materializa a característica Interatividade e o processo Interagir do MPO (Vieira, pp. 191, 198). Sem comentários, não há comunidade — apenas dashboard.
+- Justificativa de negócio: Materializa a característica Interatividade e o processo Interagir do MPO. Sem comentários, não há comunidade — apenas dashboard.
 - Stakeholder: Consultoria + clientes.
 - Dependências: RF13 (perfis).
 
 **3. Validação**
 - Critérios de aceite: Thread livre por projeto; identificação do autor visível; resposta com 1 nível de aninhamento; edição/exclusão pelo próprio autor; consultor pode moderar.
 - Regras de negócio: Cliente comenta apenas no seu projeto. Comentário não pode ser anônimo. Histórico preservado em soft-delete.
+- Rastreabilidade MPO: Característica **Interatividade** (Vieira, 2022, p. 191) + processo **Interagir** (p. 198) + conteúdo **Usuários e Interações** (p. 188).
 - Observações: **Backend (Raniel):** modelo `Comment` (FK projeto + FK autor + parent_id); endpoints CRUD com check de perfil. **Frontend (Bruno):** componente de thread com formulário, listagem, resposta e edição.
 
 ---
@@ -347,13 +361,14 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 
 **2. Detalhamento**
 - Descrição: Mostrar feed das novidades dos projetos do usuário: novo comentário, novo resumo gerado, nova extração, novo draft publicado.
-- Justificativa de negócio: Materializa o processo Acompanhar do MPO (Vieira, p. 198). Mantém comunidade viva sem precisar de email.
+- Justificativa de negócio: Materializa o processo Acompanhar do MPO. Mantém comunidade viva sem precisar de email.
 - Stakeholder: Consultoria + clientes.
 - Dependências: RF13 (perfis), RF14 (comentários), RF16 (resumos), RF17 (drafts).
 
 **3. Validação**
 - Critérios de aceite: Feed filtrado por perfil (cliente vê só seu projeto; consultor vê todos); indicador de "não lido" (contador); navegação direta para o evento.
 - Regras de negócio: Sem envio de email externo — apenas in-app. Eventos antigos (> 30 dias) podem ser arquivados.
+- Rastreabilidade MPO: Processo **Acompanhar** (Vieira, 2022, p. 198) — "usuários podem escolher receber notificações (...) de atualizações dos projetos".
 - Observações: **Backend (Raniel):** modelo `ActivityEvent` registrado em hooks dos demais módulos; endpoint `GET /feed`. **Frontend (Bruno):** componente badge no header + tela de feed.
 
 ---
@@ -376,6 +391,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **3. Validação**
 - Critérios de aceite: IA gera texto em linguagem cidadã cobrindo objetivos, escopo, status, riscos relevantes; sempre revisável pelo consultor antes de publicar; versão do prompt + modelo registrados.
 - Regras de negócio: Cliente **nunca vê** resumo não-revisado. Resumo publicado vira "current"; histórico preservado.
+- Rastreabilidade MPO: Processo **Comunicar** (Vieira, 2022, p. 197) + característica **Usabilidade** — linguagem cidadã (p. 192).
 - Observações: **Backend (Raniel):** endpoint `POST /projects/{id}/summary/generate` (gera draft) + `POST /projects/{id}/summary/publish` (consultor publica). **Frontend (Bruno):** tela "Resumo do Cliente" no detalhe do projeto, com modos "rascunho" (consultor edita) e "publicado" (cliente vê).
 
 ---
@@ -398,6 +414,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **3. Validação**
 - Critérios de aceite: IA gera drafts a partir da extração + comentários; consultor edita antes de publicar; drafts em rascunho não aparecem para o cliente; versão do prompt + modelo registrados.
 - Regras de negócio: Consultor **sempre** revisa antes de publicar — não há publicação automática. Histórico de drafts preservado.
+- Rastreabilidade MPO: Processos **Transformar** + **Comunicar** + **Categorizar/Classificar** (Vieira, 2022, pp. 196-197) + motivação **Tomada de Decisão** (p. 203).
 - Observações: **Backend (Raniel):** endpoint `POST /projects/{id}/drafts/generate` + `POST /projects/{id}/drafts/{draft_id}/publish`. **Frontend (Bruno):** seção "Próximos Passos / Pontos de Atenção" no detalhe do projeto, com editor para o consultor revisar drafts.
 
 ---
@@ -420,6 +437,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **3. Validação**
 - Critérios de aceite: Formulário com 4 dimensões em escala 1-5 (clareza do resumo, utilidade do espaço, qualidade do diálogo, sentido de inclusão); identificação do projeto (respondente anônimo opcional); N esperado 5-10.
 - Regras de negócio: Aplicado após pelo menos 2 semanas de uso pelos clientes. Implementação mínima viável: Google Forms externo + import das respostas.
+- Rastreabilidade MPO: Agente **Partes Interessadas dos Projetos** + **Usuários do Observatório** (Vieira, 2022, pp. 200-201) + motivações **Engajamento** e **Conhecimento** (p. 204) + característica **Interatividade** (p. 191).
 - Observações: **Backend (Raniel):** endpoint `POST /likert-responses?audience=cliente` para receber respostas importadas. **Frontend (Bruno):** tela de import do CSV + relatório agregado (médias por dimensão por projeto).
 
 ---
@@ -434,6 +452,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 - Categoria: Performance
 - Prioridade: Média
 - Status: Backlog
+- Sprint/Release: Sprint 1 — semana 10 (medido ao concluir RF03)
 
 **2. Detalhamento**
 - Descrição: O pipeline LLM deve processar um documento `.docx` de tamanho médio (~10 páginas) em tempo aceitável para o ciclo de uso da pesquisa.
@@ -444,6 +463,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **3. Validação**
 - Critérios de aceite: Tempo médio ≤ 3 minutos por documento, medido sobre os 5 projetos.
 - Regras de negócio: Se ultrapassar, otimizar prompt ou estratégia de chunking.
+- Rastreabilidade MPO: — (qualidade técnica do pipeline, sem mapeamento direto a um conceito do MPO).
 - Observações: Reportar no relato como métrica.
 
 ---
@@ -456,6 +476,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 - Categoria: Usabilidade
 - Prioridade: Média
 - Status: Backlog
+- Sprint/Release: Cross-cutting; avaliado via RF18 (Sprint 4)
 
 **2. Detalhamento**
 - Descrição: Um cliente sem conhecimento técnico deve conseguir acessar seu projeto, ler o resumo, comentar e navegar pelo feed sem treinamento.
@@ -466,7 +487,8 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **3. Validação**
 - Critérios de aceite: Avaliado via dimensão "clareza do resumo" e "utilidade do espaço" do Likert dos clientes (RF18).
 - Regras de negócio: —
-- Observações: Característica Usabilidade do MPO (Vieira, p. 192).
+- Rastreabilidade MPO: Característica **Usabilidade** (Vieira, 2022, p. 192) — linguagem cidadã, simplicidade e acessibilidade.
+- Observações: —
 
 ---
 
@@ -478,6 +500,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 - Categoria: Manutenibilidade
 - Prioridade: Média
 - Status: Backlog
+- Sprint/Release: Cross-cutting; verificado a cada sprint
 
 **2. Detalhamento**
 - Descrição: Backend e frontend em pastas separadas; schema versionado; estrutura legível para qualquer integrante.
@@ -488,6 +511,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **3. Validação**
 - Critérios de aceite: Novo integrante clona e roda o ambiente local em < 30 minutos seguindo o README.
 - Regras de negócio: —
+- Rastreabilidade MPO: — (qualidade interna de engenharia, sem mapeamento direto a um conceito do MPO).
 - Observações: `backend/` + `frontend/` na raiz do `raniel90/obione`.
 
 ---
@@ -500,6 +524,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 - Categoria: Confiabilidade
 - Prioridade: Alta
 - Status: Backlog
+- Sprint/Release: Cross-cutting; aplicado em RF03 (Sprint 1), RF16 e RF17 (Sprint 3)
 
 **2. Detalhamento**
 - Descrição: Toda extração registra versão do prompt, identificador do modelo LLM, timestamp e parâmetros relevantes.
@@ -510,6 +535,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **3. Validação**
 - Critérios de aceite: Cada saída de IA carrega versão do prompt + modelo + timestamp + parâmetros.
 - Regras de negócio: Mudança de prompt incrementa versão registrada.
+- Rastreabilidade MPO: — (qualidade de método científico aplicado ao artefato).
 - Observações: Aplicado a extração (RF03), resumo (RF16) e drafts (RF17).
 
 ---
@@ -522,6 +548,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 - Categoria: Confiabilidade
 - Prioridade: Alta
 - Status: Backlog
+- Sprint/Release: Sprint 1 (gerado em RF03) + Sprint 2 (exibido em RF06)
 
 **2. Detalhamento**
 - Descrição: Toda informação extraída automaticamente carrega o trecho do documento original que a justifica.
@@ -532,6 +559,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **3. Validação**
 - Critérios de aceite: Para cada atributo preenchido, o sistema persiste e exibe o trecho de origem.
 - Regras de negócio: Se a IA não conseguir identificar trecho, atributo deve ficar `null`.
+- Rastreabilidade MPO: Processo **Tratar** (Vieira, 2022, p. 195) — qualidade e auditabilidade dos dados coletados/extraídos.
 - Observações: Visível na tela de detalhe (RF06).
 
 ---
@@ -544,6 +572,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 - Categoria: Portabilidade
 - Prioridade: Alta
 - Status: Backlog
+- Sprint/Release: Sprint 0 — semana 8 (estabelecido em T0.5)
 
 **2. Detalhamento**
 - Descrição: Sistema roda localmente via Docker Compose, sem dependência de infraestrutura externa além da API do LLM.
@@ -554,6 +583,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **3. Validação**
 - Critérios de aceite: `docker compose up` provisiona PostgreSQL + backend FastAPI; `npm run dev` levanta o frontend; instruções no README.
 - Regras de negócio: —
+- Rastreabilidade MPO: Conceito de **Infraestrutura de TI** (Vieira, 2022, p. 192) — base computacional que sustenta o observatório.
 - Observações: Sem deploy em produção no MVP.
 
 ---
@@ -566,6 +596,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 - Categoria: Restrição
 - Prioridade: Alta (declarativa)
 - Status: Backlog
+- Sprint/Release: Declarativa — válida em todas as sprints
 
 **2. Detalhamento**
 - Descrição: O sistema NÃO implementa OAuth, multi-tenancy, deploy em produção, pipeline de CI/CD nem suíte automatizada de testes extensiva.
@@ -576,6 +607,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **3. Validação**
 - Critérios de aceite: Restrição declarativa — nenhuma medida.
 - Regras de negócio: Smoke tests pontuais para fluxos críticos são aceitáveis.
+- Rastreabilidade MPO: — (delimitação de escopo do artefato acadêmico).
 - Observações: —
 
 ---
@@ -588,6 +620,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 - Categoria: Segurança / Compliance
 - Prioridade: Alta
 - Status: Backlog
+- Sprint/Release: Cross-cutting; principal aplicação em Sprint 1 (RF12) e Sprint 2 (RF13)
 
 **2. Detalhamento**
 - Descrição: Dados de marketing dos clientes em formato semi-aberto exigem medidas mínimas de proteção e consentimento.
@@ -598,7 +631,8 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **3. Validação**
 - Critérios de aceite: NDA assinado com clientes participantes; consentimento explícito para uso anonimizado dos resultados; isolamento por perfil (RF13); criptografia em trânsito (HTTPS local via certificado autoassinado para o ambiente); logs de acesso ao observatório.
 - Regras de negócio: Cliente A nunca acessa dados do Cliente B. Logs de acesso preservados.
-- Observações: Característica Segurança do MPO (Vieira, p. 192). NDA gerenciado fora do sistema.
+- Rastreabilidade MPO: Característica **Segurança** (Vieira, 2022, p. 192) — explicitamente menciona "política de segurança aderente à Lei Geral de Proteção de Dados (LGPD)".
+- Observações: NDA gerenciado fora do sistema.
 
 ---
 
@@ -610,6 +644,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 - Categoria: Operacional
 - Prioridade: Média
 - Status: Backlog
+- Sprint/Release: Cross-cutting; monitorado a partir de Sprint 1
 
 **2. Detalhamento**
 - Descrição: As três chamadas adicionais de IA por projeto (extração + resumo + drafts) ampliam o custo de tokens. O sistema deve permitir controle e visibilidade.
@@ -620,6 +655,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **3. Validação**
 - Critérios de aceite: Cada chamada LLM registra tokens consumidos (input + output) e custo estimado; relatório agregado de custo por projeto e total.
 - Regras de negócio: Estimar volume na semana 8 (orçamento de tokens). Usar modelo mais barato para drafts iniciais; modelo mais capaz só para extração final.
+- Rastreabilidade MPO: Característica **Sustentabilidade** (Vieira, 2022, p. 190) — operação no longo prazo do observatório requer controle de custos operacionais.
 - Observações: Caching agressivo onde possível (mesma extração para mesmo documento + mesma versão de prompt não re-roda).
 
 ---
