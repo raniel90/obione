@@ -1,236 +1,334 @@
-# ObiOne — Backlog de Produto (Revisado)
+# ObiOne — Backlog de Produto (Pós-Pivot Comunidade)
 
-> Versão revisada do backlog para alinhar o desdobramento de produto à proposta acadêmica do ObiOne (atividade 1) e à metodologia DSR em 12 semanas.
+> Versão pós-pivot do backlog (16/05/2026), alinhada à proposta acadêmica reformulada, à metodologia DSR e ao calendário real da disciplina TAES (semana 8 atual, entrega em 10/07/2026).
 
 ## Visão Geral
 
-O ObiOne é um observatório de projetos baseado no MPO (Farias Jr. *et al.*, 2025; Vieira, 2022), potencializado por IA Generativa. O objetivo do MVP é demonstrar que um pipeline LLM consegue extrair atributos do MPO a partir de documentos não-estruturados, alimentar um dashboard de observação e ser avaliado quantitativa e qualitativamente em um estudo de caso com 5 projetos reais.
+O ObiOne é um **observatório-comunidade de projetos** baseado no MPO (Farias Jr. *et al.*, 2025; Vieira, 2022) e potencializado por IA Generativa. O MVP demonstra duas frentes integradas:
 
-**Não é um produto SaaS de gestão de risco ou portfólio.** É um artefato de pesquisa avaliado via DSR (Hevner *et al.*, 2004).
+1. **Pipeline LLM** que extrai atributos do Quadro 37 do MPO de documentos `.docx` não-estruturados.
+2. **Espaço de comunidade** semi-aberto onde a equipe da consultoria curatoriza todos os projetos e cada cliente acessa apenas o seu, com comentários, feed de novidades, resumos automáticos e drafts assistidos pela IA.
+
+**Não é um produto SaaS nem um dashboard de gestão.** É um artefato de pesquisa avaliado via DSR que materializa as características de Interatividade e Rede de Colaboração do MPO (Vieira, 2022).
 
 ---
 
 ## Princípios de Escopo
 
-1. **Fidelidade ao MPO.** O que o pipeline extrai deve ser, sempre que possível, atributo previsto no **Quadro 37 (terceira versão do MPO — Vieira, 2022)** — não uma lista própria. Atributos não-textuais (ex.: imagens/fotos do projeto) ficam **fora do escopo** do pipeline LLM.
-2. **Avaliação primeiro.** Toda funcionalidade de produto precisa estar a serviço da avaliação DSR (cobertura do MPO, precisão/recall/F1, Cohen's Kappa, Likert).
-3. **Um ciclo, três meses.** O que não couber em 12 semanas vai para o backlog futuro.
-4. **Estudo de caso definido.** 5 projetos: Freire Batista ADV, Valença Odontologia, Kaka JJ, Bem Viver Fitoterápicos, Dinoah ADV.
+1. **Fidelidade ao MPO.** Atributos extraídos seguem o **Quadro 37 (terceira versão — Vieira, 2022)**. Funcionalidades de comunidade derivam dos conceitos do MPO (Componentes/Relacionamento, Conteúdo/Interações, Característica Interatividade, Processo Interagir).
+2. **Comunidade primeiro, IA como enabler.** A IA Generativa é redutora de fricção e tradutora — não é fim em si mesma. Toda funcionalidade serve à viabilidade do observatório-comunidade.
+3. **Avaliação dupla.** Quantitativa (extração) + qualitativa (Likert separado por audiência).
+4. **9 semanas, não 12.** Hoje é 16/05/2026, semana 8 da disciplina. Entrega: 10/07/2026.
+5. **Estudo de caso definido.** 5 projetos: Freire Batista ADV, Valença Odontologia (piloto), Kaka JJ, Bem Viver Fitoterápicos, Dinoah ADV. **Gabarito manual reduzido a 3 projetos** (Valença + Freire Batista + Kaka JJ).
 
 ---
 
 ## Estratégia de IA
 
-- LLM como **camada interna obrigatória** para extração estruturada de atributos do MPO.
-- Chat com IA: fora do escopo do MVP — backlog futuro.
+A IA Generativa cumpre três papéis combinados no observatório:
+
+- **Extratora**: lê `.docx` e estrutura os atributos do Quadro 37 em JSON.
+- **Tradutora**: converte a extração técnica em **Resumo do Projeto para o Cliente** em linguagem acessível.
+- **Redutora de fricção**: gera **drafts** de "Próximos Passos / Pontos de Atenção" que o consultor revisa antes de publicar.
+
+Chat com IA e detecção automática de padrões entre projetos: fora do escopo do MVP — backlog futuro.
 
 ---
 
-# Entregáveis da Fase Preparatória (semanas 1–2)
+# Entregáveis da Fase Preparatória (semana 8)
 
-Não são US de produto, são **decisões metodológicas e baselines de avaliação** que destravam todo o trabalho subsequente. Sem elas, Sprint 1 estoura e Sprint 3 não tem como rodar.
+Não são US de produto, são **decisões metodológicas e baselines de avaliação** que destravam o resto. Sem elas, Sprint 1 estoura e Sprint 4 (avaliação) não roda.
 
 | Entregável | Conteúdo |
 |---|---|
-| `docs/atributos_alvo_mpo.md` | Lista derivada do Quadro 37 do MPO. Para cada atributo: nome, categoria (geral, stakeholders, escopo, cronograma, custos, riscos, mudanças, lições) e **tipo** (`estruturado` ou `texto_livre`). Atributos não-extraíveis (imagens/fotos) marcados como `fora_de_escopo`. |
-| `docs/protocolo_avaliacao.md` | Critério híbrido de match para US09: (i) atributos `estruturado` por comparação normalizada exata (TP/FP/FN binário); (ii) atributos `texto_livre` por rubrica humana 0/0,5/1 aplicada por dois avaliadores independentes; (iii) cálculo de concordância via Cohen's Kappa; (iv) protocolo de resolução de divergências. |
-| `docs/schema_extracao.json` | Schema JSON formal derivado da lista de atributos-alvo, usado tanto pela extração automática quanto pela manual. |
-| `docs/gabarito/<projeto>.json` (×5) | Extração manual de cada um dos 5 projetos por **dois avaliadores independentes**, seguindo `atributos_alvo_mpo.md` e `schema_extracao.json`. Divergências resolvidas conforme `protocolo_avaliacao.md`; resoluções documentadas. **Valença Odontologia é o projeto piloto** — primeiro a ser anotado para calibrar a rubrica antes dos outros 4. |
+| `docs/atributos_alvo_mpo.md` | Lista derivada do Quadro 37. Para cada atributo: nome, categoria, **tipo** (`estruturado` ou `texto_livre`), e marcação `fora_de_escopo` para imagens/fotos. |
+| `docs/protocolo_avaliacao.md` | Critério híbrido de match: (i) estruturado por comparação normalizada exata; (ii) texto livre por rubrica humana 0/0,5/1; (iii) Cohen's Kappa para concordância; (iv) protocolo de resolução de divergências. |
+| `docs/schema_extracao.json` | Schema JSON formal derivado da lista de atributos-alvo, usado pela extração automática e pelo gabarito manual. |
+| `docs/gabarito/<projeto>.json` (×3) | Extração manual de Valença (piloto), Freire Batista e Kaka JJ por dois avaliadores independentes. Divergências resolvidas conforme protocolo. |
+| Protótipos das telas (Bruno) | Wireframes/mockups das telas novas: login, portfólio (consultor), detalhe do projeto (cliente), comentários, Resumo do Cliente, Drafts. |
 
-**Responsáveis:** a definir na reunião de kickoff da semana 1; sugere-se ao menos um par de revisão por entregável (autor + revisor cruzado entre os 4 integrantes).
+**Responsáveis:** Cynthia (atributos-alvo + matriz semente), Moisés (protocolo + rubrica), Raniel (schema + setup técnico), Bruno (protótipos). Cynthia + Moisés produzem os 3 gabaritos como par de avaliadores independentes.
 
 ---
 
 # MVP
 
-## Sprint 1 — Ingestão e Extração (semanas 3–5)
+## Sprint 0 — Preparatória (semana 8: 15-21/05)
+
+Entregáveis acima + alinhamento do grupo no pivot.
+
+## Sprint 1 — Cadastro, Upload, Auth e Pipeline (semanas 9-10: 22/05-04/06)
 
 ### US01 — Cadastrar projeto
-**Como** pesquisador, **quero** cadastrar um projeto **para** ancorar documentos e extrações.
+**Como** consultor, **quero** cadastrar um projeto **para** ancorar documentos e extrações.
 
 Critérios:
 - Campos: nome, domínio (jurídico, saúde, esporte, branding, outros), descrição livre.
-- Identificador único por projeto.
-- Listagem dos projetos cadastrados.
+- Identificador único.
+- Listagem dos projetos cadastrados (filtrada por perfil — ver US13).
 
 ---
 
 ### US02 — Fazer upload de documentos do projeto
-**Como** pesquisador, **quero** anexar arquivos (.docx, .pdf, .txt) **para** servir de fonte para a extração.
+**Como** consultor, **quero** anexar arquivos `.docx` **para** alimentar a extração.
 
 Critérios:
-- Suporte mínimo obrigatório: `.docx` (formato dos casos reais).
-- Múltiplos arquivos por projeto.
-- Persistência do arquivo bruto + metadados (nome, data, tamanho, hash).
+- `.docx` obrigatório; múltiplos arquivos por projeto.
+- Persistência do bruto + metadados (nome, data, tamanho, hash).
 
 ---
 
 ### US03 — Extrair atributos do MPO via LLM
-**Como** sistema, **devo** processar os documentos do projeto e extrair os atributos previstos no Quadro 37 (terceira versão) do MPO.
+**Como** sistema, **devo** processar os documentos e extrair os atributos previstos no Quadro 37.
 
 Critérios:
-- Prompt estruturado a partir da lista de atributos-alvo definida na fase preparatória.
-- Saída JSON conforme `docs/schema_extracao.json`, contendo as 8 categorias do Quadro 37 (geral, stakeholders, escopo, cronograma, custos, riscos, mudanças, lições aprendidas).
-- Para cada atributo preenchido: valor extraído + trecho de origem (citação).
-- Atributos não encontrados são marcados como `null` — nunca inventados.
-- Atributos marcados como `fora_de_escopo` (ex.: imagens/fotos) são ignorados pelo pipeline.
-
-Notas técnicas:
-- Versão do prompt e modelo LLM registrados junto com a extração (reprodutibilidade).
-- Estratégia de *chunking* documentada se o documento exceder o contexto.
+- Prompt estruturado a partir de `docs/atributos_alvo_mpo.md`.
+- JSON conforme `docs/schema_extracao.json` cobrindo as 8 categorias.
+- Cada atributo preenchido carrega trecho de origem.
+- Atributos não encontrados como `null` — nunca inventados.
+- `fora_de_escopo` (imagens/fotos) ignorados.
+- Versão do prompt + modelo LLM registrados.
 
 ---
 
 ### US04 — Persistir extração estruturada
-**Como** sistema, **devo** salvar a extração JSON associada ao projeto e aos documentos de origem.
+**Como** sistema, **devo** salvar a extração com metadados.
 
 Critérios:
-- Schema do JSON deriva diretamente dos atributos do Quadro 37.
-- Cada extração registra: projeto, documento(s), versão do prompt, modelo LLM, timestamp, **origem** (`automatico` | `manual`).
-- Recuperável posteriormente para comparação com gabarito.
+- Registra: projeto, documento(s), versão do prompt, modelo, timestamp, `origem` (`automatico` | `manual`).
+- Recuperável para comparação posterior.
 
 ---
 
-## Sprint 2 — Dashboard e Cobertura MPO (semanas 6–8)
-
-### US05 — Visualizar portfólio
-**Como** pesquisador, **quero** uma visão consolidada dos projetos **para** observar o portfólio.
+### US12 — Autenticar usuário
+**Como** usuário, **quero** acessar o observatório com login **para** que minhas permissões sejam respeitadas.
 
 Critérios:
-- Lista projetos com: nome, domínio, status, % de cobertura do MPO.
-- **Status é derivado** do estado dos dados, não editado manualmente. Valores possíveis: `cadastrado` (US01), `ingerido` (US02 com ≥ 1 documento), `extraído` (US03/04 com extração persistida), `avaliado` (US09 com comparação concluída).
+- Login com email + senha; JWT como token de sessão.
+- Sem OAuth, sem cadastro público — usuários criados pela equipe da consultoria.
+- Logout funcional.
+
+> Característica **Segurança** do MPO (Vieira, p. 192). Sem auth, modelo semi-aberto não é possível.
+
+---
+
+## Sprint 2 — Dashboard, Cobertura e Perfis (semana 11: 05-11/06)
+
+### US05 — Visualizar portfólio (perfil-aware)
+**Como** consultor, **quero** uma visão consolidada de todos os projetos **para** observar o portfólio.
+
+Critérios:
+- Lista projetos com: nome, domínio, status derivado, % de cobertura do MPO.
+- Status derivado dos dados: `cadastrado` → `ingerido` → `extraído` → `avaliado`.
 - Filtro por domínio.
+- **Restrito ao perfil Consultor** — Cliente não acessa essa tela (ver US13).
 
 ---
 
 ### US06 — Visualizar detalhe do projeto
-**Como** pesquisador, **quero** ver os atributos extraídos de um projeto **para** inspecionar a saída do LLM.
+**Como** consultor ou cliente daquele projeto, **quero** ver os atributos extraídos **para** inspecionar o conteúdo do observatório.
 
 Critérios:
-- Exibe todos os atributos do Quadro 37 (preenchidos e vazios) agrupados por categoria.
-- Para cada atributo preenchido: valor + trecho de origem.
+- Atributos do Quadro 37 agrupados por categoria; preenchidos e vazios visíveis.
+- Cada atributo preenchido: valor + trecho de origem.
 - Acesso aos documentos originais.
+- **Cliente vê apenas o seu projeto**; Consultor vê todos (ver US13).
 
 ---
 
 ### US07 — Indicador de cobertura do MPO
-**Como** pesquisador, **quero** saber quais atributos do MPO foram preenchidos pela IA **para** avaliar a abrangência do pipeline.
+**Como** consultor, **quero** saber quais atributos do MPO foram preenchidos pela IA **para** avaliar a abrangência do pipeline.
 
 Critérios:
-- Por projeto: % de atributos preenchidos vs. total de atributos-alvo (Quadro 37, excluindo `fora_de_escopo`).
-- No portfólio: tabela ou heatmap cruzando projetos × atributos.
-- **Destaque visual** quando cobertura < 50% (atributos pouco capturados pelo pipeline) — cor diferenciada na tabela/heatmap. Cobertura ≥ 80% sinalizada como saudável.
-
-> Indicador-chave da avaliação quantitativa, não opcional.
+- Por projeto: % de atributos preenchidos vs. total de atributos-alvo (excluindo `fora_de_escopo`).
+- No portfólio: tabela ou heatmap projetos × atributos.
+- Destaque visual quando < 50%; sinalização saudável quando ≥ 80%.
 
 ---
 
-## Sprint 3 — Avaliação DSR (semanas 9–10)
-
-### US08 — Importar e validar gabarito manual
-**Como** pesquisador, **quero** carregar o gabarito manual produzido na fase preparatória **para** servir de baseline na comparação com a extração automática.
+### US13 — Gerenciar perfis e acesso semi-aberto
+**Como** sistema, **devo** garantir que cada usuário acessa apenas o que seu perfil permite.
 
 Critérios:
-- Carga dos arquivos `docs/gabarito/<projeto>.json` (5 arquivos) gerados na fase preparatória.
-- Validação de schema: cada gabarito está conforme `docs/schema_extracao.json`.
-- Persistência no mesmo schema da extração automática, com `origem: manual`.
-- Validação de integridade: todos os 5 projetos têm gabarito completo antes de US09 ser executada.
+- Dois perfis: **Consultor** (acesso a todos os projetos), **Cliente** (acesso apenas ao seu projeto associado).
+- Vínculo cliente ↔ projeto persistido.
+- Endpoints e telas filtram conforme o perfil; tentativa de acesso indevido retorna 403.
+- Equipe da consultoria cria contas; cliente recebe convite por email com senha provisória.
 
-> A **produção** do gabarito (esforço alto: ~30 dos ~43 atributos do Quadro 37 são texto livre) é **entregável da fase preparatória** (Marco M1, fim da semana 2). Esta US apenas importa e valida o trabalho já feito.
+> Característica **Acesso semi-aberto** (Vieira, p. 189). Materializa o modelo do MPO.
+
+---
+
+## Sprint 3 — Comunidade e IA-Assistente (semanas 12-13: 12-25/06)
+
+### US14 — Comentar no projeto
+**Como** consultor ou cliente daquele projeto, **quero** comentar e responder comentários **para** dialogar sobre o conteúdo observado.
+
+Critérios:
+- Thread livre por projeto; consultor e cliente daquele projeto comentam.
+- Resposta a comentário (1 nível de aninhamento).
+- Identificação do autor visível.
+- Edição/exclusão pelo próprio autor; consultor pode moderar.
+
+> Característica **Interatividade** + processo **Interagir** (Vieira, pp. 191, 198).
+
+---
+
+### US15 — Visualizar feed in-app de novidades
+**Como** consultor ou cliente, **quero** ver as novidades dos meus projetos **para** acompanhar o que mudou.
+
+Critérios:
+- Feed listando: novo comentário, novo resumo gerado, nova extração, novo draft publicado.
+- Filtrado por perfil (cliente vê só seu projeto; consultor vê todos).
+- Indicador de "não lido" (contador).
+- **Sem envio de email** — feed apenas in-app.
+
+> Processo **Acompanhar** (Vieira, p. 198).
+
+---
+
+### US16 — Gerar Resumo do Projeto para o Cliente
+**Como** sistema, **devo** gerar uma narrativa acessível do projeto a partir da extração técnica **para** que o cliente compreenda o que está sendo observado.
+
+Critérios:
+- IA Generativa lê a extração JSON do projeto e produz texto narrativo em linguagem acessível ao cliente.
+- Resumo cobre os pontos principais: objetivos, escopo, status, riscos relevantes.
+- **Sempre revisável pelo consultor antes de publicar** — cliente nunca vê resumo não-revisado.
+- Versão e modelo LLM registrados.
+
+> Processo **Comunicar** (Vieira, p. 197) + característica **Usabilidade** (linguagem cidadã, p. 192).
+
+---
+
+### US17 — Gerar drafts de "Próximos Passos / Pontos de Atenção"
+**Como** consultor, **quero** drafts gerados pela IA dos próximos passos e pontos de atenção do projeto **para** reduzir o tempo de manutenção do observatório.
+
+Critérios:
+- IA propõe rascunhos a partir da extração + comentários recentes.
+- Consultor revisa e **edita** antes de publicar para o cliente.
+- Drafts pendentes ficam em rascunho — não aparecem para o cliente até publicação.
+- Versão e modelo LLM registrados.
+
+> Materialização do papel de IA-redutora-de-fricção do pivot.
+
+---
+
+## Sprint 4 — Avaliação (semana 14: 26/06-02/07)
+
+### US08 — Importar e validar gabarito manual
+**Como** sistema, **devo** carregar os gabaritos produzidos na fase preparatória **para** servir de baseline na comparação.
+
+Critérios:
+- Carga dos arquivos `docs/gabarito/<projeto>.json` (**3 projetos** — não 5).
+- Validação contra `docs/schema_extracao.json`.
+- Persistência com `origem: manual`.
 
 ---
 
 ### US09 — Comparar extração automática vs. gabarito (critério híbrido)
-**Como** pesquisador, **quero** métricas de precisão, recall e F1 calculadas conforme o protocolo híbrido **para** avaliar quantitativamente o pipeline.
+**Como** pesquisador, **quero** métricas de precisão, recall, F1 e Kappa **para** avaliar quantitativamente o pipeline.
 
 Critérios:
-- Atributos `estruturado` (datas, valores, status, nomes próprios formais): comparação normalizada exata; cálculo binário de TP/FP/FN.
-- Atributos `texto_livre` (escopo, riscos, lições, etc.): rubrica humana 0 / 0,5 / 1 por dois avaliadores independentes.
-- Concordância entre avaliadores reportada via Cohen's Kappa por atributo e agregado.
-- Métricas reportadas separadamente para o grupo `estruturado` e `texto_livre`, mais agregado total.
-- Tempo de extração registrado: manual (reportado) vs. automático (medido).
-- Visualização tabular dos resultados por projeto e consolidados.
+- Atributos `estruturado`: comparação normalizada exata (TP/FP/FN).
+- Atributos `texto_livre`: rubrica humana 0/0,5/1 aplicada por dois avaliadores.
+- Cohen's Kappa por atributo e agregado.
+- Métricas separadas por grupo + agregado total.
+- Tempo de extração: manual (reportado) vs. automático (medido).
+- Visualização tabular.
 
-> Atributos com Kappa < 0,6 indicam que a rubrica precisa ser refinada — registrar e discutir como limitação.
+> Atributos com Kappa < 0,6: registrar como limitação.
 
 ---
 
-### US10 — Coletar feedback qualitativo (Likert)
-**Como** pesquisador, **quero** registrar respostas dos stakeholders **para** compor a avaliação qualitativa.
+### US10 — Coletar feedback Likert da consultoria
+**Como** pesquisador, **quero** registrar a percepção da equipe da consultoria **para** avaliar a redução de fricção e qualidade da assistência da IA.
 
 Critérios:
-- Formulário com 4 dimensões em escala 1–5: utilidade, clareza, completude, confiabilidade.
-- Identificação do projeto e do respondente (anônimo opcional).
+- Formulário com 4 dimensões em escala 1-5: utilidade dos drafts, redução de fricção, qualidade do resumo gerado, manutenibilidade do papel de mediador.
+- Identificação do respondente.
+- N esperado: ~4 (toda a equipe da consultoria/grupo do TAES).
 - Persistência das respostas e relatório agregado.
 
-> **N esperado:** ~2 stakeholders por projeto = entre 8 e 10 respondentes no total. Recrutamento via contato direto pelo Raniel (responsável pelo acesso aos casos). **Plano B** caso N < 8: aceitar 1 respondente por projeto e declarar limitação na avaliação.
+---
 
-> Implementação mínima viável: Google Forms externo + import dos resultados, desde que os dados cheguem ao sistema para o relatório.
+### US18 — Coletar feedback Likert dos clientes
+**Como** pesquisador, **quero** registrar a percepção dos clientes finais **para** avaliar a clareza do resumo e a qualidade do diálogo no observatório.
+
+Critérios:
+- Formulário com 4 dimensões em escala 1-5: clareza do resumo, utilidade do espaço, qualidade do diálogo, sentido de inclusão.
+- Identificação do projeto e do respondente (anonimato opcional).
+- N esperado: 5-10 (~1-2 stakeholders por projeto).
+- Implementação mínima: Google Forms externo + import.
+
+> **Plano B** se N total < 8: declarar limitação no relato.
 
 ---
 
 ### US11 — Exportar resultados consolidados
-**Como** pesquisador, **quero** exportar os resultados da avaliação **para** alimentar o relatório final e o artigo.
+**Como** pesquisador, **quero** exportar todos os resultados **para** alimentar o relato e o artigo.
 
 Critérios:
-- Exportação em CSV/JSON: extrações, cobertura, precisão/recall/F1 por grupo, Kappa, respostas Likert.
-- Cabeçalhos compatíveis com importação em planilha.
+- CSV/JSON com: extrações, cobertura, precisão/recall/F1 por grupo, Kappa, respostas Likert (consultoria + clientes), métricas de engajamento por projeto (#comentários, #drafts publicados).
+- Cabeçalhos compatíveis com planilha.
 
 ---
 
 # Marcos do Estudo de Caso
 
-Marcos verificáveis para garantir que os 5 projetos são processados de ponta a ponta — sem isso, o time pode terminar o MVP sem nunca ter rodado os casos.
-
 | Marco | Quando | Critério de aprovação |
 |---|---|---|
-| **M1** — Preparação concluída | Fim da semana 2 | `docs/atributos_alvo_mpo.md`, `docs/protocolo_avaliacao.md` e `docs/schema_extracao.json` versionados; gabarito manual dos 5 projetos produzido. |
-| **M2** — Pipeline operacional nos 5 casos | Fim da semana 5 | Extração automática rodada para os 5 projetos sem erro fatal; JSONs persistidos. |
-| **M3** — Dashboard com cobertura | Fim da semana 8 | Cobertura do MPO visualizável para os 5 projetos; tabela cruzada projetos × atributos disponível. |
-| **M4** — Avaliação concluída | Fim da semana 10 | Precisão/recall/F1 calculados para os 5 projetos (estruturado + texto_livre); Likert coletado e consolidado; exportação dos resultados pronta para o relatório. |
+| **M1** — Preparação conceitual concluída | Fim da semana 9 (28/05, após SR1) | Entregáveis preparatórios versionados; gabarito dos 3 projetos iniciado; protótipos aprovados. |
+| **M2** — Pipeline operacional nos 5 casos | Fim da semana 11 (11/06) | Extração rodada nos 5 projetos sem erro fatal; JSONs persistidos; auth + perfis funcionais. |
+| **M3** — Dashboard + IA-Assistente operacionais | Fim da semana 13 (25/06, após SR2) | Cobertura visualizável; comentários funcionando; Resumo do Cliente e Drafts gerando saída revisável. |
+| **M4** — Avaliação concluída | Fim da semana 14 (02/07) | Precisão/recall/F1/Kappa calculados nos 3 com gabarito; Likert consultoria + clientes consolidados; exportação pronta. |
 
 ---
 
 # Backlog Futuro (fora do MVP)
 
-Itens previstos no backlog original que ficam **fora do escopo** das 12 semanas. Podem virar trabalhos futuros, evoluções pós-disciplina ou nova proposta.
-
-| Item | Origem no backlog anterior | Motivo de adiar |
-|---|---|---|
-| Modelo de risco PMBOK com pesos próprios | EPIC 3 (US08-10) | Artefato paralelo não previsto na proposta. Riscos já são atributo extraído do MPO. |
-| Atualização incremental + detecção de mudanças + versionamento | US05-07 | Estudo de caso assume um corpo documental por projeto; versionamento não é avaliado. |
-| Linha do tempo de eventos | US13 | Não é cobrado pela avaliação DSR. |
-| Indicadores de portfólio avançados | US14 | Cobertura do MPO já é o indicador-alvo; demais ficam pós-MVP. |
-| Comparação entre projetos / por domínio | US15, RF18 | Fora do ciclo único de DSR. |
-| Detecção de problemas de comunicação, padrões, alertas, recomendações, insights, resumo automático | US16-21 | Features de produto SaaS, não de artefato avaliado academicamente. |
-| Chat com IA | US22 | Já marcado como avançado. Mantido fora. |
-| Extração de imagens/fotos | — | Atributo do Quadro 37 não-textual; fora do escopo de pipeline LLM textual. |
+| Item | Motivo de adiar |
+|---|---|
+| Modelo de risco PMBOK com pesos próprios | Não previsto na proposta. Riscos já são atributo extraído. |
+| Atualização incremental, detecção de mudanças, versionamento | Estudo de caso assume corpus fixo por projeto. |
+| Linha do tempo interativa | Não cobrado pela avaliação. |
+| Indicadores de portfólio avançados (atrasos cruzados, projeções) | Cobertura do MPO é o indicador-alvo; demais ficam pós-MVP. |
+| Comparação entre projetos / por domínio | Fora do ciclo único de DSR (intra-projeto). |
+| **Lições aprendidas cross-project (IA-conectora)** | Era NICE no plano anterior; cortada pelo prazo apertado. |
+| Notificações por email externo | Reduzido para feed in-app simples. |
+| Detecção automática de padrões, alertas, recomendações | Features SaaS, não de pesquisa. |
+| Chat com IA / linguagem natural | Marcado como avançado desde a 1ª revisão do backlog. |
+| Extração de imagens/fotos | Atributo do Quadro 37 não-textual; fora do escopo LLM textual. |
+| Deploy em produção, multi-tenancy, OAuth | Fora do MVP acadêmico. |
 
 ---
 
-# Cronograma (alinhado à metodologia)
+# Cronograma (alinhado à metodologia e ao calendário da disciplina)
 
-| Semana | Atividade | Sprint | Marco |
-|---|---|---|---|
-| 1–2 | Consciência do problema; entregáveis preparatórios; gabarito manual dos 5 projetos | — | M1 |
-| 3–5 | Cadastro, ingestão, extração, persistência | Sprint 1 | M2 |
-| 6–8 | Dashboard, detalhe, cobertura MPO | Sprint 2 | M3 |
-| 9–10 | Avaliação quantitativa e qualitativa | Sprint 3 | M4 |
-| 11–12 | Escrita do relatório final e do artigo | — | — |
+| Sem | Data | Atividade | Sprint | Marco |
+|---|---|---|---|---|
+| 8 | 15-21/05 | Fase preparatória (atributos, protocolo, schema, protótipos, setup) + alinhamento do grupo no pivot | Sprint 0 | — |
+| 9 | 22-28/05 | US01, US02, US12; iniciar gabarito (3 projetos) | Sprint 1 | M1 + SR1 |
+| 10 | 29/05-04/06 | US03, US04; finalizar gabarito; matriz semente | Sprint 1 | — |
+| 11 | 05-11/06 | US05, US06, US07, US13 (perfis) | Sprint 2 | M2 |
+| 12 | 12-18/06 | US14, US15, US16 (Resumo), US17 (Drafts) | Sprint 3 | — |
+| 13 | 19-25/06 | Polish + aplicação da rubrica nos 3 projetos + lançar Likert | Sprint 3 | M3 + SR2 |
+| 14 | 26/06-02/07 | US08, US09, US10, US18, US11 (avaliação consolidada) | Sprint 4 | M4 |
+| 15 | 03-09/07 | Escrita do relato + slides + screencast | — | — |
+| 16 | 10/07 | **Apresentação final + entrega do artigo** | — | Entrega |
 
 ---
 
 # Definição de Pronto (DoD)
 
-**Por User Story**
+**Por User Story:**
 - Critérios de aceitação atendidos.
 - Código mergeado em `main` após revisão de pelo menos um integrante.
-- Dados de teste persistidos quando aplicável.
+- Smoke test funcional documentado.
 
-**Por Sprint**
-- Marco da sprint atingido (M2, M3 ou M4).
-- Demo curta para o grupo (15 min) com os 5 projetos sendo processados/visualizados/avaliados conforme a sprint.
-- Documentação mínima atualizada (README ou wiki interna).
+**Por Sprint:**
+- Marco da sprint atingido (M1, M2, M3 ou M4).
+- Demo curta para o grupo (15 min) cobrindo as US da sprint.
+- README/wiki interna atualizada com mudanças relevantes.
 
 ---
 
@@ -238,23 +336,29 @@ Itens previstos no backlog original que ficam **fora do escopo** das 12 semanas.
 
 | # | Risco | Probabilidade | Impacto | Mitigação |
 |---|---|---|---|---|
-| R1 | Acesso insuficiente aos stakeholders para Likert | Média | Alto | Iniciar contato na semana 1. Plano B: 1 respondente por projeto + declaração de limitação. |
-| R2 | Heterogeneidade alta dos `.docx` reais quebra o pipeline | Média | Médio | Inspeção amostral na semana 1; estratégia de *chunking* + saneamento documentada antes do Sprint 1. |
-| R3 | Custo/limite de tokens da API LLM | Baixa | Médio | Estimar volume na semana 1; usar modelo apropriado por etapa (mais barato p/ chunking, mais capaz p/ extração final). |
-| R4 | Concordância entre avaliadores baixa (Kappa < 0,6) | Média | Médio | **Valença Odontologia (complexidade Baixa) como projeto piloto** — primeiro a ser anotado para calibrar a rubrica. Se a rubrica mudar significativamente após o piloto, refazer Valença com a rubrica final antes de US09. |
-| R5 | Esforço do gabarito manual estoura semana 1–2 | Alta | Alto | 5 projetos × 2 avaliadores = 10 extrações distribuídas entre os 4 integrantes (~2-3 cada) com revisão cruzada. Iniciar imediatamente após `docs/atributos_alvo_mpo.md` (provavelmente fim da semana 1). |
-| R6 | Mudança no schema do MPO mid-sprint | Baixa | Alto | Schema versionado; mudanças exigem retrabalho do gabarito — congelar schema ao fim da semana 2. |
+| R1 | Acesso insuficiente aos stakeholders dos clientes para Likert | Média | Alto | **Bruno inicia contato na semana 8.** Plano B: 1 respondente por projeto + declaração de limitação. |
+| R2 | Heterogeneidade alta dos `.docx` reais quebra o pipeline | Média | Médio | Inspeção amostral na semana 8; chunking + saneamento documentados antes do Sprint 1. |
+| R3 | Custo/limite de tokens da API LLM (aumentado pós-pivot) | Média | Médio | Estimar volume na semana 8 considerando 3 chamadas por projeto (extração + resumo + drafts); modelo apropriado por etapa; caching. |
+| R4 | Concordância entre avaliadores baixa (Kappa < 0,6) | Média | Médio | **Valença como projeto piloto**. Se rubrica mudar significativamente, refazer Valença com a rubrica final. |
+| R5 | Esforço do gabarito manual estoura semana 8 | Média | Alto | **Reduzido para 3 projetos** (10 → 6 anotações). Cynthia + Moisés iniciam após atributos-alvo (meio da sem 8). |
+| R6 | Mudança no schema mid-sprint | Baixa | Alto | Schema versionado; congelar ao fim da semana 9 (antes do Sprint 2). |
+| R7 | LGPD — dados de marketing de clientes em formato semi-aberto | Média | Alto | NDA com clientes; consentimento explícito; criptografia em trânsito; logs de acesso. |
+| R8 | Custo de LLM aumentado pelas 3 chamadas por projeto | Média | Médio | Estimativa de tokens antes do Sprint 1; modelo mais barato para drafts iniciais; caching agressivo. |
+| R9 | Prazo apertado pós-pivot (perdemos 1 semana) | Alta | Alto | Cortes já feitos (Lições, notificações email); SR1 apresenta pivot + plano + protótipos, não código. |
+| R10 | Complexidade do auth e perfis (não estava previsto) | Média | Médio | Auth simples (email+senha+JWT); sem OAuth; bibliotecas padrão FastAPI (passlib + python-jose). |
+| R11 | Resistência dos clientes a participar do observatório | Média | Alto | Bruno inicia contato cedo; valor proposto: "ver o que estamos observando do seu projeto". |
+| R12 | Drafts da IA percebidos como pobres ou enviesados | Média | Médio | Consultor SEMPRE revisa antes de publicar; medir percepção via Likert da consultoria (US10). |
 
 ---
 
 # Definição do MVP
 
-> Upload (.docx) → Extração LLM dos atributos do Quadro 37 do MPO → JSON estruturado → Dashboard com cobertura → Avaliação contra gabarito + Likert.
+> Cadastro + Upload + Extração LLM (Quadro 37) + Auth + Perfis semi-abertos + Comentários + Feed in-app + Resumo automático para o Cliente + Drafts assistidos para o Consultor + Cobertura do MPO + Avaliação (precisão/recall/F1/Kappa em 3 projetos + Likert consultoria + Likert clientes) + Exportação.
 
-O MVP **não é um produto comercial**. É um artefato de pesquisa funcional o suficiente para que um pesquisador consiga: (i) processar 5 projetos reais, (ii) inspecionar a saída por projeto, (iii) medir cobertura do MPO, precisão, recall e F1 contra a extração manual, (iv) coletar e consolidar feedback Likert dos stakeholders, (v) exportar todos os resultados para o relatório.
+O MVP **não é produto comercial**. É um artefato de pesquisa funcional o suficiente para que: (i) os 5 projetos sejam processados de ponta a ponta; (ii) a equipe da consultoria utilize o observatório como espaço de mediação; (iii) os clientes acessem seu próprio projeto, comentem e recebam resumos automáticos; (iv) a avaliação quantitativa e qualitativa seja exportável para o relato.
 
 ---
 
 # Definição do Produto
 
-O ObiOne é um observatório de projetos baseado no MPO que utiliza IA Generativa para automatizar a etapa mais crítica reportada na literatura — a coleta e estruturação de dados de projetos a partir de documentos heterogêneos não-estruturados — reduzindo a dependência de equipes dedicadas e estendendo a aplicabilidade do MPO para contextos privados e multissetoriais.
+O ObiOne é um **observatório-comunidade de projetos** baseado no MPO que utiliza IA Generativa para reduzir a fricção operacional de manter o observatório vivo — extraindo atributos de documentos não-estruturados, traduzindo a extração técnica em narrativa acessível para os clientes e gerando drafts assistidos para o consultor revisar. O artefato endereça diretamente os Trabalhos Futuros #4 (Interatividade), #7 (Estudos comparativos com outras soluções) e #8 (Soluções computacionais à luz do MPO) propostos por Vieira (2022, pp. 215-217), estendendo a aplicabilidade do MPO de contextos públicos e acadêmicos para contextos organizacionais privados multissetoriais.
