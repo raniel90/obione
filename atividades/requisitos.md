@@ -6,6 +6,8 @@ Reformulado em 16/05/2026 após o pivot que introduziu a dimensão de comunidade
 
 Os requisitos funcionais (RF01–RF18) são derivados 1:1 das user stories do backlog. Os requisitos não funcionais (RNF01–RNF09) cobrem qualidade do produto, reprodutibilidade científica, restrições do ambiente acadêmico, conformidade LGPD e controle de custo de LLM. **Cada ficha registra explicitamente a rastreabilidade com o MPO** (Quadro 37 e/ou conceitos do modelo).
 
+**Ordem dos requisitos**: as fichas estão organizadas em **fluxo lógico de construção**, da fundação técnica (autenticação + perfis) até a avaliação final. Os IDs RF01–RF18 são preservados para manter referências cruzadas em outros documentos, mas a ordem visual reflete a sequência em que o sistema é construído.
+
 ---
 
 ## 1. Visão Geral
@@ -26,258 +28,48 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 
 ---
 
-## 2. Requisitos Funcionais (RF)
+## 2. Índice dos Requisitos Funcionais
 
-### RF01 — Cadastrar projeto
+Os 18 RFs em ordem de construção (do mais fundacional ao mais derivado).
 
-**1. Identificação**
-- ID: RF01
-- Título: Cadastrar projeto
-- Prioridade: Alta
-- Status: Backlog
-- Sprint/Release: Sprint 1 — semanas 9-10 (22/05-04/06)
+| # | ID | Título | Bloco | Sprint | MoSCoW |
+|---|---|---|---|---|---|
+| 1 | RF12 | Autenticar usuário | 1 — Fundação técnica e ingestão | 1 | Must |
+| 2 | RF13 | Gerenciar perfis e acesso semi-aberto | 1 | 2 | Must |
+| 3 | RF01 | Cadastrar projeto | 1 | 1 | Must |
+| 4 | RF02 | Fazer upload de documentos do projeto | 1 | 1 | Must |
+| 5 | RF03 | Extrair atributos do MPO via LLM | 2 — Pipeline LLM | 1 | Must |
+| 6 | RF04 | Persistir extração estruturada | 2 | 1 | Must |
+| 7 | RF05 | Visualizar portfólio (perfil-aware) | 3 — Observação e visualização | 2 | Must |
+| 8 | RF06 | Visualizar detalhe do projeto | 3 | 2 | Must |
+| 9 | RF07 | Calcular e exibir cobertura do MPO | 3 | 2 | Must |
+| 10 | RF14 | Comentar no projeto | 4 — Comunidade e IA-Assistente | 3 | Must |
+| 11 | RF15 | Visualizar feed in-app de novidades | 4 | 3 | **Should** |
+| 12 | RF16 | Gerar Resumo do Projeto para o Cliente | 4 | 3 | Must |
+| 13 | RF17 | Gerar drafts de "Próximos Passos / Pontos de Atenção" | 4 | 3 | Must |
+| 14 | RF08 | Importar e validar gabarito manual | 5 — Avaliação DSR | 4 | Must |
+| 15 | RF09 | Comparar extração automática vs. gabarito | 5 | 4 | Must |
+| 16 | RF10 | Coletar feedback Likert da consultoria | 5 | 4 | Must |
+| 17 | RF18 | Coletar feedback Likert dos clientes | 5 | 4 | Must |
+| 18 | RF11 | Exportar resultados consolidados | 5 | 4 | **Should** |
 
-**2. Detalhamento**
-- Descrição: Permitir que o consultor cadastre um projeto informando nome, domínio e descrição livre.
-- Justificativa de negócio: Toda extração, visualização e interação ancora em um projeto cadastrado. Sem cadastro, nada acontece.
-- Stakeholder: Consultoria (cria projetos para clientes).
-- Dependências: RF12 (autenticação) — apenas perfil Consultor pode cadastrar.
+### Convenção de prioridade — MoSCoW
 
-**3. Validação**
-- Critérios de aceite: Campos obrigatórios validados (nome, domínio, descrição); ID único gerado automaticamente; listagem dos projetos cadastrados disponível.
-- Regras de negócio: Domínio limitado a enum (jurídico, saúde, esporte, branding, outros). Apenas perfil Consultor cria projetos.
-- Rastreabilidade MPO: — (infraestrutura — habilita as demais funcionalidades sem mapear diretamente a um conceito do MPO).
-- Observações: **Backend (Raniel):** modelo `Project` + endpoints `POST /projects`, `GET /projects`. **Frontend (Bruno):** formulário de cadastro + tela de listagem (filtrada por perfil — ver RF13).
+- **Must**: não-negociável. Sem isto, o trabalho acadêmico não fecha (DSR incompleto, comunidade inviável, ou pipeline quebrado).
+- **Should**: importante mas cortável. Se o cronograma estourar, pode ser reduzido ou substituído por fallback declarado.
+- **Could**: desejável, sem comprometer o MVP. **Nenhum no MVP atual** — os Could-itens foram movidos para o backlog futuro no pivot (ex.: Lições Aprendidas cross-project, notificações por email externo).
 
----
-
-### RF02 — Fazer upload de documentos do projeto
-
-**1. Identificação**
-- ID: RF02
-- Título: Fazer upload de documentos do projeto
-- Prioridade: Alta
-- Status: Backlog
-- Sprint/Release: Sprint 1 — semanas 9-10 (22/05-04/06)
-
-**2. Detalhamento**
-- Descrição: Permitir anexar arquivos `.docx` a um projeto cadastrado, com suporte a múltiplos arquivos.
-- Justificativa de negócio: Documentos são a fonte da extração do pipeline LLM.
-- Stakeholder: Consultoria.
-- Dependências: RF01 (cadastro), RF12 (autenticação), RF13 (perfil).
-
-**3. Validação**
-- Critérios de aceite: Suporte mínimo `.docx`; múltiplos arquivos por projeto; persistência do arquivo bruto + metadados (nome, data, tamanho, hash).
-- Regras de negócio: Tamanho máximo por arquivo a definir; rejeitar arquivos inválidos com mensagem clara. Apenas perfil Consultor faz upload.
-- Rastreabilidade MPO: Processo **Coletar** (Vieira, 2022, p. 195) — captura de dados sobre os projetos para o observatório.
-- Observações: **Backend (Raniel):** endpoint `POST /projects/{id}/documents` aceitando `multipart/form-data`; persistência em Postgres + storage local. **Frontend (Bruno):** componente drag-and-drop, suporte a múltiplos arquivos, feedback visual de progresso, listagem dos arquivos do projeto.
+**Justificativa dos "Should"**:
+- **RF15 (Feed in-app)**: comunicação interna do observatório. Se Sprint 3 atrasar, pode ser cortado — usuários ainda recebem notificações ao acessar comentários/resumos individualmente.
+- **RF11 (Exportação consolidada)**: facilita escrita do relato, mas fallback é fazer queries manuais no banco direto (mais trabalhoso porém viável).
 
 ---
 
-### RF03 — Extrair atributos do MPO via LLM
+## 3. Requisitos Funcionais (RF)
 
-**1. Identificação**
-- ID: RF03
-- Título: Extrair atributos do MPO via LLM
-- Prioridade: Alta
-- Status: Backlog
-- Sprint/Release: Sprint 1 — semana 10 (29/05-04/06)
+### 3.1 Bloco 1 — Fundação técnica e ingestão
 
-**2. Detalhamento**
-- Descrição: Processar os documentos do projeto e extrair automaticamente os atributos previstos no Quadro 37 (terceira versão do MPO).
-- Justificativa de negócio: É o coração da contribuição técnica do trabalho — o pipeline LLM que materializa o Trabalho Futuro #8 do MPO.
-- Stakeholder: Consultoria + pesquisa.
-- Dependências: RF02 (upload prévio), `docs/schema_extracao.json`, `docs/atributos_alvo_mpo.md` (fase preparatória).
-
-**3. Validação**
-- Critérios de aceite: Saída JSON conforme schema; 8 categorias do Quadro 37 contempladas; para cada atributo preenchido, valor + trecho de origem; atributos não encontrados como `null`; atributos `fora_de_escopo` (imagens) ignorados; versão do prompt e modelo registrados.
-- Regras de negócio: Nunca inventar valor (alucinação) — preferir `null`. Sempre registrar versão do prompt e modelo para reprodutibilidade.
-- Rastreabilidade MPO: **Quadro 37 — Atributos relacionados aos projetos** (Vieira, 2022, p. 264) — todas as 8 categorias (geral, stakeholders, escopo, cronograma, custos, riscos, mudanças, lições aprendidas) + processo **Transformar** (p. 196).
-- Observações: **Backend (Raniel):** pipeline completo de extração — leitura `.docx`, chunking se necessário, prompt estruturado, chamada LLM, parsing, validação contra schema, endpoint `POST /projects/{id}/extract`. **Frontend (Bruno):** botão "Extrair com IA" no detalhe do projeto; loading visual; notificação ao concluir.
-
----
-
-### RF04 — Persistir extração estruturada
-
-**1. Identificação**
-- ID: RF04
-- Título: Persistir extração estruturada
-- Prioridade: Alta
-- Status: Backlog
-- Sprint/Release: Sprint 1 — semana 10 (29/05-04/06)
-
-**2. Detalhamento**
-- Descrição: Salvar a extração JSON associada ao projeto e aos documentos de origem, com metadados de rastreabilidade.
-- Justificativa de negócio: Sem persistência, não há comparação posterior nem auditoria humana.
-- Stakeholder: Pesquisa + consultoria.
-- Dependências: RF03.
-
-**3. Validação**
-- Critérios de aceite: Cada extração registra projeto, documento(s), versão do prompt, modelo LLM, timestamp, `origem` (`automatico` | `manual`); recuperável via API.
-- Regras de negócio: Histórico de extrações preservado — nunca sobrescrever silenciosamente.
-- Rastreabilidade MPO: Processo **Armazenar** (Vieira, 2022, p. 196).
-- Observações: **Backend (Raniel):** modelo `Extraction` com FKs e metadados; endpoints `GET /projects/{id}/extractions`. **Frontend (Bruno):** sem tela própria — dados consumidos por RF06.
-
----
-
-### RF05 — Visualizar portfólio de projetos (perfil-aware)
-
-**1. Identificação**
-- ID: RF05
-- Título: Visualizar portfólio de projetos
-- Prioridade: Alta
-- Status: Backlog
-- Sprint/Release: Sprint 2 — semana 11 (05-11/06)
-
-**2. Detalhamento**
-- Descrição: Apresentar visão consolidada de projetos, com status derivado e cobertura, restrita ao perfil Consultor.
-- Justificativa de negócio: Permite ao consultor curar e priorizar o que precisa de atenção no observatório.
-- Stakeholder: Consultoria.
-- Dependências: RF13 (perfis), RF07 (cobertura).
-
-**3. Validação**
-- Critérios de aceite: Lista projetos com nome, domínio, status derivado (`cadastrado` → `ingerido` → `extraído` → `avaliado`), % de cobertura; filtro por domínio.
-- Regras de negócio: Cliente NÃO acessa esta tela (redirecionado ao seu próprio detalhe — RF06). Status é derivado, nunca editado.
-- Rastreabilidade MPO: Característica **Abrangência** (Vieira, 2022, p. 189) + processo **Disponibilizar** (p. 196) — visão consolidada dos projetos do observatório.
-- Observações: **Backend (Raniel):** endpoint `GET /projects` com cálculo de status + cobertura; filtro por perfil. **Frontend (Bruno):** tabela com colunas, filtro por domínio, navegação para detalhe.
-
----
-
-### RF06 — Visualizar detalhe do projeto
-
-**1. Identificação**
-- ID: RF06
-- Título: Visualizar detalhe do projeto
-- Prioridade: Alta
-- Status: Backlog
-- Sprint/Release: Sprint 2 — semana 11 (05-11/06)
-
-**2. Detalhamento**
-- Descrição: Exibir todos os atributos extraídos de um projeto, agrupados por categoria do Quadro 37, com trecho de origem.
-- Justificativa de negócio: É a tela onde o conhecimento do observatório se materializa. Consultor inspeciona; cliente entende.
-- Stakeholder: Consultoria + cliente daquele projeto.
-- Dependências: RF13 (perfis), RF03/RF04 (extração).
-
-**3. Validação**
-- Critérios de aceite: Atributos das 8 categorias agrupados; preenchidos e vazios visíveis; valor + trecho de origem por atributo; acesso aos documentos originais.
-- Regras de negócio: Cliente acessa **apenas o seu** projeto; consultor acessa todos. Tentativa de acesso indevido retorna 403.
-- Rastreabilidade MPO: Conteúdo **Projetos** (Vieira, 2022, p. 186) — exposição dos atributos do Quadro 37; processo **Disponibilizar** (p. 196).
-- Observações: **Backend (Raniel):** endpoint `GET /projects/{id}` com check de perfil; endpoint `GET /projects/{id}/documents/{doc_id}/download`. **Frontend (Bruno):** layout de detalhe agrupado por categoria + visualização de citações.
-
----
-
-### RF07 — Calcular e exibir cobertura do MPO
-
-**1. Identificação**
-- ID: RF07
-- Título: Calcular e exibir cobertura do MPO
-- Prioridade: Alta
-- Status: Backlog
-- Sprint/Release: Sprint 2 — semana 11 (05-11/06)
-
-**2. Detalhamento**
-- Descrição: Calcular cobertura (% atributos preenchidos vs. total de atributos-alvo) por projeto e exibir matriz cruzada no portfólio.
-- Justificativa de negócio: Indicador-chave da avaliação quantitativa — abrangência da extração frente ao MPO.
-- Stakeholder: Pesquisa + consultoria.
-- Dependências: RF03 (extração).
-
-**3. Validação**
-- Critérios de aceite: Por projeto, % calculada; matriz projetos × atributos no portfólio (tabela ou heatmap); destaque visual quando < 50%; sinalização saudável quando ≥ 80%.
-- Regras de negócio: Atributos `fora_de_escopo` excluídos do denominador.
-- Rastreabilidade MPO: Característica **Abrangência** (Vieira, 2022, p. 189) — operacionalizada como % de atributos do Quadro 37 cobertos por projeto + processo **Avaliar** (p. 198).
-- Observações: **Backend (Raniel):** endpoint `GET /coverage` retornando matriz. **Frontend (Bruno):** componente heatmap/tabela com coloração por threshold; tooltip com valor por célula.
-
----
-
-### RF08 — Importar e validar gabarito manual
-
-**1. Identificação**
-- ID: RF08
-- Título: Importar e validar gabarito manual
-- Prioridade: Alta
-- Status: Backlog
-- Sprint/Release: Sprint 4 — semana 14 (26/06-02/07)
-
-**2. Detalhamento**
-- Descrição: Carregar os gabaritos manuais produzidos na fase preparatória (3 projetos) e validá-los contra o schema.
-- Justificativa de negócio: Sem gabarito, não há baseline para precisão/recall/F1.
-- Stakeholder: Pesquisa (Cynthia + Moisés).
-- Dependências: Fase preparatória (gabaritos produzidos), RF03/RF04 (schema versionado).
-
-**3. Validação**
-- Critérios de aceite: Carga via arquivo JSON; validação contra `docs/schema_extracao.json`; persistência com `origem: manual`; integridade verificada antes de RF09.
-- Regras de negócio: Apenas 3 projetos (Valença piloto + Freire Batista + Kaka JJ). Bem Viver e Dinoah avaliados apenas por cobertura + Likert.
-- Rastreabilidade MPO: — (infraestrutura de avaliação DSR — não mapeia diretamente a um conceito do MPO).
-- Observações: **Backend (Raniel):** endpoint `POST /projects/{id}/baseline` reusando modelo `Extraction` com origem manual; endpoint `GET /baseline-status`. **Frontend (Bruno):** upload do JSON + feedback de validação + indicador "gabarito presente/ausente" no portfólio.
-
----
-
-### RF09 — Comparar extração automática vs. gabarito (critério híbrido)
-
-**1. Identificação**
-- ID: RF09
-- Título: Comparar extração automática vs. gabarito (critério híbrido)
-- Prioridade: Alta
-- Status: Backlog
-- Sprint/Release: Sprint 4 — semana 14 (26/06-02/07)
-
-**2. Detalhamento**
-- Descrição: Calcular precisão, recall, F1 e Cohen's Kappa comparando extração automática com gabarito manual, aplicando critério híbrido por tipo de atributo.
-- Justificativa de negócio: Essência da avaliação quantitativa do DSR.
-- Stakeholder: Pesquisa.
-- Dependências: RF08 (gabarito carregado), RF03 (extração automática).
-
-**3. Validação**
-- Critérios de aceite: Atributos `estruturado` por comparação normalizada exata (TP/FP/FN); atributos `texto_livre` por rubrica 0/0,5/1 aplicada por dois avaliadores; Kappa por atributo e agregado; métricas separadas por grupo + agregado total; tempo manual vs. automático registrado; visualização tabular.
-- Regras de negócio: Atributos com Kappa < 0,6 sinalizados como limitação. Métricas calculadas apenas nos 3 projetos com gabarito.
-- Rastreabilidade MPO: Processo **Avaliar** (Vieira, 2022, p. 198) — avaliação colaborativa dos dados extraídos do observatório.
-- Observações: **Backend (Raniel):** algoritmo híbrido; endpoint `POST /projects/{id}/rubric` (rubrica externa) + `GET /projects/{id}/evaluation`. **Frontend (Bruno):** UI dedicada para Cynthia/Moisés aplicarem a rubrica 0/0,5/1 (lado-a-lado: extração × gabarito); tela tabular de resultados.
-
----
-
-### RF10 — Coletar feedback Likert da consultoria
-
-**1. Identificação**
-- ID: RF10
-- Título: Coletar feedback Likert da consultoria
-- Prioridade: Alta
-- Status: Backlog
-- Sprint/Release: Sprint 4 — semana 14 (26/06-02/07)
-
-**2. Detalhamento**
-- Descrição: Registrar percepção da equipe da consultoria sobre redução de fricção e qualidade da assistência da IA.
-- Justificativa de negócio: Metade da avaliação qualitativa do DSR. Valida a hipótese do pivot (IA reduz fricção).
-- Stakeholder: Pesquisa.
-- Dependências: RF16 (resumo gerado), RF17 (drafts gerados).
-
-**3. Validação**
-- Critérios de aceite: Formulário com 4 dimensões em escala 1-5 (utilidade dos drafts, redução de fricção, qualidade do resumo gerado, manutenibilidade); N esperado ~4 (toda a equipe); persistência + relatório agregado.
-- Regras de negócio: Aplicado após a equipe ter usado o sistema com os 5 projetos.
-- Rastreabilidade MPO: Agente **Equipe de Gestão e Desenvolvimento do Observatório** (Vieira, 2022, p. 201) + motivações **Conhecimento** e **Engajamento** (p. 204).
-- Observações: **Backend (Raniel):** endpoint `POST /likert-responses?audience=consultoria`. **Frontend (Bruno):** formulário simples + relatório de médias por dimensão.
-
----
-
-### RF11 — Exportar resultados consolidados
-
-**1. Identificação**
-- ID: RF11
-- Título: Exportar resultados consolidados
-- Prioridade: Alta
-- Status: Backlog
-- Sprint/Release: Sprint 4 — semana 14 (26/06-02/07)
-
-**2. Detalhamento**
-- Descrição: Gerar exportação única (CSV/JSON) com todos os dados de avaliação para alimentar relato e artigo.
-- Justificativa de negócio: Sem exportação, o trabalho de escrita do relato fica refém de queries manuais.
-- Stakeholder: Pesquisa (Cynthia para relato; Moisés para apresentação).
-- Dependências: RF09 (métricas), RF10 + RF18 (Likert), RF07 (cobertura).
-
-**3. Validação**
-- Critérios de aceite: Arquivo único contendo extrações, cobertura, métricas (precisão/recall/F1/Kappa) por grupo, respostas Likert (consultoria + clientes), métricas de engajamento (#comentários, #drafts publicados).
-- Regras de negócio: Cabeçalhos compatíveis com planilha (Excel, Google Sheets).
-- Rastreabilidade MPO: — (infraestrutura de avaliação — não mapeia diretamente a um conceito do MPO).
-- Observações: **Backend (Raniel):** endpoint `GET /export?format=csv|json`. **Frontend (Bruno):** botão "Exportar resultados" com seletor de formato.
+Autenticação, perfis e ingestão de dados. **Sem este bloco, nada mais funciona.** Embora RF13 (perfis) seja implementado no Sprint 2, aparece aqui por dependência conceitual com RF12.
 
 ---
 
@@ -286,7 +78,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **1. Identificação**
 - ID: RF12
 - Título: Autenticar usuário
-- Prioridade: Alta
+- Prioridade: Must
 - Status: Backlog
 - Sprint/Release: Sprint 1 — semana 9 (22-28/05)
 
@@ -309,7 +101,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **1. Identificação**
 - ID: RF13
 - Título: Gerenciar perfis e acesso semi-aberto
-- Prioridade: Alta
+- Prioridade: Must
 - Status: Backlog
 - Sprint/Release: Sprint 2 — semana 11 (05-11/06)
 
@@ -327,12 +119,191 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 
 ---
 
+### RF01 — Cadastrar projeto
+
+**1. Identificação**
+- ID: RF01
+- Título: Cadastrar projeto
+- Prioridade: Must
+- Status: Backlog
+- Sprint/Release: Sprint 1 — semanas 9-10 (22/05-04/06)
+
+**2. Detalhamento**
+- Descrição: Permitir que o consultor cadastre um projeto informando nome, domínio e descrição livre.
+- Justificativa de negócio: Toda extração, visualização e interação ancora em um projeto cadastrado. Sem cadastro, nada acontece.
+- Stakeholder: Consultoria (cria projetos para clientes).
+- Dependências: RF12 (autenticação) — apenas perfil Consultor pode cadastrar.
+
+**3. Validação**
+- Critérios de aceite: Campos obrigatórios validados (nome, domínio, descrição); ID único gerado automaticamente; listagem dos projetos cadastrados disponível.
+- Regras de negócio: Domínio limitado a enum (jurídico, saúde, esporte, branding, outros). Apenas perfil Consultor cria projetos.
+- Rastreabilidade MPO: — (infraestrutura — habilita as demais funcionalidades sem mapear diretamente a um conceito do MPO).
+- Observações: **Backend (Raniel):** modelo `Project` + endpoints `POST /projects`, `GET /projects`. **Frontend (Bruno):** formulário de cadastro + tela de listagem (filtrada por perfil — ver RF13).
+
+---
+
+### RF02 — Fazer upload de documentos do projeto
+
+**1. Identificação**
+- ID: RF02
+- Título: Fazer upload de documentos do projeto
+- Prioridade: Must
+- Status: Backlog
+- Sprint/Release: Sprint 1 — semanas 9-10 (22/05-04/06)
+
+**2. Detalhamento**
+- Descrição: Permitir anexar arquivos `.docx` a um projeto cadastrado, com suporte a múltiplos arquivos.
+- Justificativa de negócio: Documentos são a fonte da extração do pipeline LLM.
+- Stakeholder: Consultoria.
+- Dependências: RF01 (cadastro), RF12 (autenticação), RF13 (perfil).
+
+**3. Validação**
+- Critérios de aceite: Suporte mínimo `.docx`; múltiplos arquivos por projeto; persistência do arquivo bruto + metadados (nome, data, tamanho, hash).
+- Regras de negócio: Tamanho máximo por arquivo a definir; rejeitar arquivos inválidos com mensagem clara. Apenas perfil Consultor faz upload.
+- Rastreabilidade MPO: Processo **Coletar** (Vieira, 2022, p. 195) — captura de dados sobre os projetos para o observatório.
+- Observações: **Backend (Raniel):** endpoint `POST /projects/{id}/documents` aceitando `multipart/form-data`; persistência em Postgres + storage local. **Frontend (Bruno):** componente drag-and-drop, suporte a múltiplos arquivos, feedback visual de progresso, listagem dos arquivos do projeto.
+
+---
+
+### 3.2 Bloco 2 — Pipeline LLM
+
+Coração técnico da contribuição. A IA Generativa entra aqui pela primeira vez, no papel de **extratora**.
+
+---
+
+### RF03 — Extrair atributos do MPO via LLM
+
+**1. Identificação**
+- ID: RF03
+- Título: Extrair atributos do MPO via LLM
+- Prioridade: Must
+- Status: Backlog
+- Sprint/Release: Sprint 1 — semana 10 (29/05-04/06)
+
+**2. Detalhamento**
+- Descrição: Processar os documentos do projeto e extrair automaticamente os atributos previstos no Quadro 37 (terceira versão do MPO).
+- Justificativa de negócio: É o coração da contribuição técnica do trabalho — o pipeline LLM que materializa o Trabalho Futuro #8 do MPO.
+- Stakeholder: Consultoria + pesquisa.
+- Dependências: RF02 (upload prévio), `docs/schema_extracao.json`, `docs/atributos_alvo_mpo.md` (fase preparatória).
+
+**3. Validação**
+- Critérios de aceite: Saída JSON conforme schema; 8 categorias do Quadro 37 contempladas; para cada atributo preenchido, valor + trecho de origem; atributos não encontrados como `null`; atributos `fora_de_escopo` (imagens) ignorados; versão do prompt e modelo registrados.
+- Regras de negócio: Nunca inventar valor (alucinação) — preferir `null`. Sempre registrar versão do prompt e modelo para reprodutibilidade.
+- Rastreabilidade MPO: **Quadro 37 — Atributos relacionados aos projetos** (Vieira, 2022, p. 264) — todas as 8 categorias (geral, stakeholders, escopo, cronograma, custos, riscos, mudanças, lições aprendidas) + processo **Transformar** (p. 196).
+- Observações: **Backend (Raniel):** pipeline completo de extração — leitura `.docx`, chunking se necessário, prompt estruturado, chamada LLM, parsing, validação contra schema, endpoint `POST /projects/{id}/extract`. **Frontend (Bruno):** botão "Extrair com IA" no detalhe do projeto; loading visual; notificação ao concluir.
+
+---
+
+### RF04 — Persistir extração estruturada
+
+**1. Identificação**
+- ID: RF04
+- Título: Persistir extração estruturada
+- Prioridade: Must
+- Status: Backlog
+- Sprint/Release: Sprint 1 — semana 10 (29/05-04/06)
+
+**2. Detalhamento**
+- Descrição: Salvar a extração JSON associada ao projeto e aos documentos de origem, com metadados de rastreabilidade.
+- Justificativa de negócio: Sem persistência, não há comparação posterior nem auditoria humana.
+- Stakeholder: Pesquisa + consultoria.
+- Dependências: RF03.
+
+**3. Validação**
+- Critérios de aceite: Cada extração registra projeto, documento(s), versão do prompt, modelo LLM, timestamp, `origem` (`automatico` | `manual`); recuperável via API.
+- Regras de negócio: Histórico de extrações preservado — nunca sobrescrever silenciosamente.
+- Rastreabilidade MPO: Processo **Armazenar** (Vieira, 2022, p. 196).
+- Observações: **Backend (Raniel):** modelo `Extraction` com FKs e metadados; endpoints `GET /projects/{id}/extractions`. **Frontend (Bruno):** sem tela própria — dados consumidos por RF06.
+
+---
+
+### 3.3 Bloco 3 — Observação e visualização
+
+Dashboard sobre os dados extraídos, respeitando os perfis. Aqui o observatório começa a "existir" para os usuários.
+
+---
+
+### RF05 — Visualizar portfólio de projetos (perfil-aware)
+
+**1. Identificação**
+- ID: RF05
+- Título: Visualizar portfólio de projetos
+- Prioridade: Must
+- Status: Backlog
+- Sprint/Release: Sprint 2 — semana 11 (05-11/06)
+
+**2. Detalhamento**
+- Descrição: Apresentar visão consolidada de projetos, com status derivado e cobertura, restrita ao perfil Consultor.
+- Justificativa de negócio: Permite ao consultor curar e priorizar o que precisa de atenção no observatório.
+- Stakeholder: Consultoria.
+- Dependências: RF13 (perfis), RF07 (cobertura).
+
+**3. Validação**
+- Critérios de aceite: Lista projetos com nome, domínio, status derivado (`cadastrado` → `ingerido` → `extraído` → `avaliado`), % de cobertura; filtro por domínio.
+- Regras de negócio: Cliente NÃO acessa esta tela (redirecionado ao seu próprio detalhe — RF06). Status é derivado, nunca editado.
+- Rastreabilidade MPO: Característica **Abrangência** (Vieira, 2022, p. 189) + processo **Disponibilizar** (p. 196) — visão consolidada dos projetos do observatório.
+- Observações: **Backend (Raniel):** endpoint `GET /projects` com cálculo de status + cobertura; filtro por perfil. **Frontend (Bruno):** tabela com colunas, filtro por domínio, navegação para detalhe.
+
+---
+
+### RF06 — Visualizar detalhe do projeto
+
+**1. Identificação**
+- ID: RF06
+- Título: Visualizar detalhe do projeto
+- Prioridade: Must
+- Status: Backlog
+- Sprint/Release: Sprint 2 — semana 11 (05-11/06)
+
+**2. Detalhamento**
+- Descrição: Exibir todos os atributos extraídos de um projeto, agrupados por categoria do Quadro 37, com trecho de origem.
+- Justificativa de negócio: É a tela onde o conhecimento do observatório se materializa. Consultor inspeciona; cliente entende.
+- Stakeholder: Consultoria + cliente daquele projeto.
+- Dependências: RF13 (perfis), RF03/RF04 (extração).
+
+**3. Validação**
+- Critérios de aceite: Atributos das 8 categorias agrupados; preenchidos e vazios visíveis; valor + trecho de origem por atributo; acesso aos documentos originais.
+- Regras de negócio: Cliente acessa **apenas o seu** projeto; consultor acessa todos. Tentativa de acesso indevido retorna 403.
+- Rastreabilidade MPO: Conteúdo **Projetos** (Vieira, 2022, p. 186) — exposição dos atributos do Quadro 37; processo **Disponibilizar** (p. 196).
+- Observações: **Backend (Raniel):** endpoint `GET /projects/{id}` com check de perfil; endpoint `GET /projects/{id}/documents/{doc_id}/download`. **Frontend (Bruno):** layout de detalhe agrupado por categoria + visualização de citações.
+
+---
+
+### RF07 — Calcular e exibir cobertura do MPO
+
+**1. Identificação**
+- ID: RF07
+- Título: Calcular e exibir cobertura do MPO
+- Prioridade: Must
+- Status: Backlog
+- Sprint/Release: Sprint 2 — semana 11 (05-11/06)
+
+**2. Detalhamento**
+- Descrição: Calcular cobertura (% atributos preenchidos vs. total de atributos-alvo) por projeto e exibir matriz cruzada no portfólio.
+- Justificativa de negócio: Indicador-chave da avaliação quantitativa — abrangência da extração frente ao MPO.
+- Stakeholder: Pesquisa + consultoria.
+- Dependências: RF03 (extração).
+
+**3. Validação**
+- Critérios de aceite: Por projeto, % calculada; matriz projetos × atributos no portfólio (tabela ou heatmap); destaque visual quando < 50%; sinalização saudável quando ≥ 80%.
+- Regras de negócio: Atributos `fora_de_escopo` excluídos do denominador.
+- Rastreabilidade MPO: Característica **Abrangência** (Vieira, 2022, p. 189) — operacionalizada como % de atributos do Quadro 37 cobertos por projeto + processo **Avaliar** (p. 198).
+- Observações: **Backend (Raniel):** endpoint `GET /coverage` retornando matriz. **Frontend (Bruno):** componente heatmap/tabela com coloração por threshold; tooltip com valor por célula.
+
+---
+
+### 3.4 Bloco 4 — Comunidade e IA-Assistente
+
+Onde o pivot acontece. Comunidade vira primeira-classe; IA assume os papéis de tradutora e redutora de fricção.
+
+---
+
 ### RF14 — Comentar no projeto
 
 **1. Identificação**
 - ID: RF14
 - Título: Comentar no projeto
-- Prioridade: Alta
+- Prioridade: Must
 - Status: Backlog
 - Sprint/Release: Sprint 3 — semana 12 (12-18/06)
 
@@ -355,7 +326,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **1. Identificação**
 - ID: RF15
 - Título: Visualizar feed in-app de novidades
-- Prioridade: Média
+- Prioridade: Should
 - Status: Backlog
 - Sprint/Release: Sprint 3 — semana 12 (12-18/06)
 
@@ -369,7 +340,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 - Critérios de aceite: Feed filtrado por perfil (cliente vê só seu projeto; consultor vê todos); indicador de "não lido" (contador); navegação direta para o evento.
 - Regras de negócio: Sem envio de email externo — apenas in-app. Eventos antigos (> 30 dias) podem ser arquivados.
 - Rastreabilidade MPO: Processo **Acompanhar** (Vieira, 2022, p. 198) — "usuários podem escolher receber notificações (...) de atualizações dos projetos".
-- Observações: **Backend (Raniel):** modelo `ActivityEvent` registrado em hooks dos demais módulos; endpoint `GET /feed`. **Frontend (Bruno):** componente badge no header + tela de feed.
+- Observações: **Backend (Raniel):** modelo `ActivityEvent` registrado em hooks dos demais módulos; endpoint `GET /feed`. **Frontend (Bruno):** componente badge no header + tela de feed. **Cortável se Sprint 3 atrasar** — fallback: usuários veem novidades ao acessar diretamente comentários/resumos.
 
 ---
 
@@ -378,7 +349,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **1. Identificação**
 - ID: RF16
 - Título: Gerar Resumo do Projeto para o Cliente
-- Prioridade: Alta
+- Prioridade: Must
 - Status: Backlog
 - Sprint/Release: Sprint 3 — semana 12 (12-18/06)
 
@@ -401,7 +372,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 **1. Identificação**
 - ID: RF17
 - Título: Gerar drafts de "Próximos Passos / Pontos de Atenção"
-- Prioridade: Alta
+- Prioridade: Must
 - Status: Backlog
 - Sprint/Release: Sprint 3 — semana 12 (12-18/06)
 
@@ -419,12 +390,87 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 
 ---
 
+### 3.5 Bloco 5 — Avaliação DSR
+
+Fecha o ciclo de pesquisa. Sem este bloco, o DSR não tem evidência empírica para discutir no relato.
+
+---
+
+### RF08 — Importar e validar gabarito manual
+
+**1. Identificação**
+- ID: RF08
+- Título: Importar e validar gabarito manual
+- Prioridade: Must
+- Status: Backlog
+- Sprint/Release: Sprint 4 — semana 14 (26/06-02/07)
+
+**2. Detalhamento**
+- Descrição: Carregar os gabaritos manuais produzidos na fase preparatória (3 projetos) e validá-los contra o schema.
+- Justificativa de negócio: Sem gabarito, não há baseline para precisão/recall/F1.
+- Stakeholder: Pesquisa (Cynthia + Moisés).
+- Dependências: Fase preparatória (gabaritos produzidos), RF03/RF04 (schema versionado).
+
+**3. Validação**
+- Critérios de aceite: Carga via arquivo JSON; validação contra `docs/schema_extracao.json`; persistência com `origem: manual`; integridade verificada antes de RF09.
+- Regras de negócio: Apenas 3 projetos (Valença piloto + Freire Batista + Kaka JJ). Bem Viver e Dinoah avaliados apenas por cobertura + Likert.
+- Rastreabilidade MPO: — (infraestrutura de avaliação DSR — não mapeia diretamente a um conceito do MPO).
+- Observações: **Backend (Raniel):** endpoint `POST /projects/{id}/baseline` reusando modelo `Extraction` com origem manual; endpoint `GET /baseline-status`. **Frontend (Bruno):** upload do JSON + feedback de validação + indicador "gabarito presente/ausente" no portfólio.
+
+---
+
+### RF09 — Comparar extração automática vs. gabarito (critério híbrido)
+
+**1. Identificação**
+- ID: RF09
+- Título: Comparar extração automática vs. gabarito (critério híbrido)
+- Prioridade: Must
+- Status: Backlog
+- Sprint/Release: Sprint 4 — semana 14 (26/06-02/07)
+
+**2. Detalhamento**
+- Descrição: Calcular precisão, recall, F1 e Cohen's Kappa comparando extração automática com gabarito manual, aplicando critério híbrido por tipo de atributo.
+- Justificativa de negócio: Essência da avaliação quantitativa do DSR.
+- Stakeholder: Pesquisa.
+- Dependências: RF08 (gabarito carregado), RF03 (extração automática).
+
+**3. Validação**
+- Critérios de aceite: Atributos `estruturado` por comparação normalizada exata (TP/FP/FN); atributos `texto_livre` por rubrica 0/0,5/1 aplicada por dois avaliadores; Kappa por atributo e agregado; métricas separadas por grupo + agregado total; tempo manual vs. automático registrado; visualização tabular.
+- Regras de negócio: Atributos com Kappa < 0,6 sinalizados como limitação. Métricas calculadas apenas nos 3 projetos com gabarito.
+- Rastreabilidade MPO: Processo **Avaliar** (Vieira, 2022, p. 198) — avaliação colaborativa dos dados extraídos do observatório.
+- Observações: **Backend (Raniel):** algoritmo híbrido; endpoint `POST /projects/{id}/rubric` (rubrica externa) + `GET /projects/{id}/evaluation`. **Frontend (Bruno):** UI dedicada para Cynthia/Moisés aplicarem a rubrica 0/0,5/1 (lado-a-lado: extração × gabarito); tela tabular de resultados.
+
+---
+
+### RF10 — Coletar feedback Likert da consultoria
+
+**1. Identificação**
+- ID: RF10
+- Título: Coletar feedback Likert da consultoria
+- Prioridade: Must
+- Status: Backlog
+- Sprint/Release: Sprint 4 — semana 14 (26/06-02/07)
+
+**2. Detalhamento**
+- Descrição: Registrar percepção da equipe da consultoria sobre redução de fricção e qualidade da assistência da IA.
+- Justificativa de negócio: Metade da avaliação qualitativa do DSR. Valida a hipótese do pivot (IA reduz fricção).
+- Stakeholder: Pesquisa.
+- Dependências: RF16 (resumo gerado), RF17 (drafts gerados).
+
+**3. Validação**
+- Critérios de aceite: Formulário com 4 dimensões em escala 1-5 (utilidade dos drafts, redução de fricção, qualidade do resumo gerado, manutenibilidade); N esperado ~4 (toda a equipe); persistência + relatório agregado.
+- Regras de negócio: Aplicado após a equipe ter usado o sistema com os 5 projetos.
+- Rastreabilidade MPO: Agente **Equipe de Gestão e Desenvolvimento do Observatório** (Vieira, 2022, p. 201) + motivações **Conhecimento** e **Engajamento** (p. 204).
+- Observações: **Backend (Raniel):** endpoint `POST /likert-responses?audience=consultoria`. **Frontend (Bruno):** formulário simples + relatório de médias por dimensão.
+
+---
+
 ### RF18 — Coletar feedback Likert dos clientes
 
 **1. Identificação**
 - ID: RF18
 - Título: Coletar feedback Likert dos clientes
-- Prioridade: Alta
+- Prioridade: Must
 - Status: Backlog
 - Sprint/Release: Sprint 4 — semana 14 (26/06-02/07)
 
@@ -442,79 +488,30 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 
 ---
 
-## 3. Requisitos Não Funcionais (RNF)
-
-### RNF01 — Performance da extração
+### RF11 — Exportar resultados consolidados
 
 **1. Identificação**
-- ID: RNF01
-- Título: Performance da extração
-- Categoria: Performance
-- Prioridade: Média
+- ID: RF11
+- Título: Exportar resultados consolidados
+- Prioridade: Should
 - Status: Backlog
-- Sprint/Release: Sprint 1 — semana 10 (medido ao concluir RF03)
+- Sprint/Release: Sprint 4 — semana 14 (26/06-02/07)
 
 **2. Detalhamento**
-- Descrição: O pipeline LLM deve processar um documento `.docx` de tamanho médio (~10 páginas) em tempo aceitável para o ciclo de uso da pesquisa.
-- Justificativa de negócio: Latência inviabiliza demos e testes iterativos.
-- Stakeholder: Equipe técnica + apresentação final.
-- Dependências: RF03.
+- Descrição: Gerar exportação única (CSV/JSON) com todos os dados de avaliação para alimentar relato e artigo.
+- Justificativa de negócio: Sem exportação, o trabalho de escrita do relato fica refém de queries manuais.
+- Stakeholder: Pesquisa (Cynthia para relato; Moisés para apresentação).
+- Dependências: RF09 (métricas), RF10 + RF18 (Likert), RF07 (cobertura).
 
 **3. Validação**
-- Critérios de aceite: Tempo médio ≤ 3 minutos por documento, medido sobre os 5 projetos.
-- Regras de negócio: Se ultrapassar, otimizar prompt ou estratégia de chunking.
-- Rastreabilidade MPO: — (qualidade técnica do pipeline, sem mapeamento direto a um conceito do MPO).
-- Observações: Reportar no relato como métrica.
+- Critérios de aceite: Arquivo único contendo extrações, cobertura, métricas (precisão/recall/F1/Kappa) por grupo, respostas Likert (consultoria + clientes), métricas de engajamento (#comentários, #drafts publicados).
+- Regras de negócio: Cabeçalhos compatíveis com planilha (Excel, Google Sheets).
+- Rastreabilidade MPO: — (infraestrutura de avaliação — não mapeia diretamente a um conceito do MPO).
+- Observações: **Backend (Raniel):** endpoint `GET /export?format=csv|json`. **Frontend (Bruno):** botão "Exportar resultados" com seletor de formato. **Cortável se Sprint 4 atrasar** — fallback: queries SQL manuais no banco para extrair os dados de avaliação.
 
 ---
 
-### RNF02 — Usabilidade
-
-**1. Identificação**
-- ID: RNF02
-- Título: Usabilidade
-- Categoria: Usabilidade
-- Prioridade: Média
-- Status: Backlog
-- Sprint/Release: Cross-cutting; avaliado via RF18 (Sprint 4)
-
-**2. Detalhamento**
-- Descrição: Um cliente sem conhecimento técnico deve conseguir acessar seu projeto, ler o resumo, comentar e navegar pelo feed sem treinamento.
-- Justificativa de negócio: Sem usabilidade para o cliente final, o observatório não viabiliza comunidade.
-- Stakeholder: Clientes.
-- Dependências: RF06, RF14, RF15, RF16.
-
-**3. Validação**
-- Critérios de aceite: Avaliado via dimensão "clareza do resumo" e "utilidade do espaço" do Likert dos clientes (RF18).
-- Regras de negócio: —
-- Rastreabilidade MPO: Característica **Usabilidade** (Vieira, 2022, p. 192) — linguagem cidadã, simplicidade e acessibilidade.
-- Observações: —
-
----
-
-### RNF03 — Manutenibilidade e organização
-
-**1. Identificação**
-- ID: RNF03
-- Título: Manutenibilidade e organização do código
-- Categoria: Manutenibilidade
-- Prioridade: Média
-- Status: Backlog
-- Sprint/Release: Cross-cutting; verificado a cada sprint
-
-**2. Detalhamento**
-- Descrição: Backend e frontend em pastas separadas; schema versionado; estrutura legível para qualquer integrante.
-- Justificativa de negócio: Permite que qualquer integrante contribua em qualquer parte sem bloqueio.
-- Stakeholder: Equipe técnica.
-- Dependências: —
-
-**3. Validação**
-- Critérios de aceite: Novo integrante clona e roda o ambiente local em < 30 minutos seguindo o README.
-- Regras de negócio: —
-- Rastreabilidade MPO: — (qualidade interna de engenharia, sem mapeamento direto a um conceito do MPO).
-- Observações: `backend/` + `frontend/` na raiz do `raniel90/obione`.
-
----
+## 4. Requisitos Não Funcionais (RNF)
 
 ### RNF04 — Reprodutibilidade científica
 
@@ -522,7 +519,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 - ID: RNF04
 - Título: Reprodutibilidade científica
 - Categoria: Confiabilidade
-- Prioridade: Alta
+- Prioridade: Must
 - Status: Backlog
 - Sprint/Release: Cross-cutting; aplicado em RF03 (Sprint 1), RF16 e RF17 (Sprint 3)
 
@@ -546,7 +543,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 - ID: RNF05
 - Título: Rastreabilidade de origem
 - Categoria: Confiabilidade
-- Prioridade: Alta
+- Prioridade: Must
 - Status: Backlog
 - Sprint/Release: Sprint 1 (gerado em RF03) + Sprint 2 (exibido em RF06)
 
@@ -570,7 +567,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 - ID: RNF06
 - Título: Ambiente de execução local
 - Categoria: Portabilidade
-- Prioridade: Alta
+- Prioridade: Must
 - Status: Backlog
 - Sprint/Release: Sprint 0 — semana 8 (estabelecido em T0.5)
 
@@ -594,7 +591,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 - ID: RNF07
 - Título: Restrições de escopo declaradas
 - Categoria: Restrição
-- Prioridade: Alta (declarativa)
+- Prioridade: Must (declarativa)
 - Status: Backlog
 - Sprint/Release: Declarativa — válida em todas as sprints
 
@@ -612,13 +609,13 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 
 ---
 
-### RNF08 — Conformidade LGPD (NOVO — pós-pivot)
+### RNF08 — Conformidade LGPD
 
 **1. Identificação**
 - ID: RNF08
 - Título: Conformidade LGPD
 - Categoria: Segurança / Compliance
-- Prioridade: Alta
+- Prioridade: Must
 - Status: Backlog
 - Sprint/Release: Cross-cutting; principal aplicação em Sprint 1 (RF12) e Sprint 2 (RF13)
 
@@ -636,13 +633,85 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 
 ---
 
-### RNF09 — Controle de custo de LLM (NOVO — pós-pivot)
+### RNF01 — Performance da extração
+
+**1. Identificação**
+- ID: RNF01
+- Título: Performance da extração
+- Categoria: Performance
+- Prioridade: Should
+- Status: Backlog
+- Sprint/Release: Sprint 1 — semana 10 (medido ao concluir RF03)
+
+**2. Detalhamento**
+- Descrição: O pipeline LLM deve processar um documento `.docx` de tamanho médio (~10 páginas) em tempo aceitável para o ciclo de uso da pesquisa.
+- Justificativa de negócio: Latência inviabiliza demos e testes iterativos.
+- Stakeholder: Equipe técnica + apresentação final.
+- Dependências: RF03.
+
+**3. Validação**
+- Critérios de aceite: Tempo médio ≤ 3 minutos por documento, medido sobre os 5 projetos.
+- Regras de negócio: Se ultrapassar, otimizar prompt ou estratégia de chunking.
+- Rastreabilidade MPO: — (qualidade técnica do pipeline, sem mapeamento direto a um conceito do MPO).
+- Observações: Reportar no relato como métrica.
+
+---
+
+### RNF02 — Usabilidade
+
+**1. Identificação**
+- ID: RNF02
+- Título: Usabilidade
+- Categoria: Usabilidade
+- Prioridade: Should
+- Status: Backlog
+- Sprint/Release: Cross-cutting; avaliado via RF18 (Sprint 4)
+
+**2. Detalhamento**
+- Descrição: Um cliente sem conhecimento técnico deve conseguir acessar seu projeto, ler o resumo, comentar e navegar pelo feed sem treinamento.
+- Justificativa de negócio: Sem usabilidade para o cliente final, o observatório não viabiliza comunidade.
+- Stakeholder: Clientes.
+- Dependências: RF06, RF14, RF15, RF16.
+
+**3. Validação**
+- Critérios de aceite: Avaliado via dimensão "clareza do resumo" e "utilidade do espaço" do Likert dos clientes (RF18).
+- Regras de negócio: —
+- Rastreabilidade MPO: Característica **Usabilidade** (Vieira, 2022, p. 192) — linguagem cidadã, simplicidade e acessibilidade.
+- Observações: —
+
+---
+
+### RNF03 — Manutenibilidade e organização
+
+**1. Identificação**
+- ID: RNF03
+- Título: Manutenibilidade e organização do código
+- Categoria: Manutenibilidade
+- Prioridade: Should
+- Status: Backlog
+- Sprint/Release: Cross-cutting; verificado a cada sprint
+
+**2. Detalhamento**
+- Descrição: Backend e frontend em pastas separadas; schema versionado; estrutura legível para qualquer integrante.
+- Justificativa de negócio: Permite que qualquer integrante contribua em qualquer parte sem bloqueio.
+- Stakeholder: Equipe técnica.
+- Dependências: —
+
+**3. Validação**
+- Critérios de aceite: Novo integrante clona e roda o ambiente local em < 30 minutos seguindo o README.
+- Regras de negócio: —
+- Rastreabilidade MPO: — (qualidade interna de engenharia, sem mapeamento direto a um conceito do MPO).
+- Observações: `backend/` + `frontend/` na raiz do `raniel90/obione`.
+
+---
+
+### RNF09 — Controle de custo de LLM
 
 **1. Identificação**
 - ID: RNF09
 - Título: Controle de custo de LLM
 - Categoria: Operacional
-- Prioridade: Média
+- Prioridade: Should
 - Status: Backlog
 - Sprint/Release: Cross-cutting; monitorado a partir de Sprint 1
 
@@ -660,7 +729,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 
 ---
 
-## 4. Premissas
+## 5. Premissas
 
 - O estudo de caso usa **5 projetos reais**: Freire Batista ADV, Valença Odontologia, Kaka JJ, Bem Viver Fitoterápicos, Dinoah ADV.
 - **Gabarito manual produzido em apenas 3 projetos** (Valença piloto + Freire Batista + Kaka JJ).
@@ -670,7 +739,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 
 ---
 
-## 5. Fora de Escopo
+## 6. Fora de Escopo
 
 - Atualização incremental, detecção de mudanças, versionamento.
 - Modelo próprio de classificação de risco (PMBOK).
