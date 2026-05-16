@@ -1,21 +1,21 @@
-# Plano de Execução — ObiOne
+# Plano de Execução — ObiOne (Pós-Pivot Comunidade)
 
-Plano de trabalho para executar o ObiOne dentro do calendário da disciplina TAES, alinhado à proposta acadêmica, ao backlog revisado e aos entregáveis formais cobrados pelo professor.
+Plano de trabalho para executar o ObiOne dentro do calendário da disciplina TAES, alinhado à proposta acadêmica reformulada (pivot comunidade), ao backlog atualizado e aos entregáveis formais cobrados pelo professor.
 
-Período: semana 7 (08/05) a semana 16 (10/07) — 10 semanas de trabalho.
+Período: semana 8 (15-21/05/2026, em curso) a semana 16 (10/07/2026) — **9 semanas restantes**.
 
-**Última atualização:** 07/05/2026 — T0.1 (requisitos) concluído.
+**Última atualização:** 16/05/2026 — pivot para observatório-comunidade aplicado.
 
-### Progresso (1/19 tarefas)
+### Progresso (2/22 tarefas)
 
 | Bloco | Tarefas totais | Concluídas |
 |---|---|---|
-| 0 — Fundação | 4 | 1 (T0.1) |
-| 1 — Preparação avaliação | 4 | 0 |
-| 2 — Pipeline | 3 | 0 |
-| 3 — Dashboard | 2 | 0 |
-| 4 — Avaliação | 4 | 0 |
-| 5 — Documentação | 3 | 0 |
+| 0 — Fundação (preparatória + alinhamento pivot) | 5 | 1 (T0.1) |
+| 1 — Pipeline + Cadastro + Auth | 4 | 0 |
+| 2 — Dashboard + Perfis | 3 | 0 |
+| 3 — Comunidade + IA-Assistente | 4 | 0 |
+| 4 — Avaliação | 5 | 1 (pivot decidido) |
+| 5 — Documentação acadêmica | 1 | 0 |
 
 ---
 
@@ -23,12 +23,12 @@ Período: semana 7 (08/05) a semana 16 (10/07) — 10 semanas de trabalho.
 
 | Integrante | Papel principal | Frentes |
 |---|---|---|
-| **Bruno** | Frontend | Prototipação das telas, implementação React + Vite + componentes Lovable |
-| **Raniel** | Backend | Arquitetura, FastAPI, banco, pipeline LLM, integração, requisitos |
+| **Bruno** | Frontend + UX + relacionamento | Protótipos, implementação React + Vite + Lovable, contato com stakeholders dos clientes |
+| **Raniel** | Backend + IA + arquitetura | FastAPI, banco, pipeline LLM, prompts (extração + resumo + drafts), auth, integração, requisitos |
 | **Cynthia** | Pesquisa + escrita | Atributos-alvo, gabaritos manuais, matriz de rastreabilidade, relato de experiência (artigo) |
-| **Moisés** | Pesquisa + apresentação | Protocolo de avaliação, gabaritos manuais, Likert, apresentação final |
+| **Moisés** | Pesquisa + apresentação | Protocolo de avaliação, gabaritos manuais, rubrica de avaliação, Likert, apresentação final |
 
-**Avaliação** = trabalho conjunto de Cynthia + Moisés (par de avaliadores independentes para o gabarito e para a aplicação da rubrica).
+**Avaliação** = trabalho conjunto de Cynthia + Moisés (par de avaliadores independentes para o gabarito e para a aplicação da rubrica). **Contato com stakeholders dos clientes para Likert** = Bruno.
 
 ---
 
@@ -40,11 +40,11 @@ Período: semana 7 (08/05) a semana 16 (10/07) — 10 semanas de trabalho.
 | Backend | Python 3 + FastAPI |
 | Banco de dados | PostgreSQL |
 | Comunicação | REST (JSON) |
-| LLM | A definir pelo Raniel (decisão técnica do backend) |
+| Autenticação | Email + senha + JWT (passlib + python-jose); sem OAuth |
+| LLM | A definir pelo Raniel |
 | Ambiente | Docker Compose local — sem deploy em produção |
-| Autenticação | Não há (fora do escopo do MVP) |
 
-Repositório: **`raniel90/obione`** (já existe; código vai em `backend/` e `frontend/` na raiz).
+Repositório: **`raniel90/obione`** (já existe; código em `backend/` e `frontend/` na raiz).
 
 ---
 
@@ -54,11 +54,11 @@ Sete artefatos compõem a entrega final no dia 10/07. Todos **herdam do MPO** (Q
 
 | # | Entregável | Responsável | Prazo final |
 |---|---|---|---|
-| 1 | Requisitos (RF + RNF) | Raniel | semana 8 (15/05) |
-| 2 | Prototipação das telas | Bruno | semana 8 (15/05) |
-| 3 | Matriz de rastreabilidade | Cynthia | semana 15 (03/07) |
-| 4 | Código rodando local + 5 projetos processados | Bruno + Raniel | semana 14 (26/06) |
-| 5 | Avaliação executada (precisão, recall, F1, Kappa, Likert) | Cynthia + Moisés | semana 14 (26/06) |
+| 1 | Requisitos (RF + RNF) | Raniel | semana 8 (21/05) ✅ |
+| 2 | Prototipação das telas | Bruno | semana 8 (21/05) |
+| 3 | Matriz de rastreabilidade | Cynthia | semana 15 (09/07) |
+| 4 | Código rodando local + 5 projetos processados | Bruno + Raniel | semana 14 (02/07) |
+| 5 | Avaliação executada (precisão, recall, F1, Kappa, Likert × 2) | Cynthia + Moisés | semana 14 (02/07) |
 | 6 | Relato de experiência (formato artigo) | Cynthia | semana 16 (09/07) |
 | 7 | Apresentação final | Moisés | semana 16 (10/07) |
 
@@ -66,248 +66,262 @@ Sete artefatos compõem a entrega final no dia 10/07. Todos **herdam do MPO** (Q
 
 ## 4. Cronograma Geral
 
-Mapeamento ao calendário da disciplina, com marcos do projeto e Status Reports formais.
-
-| Sem | Data | Bloco do plano | Marco |
+| Sem | Data | Bloco | Marco |
 |---|---|---|---|
-| 7 | 08/05 | Bloco 0 (fundação) + Bloco 1 (preparação avaliação) início | — |
-| 8 | 15/05 | Bloco 0 conclusão + Bloco 1 continuação | — |
-| 9 | 22/05 | Bloco 1 conclusão + **Status Report 1** | **M1** |
-| 10 | 29/05 | Bloco 2 (pipeline) | — |
-| 11 | 05/06 | Bloco 2 conclusão + Bloco 3 (dashboard) início | **M2** |
-| 12 | 12/06 | Bloco 3 continuação | — |
-| 13 | 19/06 | Bloco 3 conclusão + **Status Report 2** + Bloco 4 início | **M3** |
-| 14 | 26/06 | Bloco 4 (avaliação) conclusão | **M4** |
-| 15 | 03/07 | Bloco 5 (documentação) | — |
-| 16 | 10/07 | **Apresentação final + entrega do artigo** | — |
+| **8** | 15-21/05 (em curso) | Bloco 0: Fase preparatória + alinhamento do pivot | — |
+| 9 | 22-28/05 | Bloco 1 início: cadastro + upload + auth + gabarito | **M1 + SR1** |
+| 10 | 29/05-04/06 | Bloco 1 conclusão: pipeline LLM + finalizar gabarito | — |
+| 11 | 05-11/06 | Bloco 2: dashboard + cobertura + perfis | **M2** |
+| 12 | 12-18/06 | Bloco 3: comunidade (comentários, feed) + IA-Assistente (resumo, drafts) | — |
+| 13 | 19-25/06 | Bloco 3 conclusão + lançar Likert | **M3 + SR2** |
+| 14 | 26/06-02/07 | Bloco 4: avaliação consolidada | **M4** |
+| 15 | 03-09/07 | Bloco 5: documentação acadêmica | — |
+| 16 | 10/07 | **Apresentação final + entrega** | Entrega |
 
-**Marcos do projeto:**
-- **M1** (sem 9): preparação da avaliação concluída.
-- **M2** (sem 11): pipeline LLM operacional nos 5 projetos.
-- **M3** (sem 13): dashboard com cobertura do MPO funcional.
-- **M4** (sem 14): avaliação completa executada.
+**Marcos:**
+- **M1** (sem 9): preparação conceitual concluída (atributos, protocolo, schema, protótipos).
+- **M2** (sem 11): pipeline operacional nos 5 projetos + auth/perfis funcionais.
+- **M3** (sem 13): dashboard + comunidade + IA-Assistente operacionais.
+- **M4** (sem 14): avaliação completa (métricas + Likert × 2).
 
 ---
 
 ## 5. Tarefas por Bloco
 
-Cada tarefa segue o formato:
-- **Responsável** | **Prazo** | **O que fazer** | **Entregável** | **Aceitação**
+Cada tarefa: **Responsável** | **Prazo** | **O que fazer** | **Entregável** | **Aceitação**.
 
-### Bloco 0 — Fundação Documental e Técnica (semanas 7-8)
+### Bloco 0 — Fundação (semana 8: 15-21/05)
 
-#### T0.1 — Requisitos (RF + RNF)
+#### T0.1 — Requisitos (RF + RNF) — ✅ Concluído
 - **Responsável:** Raniel (com input do grupo)
-- **Prazo:** sem 8 (15/05)
-- **Status:** ✅ Concluído em 07/05/2026 (commits `53845d1` e `7a2f854`).
-- **O que fazer:** Documentar requisitos funcionais (derivados das US01–US11 do backlog) e não-funcionais (performance básica, usabilidade, manutenibilidade).
-- **Entregável:** `atividades/requisitos.md` com RF01–RF11 + 7 RNFs. Cada RF traz seção própria de Backend (Raniel) e Frontend (Bruno), tornando cada requisito auto-contido para divisão paralela.
-- **Aceitação:** cada RF mapeia 1:1 para uma US do backlog; RNFs cobrem performance, usabilidade e manutenibilidade.
+- **Prazo:** sem 8 (21/05)
+- **Status:** ✅ Concluído em **16/05/2026** (commits anteriores + pós-pivot consolidando RF01-RF18 e RNF01-RNF09).
+- **Entregável:** `atividades/requisitos.md` no formato ficha simplificada, com Backend/Frontend em Observações.
 
 #### T0.2 — Prototipação das telas
 - **Responsável:** Bruno
-- **Prazo:** sem 7-8 (até 15/05)
-- **O que fazer:** Criar wireframes/mockups das 4 telas principais (lista de projetos, detalhe do projeto, upload de documentos, cobertura do MPO) usando Lovable. Apresentar e revisar com o grupo na reunião semanal.
-- **Entregável:** Protótipos exportados (PNG/PDF) + link para o projeto no Lovable; documento `atividades/prototipos.md` com screenshot de cada tela e descrição.
-- **Aceitação:** protótipos cobrem todas as US01–US07; aprovados pelo grupo antes do início da implementação frontend.
+- **Prazo:** sem 8 (21/05)
+- **O que fazer:** Wireframes das telas principais — login, portfólio (consultor), detalhe do projeto (consultor e cliente), comentários, Resumo do Cliente (rascunho + publicado), Drafts (rascunho + publicado), feed in-app. Apresentar ao grupo no kickoff da semana 8.
+- **Entregável:** Protótipos exportados (PNG/PDF) + link Lovable; `atividades/prototipos.md` com print de cada tela.
+- **Aceitação:** Protótipos cobrem RF01-RF18; aprovados pelo grupo antes do início da implementação frontend.
 
-#### T0.3 — Setup do código no repo
-- **Responsável:** Raniel (com Bruno acompanhando setup do frontend)
-- **Prazo:** sem 7 (até 15/05)
-- **O que fazer:** Criar `backend/` (FastAPI + SQLAlchemy + Alembic) e `frontend/` (Vite + React) na raiz do `raniel90/obione`. Configurar `docker-compose.yml` com Postgres. Endpoint backend `/health` retornando JSON; tela inicial frontend exibindo a resposta do backend.
-- **Entregável:** PR mergeado com README de setup atualizado; ambiente local funcional.
-- **Aceitação:** qualquer integrante clona o repo e roda em < 30 min seguindo o README.
+#### T0.3 — Atributos-alvo do MPO
+- **Responsável:** Cynthia (autora) + Moisés (revisor)
+- **Prazo:** sem 8 (21/05)
+- **O que fazer:** Derivar do Quadro 37 a lista de ~43 atributos categorizados (nome, categoria, tipo `estruturado`/`texto_livre`/`fora_de_escopo`).
+- **Entregável:** `atividades/atributos_alvo_mpo.md`.
+- **Aceitação:** Lista revisada por Moisés; alinhada ao Quadro 37 sem omissões.
 
-#### T0.4 — Matriz de rastreabilidade (versão semente)
-- **Responsável:** Cynthia
-- **Prazo:** sem 8 (15/05)
-- **O que fazer:** Esboçar a matriz com colunas: Requisito | US | Atributo do MPO | Categoria | Métrica de avaliação. Preencher com base nos requisitos da T0.1.
-- **Entregável:** `atividades/matriz_rastreabilidade.md` versão inicial.
-- **Aceitação:** matriz cobre todos os RF; será atualizada ao longo do projeto.
-
----
-
-### Bloco 1 — Preparação da Avaliação (semanas 7-9, M1)
-
-#### T1.1 — Lista de atributos-alvo do MPO
-- **Responsável:** Cynthia (autor) + Moisés (revisor)
-- **Prazo:** sem 7 (15/05)
-- **O que fazer:** Derivar do Quadro 37 a lista de ~43 atributos. Para cada um: nome, categoria (geral, stakeholders, escopo, cronograma, custos, riscos, mudanças, lições aprendidas) e tipo (`estruturado` ou `texto_livre`). Marcar imagens/fotos como `fora_de_escopo`.
-- **Entregável:** `atividades/atributos_alvo_mpo.md` com a lista categorizada.
-- **Aceitação:** lista revisada por Moisés; alinhada ao Quadro 37 sem omissões.
-
-#### T1.2 — Protocolo de avaliação
-- **Responsável:** Moisés (autor) + Cynthia (revisor)
-- **Prazo:** sem 7 (15/05)
-- **O que fazer:** Documentar o critério híbrido de match: (i) atributos `estruturado` por comparação normalizada exata (TP/FP/FN binário); (ii) atributos `texto_livre` por rubrica humana 0 / 0,5 / 1 aplicada por dois avaliadores; (iii) Cohen's Kappa para concordância; (iv) protocolo de resolução de divergências.
+#### T0.4 — Protocolo de avaliação
+- **Responsável:** Moisés (autor) + Cynthia (revisora)
+- **Prazo:** sem 8 (21/05)
+- **O que fazer:** Documentar o critério híbrido de match + rubrica humana 0/0,5/1 + Cohen's Kappa + protocolo de resolução de divergências.
 - **Entregável:** `atividades/protocolo_avaliacao.md`.
-- **Aceitação:** cada tipo de atributo tem critério explícito; rubrica documentada com 2-3 exemplos por categoria.
+- **Aceitação:** Cada tipo de atributo tem critério explícito; rubrica documentada com 2-3 exemplos por categoria.
 
-#### T1.3 — Schema de extração
-- **Responsável:** Raniel
-- **Prazo:** sem 8 (22/05)
-- **O que fazer:** Definir schema JSON formal derivado da T1.1, usado pela extração automática e manual. Versionar no repositório.
-- **Entregável:** schema versionado em `backend/app/schemas/extracao.py` (Pydantic) ou JSON Schema equivalente.
-- **Aceitação:** schema valida tanto outputs do LLM quanto gabaritos manuais.
-
-#### T1.4 — Gabaritos manuais dos 5 projetos
-- **Responsável:** Cynthia + Moisés (par de avaliadores independentes)
-- **Prazo:** sem 8-9 (até 22/05)
-- **O que fazer:** Cada um anota independentemente os 5 projetos seguindo T1.1, T1.2 e T1.3. **Valença Odontologia primeiro como piloto** para calibrar a rubrica; se a rubrica mudar significativamente após o piloto, refazer Valença com a versão final. Resolver divergências em sessão estruturada conforme T1.2.
-- **Entregável:** `atividades/gabaritos/<projeto>_cynthia.json` + `_moises.json` para cada um dos 5 projetos + `atividades/gabaritos/<projeto>_consolidado.json` (após resolução).
-- **Aceitação:** 5 gabaritos consolidados disponíveis antes do Status Report 1; Cohen's Kappa por atributo registrado para uso na T4.2.
+#### T0.5 — Setup do código no repo
+- **Responsável:** Raniel (com Bruno acompanhando o frontend)
+- **Prazo:** sem 8 (21/05)
+- **O que fazer:** Criar `backend/` (FastAPI + SQLAlchemy + Alembic) e `frontend/` (Vite + React) na raiz; `docker-compose.yml` com Postgres; endpoint `/health` + tela inicial consumindo via REST; estrutura para auth (placeholder).
+- **Entregável:** PR mergeado com README de setup; ambiente local funcional.
+- **Aceitação:** Qualquer integrante clona e roda em < 30 min.
 
 ---
 
-### Bloco 2 — Pipeline Funcional (semanas 9-11, M2)
+### Bloco 1 — Pipeline + Cadastro + Auth (semanas 9-10: 22/05-04/06, **M1 + SR1**)
 
-#### T2.1 — US01 (cadastro) + US02 (upload)
+#### T1.1 — RF01 (Cadastro) + RF02 (Upload)
 - **Responsável:** Bruno (frontend) + Raniel (backend)
-- **Prazo:** sem 9-10 (até 29/05)
-- **O que fazer:** Implementar cadastro de projetos com nome, domínio (jurídico, saúde, esporte, branding, outros), descrição. Upload de arquivos `.docx` (múltiplos por projeto), persistência em Postgres com metadados (nome, data, tamanho, hash).
-- **Entregável:** endpoints REST (`POST /projects`, `POST /projects/{id}/documents`) + telas correspondentes consumindo a API.
-- **Aceitação:** cadastrar Valença, fazer upload do `.docx` real, ver na lista de projetos.
+- **Prazo:** sem 9 (28/05)
+- **Entregável:** Endpoints + telas funcionais; consultor cadastra Valença e faz upload do `.docx`.
+- **Aceitação:** Fluxo de cadastro + upload funcionando end-to-end localmente.
 
-#### T2.2 — US03 (extração via LLM)
-- **Responsável:** Raniel
-- **Prazo:** sem 10-11 (até 05/06)
-- **O que fazer:** Implementar pipeline LLM que, dado um documento do projeto, extrai os atributos conforme schema T1.3. Para cada atributo preenchido: valor + trecho de origem. Atributos não encontrados marcados como `null`. Versão do prompt e modelo registrados na extração.
-- **Entregável:** endpoint `POST /projects/{id}/extract`; resultado JSON persistido.
-- **Aceitação:** extração rodando para Valença com saída estruturada coerente; ≥ 70% dos atributos preenchidos no piloto.
+#### T1.2 — RF12 (Autenticação)
+- **Responsável:** Raniel (backend) + Bruno (tela de login)
+- **Prazo:** sem 9 (28/05)
+- **Entregável:** Login com email+senha+JWT; logout funcional; senha com hash bcrypt.
+- **Aceitação:** Consultor faz login, recebe JWT, acessa rotas protegidas.
 
-#### T2.3 — US04 (persistência) + extração nos 5 projetos
+#### T1.3 — RF03 (Extração LLM) + RF04 (Persistência)
 - **Responsável:** Raniel
-- **Prazo:** sem 11 (até 05/06)
-- **O que fazer:** Persistir extrações com todos os metadados (versão prompt, modelo LLM, timestamp, `origem: automatico`). Rodar extração para os 5 projetos.
-- **Entregável:** 5 extrações JSON persistidas no banco; consultáveis via API.
-- **Aceitação:** **M2 atingido** — pipeline operacional nos 5 casos sem erro fatal.
+- **Prazo:** sem 10 (04/06)
+- **Entregável:** Pipeline rodando para Valença com saída JSON conforme schema; metadados persistidos.
+- **Aceitação:** Extração nos 5 projetos sem erro fatal; ≥ 70% dos atributos preenchidos no piloto.
+
+#### T1.4 — Produção do gabarito manual (3 projetos)
+- **Responsável:** Cynthia + Moisés (par de avaliadores independentes)
+- **Prazo:** sem 10 (04/06)
+- **O que fazer:** Anotar Valença (piloto), depois Freire Batista e Kaka JJ. Cada um faz independentemente; divergências resolvidas conforme T0.4. Se a rubrica mudar significativamente após Valença, refazer Valença com a rubrica final.
+- **Entregável:** `atividades/gabaritos/<projeto>_cynthia.json` + `_moises.json` + `_consolidado.json` para os 3 projetos.
+- **Aceitação:** 3 gabaritos consolidados disponíveis; Cohen's Kappa por atributo registrado.
 
 ---
 
-### Bloco 3 — Dashboard + Cobertura (semanas 11-13, M3)
+### Bloco 2 — Dashboard + Cobertura + Perfis (semana 11: 05-11/06, **M2**)
 
-#### T3.1 — US05 (portfólio) + US06 (detalhe do projeto)
-- **Responsável:** Bruno (frontend) + Raniel (suporte API)
-- **Prazo:** sem 11-12 (até 12/06)
-- **O que fazer:** Tela de portfólio: lista projetos com nome, domínio, status derivado (`cadastrado` → `ingerido` → `extraído` → `avaliado`), % de cobertura. Tela de detalhe: atributos extraídos agrupados por categoria do Quadro 37, com trecho de origem por atributo; acesso aos documentos originais.
-- **Entregável:** 2 telas funcionais consumindo a API; endpoints `GET /projects` e `GET /projects/{id}`.
-- **Aceitação:** navegar pelos 5 projetos; ver atributos extraídos com trechos de origem.
+#### T2.1 — RF13 (Perfis e acesso semi-aberto)
+- **Responsável:** Raniel (backend) + Bruno (roteamento condicional)
+- **Prazo:** sem 11 (11/06)
+- **Entregável:** Modelo User com role; middleware de autorização; cliente acessa apenas seu projeto.
+- **Aceitação:** Cliente de Valença não vê outros projetos; tentativa de acesso indevido retorna 403.
 
-#### T3.2 — US07 (indicador de cobertura do MPO)
-- **Responsável:** Bruno (frontend) + Raniel (cálculo backend)
-- **Prazo:** sem 12-13 (até 19/06)
-- **O que fazer:** Calcular cobertura por projeto (% atributos preenchidos vs. total de atributos-alvo, excluindo `fora_de_escopo`). Exibir tabela ou heatmap cruzando projetos × atributos. Destaque visual quando cobertura < 50%; sinalização saudável quando ≥ 80%.
-- **Entregável:** componente de cobertura no frontend; endpoint `GET /coverage`.
-- **Aceitação:** **M3 atingido** — dashboard com cobertura visualizável; pronto para o Status Report 2.
+#### T2.2 — RF05 (Portfólio) + RF06 (Detalhe) + RF07 (Cobertura)
+- **Responsável:** Bruno (frontend) + Raniel (endpoints)
+- **Prazo:** sem 11 (11/06)
+- **Entregável:** Tela de portfólio (consultor); tela de detalhe com atributos agrupados + trechos de origem; componente de cobertura (tabela/heatmap) com thresholds visuais.
+- **Aceitação:** **M2 atingido** — pipeline operacional nos 5 projetos visualizáveis com cobertura calculada.
+
+#### T2.3 — Matriz de rastreabilidade (semente)
+- **Responsável:** Cynthia
+- **Prazo:** sem 11 (11/06)
+- **O que fazer:** Esboçar matriz com colunas: Requisito | US | Atributo MPO | Categoria | Métrica de avaliação. Preencher com base nos requisitos.
+- **Entregável:** `atividades/matriz_rastreabilidade.md` versão inicial.
+- **Aceitação:** Matriz cobre todos os RF; será atualizada nas próximas sprints.
 
 ---
 
-### Bloco 4 — Avaliação (semanas 13-14, M4)
+### Bloco 3 — Comunidade + IA-Assistente (semanas 12-13: 12-25/06, **M3 + SR2**)
 
-#### T4.1 — US08 (importar gabaritos)
+#### T3.1 — RF14 (Comentários) + RF15 (Feed in-app)
+- **Responsável:** Bruno (frontend) + Raniel (backend)
+- **Prazo:** sem 12 (18/06)
+- **Entregável:** Comentários funcionais (thread + resposta); feed in-app com contador de não-lidos; eventos registrados em hooks.
+- **Aceitação:** Consultor e cliente daquele projeto comentam; feed mostra novidades; isolamento por perfil respeitado.
+
+#### T3.2 — RF16 (Resumo do Cliente)
+- **Responsável:** Raniel (prompt + backend) + Bruno (UI)
+- **Prazo:** sem 12 (18/06)
+- **Entregável:** Endpoint que gera resumo a partir da extração; UI com modos rascunho (consultor edita) e publicado (cliente vê).
+- **Aceitação:** Consultor gera rascunho, edita, publica; cliente vê apenas resumo publicado.
+
+#### T3.3 — RF17 (Drafts de Próximos Passos)
+- **Responsável:** Raniel (prompt + backend) + Bruno (UI)
+- **Prazo:** sem 13 (25/06)
+- **Entregável:** Endpoint que gera drafts a partir da extração + comentários; UI para o consultor revisar antes de publicar.
+- **Aceitação:** **M3 atingido** — comunidade + IA-Assistente operacionais nos 5 projetos.
+
+#### T3.4 — Iniciar contato com stakeholders dos clientes
+- **Responsável:** Bruno
+- **Prazo:** sem 8-12 (gradual; foco na sem 12)
+- **O que fazer:** Iniciar contato cedo (sem 8); apresentar o observatório como "espaço onde mostramos o que estamos observando do seu projeto"; convidar para responder o Likert na sem 13-14.
+- **Entregável:** Lista de stakeholders contactados + status de aceite.
+- **Aceitação:** Pelo menos 1 stakeholder por projeto comprometido a responder o Likert. Plano B: declarar limitação no relato.
+
+---
+
+### Bloco 4 — Avaliação (semana 14: 26/06-02/07, **M4**)
+
+#### T4.1 — RF08 (Importar gabarito)
 - **Responsável:** Raniel
-- **Prazo:** sem 13 (até 19/06)
-- **O que fazer:** Endpoint para carregar os JSONs consolidados produzidos na T1.4, com `origem: manual`. Validar conformidade com schema T1.3.
-- **Entregável:** endpoint `POST /projects/{id}/baseline`; gabaritos persistidos.
-- **Aceitação:** os 5 gabaritos consolidados no banco, todos validados.
+- **Prazo:** sem 13-14 (transição)
+- **Entregável:** Endpoint POST baseline carrega os 3 gabaritos consolidados; validação de schema.
 
-#### T4.2 — US09 (comparação automático vs. gabarito)
+#### T4.2 — RF09 (Comparação automático vs. gabarito — critério híbrido)
 - **Responsável:** Raniel (algoritmo) + Cynthia + Moisés (aplicação da rubrica)
-- **Prazo:** sem 14 (até 26/06)
-- **O que fazer:** Implementar comparação híbrida conforme T1.2. Estruturado: comparação normalizada exata (TP/FP/FN). Texto livre: Cynthia e Moisés aplicam a rubrica 0/0,5/1 (UI dedicada ou planilha intermediária); calcular precisão, recall, F1 e Cohen's Kappa por grupo (estruturado vs. texto_livre) e agregado.
-- **Entregável:** relatório de métricas por projeto e consolidado.
-- **Aceitação:** tabela completa com precisão, recall, F1, Kappa para os 5 projetos; atributos com Kappa < 0,6 sinalizados.
+- **Prazo:** sem 14 (02/07)
+- **Entregável:** Tabela completa com precisão, recall, F1 e Cohen's Kappa para os 3 projetos; atributos com Kappa < 0,6 sinalizados.
+- **Aceitação:** Métricas calculadas e visualizáveis na UI.
 
-#### T4.3 — US10 (Likert)
-- **Responsável:** Moisés (formulário + análise) + Bruno (acesso aos stakeholders)
-- **Prazo:** sem 13-14 (até 26/06)
-- **O que fazer:** Setup Google Forms com 4 dimensões (utilidade, clareza, completude, confiabilidade) escala 1–5. Bruno media o contato com os stakeholders dos 5 projetos. Importar respostas para o sistema; relatório agregado.
-- **Entregável:** formulário publicado + respostas consolidadas + relatório de médias por dimensão.
-- **Aceitação:** **N ≥ 8** ideal (~2 stakeholders por projeto); **plano B**: N ≥ 5 (1 por projeto) com declaração de limitação no relato.
+#### T4.3 — RF10 (Likert Consultoria)
+- **Responsável:** Moisés (formulário + análise)
+- **Prazo:** sem 13-14 (lançar sem 13, consolidar sem 14)
+- **Entregável:** Formulário Google Forms (ou interno) com 4 dimensões; respostas dos 4 integrantes do grupo importadas; relatório agregado.
+- **Aceitação:** N = 4; médias por dimensão calculadas.
 
-#### T4.4 — US11 (exportação consolidada)
+#### T4.4 — RF18 (Likert Clientes)
+- **Responsável:** Moisés (formulário + análise) + Bruno (intermediação dos contatos)
+- **Prazo:** sem 13-14 (lançar sem 13, consolidar sem 14)
+- **Entregável:** Formulário Google Forms com 4 dimensões dos clientes; respostas importadas; relatório agregado.
+- **Aceitação:** N ≥ 5 (1 por projeto) — ideal 8-10. Plano B: declarar limitação.
+
+#### T4.5 — RF11 (Exportação consolidada)
 - **Responsável:** Raniel
-- **Prazo:** sem 14 (até 26/06)
-- **O que fazer:** Endpoint que gera arquivo único (CSV ou JSON) com extrações, cobertura, métricas (precisão/recall/F1/Kappa) e respostas Likert.
-- **Entregável:** arquivo de exportação; comando ou botão para gerar.
-- **Aceitação:** **M4 atingido** — todos os dados de avaliação exportáveis para alimentar o relato.
+- **Prazo:** sem 14 (02/07)
+- **Entregável:** Arquivo único (CSV ou JSON) com extrações, cobertura, métricas, Likert × 2, engajamento.
+- **Aceitação:** **M4 atingido** — dados completos exportáveis para o relato.
 
 ---
 
-### Bloco 5 — Documentação Acadêmica (semanas 14-16)
+### Bloco 5 — Documentação Acadêmica (semanas 15-16: 03-10/07)
 
 #### T5.1 — Matriz de rastreabilidade (finalização)
 - **Responsável:** Cynthia
-- **Prazo:** sem 15 (até 03/07)
-- **O que fazer:** Atualizar a matriz iniciada em T0.4 com base nos resultados da avaliação. Cada RF deve ter rastreabilidade até o resultado obtido (precisão, cobertura, Likert).
+- **Prazo:** sem 15 (09/07)
+- **O que fazer:** Atualizar matriz iniciada em T2.3 com resultados da avaliação. Cada RF tem rastreabilidade até resultado obtido (precisão, cobertura, Likert).
 - **Entregável:** `atividades/matriz_rastreabilidade.md` finalizada.
-- **Aceitação:** cada RF tem coluna de resultado preenchida.
+- **Aceitação:** Cada RF com coluna de resultado preenchida.
 
 #### T5.2 — Relato de experiência (artigo)
 - **Responsável:** Cynthia
-- **Prazo:** sem 15-16 (até 09/07)
-- **O que fazer:** Escrever ~10–15 páginas em formato acadêmico com seções: introdução (problema, lacuna, objetivo), referencial teórico (MPO, LLM em GP, DSR), método (DSR aplicado), desenvolvimento do artefato (descrição do ObiOne, decisões técnicas), avaliação (resultados quantitativos e qualitativos), discussão e limitações (Kappa baixo, N do Likert, etc.), conclusão e trabalhos futuros.
+- **Prazo:** sem 15-16 (09/07)
+- **O que fazer:** Escrever ~10-15 páginas em formato acadêmico: introdução, referencial teórico (MPO + LLM em GP + DSR + Trabalhos Futuros do Vieira), método (DSR aplicado), desenvolvimento (descrição do ObiOne pós-pivot), avaliação (resultados quantitativos + qualitativos das duas Likert), discussão e limitações, conclusão.
 - **Entregável:** PDF do artigo no padrão da disciplina.
-- **Aceitação:** revisado por Bruno + Raniel + Moisés; coerente com a proposta apresentada na semana 4.
+- **Aceitação:** Revisado por Bruno + Raniel + Moisés; coerente com proposta reformulada.
 
 #### T5.3 — Apresentação final
 - **Responsável:** Moisés
-- **Prazo:** sem 16 (até 10/07)
-- **O que fazer:** Slides cobrindo: problema, solução proposta (com prints do dashboard), demo (ao vivo ou screencast), resultados de avaliação, limitações, próximos passos. Ensaiar com o grupo.
-- **Entregável:** PDF/PPTX dos slides; ensaio cronometrado.
-- **Aceitação:** apresentação cabe em 15–20 min; demo testada e funcionando.
+- **Prazo:** sem 16 (10/07)
+- **O que fazer:** Slides cobrindo: crítica do professor → pivot fundamentado na tese → arquitetura comunidade → demo → resultados → limitações → próximos passos. Ensaiar com o grupo.
+- **Entregável:** PDF/PPTX + ensaio cronometrado.
+- **Aceitação:** Apresentação cabe em 15-20 min; demo testada.
 
 #### T5.4 — Screencast de backup
 - **Responsável:** Bruno + Raniel
-- **Prazo:** sem 15 (até 03/07)
-- **O que fazer:** Gravar screencast curto (~3 min) mostrando o golden path: cadastro de projeto → upload de `.docx` → extração LLM → exibição da cobertura.
-- **Entregável:** arquivo `.mp4` no repositório (ou link no relatório).
-- **Aceitação:** cobre golden path em < 3 min; usado caso a demo ao vivo dê problema.
+- **Prazo:** sem 15 (09/07)
+- **O que fazer:** Screencast curto (~3 min): golden path — login → portfólio → detalhe → extração → resumo cliente → comentário → draft.
+- **Entregável:** `.mp4` no repositório.
+- **Aceitação:** Cobre golden path em < 3 min.
 
 ---
 
 ## 6. Cadência de Sincronização
 
-- **Daily curto** (Slack/WhatsApp/grupo do projeto): cada um posta o que vai fazer no dia + bloqueios. ~5 min, sem reunião.
+- **Daily curto** (Slack/WhatsApp do grupo): cada um posta o que vai fazer no dia + bloqueios. ~5 min, sem reunião.
 - **Reunião semanal antes da aula** (~1h): revisar progresso da semana, alinhar próxima semana, discutir bloqueios.
 - **Revisão de marco** (após cada M1–M4): meeting dedicado de 1h para confirmar marco atingido + ajustar próximos passos.
-- **Status Report da disciplina** (22/05 e 19/06): usar o tempo formal da disciplina como apresentação consolidada de progresso.
+- **Status Report da disciplina** (22/05 e 19/06): usar o tempo formal da disciplina como apresentação consolidada de progresso. **SR1 apresenta pivot + plano + protótipos** (não código).
 
 ---
 
 ## 7. Riscos Vivos
 
-Os 6 riscos mapeados no backlog continuam ativos, com 2 adições específicas deste plano:
+Os 12 riscos consolidados do pivot:
 
 | # | Risco | Probabilidade | Impacto | Mitigação |
 |---|---|---|---|---|
-| R1 | Acesso insuficiente aos stakeholders para Likert | Média | Alto | Iniciar contato na semana 7. Plano B em T4.3: 1 respondente por projeto + declaração de limitação. |
-| R2 | Heterogeneidade alta dos `.docx` reais quebra o pipeline | Média | Médio | Inspeção amostral na semana 7; estratégia de chunking + saneamento documentada antes do Sprint 1 (T2.2). |
-| R3 | Custo/limite de tokens da API LLM | Baixa | Médio | Estimar volume na semana 7; usar modelo apropriado por etapa (mais barato para pré-processamento, mais capaz para extração final). |
-| R4 | Concordância entre avaliadores baixa (Kappa < 0,6) | Média | Médio | Valença como projeto piloto em T1.4; se a rubrica mudar significativamente, refazer Valença antes de fechar os demais gabaritos. |
-| R5 | Esforço do gabarito manual estoura semanas 7-8 | Alta | Alto | 5 projetos × 2 avaliadores = 10 extrações distribuídas entre Cynthia e Moisés (~5 cada) com revisão cruzada. Iniciar imediatamente após T1.1. |
-| R6 | Mudança no schema mid-sprint | Baixa | Alto | Schema versionado; congelar ao fim da semana 8 (antes do Sprint 1). |
-| **R7** | **Stack nova para Bruno (Vite + Lovable)** | Média | Médio | Iniciar T0.2 (protótipos) na semana 7 para ganhar familiaridade com Lovable antes da implementação. |
-| **R8** | **Cronograma comprimido (10 semanas, não 12)** | Alta | Alto | Paralelismo das trilhas (Bloco 0 + Bloco 1 simultâneos); cortar features de polish da UI se atrasar. |
+| R1 | Acesso insuficiente aos stakeholders dos clientes para Likert | Média | Alto | Bruno inicia contato na semana 8. Plano B: 1 respondente por projeto + declaração de limitação. |
+| R2 | Heterogeneidade alta dos `.docx` reais quebra o pipeline | Média | Médio | Inspeção amostral na semana 8; chunking + saneamento documentados antes do Sprint 1. |
+| R3 | Custo/limite de tokens da API LLM | Média | Médio | Estimar volume na sem 8 (3 chamadas por projeto agora); modelo mais barato para drafts; caching agressivo. |
+| R4 | Concordância entre avaliadores baixa (Kappa < 0,6) | Média | Médio | Valença como piloto. Se rubrica mudar significativamente, refazer Valença. |
+| R5 | Esforço do gabarito manual estoura semana 9 | Média | Alto | Reduzido para 3 projetos. Cynthia + Moisés iniciam após T0.3 (meio sem 8). |
+| R6 | Mudança no schema mid-sprint | Baixa | Alto | Schema versionado; congelar ao fim da semana 9. |
+| R7 | LGPD — dados de marketing em formato semi-aberto | Média | Alto | NDA com clientes; consentimento explícito; criptografia em trânsito; logs de acesso. |
+| R8 | Custo de LLM aumentado pelas 3 chamadas por projeto | Média | Médio | Estimativa antes do Sprint 1; modelo mais barato para drafts; caching. |
+| R9 | Prazo apertado pós-pivot (perdemos 1 semana) | Alta | Alto | Cortes feitos (Lições, notificações email); SR1 apresenta plano + protótipos, não código. |
+| R10 | Complexidade do auth e perfis (não estava previsto) | Média | Médio | Auth simples (JWT, sem OAuth); bibliotecas padrão FastAPI. |
+| R11 | Resistência dos clientes a participar do observatório | Média | Alto | Bruno inicia contato cedo; valor proposto: "ver o que estamos observando do seu projeto". |
+| R12 | Drafts da IA percebidos como pobres/enviesados | Média | Médio | Consultor SEMPRE revisa antes de publicar; medir percepção via Likert da consultoria (RF10). |
 
 ---
 
 ## 8. Apêndice — Esqueleto da Matriz de Rastreabilidade
 
-A matriz da T0.4 e T5.1 segue este formato (exemplos):
+A matriz da T2.3 e T5.1 segue este formato:
 
-| Requisito | US | Atributo do MPO (Quadro 37) | Categoria | Tipo | Métrica de avaliação | Resultado |
-|---|---|---|---|---|---|---|
-| RF01 | US01 | — | — | — | (não avaliado, infraestrutura) | — |
-| RF02 | US02 | — | — | — | (não avaliado, infraestrutura) | — |
-| RF03 | US03 | nome do projeto | geral | estruturado | comparação exata | (preencher após T4.2) |
-| RF03 | US03 | descrição | geral | texto_livre | rubrica 0/0,5/1 + Kappa | (preencher após T4.2) |
-| RF03 | US03 | escopo planejado | escopo | texto_livre | rubrica 0/0,5/1 + Kappa | (preencher após T4.2) |
-| RF03 | US03 | data início | cronograma | estruturado | comparação exata | (preencher após T4.2) |
-| RF03 | US03 | riscos identificados | riscos | texto_livre | rubrica 0/0,5/1 + Kappa | (preencher após T4.2) |
-| ... | ... | ... | ... | ... | ... | ... |
-| RF07 | US07 | — | — | — | cobertura agregada (%) | (preencher após T3.2) |
-| RF09 | US09 | (todos do MPO) | (todos) | (ambos) | precisão/recall/F1/Kappa | (preencher após T4.2) |
-| RF10 | US10 | — | — | — | médias Likert (4 dimensões) | (preencher após T4.3) |
+| Requisito | US | Atributo do MPO (Quadro 37) ou Conceito | Categoria | Métrica de avaliação | Resultado |
+|---|---|---|---|---|---|
+| RF01 | US01 | — | — | (não avaliado, infra) | — |
+| RF03 | US03 | nome do projeto | geral | comparação exata | (preencher após T4.2) |
+| RF03 | US03 | escopo planejado | escopo | rubrica 0/0,5/1 + Kappa | (preencher após T4.2) |
+| RF03 | US03 | data início | cronograma | comparação exata | (preencher após T4.2) |
+| RF03 | US03 | riscos identificados | riscos | rubrica 0/0,5/1 + Kappa | (preencher após T4.2) |
+| RF07 | US07 | — | (todos) | cobertura agregada (%) | (preencher após T3.2 = RF07 implementada) |
+| RF09 | US09 | (todos do MPO) | (todos) | precisão/recall/F1/Kappa | (preencher após T4.2) |
+| RF10 | US10 | — | — | médias Likert consultoria | (preencher após T4.3) |
+| RF14 | US14 | Interatividade (Vieira p. 191) | Característica | engajamento (#comentários) | (preencher após T4.5) |
+| RF16 | US16 | Comunicar (Vieira p. 197) | Processo | Likert dimensão "clareza" | (preencher após T4.4) |
+| RF18 | US18 | — | — | médias Likert clientes | (preencher após T4.4) |
 
-A matriz é **viva**: a versão semente sai na T0.4, é atualizada à medida que requisitos mudam, e é finalizada na T5.1 com os resultados reais da avaliação.
+Linhas novas adicionadas pós-pivot: cada RF de comunidade (RF14, RF15) e de IA-Assistente (RF16, RF17) também mapeia para um **conceito do MPO** (não atributo), reforçando a fundamentação teórica.
+
+A matriz é viva: T2.3 (semente), T5.1 (finalização).
