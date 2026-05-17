@@ -26,6 +26,79 @@ from pptx.dml.color import RGBColor
 from pptx.oxml.ns import qn
 
 
+def duplicate_slide(prs, src_idx: int, dst_idx: int | None = None):
+    """Duplica o slide na posição `src_idx`. Insere o novo slide em `dst_idx`
+    (zero-based) ou no final se `dst_idx is None`.
+
+    Retorna o novo slide. Mantém todos os shapes (incluindo imagens) e a
+    relação com o slide layout original.
+
+    Implementação: python-pptx não expõe API de duplicação;
+    1. Copia o XML do `spTree` (preserva todas as shapes textuais e decorativas)
+    2. Para Pictures, re-adiciona via `add_picture` para garantir que as
+       relações `r:embed` apontem para image parts do slide novo (senão a
+       imagem aparece quebrada / não renderiza)
+    3. Move o `sldId` na `sldIdLst` para `dst_idx` se necessário
+    """
+    from copy import deepcopy
+    from io import BytesIO
+
+    src_slide = prs.slides[src_idx]
+
+    # Coletar pictures do src ANTES de duplicar — vamos re-adicionar com bytes
+    pics_to_restore = []
+    for shape in src_slide.shapes:
+        if shape.shape_type == 13:  # PICTURE
+            try:
+                pics_to_restore.append({
+                    "blob": shape.image.blob,
+                    "left": shape.left,
+                    "top": shape.top,
+                    "width": shape.width,
+                    "height": shape.height,
+                })
+            except Exception:
+                # Picture sem blob acessível (ex: linked, não embedded); skip
+                pass
+
+    # Adicionar novo slide com o mesmo layout do src
+    new_slide = prs.slides.add_slide(src_slide.slide_layout)
+
+    # Remover placeholders padrão
+    for shape in list(new_slide.shapes):
+        sp = shape._element
+        sp.getparent().remove(sp)
+
+    # Copiar todos os shapes do src_slide para o new_slide (inclusive pictures quebradas)
+    for shape in src_slide.shapes:
+        el = shape._element
+        new_el = deepcopy(el)
+        new_slide.shapes._spTree.append(new_el)
+
+    # Remover as Pictures duplicadas (broken — rId aponta pra outro slide)
+    for shape in list(new_slide.shapes):
+        if shape.shape_type == 13:
+            shape._element.getparent().remove(shape._element)
+
+    # Re-adicionar Pictures usando os bytes e posições originais
+    for pic in pics_to_restore:
+        new_slide.shapes.add_picture(
+            BytesIO(pic["blob"]),
+            pic["left"], pic["top"],
+            width=pic["width"], height=pic["height"],
+        )
+
+    # Reordenar se dst_idx for especificado e diferente do final
+    if dst_idx is not None and dst_idx != len(prs.slides) - 1:
+        sld_id_lst = prs.slides._sldIdLst
+        sld_ids = list(sld_id_lst)
+        new_sld_id = sld_ids[-1]  # último é o que acabamos de adicionar
+        sld_id_lst.remove(new_sld_id)
+        sld_id_lst.insert(dst_idx, new_sld_id)
+
+    return new_slide
+
+
 def delete_slide_by_index(prs, idx: int) -> None:
     """Remove o slide na posição zero-based.
 

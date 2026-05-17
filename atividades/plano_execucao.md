@@ -290,13 +290,13 @@ Os 12 riscos consolidados do pivot:
 | # | Risco | Probabilidade | Impacto | Mitigação |
 |---|---|---|---|---|
 | R1 | Acesso insuficiente aos stakeholders dos clientes para Likert | Média | Alto | Bruno inicia contato na semana 8. Plano B: 1 respondente por projeto + declaração de limitação. |
-| R2 | Heterogeneidade alta dos `.docx` reais quebra o pipeline | Média | Médio | Inspeção amostral na semana 8; chunking + saneamento documentados antes do Sprint 1. |
+| R2 | Heterogeneidade alta dos `.docx` reais quebra o pipeline | Média | Médio | Inspeção amostral na semana 8; chunking + saneamento documentados antes do Sprint 2. |
 | R3 | Custo/limite de tokens da API LLM | Média | Médio | Estimar volume na sem 8 (3 chamadas por projeto agora); modelo mais barato para drafts; caching agressivo. |
 | R4 | Concordância entre avaliadores baixa (Kappa < 0,6) | Média | Médio | Valença como piloto. Se rubrica mudar significativamente, refazer Valença. |
 | R5 | Esforço do gabarito manual estoura semana 9 | Média | Alto | Reduzido para 3 projetos. Cynthia + Moisés iniciam após T0.3 (meio sem 8). |
 | R6 | Mudança no schema mid-sprint | Baixa | Alto | Schema versionado; congelar ao fim da semana 9. |
 | R7 | LGPD — dados de marketing em formato semi-aberto | Média | Alto | NDA com clientes; consentimento explícito; criptografia em trânsito; logs de acesso. |
-| R8 | Custo de LLM aumentado pelas 3 chamadas por projeto | Média | Médio | Estimativa antes do Sprint 1; modelo mais barato para drafts; caching. |
+| R8 | Custo de LLM aumentado pelas 3 chamadas por projeto | Média | Médio | Estimativa antes do Sprint 2; modelo mais barato para drafts; caching. |
 | R9 | Prazo apertado pós-pivot (perdemos 1 semana) | Alta | Alto | Cortes feitos (Lições, notificações email); SR1 apresenta plano + protótipos, não código. |
 | R10 | Complexidade do auth e perfis (não estava previsto) | Média | Médio | Auth simples (JWT, sem OAuth); bibliotecas padrão FastAPI. |
 | R11 | Resistência dos clientes a participar do observatório | Média | Alto | Bruno inicia contato cedo; valor proposto: "ver o que estamos observando do seu projeto". |

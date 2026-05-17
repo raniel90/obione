@@ -37,7 +37,7 @@ Chat com IA e detecção automática de padrões entre projetos: fora do escopo 
 
 # Entregáveis da Fase Preparatória (semana 8)
 
-Não são US de produto, são **decisões metodológicas e baselines de avaliação** que destravam o resto. Sem elas, Sprint 1 estoura e Sprint 4 (avaliação) não roda.
+Não são US de produto, são **decisões metodológicas e baselines de avaliação** que destravam o resto. Sem elas, Sprint 2 estoura e Sprint 5 (avaliação) não roda.
 
 | Entregável | Conteúdo |
 |---|---|
@@ -53,11 +53,11 @@ Não são US de produto, são **decisões metodológicas e baselines de avaliaç
 
 # MVP
 
-## Sprint 0 — Preparatória (semana 8: 15-21/05)
+## Sprint 1 — Preparatória (semana 8: 15-21/05)
 
 Entregáveis acima + alinhamento do grupo no pivot.
 
-## Sprint 1 — Cadastro, Upload, Auth e Pipeline (semanas 9-10: 22/05-04/06)
+## Sprint 2 — Cadastro, Upload, Auth e Pipeline (semanas 9-10: 22/05-04/06)
 
 ### US01 — Autenticar usuário
 **Como** usuário, **quero** acessar o observatório com login **para** que minhas permissões sejam respeitadas.
@@ -112,7 +112,7 @@ Critérios:
 
 ---
 
-## Sprint 2 — Dashboard, Cobertura e Perfis (semana 11: 05-11/06)
+## Sprint 3 — Dashboard, Cobertura e Perfis (semana 11: 05-11/06)
 
 ### US02 — Gerenciar perfis e acesso semi-aberto
 **Como** sistema, **devo** garantir que cada usuário acessa apenas o que seu perfil permite.
@@ -159,7 +159,7 @@ Critérios:
 
 ---
 
-## Sprint 3 — Comunidade e IA-Assistente (semanas 12-13: 12-25/06)
+## Sprint 4 — Comunidade e IA-Assistente (semanas 12-13: 12-25/06)
 
 ### US10 — Comentar no projeto
 **Como** consultor ou cliente daquele projeto, **quero** comentar e responder comentários **para** dialogar sobre o conteúdo observado.
@@ -213,7 +213,7 @@ Critérios:
 
 ---
 
-## Sprint 4 — Avaliação (semana 14: 26/06-02/07)
+## Sprint 5 — Avaliação (semana 14: 26/06-02/07)
 
 ### US14 — Importar e validar gabarito manual
 **Como** sistema, **devo** carregar os gabaritos produzidos na fase preparatória **para** servir de baseline na comparação.
@@ -306,13 +306,13 @@ Critérios:
 
 | Sem | Data | Atividade | Sprint | Marco |
 |---|---|---|---|---|
-| 8 | 15-21/05 | Fase preparatória (atributos, protocolo, schema, protótipos, setup) + alinhamento do grupo no pivot | Sprint 0 | — |
-| 9 | 22-28/05 | US01 (auth), US03 (cadastro), US04 (upload); iniciar gabarito (3 projetos) | Sprint 1 | M1 + SR1 |
-| 10 | 29/05-04/06 | US05 (extração), US06 (persistência); finalizar gabarito; matriz semente | Sprint 1 | — |
-| 11 | 05-11/06 | US02 (perfis), US07 (portfólio), US08 (detalhe), US09 (cobertura) | Sprint 2 | M2 |
-| 12 | 12-18/06 | US10, US11, US12 (Resumo), US13 (Drafts) | Sprint 3 | — |
-| 13 | 19-25/06 | Polish + aplicação da rubrica nos 3 projetos + lançar Likert | Sprint 3 | M3 + SR2 |
-| 14 | 26/06-02/07 | US14, US15, US16, US17, US18 (avaliação consolidada) | Sprint 4 | M4 |
+| 8 | 15-21/05 | Fase preparatória (atributos, protocolo, schema, protótipos, setup) + alinhamento do grupo no pivot | Sprint 1 | — |
+| 9 | 22-28/05 | US01 (auth), US03 (cadastro), US04 (upload); iniciar gabarito (3 projetos) | Sprint 2 | M1 + SR1 |
+| 10 | 29/05-04/06 | US05 (extração), US06 (persistência); finalizar gabarito; matriz semente | Sprint 2 | — |
+| 11 | 05-11/06 | US02 (perfis), US07 (portfólio), US08 (detalhe), US09 (cobertura) | Sprint 3 | M2 |
+| 12 | 12-18/06 | US10, US11, US12 (Resumo), US13 (Drafts) | Sprint 4 | — |
+| 13 | 19-25/06 | Polish + aplicação da rubrica nos 3 projetos + lançar Likert | Sprint 4 | M3 + SR2 |
+| 14 | 26/06-02/07 | US14, US15, US16, US17, US18 (avaliação consolidada) | Sprint 5 | M4 |
 | 15 | 03-09/07 | Escrita do relato + slides + screencast | — | — |
 | 16 | 10/07 | **Apresentação final + entrega do artigo** | — | Entrega |
 
@@ -337,13 +337,13 @@ Critérios:
 | # | Risco | Probabilidade | Impacto | Mitigação |
 |---|---|---|---|---|
 | R1 | Acesso insuficiente aos stakeholders dos clientes para Likert | Média | Alto | **Bruno inicia contato na semana 8.** Plano B: 1 respondente por projeto + declaração de limitação. |
-| R2 | Heterogeneidade alta dos `.docx` reais quebra o pipeline | Média | Médio | Inspeção amostral na semana 8; chunking + saneamento documentados antes do Sprint 1. |
+| R2 | Heterogeneidade alta dos `.docx` reais quebra o pipeline | Média | Médio | Inspeção amostral na semana 8; chunking + saneamento documentados antes do Sprint 2. |
 | R3 | Custo/limite de tokens da API LLM (aumentado pós-pivot) | Média | Médio | Estimar volume na semana 8 considerando 3 chamadas por projeto (extração + resumo + drafts); modelo apropriado por etapa; caching. |
 | R4 | Concordância entre avaliadores baixa (Kappa < 0,6) | Média | Médio | **Valença como projeto piloto**. Se rubrica mudar significativamente, refazer Valença com a rubrica final. |
 | R5 | Esforço do gabarito manual estoura semana 8 | Média | Alto | **Reduzido para 3 projetos** (10 → 6 anotações). Cynthia + Moisés iniciam após atributos-alvo (meio da sem 8). |
-| R6 | Mudança no schema mid-sprint | Baixa | Alto | Schema versionado; congelar ao fim da semana 9 (antes do Sprint 2). |
+| R6 | Mudança no schema mid-sprint | Baixa | Alto | Schema versionado; congelar ao fim da semana 9 (antes do Sprint 3). |
 | R7 | LGPD — dados de marketing de clientes em formato semi-aberto | Média | Alto | NDA com clientes; consentimento explícito; criptografia em trânsito; logs de acesso. |
-| R8 | Custo de LLM aumentado pelas 3 chamadas por projeto | Média | Médio | Estimativa de tokens antes do Sprint 1; modelo mais barato para drafts iniciais; caching agressivo. |
+| R8 | Custo de LLM aumentado pelas 3 chamadas por projeto | Média | Médio | Estimativa de tokens antes do Sprint 2; modelo mais barato para drafts iniciais; caching agressivo. |
 | R9 | Prazo apertado pós-pivot (perdemos 1 semana) | Alta | Alto | Cortes já feitos (Lições, notificações email); SR1 apresenta pivot + plano + protótipos, não código. |
 | R10 | Complexidade do auth e perfis (não estava previsto) | Média | Médio | Auth simples (email+senha+JWT); sem OAuth; bibliotecas padrão FastAPI (passlib + python-jose). |
 | R11 | Resistência dos clientes a participar do observatório | Média | Alto | Bruno inicia contato cedo; valor proposto: "ver o que estamos observando do seu projeto". |
