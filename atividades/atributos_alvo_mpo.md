@@ -150,7 +150,7 @@ A comparação exata aplicada na avaliação considera as seguintes normalizaç�
 ## Próximos passos
 
 1. **Revisão pelo Moisés** desta lista — confirmar categorizações borderline (especialmente "Indicadores do projeto", "Análise quantitativa de riscos", "Licitação", "Contratos").
-2. **T1.3 — Schema de extração** (Raniel) — derivar JSON Schema formal desta lista para uso na extração automática (RF05) e validação dos gabaritos (RF14).
+2. ✅ **T1.3 — Schema de extração** (Raniel) — `atividades/schema_extracao.json` (JSON Schema draft 2020-12, 44 propriedades flat com `x-numero`, `x-categoria`, `x-tipo-extracao`). Stub validável em `atividades/schema_extracao_exemplo.json`.
 3. **T1.4 — Produção dos gabaritos manuais** — Cynthia e Moisés anotam Valença (piloto), depois Freire Batista e Kaka JJ, usando esta lista como referência.
 
 ---

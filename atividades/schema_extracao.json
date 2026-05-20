@@ -1,0 +1,372 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://obione.upe.br/schema/extracao/v1.json",
+  "title": "ObiOne — Schema de Extração v1 (MPO Quadro 37)",
+  "description": "Schema formal dos 44 atributos extraídos pelo pipeline LLM do ObiOne. Derivado do Quadro 37 (Vieira, 2022, p. 264). Usado pela extração automática (RF05), pelo gabarito manual (RF14) e pela avaliação (RF15). Nullable em tudo — o .docx pode não conter o atributo.",
+  "version": "1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "_meta": {
+      "type": "object",
+      "description": "Metadados de linkagem do JSON ao documento fonte. Não é provenance por atributo.",
+      "additionalProperties": false,
+      "properties": {
+        "projeto_nome": {
+          "type": "string",
+          "description": "Nome do projeto (slug ou nome legível)."
+        },
+        "documento_fonte": {
+          "type": "string",
+          "description": "Caminho/nome do arquivo .docx fonte."
+        },
+        "hash_documento": {
+          "type": ["string", "null"],
+          "description": "SHA-256 do conteúdo do .docx para detectar mudanças."
+        },
+        "modelo_llm": {
+          "type": ["string", "null"],
+          "description": "Identificador do modelo LLM usado (ex: 'claude-opus-4-7'). null para gabarito manual."
+        },
+        "data_extracao": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Data/hora da extração em ISO 8601."
+        },
+        "origem": {
+          "type": "string",
+          "enum": ["llm", "gabarito_manual"],
+          "description": "llm = extração automática; gabarito_manual = anotação humana."
+        }
+      },
+      "required": ["projeto_nome", "documento_fonte", "data_extracao", "origem"]
+    },
+
+    "nome_projeto": {
+      "type": ["string", "null"],
+      "x-numero": 1,
+      "x-categoria": "conteudo_geral",
+      "x-tipo-extracao": "estruturado",
+      "description": "String curta que identifica o projeto univocamente."
+    },
+    "descricao": {
+      "type": ["string", "null"],
+      "x-numero": 2,
+      "x-categoria": "conteudo_geral",
+      "x-tipo-extracao": "texto_livre",
+      "description": "Texto narrativo livre do projeto."
+    },
+    "local_execucao": {
+      "type": ["string", "null"],
+      "x-numero": 3,
+      "x-categoria": "conteudo_geral",
+      "x-tipo-extracao": "estruturado",
+      "description": "Cidade/estado/país ou referência de local."
+    },
+    "tipo": {
+      "type": ["string", "null"],
+      "x-numero": 4,
+      "x-categoria": "conteudo_geral",
+      "x-tipo-extracao": "estruturado",
+      "description": "Categoria/classe do projeto (ex: consultoria de marketing, jurídico, gastronomia)."
+    },
+    "porte": {
+      "type": ["string", "null"],
+      "enum": ["pequeno", "medio", "grande", null],
+      "x-numero": 5,
+      "x-categoria": "conteudo_geral",
+      "x-tipo-extracao": "estruturado",
+      "description": "Porte do projeto."
+    },
+    "objetivos": {
+      "type": ["string", "null"],
+      "x-numero": 6,
+      "x-categoria": "conteudo_geral",
+      "x-tipo-extracao": "texto_livre",
+      "description": "Lista narrativa dos objetivos do projeto (use bullets ou parágrafos)."
+    },
+    "descricao_produtos_servicos": {
+      "type": ["string", "null"],
+      "x-numero": 7,
+      "x-categoria": "conteudo_geral",
+      "x-tipo-extracao": "texto_livre",
+      "description": "Narrativa dos produtos e serviços gerados pelo projeto."
+    },
+    "licitacao": {
+      "type": ["string", "null"],
+      "x-numero": 8,
+      "x-categoria": "conteudo_geral",
+      "x-tipo-extracao": "estruturado",
+      "description": "Número/referência da licitação. N/A para os 5 projetos do estudo (consultoria privada) — extrair null."
+    },
+    "contratos": {
+      "type": ["string", "null"],
+      "x-numero": 9,
+      "x-categoria": "conteudo_geral",
+      "x-tipo-extracao": "estruturado",
+      "description": "Número/referência de contrato."
+    },
+    "termo_encerramento": {
+      "type": ["string", "null"],
+      "x-numero": 10,
+      "x-categoria": "conteudo_geral",
+      "x-tipo-extracao": "texto_livre",
+      "description": "Texto do termo de encerramento, se o projeto já foi finalizado."
+    },
+    "justificativas_projeto": {
+      "type": ["string", "null"],
+      "x-numero": 11,
+      "x-categoria": "conteudo_geral",
+      "x-tipo-extracao": "texto_livre",
+      "description": "Narrativa da razão do projeto existir."
+    },
+    "impactos_projeto": {
+      "type": ["string", "null"],
+      "x-numero": 12,
+      "x-categoria": "conteudo_geral",
+      "x-tipo-extracao": "texto_livre",
+      "description": "Narrativa dos impactos esperados/observados a curto e longo prazo."
+    },
+    "indicadores_projeto": {
+      "type": ["string", "null"],
+      "x-numero": 13,
+      "x-categoria": "conteudo_geral",
+      "x-tipo-extracao": "texto_livre",
+      "description": "Lista narrativa de KPIs do projeto."
+    },
+    "artefatos_produzidos": {
+      "type": ["string", "null"],
+      "x-numero": 14,
+      "x-categoria": "conteudo_geral",
+      "x-tipo-extracao": "texto_livre",
+      "description": "Lista descritiva de entregáveis produzidos."
+    },
+    "imagens_fotos": {
+      "type": "null",
+      "x-numero": 15,
+      "x-categoria": "conteudo_geral",
+      "x-tipo-extracao": "fora_de_escopo",
+      "x-fora-de-escopo": true,
+      "description": "Conteúdo visual; não extraível por LLM textual. Excluído do cálculo de cobertura."
+    },
+
+    "nome_stakeholders": {
+      "type": ["array", "null"],
+      "items": {"type": "string"},
+      "x-numero": 16,
+      "x-categoria": "stakeholders",
+      "x-tipo-extracao": "estruturado",
+      "description": "Lista de nomes próprios dos stakeholders. Avaliação por comparação de conjunto."
+    },
+    "funcao_projeto": {
+      "type": ["array", "null"],
+      "items": {"type": "string"},
+      "x-numero": 17,
+      "x-categoria": "stakeholders",
+      "x-tipo-extracao": "estruturado",
+      "description": "Lista de cargos/papéis de cada stakeholder. Avaliação por comparação de conjunto."
+    },
+    "publico_alvo": {
+      "type": ["string", "null"],
+      "x-numero": 18,
+      "x-categoria": "stakeholders",
+      "x-tipo-extracao": "texto_livre",
+      "description": "Descrição da audiência/cliente final."
+    },
+    "detalhes_equipe": {
+      "type": ["string", "null"],
+      "x-numero": 19,
+      "x-categoria": "stakeholders",
+      "x-tipo-extracao": "texto_livre",
+      "description": "Composição, organização e responsabilidades da equipe."
+    },
+    "treinamentos_equipes": {
+      "type": ["string", "null"],
+      "x-numero": 20,
+      "x-categoria": "stakeholders",
+      "x-tipo-extracao": "texto_livre",
+      "description": "Narrativa de capacitações e formações realizadas pelas equipes."
+    },
+
+    "tarefas_projeto": {
+      "type": ["string", "null"],
+      "x-numero": 21,
+      "x-categoria": "escopo",
+      "x-tipo-extracao": "texto_livre",
+      "description": "Lista descritiva de tarefas do projeto."
+    },
+    "requisitos": {
+      "type": ["string", "null"],
+      "x-numero": 22,
+      "x-categoria": "escopo",
+      "x-tipo-extracao": "texto_livre",
+      "description": "Lista descritiva de requisitos funcionais/não-funcionais."
+    },
+    "escopo_planejado": {
+      "type": ["string", "null"],
+      "x-numero": 23,
+      "x-categoria": "escopo",
+      "x-tipo-extracao": "texto_livre",
+      "description": "Definição original do escopo do projeto."
+    },
+    "escopo_executado": {
+      "type": ["string", "null"],
+      "x-numero": 24,
+      "x-categoria": "escopo",
+      "x-tipo-extracao": "texto_livre",
+      "description": "O que efetivamente foi feito."
+    },
+
+    "data_inicio": {
+      "type": ["string", "null"],
+      "format": "date",
+      "x-numero": 25,
+      "x-categoria": "cronograma",
+      "x-tipo-extracao": "estruturado",
+      "description": "ISO 8601 (YYYY-MM-DD)."
+    },
+    "data_fim_planejada": {
+      "type": ["string", "null"],
+      "format": "date",
+      "x-numero": 26,
+      "x-categoria": "cronograma",
+      "x-tipo-extracao": "estruturado",
+      "description": "ISO 8601 (YYYY-MM-DD)."
+    },
+    "data_fim_executada": {
+      "type": ["string", "null"],
+      "format": "date",
+      "x-numero": 27,
+      "x-categoria": "cronograma",
+      "x-tipo-extracao": "estruturado",
+      "description": "ISO 8601 (YYYY-MM-DD). null se o projeto ainda não terminou."
+    },
+    "entregas_realizadas": {
+      "type": ["string", "null"],
+      "x-numero": 28,
+      "x-categoria": "cronograma",
+      "x-tipo-extracao": "texto_livre",
+      "description": "Lista descritiva de marcos/entregas a serem realizadas."
+    },
+    "status_cronograma": {
+      "type": ["string", "null"],
+      "enum": ["no_prazo", "atrasado", "adiantado", "concluido", "cancelado", null],
+      "x-numero": 29,
+      "x-categoria": "cronograma",
+      "x-tipo-extracao": "estruturado",
+      "description": "Status atual do cronograma."
+    },
+
+    "custo_estimado": {
+      "type": ["number", "null"],
+      "x-numero": 30,
+      "x-categoria": "custos",
+      "x-tipo-extracao": "estruturado",
+      "x-moeda": "BRL",
+      "description": "Valor monetário estimado em reais (BRL). Exemplo: 12500.50"
+    },
+    "custo_realizado": {
+      "type": ["number", "null"],
+      "x-numero": 31,
+      "x-categoria": "custos",
+      "x-tipo-extracao": "estruturado",
+      "x-moeda": "BRL",
+      "description": "Valor monetário realizado em reais (BRL)."
+    },
+    "justificativas_gastos": {
+      "type": ["string", "null"],
+      "x-numero": 32,
+      "x-categoria": "custos",
+      "x-tipo-extracao": "texto_livre",
+      "description": "Narrativa explicando os gastos."
+    },
+
+    "riscos_identificados": {
+      "type": ["string", "null"],
+      "x-numero": 33,
+      "x-categoria": "riscos",
+      "x-tipo-extracao": "texto_livre",
+      "description": "Lista descritiva de riscos identificados."
+    },
+    "analise_qualitativa_riscos": {
+      "type": ["string", "null"],
+      "x-numero": 34,
+      "x-categoria": "riscos",
+      "x-tipo-extracao": "texto_livre",
+      "description": "Texto narrativo da análise qualitativa dos riscos."
+    },
+    "analise_quantitativa_riscos": {
+      "type": ["string", "null"],
+      "x-numero": 35,
+      "x-categoria": "riscos",
+      "x-tipo-extracao": "texto_livre",
+      "description": "Texto narrativo da análise quantitativa (pode conter números embutidos)."
+    },
+    "planejamento_respostas_riscos": {
+      "type": ["string", "null"],
+      "x-numero": 36,
+      "x-categoria": "riscos",
+      "x-tipo-extracao": "texto_livre",
+      "description": "Estratégias de mitigação descritas."
+    },
+    "monitoramento_riscos": {
+      "type": ["string", "null"],
+      "x-numero": 37,
+      "x-categoria": "riscos",
+      "x-tipo-extracao": "texto_livre",
+      "description": "Como os riscos estão sendo acompanhados."
+    },
+
+    "custo_implementacao_mudanca": {
+      "type": ["number", "null"],
+      "x-numero": 38,
+      "x-categoria": "mudancas",
+      "x-tipo-extracao": "estruturado",
+      "x-moeda": "BRL",
+      "description": "Valor monetário de implementação da mudança em reais (BRL)."
+    },
+    "analise_custo_beneficio": {
+      "type": ["string", "null"],
+      "x-numero": 39,
+      "x-categoria": "mudancas",
+      "x-tipo-extracao": "texto_livre",
+      "description": "Análise narrativa custo-benefício da mudança."
+    },
+    "impactos_mudanca": {
+      "type": ["string", "null"],
+      "x-numero": 40,
+      "x-categoria": "mudancas",
+      "x-tipo-extracao": "texto_livre",
+      "description": "Descrição dos impactos da mudança no escopo e cronograma."
+    },
+
+    "pontos_fortes": {
+      "type": ["string", "null"],
+      "x-numero": 41,
+      "x-categoria": "licoes_aprendidas",
+      "x-tipo-extracao": "texto_livre",
+      "description": "Aspectos positivos identificados."
+    },
+    "pontos_fracos": {
+      "type": ["string", "null"],
+      "x-numero": 42,
+      "x-categoria": "licoes_aprendidas",
+      "x-tipo-extracao": "texto_livre",
+      "description": "Aspectos negativos identificados."
+    },
+    "dificuldades_encontradas": {
+      "type": ["string", "null"],
+      "x-numero": 43,
+      "x-categoria": "licoes_aprendidas",
+      "x-tipo-extracao": "texto_livre",
+      "description": "Obstáculos enfrentados durante o projeto."
+    },
+    "providencias_tomadas": {
+      "type": ["string", "null"],
+      "x-numero": 44,
+      "x-categoria": "licoes_aprendidas",
+      "x-tipo-extracao": "texto_livre",
+      "description": "Ações de resposta às dificuldades."
+    }
+  }
+}
