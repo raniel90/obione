@@ -11,9 +11,9 @@ matches the JSON schema contract exactly.
 """
 from __future__ import annotations
 
-from typing import Literal
+from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class MetaExtracao(BaseModel):
@@ -53,6 +53,16 @@ class ProjetoExtraido(BaseModel):
     model_config = ConfigDict(populate_by_name=True, extra="ignore")
 
     meta: MetaExtracao = Field(alias="_meta")
+
+    @field_validator("porte", "status_cronograma", mode="before")
+    @classmethod
+    def _lowercase_enums(cls, v: Any) -> Any:
+        """LLMs sometimes capitalize enum values ('Pequeno' vs 'pequeno').
+        Normalize to lowercase before Literal validation kicks in.
+        """
+        if isinstance(v, str):
+            return v.strip().lower()
+        return v
 
     # --- Conteúdo geral (15 atributos: 1-15) ---
     nome_projeto: str | None = Field(
