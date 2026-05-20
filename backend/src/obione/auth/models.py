@@ -2,11 +2,15 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import CheckConstraint, DateTime, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
+
+
+def _now() -> datetime:
+    return datetime.now(timezone.utc)
 
 from obione.shared.database import Base
 from obione.shared.ids import new_id
@@ -27,12 +31,16 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(String(32), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
+        DateTime(timezone=True),
+        default=_now,
+        server_default=func.now(),
+        nullable=False,
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
+        default=_now,
+        onupdate=_now,
         server_default=func.now(),
-        onupdate=func.now(),
         nullable=False,
     )
 
