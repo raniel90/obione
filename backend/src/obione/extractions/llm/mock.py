@@ -6,21 +6,25 @@ from obione.extractions.llm.port import ExtractionResult
 
 _FALLBACK = {
     "_meta": {
-        "project_name": "mock-project",
-        "source_document": "mock.docx",
-        "extracted_at": "2026-01-01T00:00:00Z",
-        "source": "llm",
+        "projeto_nome": "mock-project",
+        "documento_fonte": "mock.docx",
+        "data_extracao": "2026-01-01T00:00:00Z",
+        "origem": "llm",
+        "modelo_llm": "mock",
     },
-    "project_name": "Mock Project",
+    "nome_projeto": "Mock Project",
 }
+
+
+_DEFAULT_EXAMPLE_PATH = "/app/atividades/schema_extracao_exemplo.json"
 
 
 class MockExtractor:
     def __init__(self, example_path: str | None = None):
-        self._example_path = example_path
+        self._example_path = example_path or _DEFAULT_EXAMPLE_PATH
 
     def extract(self, document_bytes: bytes) -> ExtractionResult:
-        if self._example_path and Path(self._example_path).exists():
+        if Path(self._example_path).exists():
             content = json.loads(Path(self._example_path).read_text())
         else:
             content = dict(_FALLBACK)
