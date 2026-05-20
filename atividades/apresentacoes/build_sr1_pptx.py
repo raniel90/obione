@@ -487,12 +487,12 @@ def fix_slide_6_marcos(slide) -> None:
 
 
 def fix_slide_7_estamos_vs_proximos(slide) -> None:
-    """Then-Now-Next: ESTÁ FEITO (Sprint 0) + PRÓXIMAS SEMANAS."""
+    """Then-Now-Next: ESTÁ FEITO (Sprint 1, esta semana) + PRÓXIMAS SEMANAS."""
     replace_run_text(slide, "PRÓXIMOS PASSOS", "ONDE ESTAMOS · O QUE VEM")
     replace_run_text(
         slide,
         "Decisões e posicionamentos",
-        "Sprint 0 concluído e próximas semanas",
+        "Status atual e próximas semanas",
     )
 
     # Card esquerda
@@ -562,6 +562,115 @@ def fix_slide_8_obrigado(slide) -> None:
 # ----------------------------------------------------------------------- main
 
 
+def add_speaker_notes(prs) -> None:
+    """Adiciona briefing como nota do apresentador em cada um dos 8 slides."""
+    notes = {
+        0: """[Tempo: ~30s]
+
+Saudação inicial. Apresentar o grupo e a cadeira:
+"Somos Bruno, Cynthia, Moisés e Raniel, do grupo ObiOne, da cadeira Tópicos Avançados em Engenharia de Software, do prof. Ivaldir."
+
+Gancho: "Esse é o nosso Status Report 1. Vamos te mostrar o que é o ObiOne, o que vamos entregar até 10/07, e onde estamos agora."
+""",
+        1: """[Tempo: ~30s]
+
+Apresente o roteiro em 4 blocos sem detalhar:
+"Quatro partes: primeiro o contexto que motiva o projeto, depois o que vamos construir, o cronograma das 9 semanas restantes, e fechamos com o status atual."
+""",
+        2: """[Tempo: ~2min — slide-chave para criar tensão narrativa]
+
+CARD ESQUERDO — "Observatórios vs. ferramentas":
+"Observatório é MAIS que dashboard. É um espaço de conhecimento entre múltiplos atores — consultoria, clientes, pesquisa — mediado por interação contínua. Ferramentas de gestão como Jira ou planilhas só oferecem visualização de status. Falta o tecido social e a curadoria do conhecimento."
+
+TRANSIÇÃO para o card direito:
+"Se observatórios são tão valiosos, por que são raros na prática? Porque mantê-los vivos é CARO."
+
+CARD DIREITO — três fontes de fricção:
+1. Manual: ler .docx, estruturar, atualizar a curadoria de atributos
+2. Repetitivo: comunicar progresso ao cliente em linguagem acessível
+3. Custoso: manter engajamento da comunidade — responder, contextualizar
+
+FECHAMENTO: "Sem reduzir essa fricção, observatório fica restrito à teoria. É aí que entra a IA Generativa — e o ObiOne."
+
+Bases citadas: Vieira (2022) Cap. 5 (MPO); OPTI-PE como caso prático; Seção 6.4 sobre Trabalhos Futuros.
+""",
+        3: """[Tempo: ~3min — NÚCLEO ESTRATÉGICO da apresentação]
+
+CARD ESQUERDO — "O que é o ObiOne":
+Diga claramente: "O ObiOne é um observatório-de-portfólio para consultoria de projetos."
+
+PARA QUEM E PARA QUÊ — três audiências:
+- CONSULTORIA: observa o portfólio como conhecimento estruturado, não como pasta de Drive.
+- CLIENTE: acompanha o PRÓPRIO projeto em linguagem acessível, sem depender de reunião.
+- COMUNIDADE vira ativo: comentários, comparativos cross-projeto, IA mantém o tecido vivo.
+
+PAUSA — deixe assentar.
+
+CARD DIREITO — "Por que isso é diferente do que já existe? Combinação inédita em 3 vetores":
+- vs. PM (Jira, Trello, Asana): gerenciam tarefas e prazos. ObiOne OBSERVA o projeto como objeto de conhecimento, mapeando 44 atributos do MPO.
+- vs. BI (Power BI, Looker): mostram métricas. ObiOne extrai SIGNIFICADO de .docx com LLM.
+- vs. OBSERVATÓRIOS ACADÊMICOS (OPTI-PE): são instrumentos de pesquisa estáticos. ObiOne é OPERACIONAL — consultoria e clientes no dia-a-dia.
+
+FECHAMENTO: "Único a combinar observação MPO + extração com IA + comunidade ativa em uma só plataforma."
+
+Bases citadas: Quadro 37 do MPO (44 atributos); OPTI-PE (Vieira 2022 Cap. 5); levantamento de ferramentas de mercado.
+""",
+        4: """[Tempo: ~2min]
+
+Descer ao nível da execução:
+"Agora o como — escopo organizado em 5 grupos, 18 requisitos funcionais."
+
+Aponte para cada grupo brevemente (NÃO leia tudo):
+- G1 PIPELINE LLM: extrai os 44 atributos via LLM, alimenta tudo
+- G2 OBSERVAÇÃO: dashboard de cobertura — cliente vê apenas o seu projeto
+- G3 COMUNIDADE: auth, perfis semi-abertos, comentários e feed
+- G4 IA-ASSISTENTE: Resumo do Cliente (tradutora) + Drafts (redutora de fricção)
+- G5 AVALIAÇÃO: rubrica + Cohen's Kappa nos 3 projetos + Likert × 2 audiências
+
+FECHAMENTO: "Cada grupo materializa uma categoria do MPO. Detalhes técnicos no repositório."
+""",
+        5: """[Tempo: ~1.5min]
+
+"São 9 semanas até 10/07, divididas em 4 marcos."
+
+Percorra rapidamente os marcos (use os subtítulos como âncora):
+- M1 PREPARAÇÃO (22-28 mai · ESTA SEMANA): atributos, protocolo, primeiros gabaritos. Destrava tudo o que vem.
+- M2 PIPELINE (29 mai - 11 jun): núcleo técnico. Cadastro + upload + auth + extração LLM nos 5 projetos.
+- M3 DASHBOARD + IA (12-25 jun): a comunidade ganha vida. Cobertura, perfis, comentários, Resumo do Cliente, Drafts assistidos. Status Report 2 em 19/06.
+- M4 AVALIAÇÃO (26 jun - 2 jul): fecha o ciclo DSR. Precisão, Recall, F1, Kappa, Likert × 2.
+
+FECHAMENTO: "Escrita do relato de 3-9/07. Apresentação final em 10/07."
+""",
+        6: """[Tempo: ~1.5min]
+
+"Onde estamos AGORA e o que vem nas próximas semanas."
+
+CARD ESQUERDO — ESTÁ FEITO (Sprint 1, esta semana — preparatória):
+1. REQUISITOS: 18 funcionais + 9 não funcionais, em formato ficha
+2. ATRIBUTOS-ALVO do MPO: os 44 do Quadro 37, categorizados por tipo
+3. PROTOCOLO DE AVALIAÇÃO: rubrica híbrida 0/0,5/1 + Cohen's Kappa
+
+CARD DIREITO — PRÓXIMAS SEMANAS:
+4. SPRINT 2 (22 mai - 4 jun): cadastro + upload + auth + pipeline LLM rodando nos 5 projetos
+5. GABARITOS MANUAIS: Valença como piloto, depois Freire Batista e Kaka JJ — pareados (Cynthia + Moisés)
+6. STATUS REPORT 2 (19/06): dashboard + IA-Assistente operacionais
+""",
+        7: """[Tempo: ~30s + perguntas]
+
+"Esse foi nosso Status Report 1. Documentação completa no repositório raniel90/obione. Abrimos para perguntas."
+
+Antecipe perguntas prováveis (responda só se vierem):
+- "Como vão validar o LLM?" → rubrica híbrida + 2 avaliadores independentes + Kappa
+- "Quem são os clientes?" → consultoria parceira; 5 projetos reais de domínios distintos (jurídico, saúde, esporte, branding)
+- "E se a IA errar?" → IA gera draft, consultor revisa antes de publicar
+- "Por que LLM e não regex/parser?" → heterogeneidade dos .docx; LLM lida com variação semântica
+""",
+    }
+    for idx, text in notes.items():
+        prs.slides[idx].notes_slide.notes_text_frame.text = text.strip()
+    print(f"  {len(notes)} speaker notes adicionados")
+
+
 def main() -> int:
     if not TEMPLATE.exists():
         print(f"❌ Template não encontrado: {TEMPLATE}", file=sys.stderr)
@@ -609,6 +718,9 @@ def main() -> int:
     print("\nAtualizando numeração de página (total=8)...")
     n = update_footers(prs, total=8)
     print(f"  {n} números de página atualizados")
+
+    print("\nAdicionando speaker notes (briefing por slide)...")
+    add_speaker_notes(prs)
 
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     prs.save(OUTPUT)
