@@ -17,6 +17,10 @@ NAMING_CONVENTION = {
 
 class Base(DeclarativeBase):
     metadata = MetaData(naming_convention=NAMING_CONVENTION)
+    # Force RETURNING on INSERT so server-defaulted columns are populated
+    # without an extra SELECT. Combined with expire_on_commit=False this
+    # keeps ORM objects safely readable after the UoW closes.
+    __mapper_args__ = {"eager_defaults": True}
 
 
 engine = create_engine(

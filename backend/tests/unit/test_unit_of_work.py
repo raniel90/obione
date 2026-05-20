@@ -24,7 +24,9 @@ def test_uow_commits_explicit():
     with uow:
         uow.commit()
     assert uow.commit_count == 1
-    assert uow.rollback_count == 1
+    # After a clean commit, __exit__ must NOT auto-rollback — that would
+    # expire ORM attributes and detach returned entities prematurely.
+    assert uow.rollback_count == 0
 
 
 @pytest.mark.unit
