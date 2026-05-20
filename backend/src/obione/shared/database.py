@@ -28,7 +28,13 @@ engine = create_engine(
     echo=False,
 )
 
-SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False, class_=Session)
+SessionLocal = sessionmaker(
+    bind=engine,
+    autocommit=False,
+    autoflush=False,
+    expire_on_commit=False,  # keep loaded attributes accessible after UoW closes
+    class_=Session,
+)
 
 
 def get_db() -> Generator[Session, None, None]:
