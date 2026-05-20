@@ -1,27 +1,31 @@
-"""Instructor-based extractor. One adapter, many providers via from_provider.
+"""LLM extractor adapter.
 
-Provider string is whatever instructor.from_provider accepts:
-    "ollama/llama3.1:8b"
-    "anthropic/claude-sonnet-4-6"
-    "openai/gpt-5-mini"
-
-For Ollama we force JSON mode explicitly; other providers use the library
-default (function/tool-call mode where available).
+Uses Instructor only for the OpenAI-compatible client construction; the actual
+chat call is made directly via httpx so the prompt isn't wrapped with
+Instructor's JSON-mode preamble. Llama 3.1 8B is sensitive to extra system
+instructions — adding Instructor's JSON wrapper consistently produced all-null
+outputs, while a direct call with our schema-aware prompt fills 30+ of 44
+attributes.
 """
 from __future__ import annotations
 
+import json
 from datetime import datetime, timezone
 
-import instructor
+from openai import OpenAI
 
 from obione.extractions.llm.loader import extract_text_from_docx
 from obione.extractions.llm.port import ExtractionResult
 from obione.extractions.llm.prompts import build_extraction_messages
 from obione.extractions.llm.schema import MetaExtracao, ProjetoExtraido
+from obione.settings import settings
 
 
 class InstructorExtractor:
-    """Implements AbstractExtractor by routing through Instructor."""
+    """Implements AbstractExtractor against any OpenAI-compatible endpoint.
+
+    Provider string drives the model name and (for Ollama) the base_url.
+    """
 
     def __init__(
         self,
@@ -33,10 +37,30 @@ class InstructorExtractor:
         self._provider = provider
         self._project_name = project_name
         self._document_name = document_name
-        kwargs: dict = {}
+        self._model_name = provider.split("/", 1)[1] if "/" in provider else provider
+
         if provider.startswith("ollama/"):
-            kwargs["mode"] = instructor.Mode.JSON
-        self._client = instructor.from_provider(provider, **kwargs)
+            base_url = (
+                f"{settings.LLM_BASE_URL.rstrip('/')}/v1"
+                if settings.LLM_BASE_URL
+                else "http://localhost:11434/v1"
+            )
+            api_key = "ollama"
+        elif provider.startswith("openai/"):
+            base_url = None
+            api_key = (
+                settings.LLM_API_KEY.get_secret_value()
+                if settings.LLM_API_KEY
+                else None
+            )
+        else:
+            # anthropic/*, others — not supported in this MVP path.
+            raise ValueError(
+                f"Unsupported provider for direct OpenAI client: {provider}. "
+                "Add a dedicated adapter for non-OpenAI-compatible providers."
+            )
+
+        self._client = OpenAI(base_url=base_url, api_key=api_key or "unused")
 
     def extract(self, document_bytes: bytes) -> ExtractionResult:
         doc_text = extract_text_from_docx(document_bytes)
@@ -45,20 +69,30 @@ class InstructorExtractor:
             project_name=self._project_name,
             document_name=self._document_name,
         )
-        projeto: ProjetoExtraido = self._client.create(
-            response_model=ProjetoExtraido,
+
+        completion = self._client.chat.completions.create(
+            model=self._model_name,
             messages=messages,
-            max_retries=3,
+            response_format={"type": "json_object"},
+            temperature=0.2,
         )
-        # Stamp _meta with runtime info — the LLM may have left placeholders
-        # or hallucinated a different value, so we overwrite authoritatively.
-        projeto.meta = MetaExtracao(
+        raw_json = completion.choices[0].message.content or "{}"
+        try:
+            payload = json.loads(raw_json)
+        except json.JSONDecodeError:
+            payload = {}
+
+        # Drop any _meta the LLM emitted — server-stamped below.
+        payload.pop("_meta", None)
+        payload["_meta"] = MetaExtracao(
             projeto_nome=self._project_name,
             documento_fonte=self._document_name,
             data_extracao=datetime.now(tz=timezone.utc).isoformat(),
             origem="llm",
             modelo_llm=self._provider,
-        )
+        ).model_dump(mode="json")
+
+        projeto = ProjetoExtraido.model_validate(payload)
         return ExtractionResult(
             content=projeto.model_dump(mode="json", by_alias=True),
             model_id=self._provider,
