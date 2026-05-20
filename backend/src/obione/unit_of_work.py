@@ -45,6 +45,8 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
 
     def __enter__(self) -> SqlAlchemyUnitOfWork:
         self.session = self._session_factory()
+        from obione.auth.repository import SqlAlchemyUserRepository
+        self.users: SqlAlchemyUserRepository = SqlAlchemyUserRepository(self.session)
         return super().__enter__()  # type: ignore[return-value]
 
     def __exit__(self, *args) -> None:
@@ -67,6 +69,8 @@ class FakeUnitOfWork(AbstractUnitOfWork):
 
     def __init__(self):
         self.committed = False
+        from obione.auth.repository import FakeUserRepository
+        self.users: FakeUserRepository = FakeUserRepository()
 
     def commit(self) -> None:
         self.committed = True
