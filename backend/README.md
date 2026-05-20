@@ -9,7 +9,7 @@ cd backend
 cp .env.example .env
 make up
 make migrate
-make seed       # creates admin@obione.local / admin123
+make seed       # creates admin@obione.dev / admin123
 ```
 
 Then open http://localhost:8000/docs

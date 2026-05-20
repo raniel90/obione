@@ -52,9 +52,9 @@ format:  ## Apply formatting + auto-fix linting
 	docker-compose exec backend ruff format .
 	docker-compose exec backend ruff check --fix .
 
-seed:  ## Create admin@obione.local / admin123
+seed:  ## Create admin@obione.dev / admin123
 	docker-compose exec backend python -m obione.cli create-user \
-		--email admin@obione.local --password admin123 --role admin --name "Admin"
+		--email admin@obione.dev --password admin123 --role admin --name "Admin"
 
 clean:  ## Stop containers AND remove volumes (DELETES DATA)
 	docker-compose down -v
