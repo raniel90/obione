@@ -9,6 +9,7 @@ from obione.shared.database import Base
 
 # Import all models so they register on Base.metadata.
 from obione.auth.models import User  # noqa: F401
+from obione.documents.models import Document  # noqa: F401
 from obione.projects.models import Project, ProjectClient  # noqa: F401
 
 config = context.config
