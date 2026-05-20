@@ -51,10 +51,14 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
         self.session = self._session_factory()
         from obione.auth.repository import SqlAlchemyUserRepository
         from obione.documents.repository import SqlAlchemyDocumentRepository
+        from obione.extractions.repository import SqlAlchemyExtractionRepository
         from obione.projects.repository import SqlAlchemyProjectRepository
         self.users: SqlAlchemyUserRepository = SqlAlchemyUserRepository(self.session)
         self.projects: SqlAlchemyProjectRepository = SqlAlchemyProjectRepository(self.session)
         self.documents: SqlAlchemyDocumentRepository = SqlAlchemyDocumentRepository(self.session)
+        self.extractions: SqlAlchemyExtractionRepository = SqlAlchemyExtractionRepository(
+            self.session
+        )
         return super().__enter__()  # type: ignore[return-value]
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
@@ -81,10 +85,12 @@ class FakeUnitOfWork(AbstractUnitOfWork):
         self.committed = False
         from obione.auth.repository import FakeUserRepository
         from obione.documents.repository import FakeDocumentRepository
+        from obione.extractions.repository import FakeExtractionRepository
         from obione.projects.repository import FakeProjectRepository
         self.users: FakeUserRepository = FakeUserRepository()
         self.projects: FakeProjectRepository = FakeProjectRepository()
         self.documents: FakeDocumentRepository = FakeDocumentRepository()
+        self.extractions: FakeExtractionRepository = FakeExtractionRepository()
 
     def commit(self) -> None:
         self.committed = True
