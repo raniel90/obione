@@ -6,9 +6,17 @@ from docx import Document as DocxDocument
 from obione.auth.models import User
 from obione.auth.security import hash_password
 from obione.projects.models import Project
+from obione.settings import settings
 from obione.shared.database import SessionLocal
 
 DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+
+@pytest.fixture(autouse=True)
+def _force_mock_provider(monkeypatch):
+    """Pin LLM_PROVIDER=mock for these e2e tests so they don't depend on
+    Ollama being reachable. Manual smoke covers the real provider path."""
+    monkeypatch.setattr(settings, "LLM_PROVIDER", "mock")
 
 
 def _purge_user(s, email: str) -> None:
