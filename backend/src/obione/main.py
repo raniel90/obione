@@ -4,6 +4,7 @@ from fastapi.responses import RedirectResponse
 
 from obione.auth.router import router as auth_router
 from obione.health.router import router as health_router
+from obione.projects.router import router as projects_router
 from obione.settings import settings
 from obione.shared.exceptions import register_exception_handlers
 from obione.shared.logging import configure_logging
@@ -24,6 +25,7 @@ def create_app() -> FastAPI:
 
     app.include_router(health_router)
     app.include_router(auth_router)
+    app.include_router(projects_router)
 
     @app.get("/", include_in_schema=False)
     def root():
