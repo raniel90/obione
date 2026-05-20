@@ -8,8 +8,7 @@ from obione.settings import settings
 from obione.shared.database import Base
 
 # Import all models so they register on Base.metadata.
-# Add new imports here when new bounded contexts add models.
-# (No models yet — added in phases 3+.)
+from obione.auth.models import User  # noqa: F401
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
