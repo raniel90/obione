@@ -4,18 +4,18 @@ Plano de trabalho para executar o ObiOne dentro do calendário da disciplina TAE
 
 Período: semana 8 (15-21/05/2026, em curso) a semana 16 (10/07/2026) — **9 semanas restantes**.
 
-**Última atualização:** 16/05/2026 — pivot para observatório-comunidade aplicado.
+**Última atualização:** 21/05/2026 — backend MVP completo (18/18 USs); pendências restritas a frontend, gabarito manual, coleta humana de Likert e re-ativação do Ollama para Sprint 5.
 
-### Progresso (2/22 tarefas)
+### Progresso (12/22 tarefas concluídas; 5 parcialmente)
 
-| Bloco | Tarefas totais | Concluídas |
-|---|---|---|
-| 0 — Fundação (preparatória + alinhamento pivot) | 5 | 1 (T0.1) |
-| 1 — Pipeline + Cadastro + Auth | 4 | 0 |
-| 2 — Dashboard + Perfis | 3 | 0 |
-| 3 — Comunidade + IA-Assistente | 4 | 0 |
-| 4 — Avaliação | 5 | 1 (pivot decidido) |
-| 5 — Documentação acadêmica | 1 | 0 |
+| Bloco | Tarefas totais | Concluídas | Notas |
+|---|---|---|---|
+| 0 — Fundação (preparatória + alinhamento pivot) | 5 | 4 (T0.1, T0.3, T0.4, T0.5) | T0.2 (protótipos do Bruno) pendente |
+| 1 — Pipeline + Cadastro + Auth | 4 | 3 (T1.1, T1.2, T1.3) — backend completo | T1.4 (gabarito manual de 3 projetos) pendente — depende de Cynthia+Moisés |
+| 2 — Dashboard + Perfis | 3 | 2 (T2.1, T2.2 backend) | T2.3 (matriz semente) pendente |
+| 3 — Comunidade + IA-Assistente | 4 | 3 (T3.1, T3.2, T3.3 backend; mock generators) | T3.4 (contato de stakeholders) é trabalho do Bruno |
+| 4 — Avaliação | 5 | 1 (T4.5 export) + T4.1/T4.2 implementação pronta | T4.3/T4.4 (Likert) dependem de coleta humana |
+| 5 — Documentação acadêmica | 1 | 0 | Sprint 5+ |
 
 ---
 
@@ -105,21 +105,21 @@ Cada tarefa: **Responsável** | **Prazo** | **O que fazer** | **Entregável** | 
 - **Entregável:** Protótipos exportados (PNG/PDF) + link Lovable; `atividades/prototipos.md` com print de cada tela.
 - **Aceitação:** Protótipos cobrem RF01-RF18; aprovados pelo grupo antes do início da implementação frontend.
 
-#### T0.3 — Atributos-alvo do MPO
+#### T0.3 — Atributos-alvo do MPO ✅ Concluído
 - **Responsável:** Cynthia (autora) + Moisés (revisor)
 - **Prazo:** sem 8 (21/05)
 - **O que fazer:** Derivar do Quadro 37 a lista de ~43 atributos categorizados (nome, categoria, tipo `estruturado`/`texto_livre`/`fora_de_escopo`).
 - **Entregável:** `atividades/atributos_alvo_mpo.md`.
 - **Aceitação:** Lista revisada por Moisés; alinhada ao Quadro 37 sem omissões.
 
-#### T0.4 — Protocolo de avaliação
+#### T0.4 — Protocolo de avaliação ✅ Concluído
 - **Responsável:** Moisés (autor) + Cynthia (revisora)
 - **Prazo:** sem 8 (21/05)
 - **O que fazer:** Documentar o critério híbrido de match + rubrica humana 0/0,5/1 + Cohen's Kappa + protocolo de resolução de divergências.
 - **Entregável:** `atividades/protocolo_avaliacao.md`.
 - **Aceitação:** Cada tipo de atributo tem critério explícito; rubrica documentada com 2-3 exemplos por categoria.
 
-#### T0.5 — Setup do código no repo
+#### T0.5 — Setup do código no repo ✅ Concluído
 - **Responsável:** Raniel (com Bruno acompanhando o frontend)
 - **Prazo:** sem 8 (21/05)
 - **O que fazer:** Criar `backend/` (FastAPI + SQLAlchemy + Alembic) e `frontend/` (Vite + React) na raiz; `docker-compose.yml` com Postgres; endpoint `/health` + tela inicial consumindo via REST; estrutura para auth (placeholder).
@@ -130,23 +130,23 @@ Cada tarefa: **Responsável** | **Prazo** | **O que fazer** | **Entregável** | 
 
 ### Bloco 1 — Pipeline + Cadastro + Auth (semanas 9-10: 22/05-04/06, **M1 + SR1**)
 
-#### T1.1 — RF03 (Cadastro) + RF04 (Upload)
+#### T1.1 — RF03 (Cadastro) + RF04 (Upload) ✅ Backend concluído (21/05/2026 — PR #1)
 - **Responsável:** Bruno (frontend) + Raniel (backend)
-- **Prazo:** sem 9 (28/05)
+- **Prazo:** sem 9 (28/05) — backend entregue 1 semana antes
 - **Entregável:** Endpoints + telas funcionais; consultor cadastra Valença e faz upload do `.docx`.
-- **Aceitação:** Fluxo de cadastro + upload funcionando end-to-end localmente.
+- **Aceitação:** Fluxo de cadastro + upload funcionando end-to-end localmente. Backend coberto; frontend pendente do Bruno.
 
-#### T1.2 — RF01 (Autenticação)
+#### T1.2 — RF01 (Autenticação) ✅ Backend concluído (21/05/2026 — PR #1)
 - **Responsável:** Raniel (backend) + Bruno (tela de login)
-- **Prazo:** sem 9 (28/05)
+- **Prazo:** sem 9 (28/05) — backend entregue 1 semana antes
 - **Entregável:** Login com email+senha+JWT; logout funcional; senha com hash bcrypt.
-- **Aceitação:** Consultor faz login, recebe JWT, acessa rotas protegidas.
+- **Aceitação:** Consultor faz login, recebe JWT, acessa rotas protegidas. ✅ Validado em e2e + smoke ao vivo.
 
-#### T1.3 — RF05 (Extração LLM) + RF06 (Persistência)
+#### T1.3 — RF05 (Extração LLM) + RF06 (Persistência) ✅ Concluído (21/05/2026 — PR #1)
 - **Responsável:** Raniel
-- **Prazo:** sem 10 (04/06)
+- **Prazo:** sem 10 (04/06) — entregue 2 semanas antes
 - **Entregável:** Pipeline rodando para Valença com saída JSON conforme schema; metadados persistidos.
-- **Aceitação:** Extração nos 5 projetos sem erro fatal; ≥ 70% dos atributos preenchidos no piloto.
+- **Aceitação:** Smoke real em Valença com Llama 3.1 8B via Ollama: **19/44 atributos preenchidos em ~46s** (registrado em `pipeline_smoke_ollama.md`). Resta rodar nos 4 docs restantes após re-instalar Ollama.
 
 #### T1.4 — Produção do gabarito manual (3 projetos)
 - **Responsável:** Cynthia + Moisés (par de avaliadores independentes)
@@ -159,17 +159,17 @@ Cada tarefa: **Responsável** | **Prazo** | **O que fazer** | **Entregável** | 
 
 ### Bloco 2 — Dashboard + Cobertura + Perfis (semana 11: 05-11/06, **M2**)
 
-#### T2.1 — RF02 (Perfis e acesso semi-aberto)
+#### T2.1 — RF02 (Perfis e acesso semi-aberto) ✅ Backend concluído (21/05/2026 — PR #1)
 - **Responsável:** Raniel (backend) + Bruno (roteamento condicional)
-- **Prazo:** sem 11 (11/06)
+- **Prazo:** sem 11 (11/06) — backend entregue 3 semanas antes
 - **Entregável:** Modelo User com role; middleware de autorização; cliente acessa apenas seu projeto.
-- **Aceitação:** Cliente de Valença não vê outros projetos; tentativa de acesso indevido retorna 403.
+- **Aceitação:** Cliente de Valença não vê outros projetos; tentativa de acesso indevido retorna 403. ✅ Validado em e2e (`client_cannot_create_project` etc.) + smoke ao vivo (40 status codes corretos em 50 calls).
 
-#### T2.2 — RF07 (Portfólio) + RF08 (Detalhe) + RF09 (Cobertura)
+#### T2.2 — RF07 (Portfólio) + RF08 (Detalhe) + RF09 (Cobertura) ✅ Backend concluído (21/05/2026 — PR #1 + PR #5)
 - **Responsável:** Bruno (frontend) + Raniel (endpoints)
-- **Prazo:** sem 11 (11/06)
+- **Prazo:** sem 11 (11/06) — backend entregue 3 semanas antes
 - **Entregável:** Tela de portfólio (consultor); tela de detalhe com atributos agrupados + trechos de origem; componente de cobertura (tabela/heatmap) com thresholds visuais.
-- **Aceitação:** **M2 atingido** — pipeline operacional nos 5 projetos visualizáveis com cobertura calculada.
+- **Aceitação:** **M2 atingido no backend** — endpoints `/projects/portfolio`, `/projects/{id}/detail`, `/projects/{id}/extractions/coverage` prontos. Frontend pendente do Bruno.
 
 #### T2.3 — Matriz de rastreabilidade (semente)
 - **Responsável:** Cynthia
@@ -182,23 +182,23 @@ Cada tarefa: **Responsável** | **Prazo** | **O que fazer** | **Entregável** | 
 
 ### Bloco 3 — Comunidade + IA-Assistente (semanas 12-13: 12-25/06, **M3 + SR2**)
 
-#### T3.1 — RF10 (Comentários) + RF11 (Feed in-app)
+#### T3.1 — RF10 (Comentários) + RF11 (Feed in-app) ✅ Backend concluído (21/05/2026 — PR #1)
 - **Responsável:** Bruno (frontend) + Raniel (backend)
-- **Prazo:** sem 12 (18/06)
+- **Prazo:** sem 12 (18/06) — backend entregue 4 semanas antes
 - **Entregável:** Comentários funcionais (thread + resposta); feed in-app com contador de não-lidos; eventos registrados em hooks.
-- **Aceitação:** Consultor e cliente daquele projeto comentam; feed mostra novidades; isolamento por perfil respeitado.
+- **Aceitação:** Endpoints `/projects/{id}/comments` (com 1 nível de aninhamento) + `/feed?limit=N` (visibility-aware) operacionais. Contador de não-lidos é trabalho de frontend. Frontend pendente do Bruno.
 
-#### T3.2 — RF12 (Resumo do Cliente)
+#### T3.2 — RF12 (Resumo do Cliente) ✅ Backend concluído (21/05/2026 — PR #7)
 - **Responsável:** Raniel (prompt + backend) + Bruno (UI)
-- **Prazo:** sem 12 (18/06)
+- **Prazo:** sem 12 (18/06) — backend entregue 4 semanas antes
 - **Entregável:** Endpoint que gera resumo a partir da extração; UI com modos rascunho (consultor edita) e publicado (cliente vê).
-- **Aceitação:** Consultor gera rascunho, edita, publica; cliente vê apenas resumo publicado.
+- **Aceitação:** `POST /projects/{id}/resumos/generate` → draft → PATCH → publish (imutável). Cliente só vê published. **Gerador atual: mock determinístico** templated a partir dos 44 atributos. Substituir por LLM real é troca de uma linha em `obione.resumos.dependencies.get_resumo_generator()` quando Ollama for re-ativado para Sprint 5.
 
-#### T3.3 — RF13 (Drafts de Próximos Passos)
+#### T3.3 — RF13 (Drafts de Próximos Passos) ✅ Backend concluído (21/05/2026 — PR #8)
 - **Responsável:** Raniel (prompt + backend) + Bruno (UI)
-- **Prazo:** sem 13 (25/06)
+- **Prazo:** sem 13 (25/06) — backend entregue 5 semanas antes
 - **Entregável:** Endpoint que gera drafts a partir da extração + comentários; UI para o consultor revisar antes de publicar.
-- **Aceitação:** **M3 atingido** — comunidade + IA-Assistente operacionais nos 5 projetos.
+- **Aceitação:** `POST /projects/{id}/drafts/generate` retorna batch de N items (kind ∈ {next_step, attention_point}). Lifecycle draft → PATCH/DELETE → publish individual. **Gerador atual: mock com 7 regras heurísticas + extração de perguntas abertas dos comentários.** Smoke ao vivo gerou 5 items a partir de extração rica. Substituir por LLM real quando Ollama for re-ativado. **M3 backend atingido** — frontend pendente do Bruno.
 
 #### T3.4 — Iniciar contato com stakeholders dos clientes
 - **Responsável:** Bruno
@@ -211,34 +211,35 @@ Cada tarefa: **Responsável** | **Prazo** | **O que fazer** | **Entregável** | 
 
 ### Bloco 4 — Avaliação (semana 14: 26/06-02/07, **M4**)
 
-#### T4.1 — RF14 (Importar gabarito)
+#### T4.1 — RF14 (Importar gabarito) ✅ Backend concluído (21/05/2026 — PR #1)
 - **Responsável:** Raniel
-- **Prazo:** sem 13-14 (transição)
+- **Prazo:** sem 13-14 (transição) — backend entregue 6 semanas antes
 - **Entregável:** Endpoint POST baseline carrega os 3 gabaritos consolidados; validação de schema.
+- **Aceitação:** `POST /projects/{id}/extractions/manual` aceita JSON com `_meta.origem=gabarito_manual`. Validação rígida contra `schema_extracao.json` (retorna 400 com `details[]` quando falha). Depende da produção dos 3 gabaritos por Cynthia + Moisés.
 
-#### T4.2 — RF15 (Comparação automático vs. gabarito — critério híbrido)
+#### T4.2 — RF15 (Comparação automático vs. gabarito — critério híbrido) ✅ Backend concluído (21/05/2026 — PR #1)
 - **Responsável:** Raniel (algoritmo) + Cynthia + Moisés (aplicação da rubrica)
-- **Prazo:** sem 14 (02/07)
+- **Prazo:** sem 14 (02/07) — algoritmo entregue 6 semanas antes
 - **Entregável:** Tabela completa com precisão, recall, F1 e Cohen's Kappa para os 3 projetos; atributos com Kappa < 0,6 sinalizados.
-- **Aceitação:** Métricas calculadas e visualizáveis na UI.
+- **Aceitação:** `GET /projects/{id}/extractions/evaluation` compara última extração LLM vs último gabarito; calcula TP/FP/FN/TN + precision/recall/F1 sobre atributos `estruturado`; sinaliza atributos `texto_livre` como `needs_human_review` para aplicação da rubrica humana 0/0,5/1 (Sprint 5). Cohen's Kappa: calculado fora do backend a partir de duas anotações independentes — pendente de Cynthia + Moisés.
 
-#### T4.3 — RF16 (Likert Consultoria)
+#### T4.3 — RF16 (Likert Consultoria) ✅ Backend concluído (21/05/2026 — PR #4)
 - **Responsável:** Moisés (formulário + análise)
 - **Prazo:** sem 13-14 (lançar sem 13, consolidar sem 14)
 - **Entregável:** Formulário Google Forms (ou interno) com 4 dimensões; respostas dos 4 integrantes do grupo importadas; relatório agregado.
-- **Aceitação:** N = 4; médias por dimensão calculadas.
+- **Aceitação:** Endpoint interno `POST /likert/consultoria` aceita as 4 dimensões (utilidade_drafts, reducao_friccao, qualidade_resumo, manutenibilidade_mediador). `GET /likert/summary?kind=consultoria` agrega count/mean/min/max + respondent_count. Formulário externo (Google Forms) opcional — pode usar o endpoint direto. **Coleta pendente:** N = 4 (todo o grupo TAES).
 
-#### T4.4 — RF17 (Likert Clientes)
+#### T4.4 — RF17 (Likert Clientes) ✅ Backend concluído (21/05/2026 — PR #4)
 - **Responsável:** Moisés (formulário + análise) + Bruno (intermediação dos contatos)
 - **Prazo:** sem 13-14 (lançar sem 13, consolidar sem 14)
 - **Entregável:** Formulário Google Forms com 4 dimensões dos clientes; respostas importadas; relatório agregado.
-- **Aceitação:** N ≥ 5 (1 por projeto) — ideal 8-10. Plano B: declarar limitação.
+- **Aceitação:** Endpoint interno `POST /likert/client` exige `project_id` + 4 dimensões (clareza_resumo, utilidade_espaco, qualidade_dialogo, sentido_inclusao). Visibilidade ligada ao projeto (cliente só responde sobre projetos aos quais foi assinado). **Coleta pendente:** N ≥ 5 (1-2 por projeto). Plano B: declarar limitação.
 
-#### T4.5 — RF18 (Exportação consolidada)
+#### T4.5 — RF18 (Exportação consolidada) ✅ Concluído (21/05/2026 — PR #1 + PR #3)
 - **Responsável:** Raniel
-- **Prazo:** sem 14 (02/07)
+- **Prazo:** sem 14 (02/07) — entregue 6 semanas antes
 - **Entregável:** Arquivo único (CSV ou JSON) com extrações, cobertura, métricas, Likert × 2, engajamento.
-- **Aceitação:** **M4 atingido** — dados completos exportáveis para o relato.
+- **Aceitação:** `GET /projects/{id}/export?format=json` retorna bundle completo (project + documents + extractions + comments + coverage). `?format=csv` retorna long-format spreadsheet (1 row por extração × atributo) — formato direto para a rubrica humana da Sprint 5. **Likert × 2 e engajamento** acessíveis via `/likert/summary` + `/feed` (formato livre para post-processing no relato). **M4 backend atingido** — dados completos exportáveis.
 
 ---
 
