@@ -53,10 +53,22 @@ markers = [
 line-length = 100
 target-version = "py311"
 src = ["src", "tests"]
+# `atividades/` only appears inside the dev container via a bind mount
+# (see docker-compose.yml). It contains academic Python helpers that
+# don't follow this project's conventions; exclude from ruff scans.
+extend-exclude = ["atividades"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM"]
-ignore = ["E501"]
+ignore = [
+    "E501",   # line length — handled by formatter
+    "B008",   # function call in default — FastAPI `Depends(...)` is idiomatic
+    "N818",   # Exception suffix — `ObioneException` mirrors Python stdlib (RuntimeException, BaseException)
+]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = ["N802"]
+"tests/**/*.py" = [
+    "N802",   # allow Test_ prefixes
+    "B017",   # `pytest.raises(Exception)` is fine in tests
+    "E702",   # `s.add(u); s.commit()` is a common test-setup idiom
+]
