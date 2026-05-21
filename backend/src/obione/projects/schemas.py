@@ -38,6 +38,80 @@ class AddClientRequest(BaseModel):
 PortfolioStatus = Literal["registered", "ingested", "extracted", "reviewed"]
 
 
+class DocumentBrief(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: uuid.UUID
+    original_name: str
+    sha256: str
+    size_bytes: int
+    mime_type: str
+    uploaded_at: datetime
+
+
+class ExtractionBrief(BaseModel):
+    """Slimmer than full ExtractionResponse — the detail screen doesn't need
+    the entire 44-attr content blob inline (it lives in a dedicated tab)."""
+
+    model_config = ConfigDict(from_attributes=True)
+    id: uuid.UUID
+    source: str  # "llm" | "manual"
+    llm_model: str | None
+    created_at: datetime
+
+
+class CommentBrief(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: uuid.UUID
+    author_id: uuid.UUID | None
+    parent_id: uuid.UUID | None
+    body: str
+    created_at: datetime
+
+
+class CoverageSummary(BaseModel):
+    extraction_id: uuid.UUID | None
+    filled: int
+    total_in_scope: int
+    out_of_scope_count: int
+    percentage: float
+
+
+class EvaluationSummary(BaseModel):
+    """Aggregate-only — full per-attribute table lives at /extractions/evaluation."""
+
+    tp: int
+    fp: int
+    fn: int
+    tn: int
+    precision: float
+    recall: float
+    f1: float
+    needs_human_review_count: int
+
+
+class ProjectDetailResponse(BaseModel):
+    """Consolidated read-only view for the project detail screen (US08).
+
+    Distinct from /export: keeps only the latest of each extraction kind
+    and a configurable slice of recent comments. Designed to fit in one
+    UI render without a heavy network payload.
+    """
+
+    project: "ProjectResponse"
+    documents: list[DocumentBrief]
+    latest_llm_extraction: ExtractionBrief | None
+    latest_gabarito: ExtractionBrief | None
+    coverage: CoverageSummary
+    evaluation: EvaluationSummary | None = Field(
+        default=None,
+        description="Present only when the project has both an llm extraction and a gabarito_manual.",
+    )
+    recent_comments: list[CommentBrief]
+    counts: dict[str, int] = Field(
+        description="Totals across the project: extractions, comments, documents."
+    )
+
+
 class PortfolioProjectResponse(BaseModel):
     """Enriched project row for the consultant portfolio view (US07)."""
 
