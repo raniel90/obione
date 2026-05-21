@@ -69,6 +69,18 @@ def duplicate_slide(prs, src_idx: int, dst_idx: int | None = None):
         sp = shape._element
         sp.getparent().remove(sp)
 
+    # Clonar o <p:bg> do source se existir. O Keynote rejeita slides sem bg
+    # quando o slide-irmão original tem bg explícito (ex: slide 5-grupos com
+    # fundo branco solid). `add_slide` herda bg do layout, mas isso não basta;
+    # precisamos copiar o <p:bg> literal pra dentro do <p:cSld> do novo slide.
+    src_cSld = src_slide._element.find(qn("p:cSld"))
+    new_cSld = new_slide._element.find(qn("p:cSld"))
+    if src_cSld is not None and new_cSld is not None:
+        src_bg = src_cSld.find(qn("p:bg"))
+        if src_bg is not None and new_cSld.find(qn("p:bg")) is None:
+            # <p:bg> deve vir ANTES de <p:spTree> no schema; insere no índice 0.
+            new_cSld.insert(0, deepcopy(src_bg))
+
     # Copiar todos os shapes do src_slide para o new_slide (inclusive pictures quebradas)
     for shape in src_slide.shapes:
         el = shape._element

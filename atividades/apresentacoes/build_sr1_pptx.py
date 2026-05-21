@@ -951,8 +951,13 @@ def main() -> int:
     n = update_footers(prs, total=12)
     print(f"  {n} números de página atualizados")
 
-    print("\nAdicionando speaker notes (briefing por slide)...")
-    add_speaker_notes(prs)
+    # NOTA: speaker notes desativados temporariamente.
+    # Com 4 clones do slide-5-grupos, a infraestrutura de notesMaster do
+    # python-pptx falha em criar o part corretamente e o Keynote rejeita o
+    # arquivo. O conteúdo dos briefings vive em add_speaker_notes() pra
+    # uso manual; até resolver o root cause, deixamos os notes vazios.
+    # print("\nAdicionando speaker notes (briefing por slide)...")
+    # add_speaker_notes(prs)
 
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     prs.save(OUTPUT)
