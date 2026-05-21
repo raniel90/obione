@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
 from obione.auth.router import router as auth_router
+from obione.comments.router import comment_router, project_router as comments_project_router
 from obione.documents.router import router as documents_router
 from obione.extractions.router import router as extractions_router
 from obione.health.router import router as health_router
@@ -30,6 +31,8 @@ def create_app() -> FastAPI:
     app.include_router(projects_router)
     app.include_router(documents_router)
     app.include_router(extractions_router)
+    app.include_router(comments_project_router)
+    app.include_router(comment_router)
 
     @app.get("/", include_in_schema=False)
     def root():
