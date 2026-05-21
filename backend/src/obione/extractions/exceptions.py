@@ -17,3 +17,9 @@ class SchemaValidationError(BadRequestError):
     def __init__(self, message: str, errors: list[str] | None = None):
         super().__init__(message)
         self.errors = errors or []
+
+
+class EvaluationNotAvailableError(NotFoundError):
+    """Raised when the project lacks an LLM and/or gabarito extraction to compare."""
+
+    code = "evaluation_not_available"

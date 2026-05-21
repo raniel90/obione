@@ -35,6 +35,8 @@ class AttributeSpec:
     name: str
     category: str
     out_of_scope: bool
+    extraction_type: str  # "estruturado" | "texto_livre" | "fora_de_escopo"
+    value_type: str  # "string" | "number" | "array" | "null"
 
 
 @lru_cache(maxsize=1)
@@ -58,11 +60,18 @@ def attribute_specs() -> tuple[AttributeSpec, ...]:
     for name, props in schema["properties"].items():
         if name == "_meta":
             continue
+        type_val = props.get("type", "string")
+        if isinstance(type_val, list):
+            value_type = next((t for t in type_val if t != "null"), "null")
+        else:
+            value_type = type_val
         specs.append(
             AttributeSpec(
                 name=name,
                 category=props.get("x-categoria", "uncategorized"),
                 out_of_scope=bool(props.get("x-fora-de-escopo", False)),
+                extraction_type=props.get("x-tipo-extracao", "texto_livre"),
+                value_type=value_type,
             )
         )
     return tuple(specs)

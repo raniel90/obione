@@ -121,7 +121,12 @@ def test_valenca_example_file_round_trips():
 
 @pytest.mark.unit
 def test_attribute_spec_is_a_dataclass():
-    spec = AttributeSpec(name="x", category="y", out_of_scope=False)
+    spec = AttributeSpec(
+        name="x", category="y", out_of_scope=False,
+        extraction_type="estruturado", value_type="string",
+    )
     assert spec.name == "x"
     assert spec.category == "y"
     assert spec.out_of_scope is False
+    assert spec.extraction_type == "estruturado"
+    assert spec.value_type == "string"
