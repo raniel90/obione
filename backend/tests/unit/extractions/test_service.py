@@ -41,7 +41,14 @@ def test_create_manual_persists():
     e = create_extraction_from_manual(
         uow, consultant,
         project_id=project.id, document_id=None,
-        content={"project_name": "Manual Override"},
+        content={
+            "_meta": {
+                "projeto_nome": "p", "documento_fonte": "d.docx",
+                "data_extracao": "2026-05-21T00:00:00Z",
+                "origem": "gabarito_manual",
+            },
+            "nome_projeto": "Manual Override",
+        },
     )
     assert e.source == "manual"
     assert e.llm_model is None

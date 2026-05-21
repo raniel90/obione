@@ -4,7 +4,11 @@ import uuid
 from obione.auth.models import User
 from obione.documents.storage.port import AbstractBlobStorage
 from obione.extractions.coverage import CoverageReport, compute_coverage
-from obione.extractions.exceptions import ExtractionNotFoundError
+from obione.extractions.exceptions import (
+    ExtractionNotFoundError,
+    SchemaValidationError,
+)
+from obione.extractions.validation import validate_manual_extraction
 from obione.extractions.llm.port import AbstractExtractor
 from obione.extractions.models import Extraction
 from obione.projects.exceptions import ClientCannotMutateError
@@ -112,6 +116,12 @@ def create_extraction_from_manual(
     content: dict,
 ) -> Extraction:
     project = get_project_for_user(uow, user, project_id)
+    errors = validate_manual_extraction(content)
+    if errors:
+        raise SchemaValidationError(
+            f"Manual extraction does not match schema_extracao.json ({len(errors)} errors).",
+            errors=errors,
+        )
     with uow:
         extraction = Extraction(
             project_id=project.id,

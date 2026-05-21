@@ -40,7 +40,12 @@ class ConflictError(ObioneException):
 def register_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(ObioneException)
     async def _obione_handler(request: Request, exc: ObioneException):
+        body: dict = {"code": exc.code, "message": exc.message}
+        # Subclasses can attach extra context (e.g. SchemaValidationError.errors).
+        details = getattr(exc, "errors", None)
+        if details:
+            body["details"] = details
         return JSONResponse(
             status_code=exc.status_code,
-            content={"error": {"code": exc.code, "message": exc.message}},
+            content={"error": body},
         )
