@@ -58,8 +58,19 @@ def test_status_cronograma_enum_enforced():
 
 @pytest.mark.unit
 def test_schema_roundtrips_example_file():
-    """Round-trips atividades/schema_extracao_exemplo.json end-to-end."""
-    data = json.loads(Path("/app/atividades/schema_extracao_exemplo.json").read_text())
+    """Round-trips atividades/schema_extracao_exemplo.json end-to-end.
+
+    Walks ancestors so the test works both inside the Docker container
+    (`/app/atividades/...`) and on bare-metal CI runners where the checkout
+    sits at a different depth.
+    """
+    candidates = [Path("/app/atividades/schema_extracao_exemplo.json")]
+    for parent in Path(__file__).resolve().parents:
+        candidates.append(parent / "atividades" / "schema_extracao_exemplo.json")
+    example = next((c for c in candidates if c.exists()), None)
+    if example is None:
+        pytest.skip("schema_extracao_exemplo.json not found in any ancestor")
+    data = json.loads(example.read_text())
     p = MPOAttributes.model_validate(data)
     assert p.meta.projeto_nome == "valenca-odontologia"
     assert p.meta.origem == "gabarito_manual"
