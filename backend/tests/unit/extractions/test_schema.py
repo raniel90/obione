@@ -86,6 +86,38 @@ def test_schema_roundtrips_example_file():
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize(
+    "raw,expected",
+    [
+        ("Pequeno", "pequeno"),
+        ("MEDIO", "medio"),
+        ("médio", "medio"),  # accent stripped
+        ("Médio", "medio"),  # accent + casing
+        ("pequeno/médio", "pequeno"),  # hedged → first wins
+        ("medio,grande", "medio"),  # comma-hedged
+        ("  grande  ", "grande"),
+    ],
+)
+def test_porte_normalizer_handles_llm_quirks(raw, expected):
+    p = MPOAttributes.model_validate({"_meta": _make_meta(), "porte": raw})
+    assert p.porte == expected
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "raw,expected",
+    [
+        ("Concluído", "concluido"),
+        ("ATRASADO", "atrasado"),
+        ("adiantado/concluido", "adiantado"),
+    ],
+)
+def test_status_cronograma_normalizer(raw, expected):
+    p = MPOAttributes.model_validate({"_meta": _make_meta(), "status_cronograma": raw})
+    assert p.status_cronograma == expected
+
+
+@pytest.mark.unit
 def test_dump_uses_underscore_alias():
     """When dumping for the wire, the _meta key must be preserved."""
     p = MPOAttributes.model_validate({"_meta": _make_meta()})
