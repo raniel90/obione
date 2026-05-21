@@ -4,7 +4,9 @@ import uuid
 from obione.auth.models import User
 from obione.documents.storage.port import AbstractBlobStorage
 from obione.extractions.coverage import CoverageReport, compute_coverage
+from obione.extractions.evaluation import EvaluationReport, compare_extractions
 from obione.extractions.exceptions import (
+    EvaluationNotAvailableError,
     ExtractionNotFoundError,
     SchemaValidationError,
 )
@@ -105,6 +107,49 @@ def get_project_coverage(
         # list_by_project orders by created_at desc, so [0] is the latest.
         latest = extractions[0]
         return compute_coverage(latest.content, extraction_id=str(latest.id))
+
+
+def _is_gabarito_extraction(extraction) -> bool:
+    """True if `_meta.origem == 'gabarito_manual'`.
+
+    The DB `source` column is intentionally NOT consulted: the manual endpoint
+    accepts both gabarito anotations and other operator-typed extractions, so
+    `source='manual'` doesn't disambiguate. `_meta.origem` is the authoritative
+    flag defined in the academic schema.
+    """
+    origem = (extraction.content or {}).get("_meta", {}).get("origem")
+    return origem == "gabarito_manual"
+
+
+def get_project_evaluation(
+    uow: AbstractUnitOfWork, user: User, project_id: uuid.UUID
+) -> EvaluationReport:
+    """Compare the project's latest llm extraction vs latest gabarito (US15).
+
+    Raises EvaluationNotAvailableError if either side is missing.
+    """
+    get_project_for_user(uow, user, project_id)
+    with uow:
+        extractions = uow.extractions.list_by_project(project_id)
+        # list_by_project orders by created_at desc, so first match wins.
+        llm = next(
+            (e for e in extractions if not _is_gabarito_extraction(e)),
+            None,
+        )
+        gabarito = next(
+            (e for e in extractions if _is_gabarito_extraction(e)),
+            None,
+        )
+        if llm is None or gabarito is None:
+            missing = []
+            if llm is None:
+                missing.append("llm")
+            if gabarito is None:
+                missing.append("gabarito_manual")
+            raise EvaluationNotAvailableError(
+                f"Project lacks extractions to evaluate (missing: {', '.join(missing)})."
+            )
+        return compare_extractions(llm.content, gabarito.content)
 
 
 def create_extraction_from_manual(

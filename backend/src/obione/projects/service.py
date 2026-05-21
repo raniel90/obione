@@ -89,9 +89,11 @@ def delete_project(
 
 
 def _is_gabarito(extraction) -> bool:
-    """True if the extraction represents a manual gabarito anotation."""
-    if extraction.source == "manual":
-        return True
+    """True if `_meta.origem == 'gabarito_manual'` — same definition the
+    extractions service uses. The DB `source` column doesn't disambiguate
+    because the manual endpoint persists both gabarito and other operator
+    inputs as source='manual'.
+    """
     origem = (extraction.content or {}).get("_meta", {}).get("origem")
     return origem == "gabarito_manual"
 

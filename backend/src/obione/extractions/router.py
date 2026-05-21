@@ -10,9 +10,12 @@ from obione.extractions import service
 from obione.extractions.dependencies import get_extractor_for
 from obione.extractions.exceptions import ExtractionNotFoundError
 from obione.extractions.schemas import (
+    AttributeVerdictResponse,
     CategoryCoverageResponse,
     CoverageResponse,
+    EvaluationResponse,
     ExtractionResponse,
+    GroupMetricsResponse,
     ManualExtractionCreate,
 )
 from obione.unit_of_work import SqlAlchemyUnitOfWork
@@ -45,6 +48,35 @@ def get_coverage(project_id: uuid.UUID, user: CurrentUser) -> CoverageResponse:
             )
             for c in report.by_category
         ],
+    )
+
+
+@router.get("/evaluation", response_model=EvaluationResponse)
+def get_evaluation(project_id: uuid.UUID, user: CurrentUser) -> EvaluationResponse:
+    """LLM-vs-gabarito comparison report (US15)."""
+    report = service.get_project_evaluation(get_uow(), user, project_id)
+    metrics = report.estruturado_metrics
+    return EvaluationResponse(
+        per_attribute=[
+            AttributeVerdictResponse(
+                name=v.name,
+                category=v.category,
+                extraction_type=v.extraction_type,
+                verdict=v.verdict,  # type: ignore[arg-type]
+                llm_value=v.llm_value,
+                gabarito_value=v.gabarito_value,
+            )
+            for v in report.per_attribute
+        ],
+        estruturado_metrics=GroupMetricsResponse(
+            group=metrics.group,
+            tp=metrics.tp, fp=metrics.fp, fn=metrics.fn, tn=metrics.tn,
+            precision=metrics.precision,
+            recall=metrics.recall,
+            f1=metrics.f1,
+        ),
+        needs_human_review_count=report.needs_human_review_count,
+        out_of_scope_count=report.out_of_scope_count,
     )
 
 

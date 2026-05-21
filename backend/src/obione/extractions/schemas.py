@@ -5,6 +5,39 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 
+class AttributeVerdictResponse(BaseModel):
+    name: str
+    category: str
+    extraction_type: str
+    verdict: Literal[
+        "tp", "fp", "fn", "tn", "needs_human_review", "out_of_scope"
+    ]
+    llm_value: object | None = None
+    gabarito_value: object | None = None
+
+
+class GroupMetricsResponse(BaseModel):
+    group: str
+    tp: int
+    fp: int
+    fn: int
+    tn: int
+    precision: float
+    recall: float
+    f1: float
+
+
+class EvaluationResponse(BaseModel):
+    """US15 — per-attribute verdicts + aggregate metrics for estruturado."""
+
+    per_attribute: list[AttributeVerdictResponse]
+    estruturado_metrics: GroupMetricsResponse
+    needs_human_review_count: int = Field(
+        description="Texto-livre attributes deferred to humans (0/0.5/1 rubric, Sprint 5)."
+    )
+    out_of_scope_count: int
+
+
 class CategoryCoverageResponse(BaseModel):
     category: str
     filled: int
