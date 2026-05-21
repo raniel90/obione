@@ -28,10 +28,19 @@ def _purge_users(s, emails: list[str]) -> None:
 
 @pytest.fixture
 def trio(client):
-    """A consultant + admin + assigned-client triple, with one shared project."""
+    """A consultant + admin + assigned-client triple, with one shared project.
+
+    Wipes the entire likert_responses table at the start: the consultoria
+    flavor has no project_id, so it doesn't cascade when projects/users
+    leave the DB, and any past curl smoke that hit /likert/consultoria
+    keeps polluting the summary count. Test ownership of the table is
+    safe here — only e2e suites write to it.
+    """
     s = SessionLocal()
     emails = ["e2e-lik-cons@x.com", "e2e-lik-admin@x.com", "e2e-lik-cli@x.com"]
     try:
+        s.query(LikertResponse).delete()
+        s.commit()
         _purge_users(s, emails)
         cons = User(
             email=emails[0],

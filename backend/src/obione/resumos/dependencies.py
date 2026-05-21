@@ -1,9 +1,17 @@
-"""Pick the configured resume generator. Mock-only today; a real-LLM
-adapter will land alongside the Sprint 4 narrative generation work."""
+"""Pick the configured Resumo generator.
 
+`LLM_PROVIDER=mock` (CI default) → MockResumoGenerator (offline templated).
+Anything else → InstructorResumoGenerator hitting the OpenAI-compatible
+endpoint (Ollama, OpenAI).
+"""
+
+from obione.resumos.generator.instructor import InstructorResumoGenerator
 from obione.resumos.generator.mock import MockResumoGenerator
 from obione.resumos.generator.port import AbstractResumoGenerator
+from obione.settings import settings
 
 
 def get_resumo_generator() -> AbstractResumoGenerator:
-    return MockResumoGenerator()
+    if settings.LLM_PROVIDER == "mock":
+        return MockResumoGenerator()
+    return InstructorResumoGenerator(settings.LLM_PROVIDER)
