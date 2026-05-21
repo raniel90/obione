@@ -18,11 +18,12 @@ Then open <http://localhost:8000/docs> for the interactive OpenAPI surface.
 
 ```
 backend/
-├── src/obione/        # 8 bounded contexts (auth, projects, documents, extractions,
-│                      # comments, likert, feed, exports) + health + shared infra
+├── src/obione/        # 10 bounded contexts (auth, projects, documents, extractions,
+│                      # comments, resumos, drafts, likert, feed, exports) +
+│                      # health + shared infra
 ├── tests/             # 3 tiers: unit/ (Fakes, no I/O) / integration/ (real Postgres)
 │                      # / e2e/ (FastAPI TestClient)
-├── alembic/           # Migrations 0001..0006
+├── alembic/           # Migrations 0001..0008
 └── Makefile           # Dev workflow
 ```
 
@@ -100,6 +101,27 @@ All endpoints require `Authorization: Bearer <jwt>` except `POST /auth/login` an
 |---|---|---|---|
 | GET | `/feed?limit=N` | any | **US11** Chronological merge of `new_comment` + `new_extraction` + `new_document` events scoped to projects the caller can see. Default limit 50, max 200. |
 
+### Resumo do Cliente — `obione.resumos`
+
+| Method | Path | Roles | Notes |
+|---|---|---|---|
+| POST | `/projects/{id}/resumos/generate` | consultor + admin | **US12** Generates a `draft` from the project's latest extraction. 400 `no_extraction_for_resumo` if there's none. |
+| GET | `/projects/{id}/resumos` | visible | Consultor/admin see all statuses; clients see only `published`. |
+| GET | `/resumos/{id}` | visible | Drafts return 404 to clients. |
+| PATCH | `/resumos/{id}` | consultor + admin | Body edits while `draft`. 409 `resumo_already_published` after publish. |
+| POST | `/resumos/{id}/publish` | consultor + admin | Irreversible. Stamps `reviewed_by` + `reviewed_at`. Double-publish returns 409. |
+
+### Drafts (Próximos Passos / Pontos de Atenção) — `obione.drafts`
+
+| Method | Path | Roles | Notes |
+|---|---|---|---|
+| POST | `/projects/{id}/drafts/generate` | consultor + admin | **US13** Generates a batch of items from extraction signals (escopo, atraso, custo overrun, riscos) + recent comments. Each item has `kind ∈ {next_step, attention_point}`. |
+| GET | `/projects/{id}/drafts` | visible | Consultor/admin see all; clients see only `published`. |
+| GET | `/drafts/{id}` | visible | Drafts return 404 to clients. |
+| PATCH | `/drafts/{id}` | consultor + admin | Body/title edits while `draft`. |
+| DELETE | `/drafts/{id}` | consultor + admin | Discard a draft. 409 after publish. |
+| POST | `/drafts/{id}/publish` | consultor + admin | Irreversible. 409 on double-publish. |
+
 ### Likert feedback — `obione.likert`
 
 | Method | Path | Roles | Notes |
@@ -124,13 +146,21 @@ All endpoints require `Authorization: Bearer <jwt>` except `POST /auth/login` an
 
 ## LLM provider switch
 
-The pipeline behind `/projects/{id}/extractions/from-document/{doc_id}` reads `settings.LLM_PROVIDER`. Tests pin it to `mock` via an autouse fixture so the suite doesn't depend on a network reachable LLM. Switch it through `.env`:
+Three AI-mediated artifacts live behind the same `LLM_PROVIDER` env var (tests pin to `mock` via an autouse fixture):
+
+- **Extração** — `MockExtractor` returns the Valença example; `InstructorExtractor` ships with Ollama/OpenAI-compatible backends.
+- **Resumo do Cliente** — `MockResumoGenerator` templates a PT-BR narrative from the 44 attributes. The real-LLM adapter slot is at `obione.resumos.dependencies.get_resumo_generator()` — drop in an `InstructorResumoGenerator` and the rest of the flow stays put.
+- **Drafts** — `MockDraftGenerator` produces bullet-shaped items from extraction signals + open questions in recent comments. Same plug-in slot at `obione.drafts.dependencies.get_draft_generator()`.
+
+Switch the extraction provider through `.env`:
 
 | Value | Behavior |
 |---|---|
-| `mock` (default) | Loads `atividades/schema_extracao_exemplo.json`. Offline. |
-| `ollama/llama3.1:8b` | Talks to a local Ollama instance over `LLM_BASE_URL` (defaults to `http://localhost:11434`). For Docker, point to `http://host.docker.internal:11434`. |
+| `mock` (default) | All three generators run offline against canned/template data. |
+| `ollama/llama3.1:8b` | Extraction talks to a local Ollama instance over `LLM_BASE_URL` (defaults to `http://localhost:11434`). For Docker, point to `http://host.docker.internal:11434`. |
 | `openai/<model>` | Uses `LLM_API_KEY`. |
+
+Resumos and Drafts ship with mock generators only today; flipping them to a real LLM is a one-line change in their respective `dependencies.py`.
 
 To run a real Ollama smoke locally:
 
