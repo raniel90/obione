@@ -9,6 +9,7 @@ from sqlalchemy import engine_from_config, pool
 from obione.auth.models import User  # noqa: F401
 from obione.comments.models import Comment  # noqa: F401
 from obione.documents.models import Document  # noqa: F401
+from obione.drafts.models import Draft  # noqa: F401
 from obione.extractions.models import Extraction  # noqa: F401
 from obione.likert.models import LikertResponse  # noqa: F401
 from obione.projects.models import Project, ProjectClient  # noqa: F401

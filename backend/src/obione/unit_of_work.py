@@ -69,6 +69,7 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
         from obione.auth.repository import SqlAlchemyUserRepository
         from obione.comments.repository import SqlAlchemyCommentRepository
         from obione.documents.repository import SqlAlchemyDocumentRepository
+        from obione.drafts.repository import SqlAlchemyDraftRepository
         from obione.extractions.repository import SqlAlchemyExtractionRepository
         from obione.likert.repository import SqlAlchemyLikertRepository
         from obione.projects.repository import SqlAlchemyProjectRepository
@@ -83,6 +84,7 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
         self.comments: SqlAlchemyCommentRepository = SqlAlchemyCommentRepository(self.session)
         self.likert: SqlAlchemyLikertRepository = SqlAlchemyLikertRepository(self.session)
         self.resumos: SqlAlchemyResumoRepository = SqlAlchemyResumoRepository(self.session)
+        self.drafts: SqlAlchemyDraftRepository = SqlAlchemyDraftRepository(self.session)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
@@ -113,6 +115,7 @@ class FakeUnitOfWork(AbstractUnitOfWork):
         from obione.auth.repository import FakeUserRepository
         from obione.comments.repository import FakeCommentRepository
         from obione.documents.repository import FakeDocumentRepository
+        from obione.drafts.repository import FakeDraftRepository
         from obione.extractions.repository import FakeExtractionRepository
         from obione.likert.repository import FakeLikertRepository
         from obione.projects.repository import FakeProjectRepository
@@ -125,6 +128,7 @@ class FakeUnitOfWork(AbstractUnitOfWork):
         self.comments: FakeCommentRepository = FakeCommentRepository()
         self.likert: FakeLikertRepository = FakeLikertRepository()
         self.resumos: FakeResumoRepository = FakeResumoRepository()
+        self.drafts: FakeDraftRepository = FakeDraftRepository()
 
     def commit(self) -> None:
         self.committed = True
