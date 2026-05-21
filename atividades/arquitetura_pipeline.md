@@ -2,6 +2,8 @@
 
 Documento de decisões de arquitetura para a extração de atributos do MPO a partir de documentos `.docx`. Subsidia o relato de experiência (T6).
 
+> **Atualização (21/05/2026):** A IA Generativa cumpre **três papéis** no ObiOne, todos seguindo o mesmo padrão de portas-e-adaptadores (Hexagonal): **Extração** (T2.1, este documento), **Resumo do Cliente** (US12) e **Drafts assistidos** (US13). As três trilhas vivem em pacotes Python distintos do backend, cada uma com sua `port.py` (`Abstract*Generator`) e adaptadores `mock.py` + (futuro) `instructor.py`. Hoje só a Extração tem adaptador LLM real validado (Llama 3.1 8B via Ollama); Resumo e Drafts rodam com geradores mock determinísticos prontos para substituição. Ver §7.
+
 ---
 
 ## Visão geral
@@ -90,6 +92,60 @@ Razão: o exemplo já existe (`schema_extracao_exemplo.json`). Usado para testes
 
 ---
 
+## 7. Estendendo o padrão para Resumo e Drafts (US12 + US13)
+
+A mesma arquitetura de portas-e-adaptadores foi replicada para os outros dois papéis da IA quando da implementação das US12 (Resumo do Cliente) e US13 (Drafts assistidos) em 21/05/2026. **Não é uma reescrita**: é a mesma decisão #1 acima aplicada a dois domínios diferentes.
+
+```
+                    extraction_content (JSON)
+                            │
+                ┌───────────┼───────────┐
+                ▼           ▼           ▼
+         ┌──────────┐ ┌──────────┐ ┌──────────┐
+         │Extractor │ │ Resumo   │ │ Drafts   │
+         │  Port    │ │Generator │ │Generator │
+         │          │ │  Port    │ │  Port    │
+         └────┬─────┘ └────┬─────┘ └────┬─────┘
+              │            │            │
+         mock + ollama  mock + (todo)  mock + (todo)
+              │            │            │
+              ▼            ▼            ▼
+        MPOAttributes    Resumo       Draft × N
+        (44 fields)      (texto)      (kind, title, body)
+```
+
+### Resumo do Cliente (US12)
+
+- **Pacote:** `backend/src/obione/resumos/`
+- **Porta:** `AbstractResumoGenerator` em `generator/port.py` — recebe `extraction_content: dict` e `project_name: str`, retorna `GeneratedResumo(body, model_id)`.
+- **Adaptador atual:** `MockResumoGenerator` — produz texto narrativo Markdown PT-BR templated a partir dos 44 atributos do MPO. Determinístico (mesma entrada → mesma saída).
+- **Substituição por LLM real:** uma linha em `obione.resumos.dependencies.get_resumo_generator()`. Espelhar `instructor_adapter.py` do Extractor: mesma `openai.OpenAI`, prompt diferente (pede narrativa em vez de JSON estruturado).
+- **Lifecycle:** generate → draft (consultor edita) → publish (imutável, stampa `reviewed_by` + `reviewed_at`). Cliente só vê `published`.
+
+### Drafts (US13)
+
+- **Pacote:** `backend/src/obione/drafts/`
+- **Porta:** `AbstractDraftGenerator` em `generator/port.py` — recebe extração + comentários recentes do projeto, retorna `GeneratedDrafts(items: list[GeneratedDraftItem], model_id)`. Cada item tem `kind ∈ {next_step, attention_point}`.
+- **Adaptador atual:** `MockDraftGenerator` — 7 regras heurísticas sobre sinais da extração (escopo planejado sem executado, status_cronograma="atrasado", custo_realizado > custo_estimado, riscos_identificados presente etc.) + extração de perguntas abertas nos comentários (mensagens terminadas com `?`). Retorna 1-N items por chamada.
+- **Substituição por LLM real:** mesmo padrão. Prompt pede um array de objetos JSON; Instructor garante validação contra `GeneratedDraftItem`.
+- **Lifecycle:** generate (batch de N items) → cada item segue draft → publish individual, ou `DELETE` enquanto draft. Cliente só vê `published`.
+
+### Por que o padrão se sustenta
+
+1. **Testes hermeticos.** Os geradores mock rodam offline. CI nunca depende de Ollama/Anthropic disponível. 265 testes verdes na suíte completa.
+2. **Troca de provider sem mudar serviço.** O serviço (`obione.resumos.service.generate_resumo`) recebe o gerador via parâmetro — pattern matching com o que já fazíamos no Extractor.
+3. **Telemetria uniforme.** Todos os adaptadores reportam `model_id` que é persistido na coluna `llm_model` da respectiva tabela (`resumos.llm_model`, `drafts.llm_model`). No relato, conseguimos reconstituir qual versão gerou cada artefato.
+
+### Status atual
+
+| Papel | Tabela DB | Endpoint generate | Mock | LLM real |
+|---|---|---|---|---|
+| Extração | `extractions` | `POST /projects/{id}/extractions/from-document/{doc_id}` | ✅ `MockExtractor` | ✅ `InstructorExtractor` (Ollama Llama 3.1 8B smokeado em Valença, 19/44 em ~46s — ver `pipeline_smoke_ollama.md`) |
+| Resumo | `resumos` | `POST /projects/{id}/resumos/generate` | ✅ `MockResumoGenerator` | ⏳ slot pronto, pendente de implementação quando Ollama for re-ativado |
+| Drafts | `drafts` | `POST /projects/{id}/drafts/generate` | ✅ `MockDraftGenerator` | ⏳ slot pronto, pendente de implementação quando Ollama for re-ativado |
+
+---
+
 ## Estrutura de pastas
 
 ```
@@ -154,4 +210,4 @@ python -m backend.pipeline.cli --doc ...
 
 ---
 
-**Status:** Decisões aprovadas em 2026-05-19. Implementação na Sprint 2 (22 mai - 4 jun).
+**Status:** Decisões aprovadas em 2026-05-19. Implementação concluída antecipadamente em 21/05/2026 — Extração + Resumo + Drafts em produção no backend (`main`), com Resumo e Drafts ainda em modo mock até a re-ativação do Ollama para Sprint 5.

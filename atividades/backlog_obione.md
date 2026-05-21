@@ -2,6 +2,40 @@
 
 > Versão pós-pivot do backlog (16/05/2026), alinhada à proposta acadêmica reformulada, à metodologia DSR e ao calendário real da disciplina TAES (semana 8 atual, entrega em 10/07/2026).
 
+## Status do MVP — atualizado em 21/05/2026
+
+**Backend: 18/18 US implementadas (100%).** Suíte: 265 testes verdes (unit + integration + e2e), 8 migrations, 32 endpoints HTTP. CI rodando em todo PR. Mergeados em `main` via 9 PRs sequenciais (#1 chassis → #9 docs).
+
+| Sprint | US | Status | PR |
+|---|---|---|---|
+| 2 | US01 Autenticar | ✅ | #1 |
+| 2 | US03 Cadastrar projeto | ✅ | #1 |
+| 2 | US04 Upload `.docx` | ✅ | #1 |
+| 2 | US05 Extrair via LLM | ✅ | #1 (mock + Ollama smoke real Valença: 19/44 em ~46s) |
+| 2 | US06 Persistir extração | ✅ | #1 |
+| 3 | US02 Perfis semi-abertos | ✅ | #1 |
+| 3 | US07 Portfólio | ✅ | #1 |
+| 3 | US08 Detalhe consolidado | ✅ | #5 |
+| 3 | US09 Cobertura MPO | ✅ | #1 |
+| 4 | US10 Comentar | ✅ | #1 |
+| 4 | US11 Feed in-app | ✅ | #1 |
+| 4 | US12 Resumo do Cliente | ✅ | #7 (mock generator; slot pronto para LLM real) |
+| 4 | US13 Drafts | ✅ | #8 (mock generator; slot pronto para LLM real) |
+| 5 | US14 Importar gabarito | ✅ | #1 |
+| 5 | US15 Comparar extração vs gabarito | ✅ | #1 |
+| 5 | US16 Likert consultoria | ✅ | #4 |
+| 5 | US17 Likert clientes | ✅ | #4 |
+| 5 | US18 Exportar resultados | ✅ | #1 (JSON) + #3 (CSV) |
+
+**Pendentes externos (fora do backend):**
+- Frontend (Bruno) — protótipos + implementação React/Vite/Lovable.
+- Smoke real Ollama nos outros 4 docs (Freire Batista, Kaka JJ, Bem Viver, Dinoah). Ollama removido localmente; será re-pulado quando Sprint 5 começar.
+- LLM real (Instructor) plugado em Resumo + Drafts. Slot pronto em `obione.resumos.dependencies` e `obione.drafts.dependencies`; troca de uma linha.
+- Aplicação da rubrica humana 0/0,5/1 em texto livre + cálculo de Cohen's Kappa (Sprint 5, depende de 2 avaliadores).
+- Coleta efetiva dos respondentes Likert (consultoria N≈4, clientes N=5-10).
+
+---
+
 ## Visão Geral
 
 O ObiOne é um **observatório-comunidade de projetos** baseado no MPO (Farias Jr. *et al.*, 2025; Vieira, 2022) e potencializado por IA Generativa. O MVP demonstra duas frentes integradas:
@@ -59,7 +93,7 @@ Entregáveis acima + alinhamento do grupo no pivot.
 
 ## Sprint 2 — Cadastro, Upload, Auth e Pipeline (semanas 9-10: 22/05-04/06)
 
-### US01 — Autenticar usuário
+### US01 — Autenticar usuário ✅
 **Como** usuário, **quero** acessar o observatório com login **para** que minhas permissões sejam respeitadas.
 
 Critérios:
@@ -71,7 +105,7 @@ Critérios:
 
 ---
 
-### US03 — Cadastrar projeto
+### US03 — Cadastrar projeto ✅
 **Como** consultor, **quero** cadastrar um projeto **para** ancorar documentos e extrações.
 
 Critérios:
@@ -81,7 +115,7 @@ Critérios:
 
 ---
 
-### US04 — Fazer upload de documentos do projeto
+### US04 — Fazer upload de documentos do projeto ✅
 **Como** consultor, **quero** anexar arquivos `.docx` **para** alimentar a extração.
 
 Critérios:
@@ -90,7 +124,7 @@ Critérios:
 
 ---
 
-### US05 — Extrair atributos do MPO via LLM
+### US05 — Extrair atributos do MPO via LLM ✅
 **Como** sistema, **devo** processar os documentos e extrair os atributos previstos no Quadro 37.
 
 Critérios:
@@ -103,7 +137,7 @@ Critérios:
 
 ---
 
-### US06 — Persistir extração estruturada
+### US06 — Persistir extração estruturada ✅
 **Como** sistema, **devo** salvar a extração com metadados.
 
 Critérios:
@@ -114,7 +148,7 @@ Critérios:
 
 ## Sprint 3 — Dashboard, Cobertura e Perfis (semana 11: 05-11/06)
 
-### US02 — Gerenciar perfis e acesso semi-aberto
+### US02 — Gerenciar perfis e acesso semi-aberto ✅
 **Como** sistema, **devo** garantir que cada usuário acessa apenas o que seu perfil permite.
 
 Critérios:
@@ -127,7 +161,7 @@ Critérios:
 
 ---
 
-### US07 — Visualizar portfólio (perfil-aware)
+### US07 — Visualizar portfólio (perfil-aware) ✅
 **Como** consultor, **quero** uma visão consolidada de todos os projetos **para** observar o portfólio.
 
 Critérios:
@@ -138,7 +172,7 @@ Critérios:
 
 ---
 
-### US08 — Visualizar detalhe do projeto
+### US08 — Visualizar detalhe do projeto ✅
 **Como** consultor ou cliente daquele projeto, **quero** ver os atributos extraídos **para** inspecionar o conteúdo do observatório.
 
 Critérios:
@@ -149,7 +183,7 @@ Critérios:
 
 ---
 
-### US09 — Indicador de cobertura do MPO
+### US09 — Indicador de cobertura do MPO ✅
 **Como** consultor, **quero** saber quais atributos do MPO foram preenchidos pela IA **para** avaliar a abrangência do pipeline.
 
 Critérios:
@@ -161,7 +195,7 @@ Critérios:
 
 ## Sprint 4 — Comunidade e IA-Assistente (semanas 12-13: 12-25/06)
 
-### US10 — Comentar no projeto
+### US10 — Comentar no projeto ✅
 **Como** consultor ou cliente daquele projeto, **quero** comentar e responder comentários **para** dialogar sobre o conteúdo observado.
 
 Critérios:
@@ -174,7 +208,7 @@ Critérios:
 
 ---
 
-### US11 — Visualizar feed in-app de novidades
+### US11 — Visualizar feed in-app de novidades ✅
 **Como** consultor ou cliente, **quero** ver as novidades dos meus projetos **para** acompanhar o que mudou.
 
 Critérios:
@@ -187,7 +221,7 @@ Critérios:
 
 ---
 
-### US12 — Gerar Resumo do Projeto para o Cliente
+### US12 — Gerar Resumo do Projeto para o Cliente ✅
 **Como** sistema, **devo** gerar uma narrativa acessível do projeto a partir da extração técnica **para** que o cliente compreenda o que está sendo observado.
 
 Critérios:
@@ -200,7 +234,7 @@ Critérios:
 
 ---
 
-### US13 — Gerar drafts de "Próximos Passos / Pontos de Atenção"
+### US13 — Gerar drafts de "Próximos Passos / Pontos de Atenção" ✅
 **Como** consultor, **quero** drafts gerados pela IA dos próximos passos e pontos de atenção do projeto **para** reduzir o tempo de manutenção do observatório.
 
 Critérios:
@@ -215,7 +249,7 @@ Critérios:
 
 ## Sprint 5 — Avaliação (semana 14: 26/06-02/07)
 
-### US14 — Importar e validar gabarito manual
+### US14 — Importar e validar gabarito manual ✅
 **Como** sistema, **devo** carregar os gabaritos produzidos na fase preparatória **para** servir de baseline na comparação.
 
 Critérios:
@@ -225,7 +259,7 @@ Critérios:
 
 ---
 
-### US15 — Comparar extração automática vs. gabarito (critério híbrido)
+### US15 — Comparar extração automática vs. gabarito (critério híbrido) ✅
 **Como** pesquisador, **quero** métricas de precisão, recall, F1 e Kappa **para** avaliar quantitativamente o pipeline.
 
 Critérios:
@@ -240,7 +274,7 @@ Critérios:
 
 ---
 
-### US16 — Coletar feedback Likert da consultoria
+### US16 — Coletar feedback Likert da consultoria ✅
 **Como** pesquisador, **quero** registrar a percepção da equipe da consultoria **para** avaliar a redução de fricção e qualidade da assistência da IA.
 
 Critérios:
@@ -251,7 +285,7 @@ Critérios:
 
 ---
 
-### US17 — Coletar feedback Likert dos clientes
+### US17 — Coletar feedback Likert dos clientes ✅
 **Como** pesquisador, **quero** registrar a percepção dos clientes finais **para** avaliar a clareza do resumo e a qualidade do diálogo no observatório.
 
 Critérios:
@@ -264,7 +298,7 @@ Critérios:
 
 ---
 
-### US18 — Exportar resultados consolidados
+### US18 — Exportar resultados consolidados ✅
 **Como** pesquisador, **quero** exportar todos os resultados **para** alimentar o relato e o artigo.
 
 Critérios:
@@ -278,9 +312,9 @@ Critérios:
 | Marco | Quando | Critério de aprovação |
 |---|---|---|
 | **M1** — Preparação conceitual concluída | Fim da semana 9 (28/05, após SR1) | Entregáveis preparatórios versionados; gabarito dos 3 projetos iniciado; protótipos aprovados. |
-| **M2** — Pipeline operacional nos 5 casos | Fim da semana 11 (11/06) | Extração rodada nos 5 projetos sem erro fatal; JSONs persistidos; auth + perfis funcionais. |
-| **M3** — Dashboard + IA-Assistente operacionais | Fim da semana 13 (25/06, após SR2) | Cobertura visualizável; comentários funcionando; Resumo do Cliente e Drafts gerando saída revisável. |
-| **M4** — Avaliação concluída | Fim da semana 14 (02/07) | Precisão/recall/F1/Kappa calculados nos 3 com gabarito; Likert consultoria + clientes consolidados; exportação pronta. |
+| **M2** — Pipeline operacional nos 5 casos | Fim da semana 11 (11/06) | Extração rodada nos 5 projetos sem erro fatal; JSONs persistidos; auth + perfis funcionais. **Atingido parcialmente em 21/05** — backend pronto + Valença smokeado; faltam os outros 4 docs (depende de re-instalar Ollama). |
+| **M3** — Dashboard + IA-Assistente operacionais | Fim da semana 13 (25/06, após SR2) | Cobertura visualizável; comentários funcionando; Resumo do Cliente e Drafts gerando saída revisável. **Atingido no backend em 21/05** — Resumo + Drafts com mock generator publicáveis; frontend pendente. |
+| **M4** — Avaliação concluída | Fim da semana 14 (02/07) | Precisão/recall/F1/Kappa calculados nos 3 com gabarito; Likert consultoria + clientes consolidados; exportação pronta. Endpoints prontos; falta executar a coleta humana. |
 
 ---
 
@@ -307,12 +341,12 @@ Critérios:
 | Sem | Data | Atividade | Sprint | Marco |
 |---|---|---|---|---|
 | 8 | 15-21/05 | Fase preparatória (atributos, protocolo, schema, protótipos, setup) + alinhamento do grupo no pivot | Sprint 1 | — |
-| 9 | 22-28/05 | US01 (auth), US03 (cadastro), US04 (upload); iniciar gabarito (3 projetos) | Sprint 2 | M1 + SR1 |
-| 10 | 29/05-04/06 | US05 (extração), US06 (persistência); finalizar gabarito; matriz semente | Sprint 2 | — |
-| 11 | 05-11/06 | US02 (perfis), US07 (portfólio), US08 (detalhe), US09 (cobertura) | Sprint 3 | M2 |
-| 12 | 12-18/06 | US10, US11, US12 (Resumo), US13 (Drafts) | Sprint 4 | — |
+| 9 | 22-28/05 | US01 (auth), US03 (cadastro), US04 (upload); iniciar gabarito (3 projetos) ✅ entregue antecipadamente em 21/05 | Sprint 2 | M1 + SR1 |
+| 10 | 29/05-04/06 | US05 (extração), US06 (persistência); finalizar gabarito; matriz semente ✅ implementação backend; finalizar gabarito manual | Sprint 2 | — |
+| 11 | 05-11/06 | US02 (perfis), US07 (portfólio), US08 (detalhe), US09 (cobertura) ✅ todos entregues em 21/05 | Sprint 3 | M2 |
+| 12 | 12-18/06 | US10, US11, US12 (Resumo), US13 (Drafts) ✅ todos entregues em 21/05 | Sprint 4 | — |
 | 13 | 19-25/06 | Polish + aplicação da rubrica nos 3 projetos + lançar Likert | Sprint 4 | M3 + SR2 |
-| 14 | 26/06-02/07 | US14, US15, US16, US17, US18 (avaliação consolidada) | Sprint 5 | M4 |
+| 14 | 26/06-02/07 | US14, US15, US16, US17, US18 (avaliação consolidada) ✅ implementação; falta execução da coleta humana | Sprint 5 | M4 |
 | 15 | 03-09/07 | Escrita do relato + slides + screencast | — | — |
 | 16 | 10/07 | **Apresentação final + entrega do artigo** | — | Entrega |
 
