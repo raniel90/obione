@@ -878,9 +878,51 @@ Antecipe perguntas prováveis (responda só se vierem):
 - "Por que tão adiantado?" → IA generativa acelerou implementação; o trabalho intelectual (requisitos, arquitetura, protocolo) virou base sólida pra automação.
 """,
     }
-    for idx, text in notes.items():
-        prs.slides[idx].notes_slide.notes_text_frame.text = text.strip()
-    print(f"  {len(notes)} speaker notes adicionados")
+    # NOTA: por que .md em vez de notes embarcadas?
+    # A combinação python-pptx + 4+ duplicações do mesmo slide-fonte
+    # corrompe a infraestrutura de notesMaster de um jeito que Keynote
+    # rejeita o .pptx ("file format is invalid"), mesmo que a estrutura
+    # XML pareça bit-equivalent a um .pptx que abre sem notes ou com
+    # menos clones. Investigação detalhada em PR #15. Workaround:
+    # apresentador usa este .md em um segundo monitor / iPad como
+    # teleprompter, sincronizado com o número do slide.
+    notes_md_path = OUTPUT.parent / "sr1_2026-05-22_notes.md"
+    SLIDE_TITLES = {
+        0: "Capa",
+        1: "Agenda",
+        2: "Contexto · Observatório é mais que dashboard",
+        3: "O que é o ObiOne · Para quem e por que",
+        4: "Escopo · 5 grupos · 18 RFs",
+        5: "Requisitos · Fundação + Pipeline (RF01-RF06)",
+        6: "Requisitos · Observação + Comunidade + IA (RF07-RF13)",
+        7: "Requisitos · Avaliação DSR (RF14-RF18)",
+        8: "Requisitos Não-Funcionais (RNF01-RNF09)",
+        9: "Cronograma · 4 marcos",
+        10: "Onde estamos · O que vem",
+        11: "Obrigado · Discussão",
+    }
+    md_lines = [
+        "# SR1 · Notas do Apresentador",
+        "",
+        "> Companion do `sr1_2026-05-22.pptx` (12 slides). Abra em um segundo",
+        "> monitor / iPad como teleprompter durante a apresentação.",
+        "> Bypass do bug Keynote + python-pptx + clones (ver PR #15).",
+        "",
+        "**Tempo total alvo:** ~16-17 min · **Equipe:** Bruno, Cynthia, Moisés, Raniel",
+        "",
+        "---",
+        "",
+    ]
+    for idx in sorted(notes.keys()):
+        title = SLIDE_TITLES.get(idx, "")
+        md_lines.append(f"## Slide {idx + 1} · {title}")
+        md_lines.append("")
+        md_lines.append(notes[idx].strip())
+        md_lines.append("")
+        md_lines.append("---")
+        md_lines.append("")
+    notes_md_path.write_text("\n".join(md_lines), encoding="utf-8")
+    print(f"  {len(notes)} briefings escritos em {notes_md_path.name}")
 
 
 def main() -> int:
@@ -953,13 +995,10 @@ def main() -> int:
     n = update_footers(prs, total=12)
     print(f"  {n} números de página atualizados")
 
-    # NOTA: speaker notes desativados temporariamente.
-    # Com 4 clones do slide-5-grupos, a infraestrutura de notesMaster do
-    # python-pptx falha em criar o part corretamente e o Keynote rejeita o
-    # arquivo. O conteúdo dos briefings vive em add_speaker_notes() pra
-    # uso manual; até resolver o root cause, deixamos os notes vazios.
-    # print("\nAdicionando speaker notes (briefing por slide)...")
-    # add_speaker_notes(prs)
+    # Notes embarcadas no .pptx desativadas (bug Keynote — ver add_speaker_notes).
+    # Em vez disso, gera um .md companion ao lado do .pptx.
+    print("\nGerando notas do apresentador (.md companion)...")
+    add_speaker_notes(prs)
 
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     prs.save(OUTPUT)
