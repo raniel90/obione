@@ -3,6 +3,7 @@ import uuid
 
 from obione.auth.models import User
 from obione.documents.storage.port import AbstractBlobStorage
+from obione.extractions.coverage import CoverageReport, compute_coverage
 from obione.extractions.exceptions import ExtractionNotFoundError
 from obione.extractions.llm.port import AbstractExtractor
 from obione.extractions.models import Extraction
@@ -81,6 +82,25 @@ def create_extraction_from_document(
         uow.extractions.add(extraction)
         uow.commit()
         return extraction
+
+
+def get_project_coverage(
+    uow: AbstractUnitOfWork, user: User, project_id: uuid.UUID
+) -> CoverageReport:
+    """Coverage report based on the project's latest extraction.
+
+    Uses any source (llm or manual) — whichever was created last. When the
+    project has no extraction yet, returns a zero-coverage report so the UI
+    can render the empty-state without a 404.
+    """
+    get_project_for_user(uow, user, project_id)
+    with uow:
+        extractions = uow.extractions.list_by_project(project_id)
+        if not extractions:
+            return compute_coverage({})
+        # list_by_project orders by created_at desc, so [0] is the latest.
+        latest = extractions[0]
+        return compute_coverage(latest.content, extraction_id=str(latest.id))
 
 
 def create_extraction_from_manual(
