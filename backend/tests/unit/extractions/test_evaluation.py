@@ -4,14 +4,18 @@ from obione.extractions.evaluation import compare_extractions
 
 _META = {
     "_meta": {
-        "projeto_nome": "p", "documento_fonte": "d.docx",
-        "data_extracao": "2026-05-21T00:00:00Z", "origem": "llm",
+        "projeto_nome": "p",
+        "documento_fonte": "d.docx",
+        "data_extracao": "2026-05-21T00:00:00Z",
+        "origem": "llm",
     }
 }
 _META_GAB = {
     "_meta": {
-        "projeto_nome": "p", "documento_fonte": "d.docx",
-        "data_extracao": "2026-05-21T00:00:00Z", "origem": "gabarito_manual",
+        "projeto_nome": "p",
+        "documento_fonte": "d.docx",
+        "data_extracao": "2026-05-21T00:00:00Z",
+        "origem": "gabarito_manual",
     }
 }
 
@@ -130,15 +134,21 @@ def test_aggregate_metrics_precision_recall_f1():
     # 3 TP, 1 FP, 2 FN
     llm = {
         **_META,
-        "nome_projeto": "x", "local_execucao": "y", "tipo": "z",  # 3 TP
-        "porte": "pequeno",                                         # 1 FP
-        "data_inicio": None, "data_fim_planejada": None,            # 2 FN
+        "nome_projeto": "x",
+        "local_execucao": "y",
+        "tipo": "z",  # 3 TP
+        "porte": "pequeno",  # 1 FP
+        "data_inicio": None,
+        "data_fim_planejada": None,  # 2 FN
     }
     gab = {
         **_META_GAB,
-        "nome_projeto": "x", "local_execucao": "y", "tipo": "z",   # TP base
-        "porte": None,                                              # was null, llm filled = FP
-        "data_inicio": "2026-01-01", "data_fim_planejada": "2026-04-01",  # llm null = FN
+        "nome_projeto": "x",
+        "local_execucao": "y",
+        "tipo": "z",  # TP base
+        "porte": None,  # was null, llm filled = FP
+        "data_inicio": "2026-01-01",
+        "data_fim_planejada": "2026-04-01",  # llm null = FN
     }
     r = compare_extractions(llm, gab)
     m = r.estruturado_metrics

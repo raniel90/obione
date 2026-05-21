@@ -41,8 +41,11 @@ def _client_user() -> User:
 def _seed_doc(uow, storage, project_id, *, uploader_id):
     sha, rel = storage.write(project_id, b"docx-bytes")
     doc = Document(
-        project_id=project_id, original_name="d.docx", relative_path=rel,
-        sha256=sha, size_bytes=10,
+        project_id=project_id,
+        original_name="d.docx",
+        relative_path=rel,
+        sha256=sha,
+        size_bytes=10,
         mime_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         uploaded_by=uploader_id,
     )
@@ -60,8 +63,12 @@ def test_create_from_document_reads_storage_and_persists():
 
     extractor = _CannedExtractor()
     extraction = create_extraction_from_document(
-        uow, storage, extractor, consultant,
-        project_id=project.id, document_id=doc.id,
+        uow,
+        storage,
+        extractor,
+        consultant,
+        project_id=project.id,
+        document_id=doc.id,
     )
 
     assert extractor.received_bytes == b"docx-bytes"
@@ -82,8 +89,12 @@ def test_create_from_document_404_when_document_in_other_project():
 
     with pytest.raises(ExtractionNotFoundError):
         create_extraction_from_document(
-            uow, storage, _CannedExtractor(), consultant,
-            project_id=p1.id, document_id=doc_in_p2.id,
+            uow,
+            storage,
+            _CannedExtractor(),
+            consultant,
+            project_id=p1.id,
+            document_id=doc_in_p2.id,
         )
 
 
@@ -96,8 +107,12 @@ def test_create_from_document_404_when_document_missing():
 
     with pytest.raises(ExtractionNotFoundError):
         create_extraction_from_document(
-            uow, storage, _CannedExtractor(), consultant,
-            project_id=project.id, document_id=new_id(),
+            uow,
+            storage,
+            _CannedExtractor(),
+            consultant,
+            project_id=project.id,
+            document_id=new_id(),
         )
 
 
@@ -113,6 +128,10 @@ def test_create_from_document_forbidden_for_client():
 
     with pytest.raises(ClientCannotMutateError):
         create_extraction_from_document(
-            uow, storage, _CannedExtractor(), client,
-            project_id=project.id, document_id=doc.id,
+            uow,
+            storage,
+            _CannedExtractor(),
+            client,
+            project_id=project.id,
+            document_id=doc.id,
         )

@@ -23,14 +23,14 @@ def consultant_token(client):
     try:
         _purge_user(s, email)
         u = User(
-            email=email, password_hash=hash_password("pwd12345678"),
-            name="C", role="consultant",
+            email=email,
+            password_hash=hash_password("pwd12345678"),
+            name="C",
+            role="consultant",
         )
         s.add(u)
         s.commit()
-        r = client.post(
-            "/auth/login", json={"email": email, "password": "pwd12345678"}
-        )
+        r = client.post("/auth/login", json={"email": email, "password": "pwd12345678"})
         yield r.json()["access_token"]
         _purge_user(s, email)
     finally:
@@ -46,14 +46,17 @@ def test_create_manual_then_list(client, consultant_token):
         r = client.post(
             f"/projects/{pid}/extractions/manual",
             headers=h,
-            json={"content": {
-                "_meta": {
-                    "projeto_nome": "p", "documento_fonte": "d.docx",
-                    "data_extracao": "2026-05-21T00:00:00Z",
-                    "origem": "gabarito_manual",
-                },
-                "nome_projeto": "Manual",
-            }},
+            json={
+                "content": {
+                    "_meta": {
+                        "projeto_nome": "p",
+                        "documento_fonte": "d.docx",
+                        "data_extracao": "2026-05-21T00:00:00Z",
+                        "origem": "gabarito_manual",
+                    },
+                    "nome_projeto": "Manual",
+                }
+            },
         )
         assert r.status_code == 201, r.text
         assert r.json()["source"] == "manual"

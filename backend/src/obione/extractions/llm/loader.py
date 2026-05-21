@@ -4,6 +4,7 @@ Concatenates non-empty paragraphs and flattens table rows into pipe-joined
 lines. Good enough for the consultancy `.docx` files in the case study —
 no headers/footers, no images, no nested tables expected at runtime.
 """
+
 import io
 
 from docx import Document

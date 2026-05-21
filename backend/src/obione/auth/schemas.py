@@ -1,4 +1,5 @@
 """Pydantic DTOs for the auth bounded context."""
+
 import uuid
 from datetime import datetime
 from typing import Literal

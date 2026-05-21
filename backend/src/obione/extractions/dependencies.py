@@ -1,4 +1,5 @@
 """FastAPI dependencies for the extractions context."""
+
 from obione.extractions.llm.factory import build_extractor
 from obione.extractions.llm.port import AbstractExtractor
 from obione.settings import settings

@@ -22,15 +22,20 @@ def tokens(client):
     emails = ["e2e-port-c@x.com", "e2e-port-cli@x.com"]
     try:
         _purge_users(s, emails)
-        c = User(email=emails[0], password_hash=hash_password("pwd12345678"),
-                 name="C", role="consultant")
-        cli = User(email=emails[1], password_hash=hash_password("pwd12345678"),
-                   name="Cl", role="client")
-        s.add_all([c, cli]); s.commit()
-        c_tok = client.post("/auth/login",
-                            json={"email": emails[0], "password": "pwd12345678"}).json()["access_token"]
-        cli_tok = client.post("/auth/login",
-                              json={"email": emails[1], "password": "pwd12345678"}).json()["access_token"]
+        c = User(
+            email=emails[0], password_hash=hash_password("pwd12345678"), name="C", role="consultant"
+        )
+        cli = User(
+            email=emails[1], password_hash=hash_password("pwd12345678"), name="Cl", role="client"
+        )
+        s.add_all([c, cli])
+        s.commit()
+        c_tok = client.post(
+            "/auth/login", json={"email": emails[0], "password": "pwd12345678"}
+        ).json()["access_token"]
+        cli_tok = client.post(
+            "/auth/login", json={"email": emails[1], "password": "pwd12345678"}
+        ).json()["access_token"]
         yield {"consultant_token": c_tok, "client_token": cli_tok}
         _purge_users(s, emails)
     finally:
@@ -41,15 +46,24 @@ def tokens(client):
 def test_portfolio_shows_status_progression(client, tokens):
     h = {"Authorization": f"Bearer {tokens['consultant_token']}"}
     p1 = client.post("/projects", json={"name": "Bare", "domain": "legal"}, headers=h).json()["id"]
-    p2 = client.post("/projects", json={"name": "WithExtraction", "domain": "health"}, headers=h).json()["id"]
+    p2 = client.post(
+        "/projects", json={"name": "WithExtraction", "domain": "health"}, headers=h
+    ).json()["id"]
     try:
         # p2 gets a manual extraction → status 'reviewed'
         client.post(
             f"/projects/{p2}/extractions/manual",
-            json={"content": {"_meta": {
-                "projeto_nome": "x", "documento_fonte": "x.docx",
-                "data_extracao": "2026-05-21T00:00:00Z", "origem": "gabarito_manual",
-            }, "nome_projeto": "WithExtraction"}},
+            json={
+                "content": {
+                    "_meta": {
+                        "projeto_nome": "x",
+                        "documento_fonte": "x.docx",
+                        "data_extracao": "2026-05-21T00:00:00Z",
+                        "origem": "gabarito_manual",
+                    },
+                    "nome_projeto": "WithExtraction",
+                }
+            },
             headers=h,
         )
         r = client.get("/projects/portfolio", headers=h)
@@ -70,8 +84,12 @@ def test_portfolio_shows_status_progression(client, tokens):
 @pytest.mark.e2e
 def test_portfolio_domain_filter(client, tokens):
     h = {"Authorization": f"Bearer {tokens['consultant_token']}"}
-    p_legal = client.post("/projects", json={"name": "L1", "domain": "legal"}, headers=h).json()["id"]
-    p_health = client.post("/projects", json={"name": "H1", "domain": "health"}, headers=h).json()["id"]
+    p_legal = client.post("/projects", json={"name": "L1", "domain": "legal"}, headers=h).json()[
+        "id"
+    ]
+    p_health = client.post("/projects", json={"name": "H1", "domain": "health"}, headers=h).json()[
+        "id"
+    ]
     try:
         r = client.get("/projects/portfolio?domain=legal", headers=h)
         assert r.status_code == 200

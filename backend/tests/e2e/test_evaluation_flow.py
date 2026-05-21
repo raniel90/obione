@@ -22,11 +22,14 @@ def consultant_token(client):
     email = "e2e-eval@x.com"
     try:
         _purge_user(s, email)
-        u = User(email=email, password_hash=hash_password("pwd12345678"),
-                 name="C", role="consultant")
-        s.add(u); s.commit()
-        tok = client.post("/auth/login",
-                          json={"email": email, "password": "pwd12345678"}).json()["access_token"]
+        u = User(
+            email=email, password_hash=hash_password("pwd12345678"), name="C", role="consultant"
+        )
+        s.add(u)
+        s.commit()
+        tok = client.post("/auth/login", json={"email": email, "password": "pwd12345678"}).json()[
+            "access_token"
+        ]
         yield tok
         _purge_user(s, email)
     finally:
@@ -34,8 +37,10 @@ def consultant_token(client):
 
 
 _META_LLM = {
-    "projeto_nome": "p", "documento_fonte": "d.docx",
-    "data_extracao": "2026-05-21T00:00:00Z", "origem": "llm",
+    "projeto_nome": "p",
+    "documento_fonte": "d.docx",
+    "data_extracao": "2026-05-21T00:00:00Z",
+    "origem": "llm",
 }
 _META_GAB = {**_META_LLM, "origem": "gabarito_manual"}
 
@@ -48,7 +53,8 @@ def test_evaluation_404_when_only_one_source(client, consultant_token):
         # Only gabarito, no llm yet.
         client.post(
             f"/projects/{pid}/extractions/manual",
-            json={"content": {"_meta": _META_GAB, "nome_projeto": "X"}}, headers=h,
+            json={"content": {"_meta": _META_GAB, "nome_projeto": "X"}},
+            headers=h,
         )
         r = client.get(f"/projects/{pid}/extractions/evaluation", headers=h)
         assert r.status_code == 404
@@ -66,26 +72,30 @@ def test_evaluation_with_llm_and_gabarito(client, consultant_token):
         client.post(
             f"/projects/{pid}/extractions/manual",
             headers=h,
-            json={"content": {
-                "_meta": _META_GAB,
-                "nome_projeto": "Projeto Certo",
-                "porte": "pequeno",
-                "custo_estimado": 800.0,
-                "data_inicio": "2026-01-01",
-            }},
+            json={
+                "content": {
+                    "_meta": _META_GAB,
+                    "nome_projeto": "Projeto Certo",
+                    "porte": "pequeno",
+                    "custo_estimado": 800.0,
+                    "data_inicio": "2026-01-01",
+                }
+            },
         )
         # LLM extraction (one TP, one FN, one FP, one TN scenario)
         client.post(
             f"/projects/{pid}/extractions/manual",
             headers=h,
-            json={"content": {
-                "_meta": _META_LLM,
-                "nome_projeto": "Projeto Certo",      # TP (case-insensitive match)
-                "porte": "medio",                      # FN (wrong value)
-                "tipo": "consultoria",                 # FP (LLM invented; gabarito was null)
-                "data_inicio": None,                   # FN (LLM missed)
-                "custo_estimado": 800.0,               # TP (exact number)
-            }},
+            json={
+                "content": {
+                    "_meta": _META_LLM,
+                    "nome_projeto": "Projeto Certo",  # TP (case-insensitive match)
+                    "porte": "medio",  # FN (wrong value)
+                    "tipo": "consultoria",  # FP (LLM invented; gabarito was null)
+                    "data_inicio": None,  # FN (LLM missed)
+                    "custo_estimado": 800.0,  # TP (exact number)
+                }
+            },
         )
         r = client.get(f"/projects/{pid}/extractions/evaluation", headers=h)
         assert r.status_code == 200, r.text

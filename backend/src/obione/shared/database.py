@@ -1,4 +1,5 @@
 """SQLAlchemy 2 engine, sessionmaker, Base. Naming convention applied for stable migrations."""
+
 from collections.abc import Generator
 
 from sqlalchemy import MetaData, create_engine

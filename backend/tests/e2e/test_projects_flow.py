@@ -8,9 +8,7 @@ from obione.shared.database import SessionLocal
 
 def _purge_test_users(s, emails: list[str]) -> None:
     """Delete users + their projects (cascades to project_clients)."""
-    user_ids = [
-        u.id for u in s.query(User).filter(User.email.in_(emails)).all()
-    ]
+    user_ids = [u.id for u in s.query(User).filter(User.email.in_(emails)).all()]
     if user_ids:
         s.query(Project).filter(Project.consultant_id.in_(user_ids)).delete(
             synchronize_session=False
@@ -27,12 +25,16 @@ def seeded_users():
     try:
         _purge_test_users(s, emails)
         consultant = User(
-            email="e2e-c@x.com", password_hash=hash_password("pwd1234567"),
-            name="C", role="consultant",
+            email="e2e-c@x.com",
+            password_hash=hash_password("pwd1234567"),
+            name="C",
+            role="consultant",
         )
         client_user = User(
-            email="e2e-cl@x.com", password_hash=hash_password("pwd1234567"),
-            name="Cl", role="client",
+            email="e2e-cl@x.com",
+            password_hash=hash_password("pwd1234567"),
+            name="Cl",
+            role="client",
         )
         s.add_all([consultant, client_user])
         s.commit()
@@ -76,9 +78,7 @@ def test_client_cannot_see_unassigned_project(client, seeded_users):
     project_id = r.json()["id"]
     r = client.get("/projects", headers={"Authorization": f"Bearer {client_tok}"})
     assert all(p["id"] != project_id for p in r.json())
-    r = client.get(
-        f"/projects/{project_id}", headers={"Authorization": f"Bearer {client_tok}"}
-    )
+    r = client.get(f"/projects/{project_id}", headers={"Authorization": f"Bearer {client_tok}"})
     assert r.status_code == 404
     client.delete(
         f"/projects/{project_id}",

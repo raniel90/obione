@@ -10,8 +10,13 @@ from obione.shared.logging import JsonFormatter, configure_logging
 def test_json_formatter_produces_valid_json():
     formatter = JsonFormatter()
     record = logging.LogRecord(
-        name="obione.test", level=logging.INFO, pathname="x.py", lineno=1,
-        msg="hello %s", args=("world",), exc_info=None,
+        name="obione.test",
+        level=logging.INFO,
+        pathname="x.py",
+        lineno=1,
+        msg="hello %s",
+        args=("world",),
+        exc_info=None,
     )
     out = formatter.format(record)
     parsed = json.loads(out)
@@ -25,8 +30,13 @@ def test_json_formatter_produces_valid_json():
 def test_json_formatter_includes_extras():
     formatter = JsonFormatter()
     record = logging.LogRecord(
-        name="x", level=logging.INFO, pathname="x.py", lineno=1,
-        msg="m", args=None, exc_info=None,
+        name="x",
+        level=logging.INFO,
+        pathname="x.py",
+        lineno=1,
+        msg="m",
+        args=None,
+        exc_info=None,
     )
     record.request_id = "abc-123"
     record.user_id = "user-1"

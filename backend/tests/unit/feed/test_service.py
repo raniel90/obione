@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
@@ -16,13 +16,16 @@ from obione.unit_of_work import FakeUnitOfWork
 
 def _user(role: str = "consultant", suffix: str = "x") -> User:
     return User(
-        id=new_id(), email=f"{role}-{suffix}@x.com",
-        password_hash="x", name="N", role=role,
+        id=new_id(),
+        email=f"{role}-{suffix}@x.com",
+        password_hash="x",
+        name="N",
+        role=role,
     )
 
 
 def _now_offset(seconds: int) -> datetime:
-    return datetime.now(tz=timezone.utc) + timedelta(seconds=seconds)
+    return datetime.now(tz=UTC) + timedelta(seconds=seconds)
 
 
 @pytest.mark.unit
@@ -102,16 +105,24 @@ def test_feed_merges_comments_extractions_documents():
 
     create_comment(uow, consultant, project.id, CommentCreate(body="comment body"))
     extraction = Extraction(
-        project_id=project.id, document_id=None,
-        source="llm", llm_model="mock", content={"_meta": {}}, created_by=None,
+        project_id=project.id,
+        document_id=None,
+        source="llm",
+        llm_model="mock",
+        content={"_meta": {}},
+        created_by=None,
         created_at=_now_offset(-10),
     )
     uow.extractions.add(extraction)
     doc = Document(
-        project_id=project.id, original_name="x.docx", relative_path="x.docx",
-        sha256="0" * 64, size_bytes=1,
+        project_id=project.id,
+        original_name="x.docx",
+        relative_path="x.docx",
+        sha256="0" * 64,
+        size_bytes=1,
         mime_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        uploaded_by=consultant.id, uploaded_at=_now_offset(-5),
+        uploaded_by=consultant.id,
+        uploaded_at=_now_offset(-5),
     )
     uow.documents.add(doc)
 
@@ -125,12 +136,17 @@ def test_feed_summary_for_extractions_uses_model_id():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
     project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
-    uow.extractions.add(Extraction(
-        project_id=project.id, document_id=None,
-        source="llm", llm_model="ollama/llama3.1:8b",
-        content={"_meta": {}}, created_by=None,
-        created_at=_now_offset(0),
-    ))
+    uow.extractions.add(
+        Extraction(
+            project_id=project.id,
+            document_id=None,
+            source="llm",
+            llm_model="ollama/llama3.1:8b",
+            content={"_meta": {}},
+            created_by=None,
+            created_at=_now_offset(0),
+        )
+    )
     events = build_feed_for_user(uow, consultant)
     extraction_events = [e for e in events if e.kind == "new_extraction"]
     assert "ollama/llama3.1:8b" in extraction_events[0].summary

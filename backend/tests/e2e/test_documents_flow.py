@@ -27,8 +27,10 @@ def consultant_token(client):
     try:
         _purge_user(s, email)
         u = User(
-            email=email, password_hash=hash_password("pwd12345678"),
-            name="C", role="consultant",
+            email=email,
+            password_hash=hash_password("pwd12345678"),
+            name="C",
+            role="consultant",
         )
         s.add(u)
         s.commit()

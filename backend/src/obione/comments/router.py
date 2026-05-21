@@ -1,4 +1,5 @@
 """HTTP routes for the comments bounded context (US10)."""
+
 import uuid
 
 from fastapi import APIRouter
@@ -8,15 +9,11 @@ from obione.comments import service
 from obione.comments.schemas import CommentCreate, CommentResponse, CommentUpdate
 
 # Project-scoped router for collection ops (list/create).
-project_router = APIRouter(
-    prefix="/projects/{project_id}/comments", tags=["comments"]
-)
+project_router = APIRouter(prefix="/projects/{project_id}/comments", tags=["comments"])
 
 
 @project_router.get("", response_model=list[CommentResponse])
-def list_comments(
-    project_id: uuid.UUID, user: CurrentUser
-) -> list[CommentResponse]:
+def list_comments(project_id: uuid.UUID, user: CurrentUser) -> list[CommentResponse]:
     return [
         CommentResponse.model_validate(c)
         for c in service.list_comments_for_project(get_uow(), user, project_id)

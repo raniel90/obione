@@ -37,9 +37,14 @@ def test_upload_succeeds():
     storage = FakeBlobStorage()
     consultant, project = _setup_project(uow)
     doc = upload_document(
-        uow, storage, consultant,
-        project_id=project.id, filename="x.docx", content=b"hello",
-        mime_type=DOCX_MIME, max_size_mb=10,
+        uow,
+        storage,
+        consultant,
+        project_id=project.id,
+        filename="x.docx",
+        content=b"hello",
+        mime_type=DOCX_MIME,
+        max_size_mb=10,
     )
     assert doc.project_id == project.id
     assert doc.sha256
@@ -52,9 +57,14 @@ def test_upload_rejects_non_docx():
     consultant, project = _setup_project(uow)
     with pytest.raises(UnsupportedMimeTypeError):
         upload_document(
-            uow, FakeBlobStorage(), consultant,
-            project_id=project.id, filename="x.pdf", content=b"x",
-            mime_type="application/pdf", max_size_mb=10,
+            uow,
+            FakeBlobStorage(),
+            consultant,
+            project_id=project.id,
+            filename="x.pdf",
+            content=b"x",
+            mime_type="application/pdf",
+            max_size_mb=10,
         )
 
 
@@ -65,9 +75,14 @@ def test_upload_rejects_too_large():
     huge = b"x" * (11 * 1024 * 1024)
     with pytest.raises(FileTooLargeError):
         upload_document(
-            uow, FakeBlobStorage(), consultant,
-            project_id=project.id, filename="x.docx", content=huge,
-            mime_type=DOCX_MIME, max_size_mb=10,
+            uow,
+            FakeBlobStorage(),
+            consultant,
+            project_id=project.id,
+            filename="x.docx",
+            content=huge,
+            mime_type=DOCX_MIME,
+            max_size_mb=10,
         )
 
 
@@ -77,26 +92,44 @@ def test_upload_rejects_duplicate():
     storage = FakeBlobStorage()
     consultant, project = _setup_project(uow)
     upload_document(
-        uow, storage, consultant, project_id=project.id,
-        filename="a.docx", content=b"same", mime_type=DOCX_MIME, max_size_mb=10,
+        uow,
+        storage,
+        consultant,
+        project_id=project.id,
+        filename="a.docx",
+        content=b"same",
+        mime_type=DOCX_MIME,
+        max_size_mb=10,
     )
     with pytest.raises(DuplicateDocumentError):
         upload_document(
-            uow, storage, consultant, project_id=project.id,
-            filename="b.docx", content=b"same", mime_type=DOCX_MIME, max_size_mb=10,
+            uow,
+            storage,
+            consultant,
+            project_id=project.id,
+            filename="b.docx",
+            content=b"same",
+            mime_type=DOCX_MIME,
+            max_size_mb=10,
         )
 
 
 @pytest.mark.unit
 def test_client_cannot_upload():
     from obione.projects.exceptions import ClientCannotMutateError
+
     uow = FakeUnitOfWork()
     consultant, project = _setup_project(uow)
     client = _client_user()
     uow.projects.add_client(project.id, client.id)
     with pytest.raises(ClientCannotMutateError):
         upload_document(
-            uow, FakeBlobStorage(), client,
-            project_id=project.id, filename="x.docx", content=b"x",
-            mime_type=DOCX_MIME, max_size_mb=10,
+            uow,
+            FakeBlobStorage(),
+            client,
+            project_id=project.id,
+            filename="x.docx",
+            content=b"x",
+            mime_type=DOCX_MIME,
+            max_size_mb=10,
         )

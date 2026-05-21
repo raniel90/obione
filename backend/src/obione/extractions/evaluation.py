@@ -13,6 +13,7 @@ Normalization for estruturado matchers:
   - numbers: exact float equality
   - dates / enums: exact string equality after strip
 """
+
 from __future__ import annotations
 
 import re
@@ -98,9 +99,7 @@ def _is_present(value: object) -> bool:
         return False
     if isinstance(value, str) and not value.strip():
         return False
-    if isinstance(value, (list, dict)) and not value:
-        return False
-    return True
+    return not (isinstance(value, (list, dict)) and not value)
 
 
 def _structured_match(spec, llm_value, gabarito_value) -> bool:
@@ -129,9 +128,7 @@ def _verdict_for_attribute(spec, llm_value, gabarito_value) -> str:
     return "tp" if _structured_match(spec, llm_value, gabarito_value) else "fn"
 
 
-def compare_extractions(
-    llm_content: dict, gabarito_content: dict
-) -> EvaluationReport:
+def compare_extractions(llm_content: dict, gabarito_content: dict) -> EvaluationReport:
     """Score `llm_content` against `gabarito_content` for all 44 attributes."""
     per_attribute: list[AttributeVerdict] = []
     tp = fp = fn = tn = 0
@@ -141,14 +138,16 @@ def compare_extractions(
         llm_val = llm_content.get(spec.name)
         gab_val = gabarito_content.get(spec.name)
         verdict = _verdict_for_attribute(spec, llm_val, gab_val)
-        per_attribute.append(AttributeVerdict(
-            name=spec.name,
-            category=spec.category,
-            extraction_type=spec.extraction_type,
-            llm_value=llm_val,
-            gabarito_value=gab_val,
-            verdict=verdict,
-        ))
+        per_attribute.append(
+            AttributeVerdict(
+                name=spec.name,
+                category=spec.category,
+                extraction_type=spec.extraction_type,
+                llm_value=llm_val,
+                gabarito_value=gab_val,
+                verdict=verdict,
+            )
+        )
         if verdict == "tp":
             tp += 1
         elif verdict == "fp":
@@ -164,7 +163,11 @@ def compare_extractions(
     return EvaluationReport(
         per_attribute=tuple(per_attribute),
         estruturado_metrics=GroupMetrics(
-            group="estruturado", tp=tp, fp=fp, fn=fn, tn=tn,
+            group="estruturado",
+            tp=tp,
+            fp=fp,
+            fn=fn,
+            tn=tn,
         ),
         needs_human_review_count=needs_review,
         out_of_scope_count=oos,

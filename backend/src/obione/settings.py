@@ -1,4 +1,5 @@
 """Typed app settings loaded from environment variables / .env file."""
+
 from typing import Literal
 
 from pydantic import Field, SecretStr

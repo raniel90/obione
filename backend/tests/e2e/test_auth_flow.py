@@ -72,7 +72,9 @@ def test_full_login_then_me(client, admin_user):
 
 @pytest.mark.e2e
 def test_create_user_requires_admin(client, admin_user):
-    login = client.post("/auth/login", json={"email": "e2e-admin@x.com", "password": "admin-pwd-1234"})
+    login = client.post(
+        "/auth/login", json={"email": "e2e-admin@x.com", "password": "admin-pwd-1234"}
+    )
     token = login.json()["access_token"]
     r = client.post(
         "/auth/users",

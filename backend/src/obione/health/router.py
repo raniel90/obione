@@ -1,4 +1,5 @@
 """Health endpoints. /health is liveness (no DB); /health/db hits Postgres."""
+
 from typing import Annotated
 
 from fastapi import APIRouter, Depends

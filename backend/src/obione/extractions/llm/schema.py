@@ -12,6 +12,7 @@ matches the JSON schema contract exactly. The 44 attribute keys keep their
 PT-BR names — they are the canonical academic identifiers and the protocol
 of evaluation references them by these names.
 """
+
 from __future__ import annotations
 
 from typing import Any, Literal
@@ -40,9 +41,7 @@ class MPOMetadata(BaseModel):
 
 
 Porte = Literal["pequeno", "medio", "grande"]
-StatusCronograma = Literal[
-    "no_prazo", "atrasado", "adiantado", "concluido", "cancelado"
-]
+StatusCronograma = Literal["no_prazo", "atrasado", "adiantado", "concluido", "cancelado"]
 
 
 class MPOAttributes(BaseModel):
@@ -73,9 +72,7 @@ class MPOAttributes(BaseModel):
     nome_projeto: str | None = Field(
         default=None, description="String curta que identifica o projeto univocamente."
     )
-    descricao: str | None = Field(
-        default=None, description="Texto narrativo livre do projeto."
-    )
+    descricao: str | None = Field(default=None, description="Texto narrativo livre do projeto.")
     local_execucao: str | None = Field(
         default=None, description="Cidade/estado/país ou referência de local."
     )
@@ -96,9 +93,7 @@ class MPOAttributes(BaseModel):
         default=None,
         description="Número/referência da licitação. Tipicamente null para consultoria privada.",
     )
-    contratos: str | None = Field(
-        default=None, description="Número/referência de contrato."
-    )
+    contratos: str | None = Field(default=None, description="Número/referência de contrato.")
     termo_encerramento: str | None = Field(
         default=None,
         description="Texto do termo de encerramento, se o projeto já foi finalizado.",
@@ -151,9 +146,7 @@ class MPOAttributes(BaseModel):
     escopo_planejado: str | None = Field(
         default=None, description="Definição original do escopo do projeto."
     )
-    escopo_executado: str | None = Field(
-        default=None, description="O que efetivamente foi feito."
-    )
+    escopo_executado: str | None = Field(default=None, description="O que efetivamente foi feito.")
 
     # --- Cronograma (5 atributos: 25-29) ---
     data_inicio: str | None = Field(
@@ -218,12 +211,8 @@ class MPOAttributes(BaseModel):
     )
 
     # --- Lições aprendidas (4 atributos: 41-44) ---
-    pontos_fortes: str | None = Field(
-        default=None, description="Aspectos positivos identificados."
-    )
-    pontos_fracos: str | None = Field(
-        default=None, description="Aspectos negativos identificados."
-    )
+    pontos_fortes: str | None = Field(default=None, description="Aspectos positivos identificados.")
+    pontos_fracos: str | None = Field(default=None, description="Aspectos negativos identificados.")
     dificuldades_encontradas: str | None = Field(
         default=None, description="Obstáculos enfrentados durante o projeto."
     )

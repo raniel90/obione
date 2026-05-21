@@ -1,4 +1,5 @@
 """Pydantic DTOs for the activity feed (US11)."""
+
 import uuid
 from datetime import datetime
 from typing import Literal
@@ -20,9 +21,7 @@ class FeedEvent(BaseModel):
         description="ID of the entity the event describes (comment/extraction/document)."
     )
     created_at: datetime
-    summary: str = Field(
-        description="Short human-readable line (~140 chars) safe for clients."
-    )
+    summary: str = Field(description="Short human-readable line (~140 chars) safe for clients.")
 
 
 class FeedResponse(BaseModel):

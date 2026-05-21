@@ -12,6 +12,7 @@ small (5 projects × ~10s of items each) so this is cheap. If the feed grows
 hot, the right next step is a denormalized `feed_events` table populated by
 service-layer hooks at write-time.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -39,9 +40,7 @@ def _trim(text: str, limit: int = 140) -> str:
     return text if len(text) <= limit else text[: limit - 1] + "…"
 
 
-def build_feed_for_user(
-    uow: AbstractUnitOfWork, user: User, *, limit: int = 50
-) -> list[FeedEvent]:
+def build_feed_for_user(uow: AbstractUnitOfWork, user: User, *, limit: int = 50) -> list[FeedEvent]:
     with uow:
         projects = list_visible_projects(uow, user)
         if not projects:
@@ -51,36 +50,43 @@ def build_feed_for_user(
 
         for project in projects:
             for c in uow.comments.list_by_project(project.id):
-                events.append(_RawEvent(
-                    kind="new_comment",
-                    project=project,
-                    actor_id=c.author_id,
-                    target_id=c.id,
-                    created_at=c.created_at,
-                    summary=_trim(c.body),
-                ))
+                events.append(
+                    _RawEvent(
+                        kind="new_comment",
+                        project=project,
+                        actor_id=c.author_id,
+                        target_id=c.id,
+                        created_at=c.created_at,
+                        summary=_trim(c.body),
+                    )
+                )
             for e in uow.extractions.list_by_project(project.id):
                 summary = (
-                    f"Nova extração via {e.llm_model}" if e.source == "llm"
+                    f"Nova extração via {e.llm_model}"
+                    if e.source == "llm"
                     else "Nova extração (entrada manual)"
                 )
-                events.append(_RawEvent(
-                    kind="new_extraction",
-                    project=project,
-                    actor_id=e.created_by,
-                    target_id=e.id,
-                    created_at=e.created_at,
-                    summary=summary,
-                ))
+                events.append(
+                    _RawEvent(
+                        kind="new_extraction",
+                        project=project,
+                        actor_id=e.created_by,
+                        target_id=e.id,
+                        created_at=e.created_at,
+                        summary=summary,
+                    )
+                )
             for d in uow.documents.list_by_project(project.id):
-                events.append(_RawEvent(
-                    kind="new_document",
-                    project=project,
-                    actor_id=d.uploaded_by,
-                    target_id=d.id,
-                    created_at=d.uploaded_at,
-                    summary=f"Documento anexado: {d.original_name}",
-                ))
+                events.append(
+                    _RawEvent(
+                        kind="new_document",
+                        project=project,
+                        actor_id=d.uploaded_by,
+                        target_id=d.id,
+                        created_at=d.uploaded_at,
+                        summary=f"Documento anexado: {d.original_name}",
+                    )
+                )
 
         events.sort(key=lambda e: e.created_at, reverse=True)
         events = events[:limit]

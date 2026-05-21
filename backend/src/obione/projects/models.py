@@ -1,8 +1,9 @@
 """Project domain entity + M2M for client access."""
+
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import CheckConstraint, DateTime, ForeignKey, String, Text, func
 from sqlalchemy.dialects.postgresql import UUID
@@ -13,7 +14,8 @@ from obione.shared.ids import new_id
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
+
 
 PROJECT_DOMAINS = ("legal", "health", "sports", "branding", "gastronomy", "other")
 

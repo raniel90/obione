@@ -1,11 +1,9 @@
 """Alembic env. Imports all model modules so target_metadata is populated."""
+
 from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
-
-from obione.settings import settings
-from obione.shared.database import Base
 
 # Import all models so they register on Base.metadata.
 from obione.auth.models import User  # noqa: F401
@@ -13,6 +11,8 @@ from obione.comments.models import Comment  # noqa: F401
 from obione.documents.models import Document  # noqa: F401
 from obione.extractions.models import Extraction  # noqa: F401
 from obione.projects.models import Project, ProjectClient  # noqa: F401
+from obione.settings import settings
+from obione.shared.database import Base
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)

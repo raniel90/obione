@@ -3,6 +3,7 @@
 - `client`: FastAPI TestClient (no DB rollback — for e2e)
 - `db_session`: transactional SQLAlchemy session (auto-rollback per test) — for integration
 """
+
 from collections.abc import Generator
 
 import pytest

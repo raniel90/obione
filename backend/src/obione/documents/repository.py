@@ -1,4 +1,5 @@
 """Document repository (abstract + SqlAlchemy + Fake)."""
+
 from __future__ import annotations
 
 import uuid
@@ -49,6 +50,7 @@ class FakeDocumentRepository:
     def add(self, document: Document) -> None:
         if document.id is None:
             from obione.shared.ids import new_id
+
             document.id = new_id()
         self._docs[document.id] = document
 

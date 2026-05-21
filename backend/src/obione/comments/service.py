@@ -5,10 +5,11 @@ project (consultant of the project, client assigned to it, or admin).
 Mutation: author can edit/delete their own comments; the consultant of the
 project can delete any comment as moderation. Clients edit only their own.
 """
+
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from obione.auth.models import User
 from obione.comments.exceptions import (
@@ -74,23 +75,20 @@ def update_comment(
         if comment.author_id != user.id:
             raise NotCommentAuthorError("Only the author can edit a comment.")
         comment.body = data.body
-        comment.updated_at = datetime.now(tz=timezone.utc)
+        comment.updated_at = datetime.now(tz=UTC)
         uow.commit()
         return comment
 
 
-def delete_comment(
-    uow: AbstractUnitOfWork, user: User, comment_id: uuid.UUID
-) -> None:
+def delete_comment(uow: AbstractUnitOfWork, user: User, comment_id: uuid.UUID) -> None:
     with uow:
         comment = uow.comments.get(comment_id)
         if comment is None:
             raise CommentNotFoundError(f"Comment not found: {comment_id}")
         project = get_project_for_user(uow, user, comment.project_id)
         is_author = comment.author_id == user.id
-        is_moderator = (
-            user.role == "admin"
-            or (user.role == "consultant" and project.consultant_id == user.id)
+        is_moderator = user.role == "admin" or (
+            user.role == "consultant" and project.consultant_id == user.id
         )
         if not (is_author or is_moderator):
             raise NotCommentAuthorError(

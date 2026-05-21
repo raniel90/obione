@@ -17,28 +17,40 @@ def _consultant() -> User:
 def _llm_extraction(project_id, content_extras: dict | None = None):
     content = {
         "_meta": {
-            "projeto_nome": "p", "documento_fonte": "d.docx",
-            "data_extracao": "2026-05-21T00:00:00Z", "origem": "llm",
+            "projeto_nome": "p",
+            "documento_fonte": "d.docx",
+            "data_extracao": "2026-05-21T00:00:00Z",
+            "origem": "llm",
         }
     }
     content.update(content_extras or {})
     return Extraction(
-        project_id=project_id, document_id=None, source="llm",
-        llm_model="mock", content=content, created_by=None,
+        project_id=project_id,
+        document_id=None,
+        source="llm",
+        llm_model="mock",
+        content=content,
+        created_by=None,
     )
 
 
 def _gabarito(project_id, content_extras: dict | None = None):
     content = {
         "_meta": {
-            "projeto_nome": "p", "documento_fonte": "d.docx",
-            "data_extracao": "2026-05-21T00:00:00Z", "origem": "gabarito_manual",
+            "projeto_nome": "p",
+            "documento_fonte": "d.docx",
+            "data_extracao": "2026-05-21T00:00:00Z",
+            "origem": "gabarito_manual",
         }
     }
     content.update(content_extras or {})
     return Extraction(
-        project_id=project_id, document_id=None, source="manual",
-        llm_model=None, content=content, created_by=new_id(),
+        project_id=project_id,
+        document_id=None,
+        source="manual",
+        llm_model=None,
+        content=content,
+        created_by=new_id(),
     )
 
 
@@ -61,12 +73,26 @@ def test_evaluation_pairs_llm_with_gabarito():
     uow = FakeUnitOfWork()
     consultant = _consultant()
     project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
-    uow.extractions.add(_llm_extraction(project.id, {
-        "nome_projeto": "X", "porte": "pequeno", "custo_estimado": 800.0,
-    }))
-    uow.extractions.add(_gabarito(project.id, {
-        "nome_projeto": "X", "porte": "medio", "custo_estimado": 800.0,
-    }))
+    uow.extractions.add(
+        _llm_extraction(
+            project.id,
+            {
+                "nome_projeto": "X",
+                "porte": "pequeno",
+                "custo_estimado": 800.0,
+            },
+        )
+    )
+    uow.extractions.add(
+        _gabarito(
+            project.id,
+            {
+                "nome_projeto": "X",
+                "porte": "medio",
+                "custo_estimado": 800.0,
+            },
+        )
+    )
 
     report = get_project_evaluation(uow, consultant, project.id)
     m = report.estruturado_metrics

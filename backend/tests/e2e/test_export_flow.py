@@ -11,16 +11,12 @@ def _purge_users(s, emails: list[str]) -> None:
     user_ids = [u.id for u in s.query(User).filter(User.email.in_(emails)).all()]
     if not user_ids:
         return
-    project_ids = [
-        p.id for p in s.query(Project).filter(Project.consultant_id.in_(user_ids)).all()
-    ]
+    project_ids = [p.id for p in s.query(Project).filter(Project.consultant_id.in_(user_ids)).all()]
     if project_ids:
         s.query(Comment).filter(Comment.project_id.in_(project_ids)).delete(
             synchronize_session=False
         )
-    s.query(Project).filter(Project.consultant_id.in_(user_ids)).delete(
-        synchronize_session=False
-    )
+    s.query(Project).filter(Project.consultant_id.in_(user_ids)).delete(synchronize_session=False)
     s.query(User).filter(User.id.in_(user_ids)).delete(synchronize_session=False)
     s.commit()
 
@@ -31,11 +27,14 @@ def consultant_token(client):
     email = "e2e-export@x.com"
     try:
         _purge_users(s, [email])
-        u = User(email=email, password_hash=hash_password("pwd12345678"),
-                 name="C", role="consultant")
-        s.add(u); s.commit()
-        tok = client.post("/auth/login",
-                          json={"email": email, "password": "pwd12345678"}).json()["access_token"]
+        u = User(
+            email=email, password_hash=hash_password("pwd12345678"), name="C", role="consultant"
+        )
+        s.add(u)
+        s.commit()
+        tok = client.post("/auth/login", json={"email": email, "password": "pwd12345678"}).json()[
+            "access_token"
+        ]
         yield tok
         _purge_users(s, [email])
     finally:
@@ -51,15 +50,19 @@ def test_export_bundle_shape(client, consultant_token):
         client.post(
             f"/projects/{pid}/extractions/manual",
             headers=h,
-            json={"content": {
-                "_meta": {
-                    "projeto_nome": "pe", "documento_fonte": "x.docx",
-                    "data_extracao": "2026-05-21T00:00:00Z",
-                    "origem": "gabarito_manual",
-                },
-                "nome_projeto": "Project E", "descricao": "narrative",
-                "porte": "pequeno",
-            }},
+            json={
+                "content": {
+                    "_meta": {
+                        "projeto_nome": "pe",
+                        "documento_fonte": "x.docx",
+                        "data_extracao": "2026-05-21T00:00:00Z",
+                        "origem": "gabarito_manual",
+                    },
+                    "nome_projeto": "Project E",
+                    "descricao": "narrative",
+                    "porte": "pequeno",
+                }
+            },
         )
         r = client.get(f"/projects/{pid}/export", headers=h)
         assert r.status_code == 200, r.text

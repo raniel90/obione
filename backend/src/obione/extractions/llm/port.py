@@ -1,4 +1,5 @@
 """LLM extractor port (hexagonal). Real adapter ships in Sprint 2 T2.1."""
+
 from dataclasses import dataclass
 from typing import Protocol
 

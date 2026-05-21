@@ -1,4 +1,5 @@
 """Project use cases."""
+
 import uuid
 from dataclasses import dataclass
 
@@ -33,9 +34,7 @@ def list_projects_for_user(uow: AbstractUnitOfWork, user: User) -> list[Project]
         return list_visible_projects(uow, user)
 
 
-def get_project_for_user(
-    uow: AbstractUnitOfWork, user: User, project_id: uuid.UUID
-) -> Project:
+def get_project_for_user(uow: AbstractUnitOfWork, user: User, project_id: uuid.UUID) -> Project:
     with uow:
         project = uow.projects.get(project_id)
         if project is None or not can_user_see(uow, user, project):
@@ -43,9 +42,7 @@ def get_project_for_user(
         return project
 
 
-def create_project(
-    uow: AbstractUnitOfWork, user: User, data: ProjectCreate
-) -> Project:
+def create_project(uow: AbstractUnitOfWork, user: User, data: ProjectCreate) -> Project:
     _require_mutator(user)
     with uow:
         project = Project(
@@ -76,9 +73,7 @@ def update_project(
         return project
 
 
-def delete_project(
-    uow: AbstractUnitOfWork, user: User, project_id: uuid.UUID
-) -> None:
+def delete_project(uow: AbstractUnitOfWork, user: User, project_id: uuid.UUID) -> None:
     _require_mutator(user)
     with uow:
         project = uow.projects.get(project_id)
@@ -98,9 +93,7 @@ def _is_gabarito(extraction) -> bool:
     return origem == "gabarito_manual"
 
 
-def _derive_status(
-    *, document_count: int, extraction_count: int, has_gabarito: bool
-) -> str:
+def _derive_status(*, document_count: int, extraction_count: int, has_gabarito: bool) -> str:
     if has_gabarito:
         return "reviewed"
     if extraction_count > 0:
@@ -137,18 +130,20 @@ def list_portfolio_for_user(
                 coverage_pct = coverage.percentage
             else:
                 coverage_pct = 0.0
-            entries.append(PortfolioEntry(
-                project=project,
-                status=_derive_status(
+            entries.append(
+                PortfolioEntry(
+                    project=project,
+                    status=_derive_status(
+                        document_count=len(documents),
+                        extraction_count=len(extractions),
+                        has_gabarito=has_gabarito,
+                    ),
                     document_count=len(documents),
                     extraction_count=len(extractions),
+                    coverage_percentage=coverage_pct,
                     has_gabarito=has_gabarito,
-                ),
-                document_count=len(documents),
-                extraction_count=len(extractions),
-                coverage_percentage=coverage_pct,
-                has_gabarito=has_gabarito,
-            ))
+                )
+            )
         return entries
 
 

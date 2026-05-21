@@ -1,4 +1,5 @@
 """Extraction repository (abstract + SqlAlchemy + Fake)."""
+
 from __future__ import annotations
 
 import uuid
@@ -43,6 +44,7 @@ class FakeExtractionRepository:
     def add(self, extraction: Extraction) -> None:
         if extraction.id is None:
             from obione.shared.ids import new_id
+
             extraction.id = new_id()
         self._extractions[extraction.id] = extraction
 

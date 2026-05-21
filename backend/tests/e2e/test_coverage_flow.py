@@ -29,14 +29,14 @@ def consultant_token(client):
     try:
         _purge_user(s, email)
         u = User(
-            email=email, password_hash=hash_password("pwd12345678"),
-            name="C", role="consultant",
+            email=email,
+            password_hash=hash_password("pwd12345678"),
+            name="C",
+            role="consultant",
         )
         s.add(u)
         s.commit()
-        r = client.post(
-            "/auth/login", json={"email": email, "password": "pwd12345678"}
-        )
+        r = client.post("/auth/login", json={"email": email, "password": "pwd12345678"})
         yield r.json()["access_token"]
         _purge_user(s, email)
     finally:
@@ -115,8 +115,10 @@ def test_coverage_uses_latest_extraction(client, consultant_token):
             json={
                 "content": {
                     "_meta": {
-                        "projeto_nome": "p", "documento_fonte": "d.docx",
-                        "data_extracao": "2026-05-20T00:00:00Z", "origem": "gabarito_manual",
+                        "projeto_nome": "p",
+                        "documento_fonte": "d.docx",
+                        "data_extracao": "2026-05-20T00:00:00Z",
+                        "origem": "gabarito_manual",
                     },
                     "nome_projeto": "v1",
                 }
@@ -129,8 +131,10 @@ def test_coverage_uses_latest_extraction(client, consultant_token):
             json={
                 "content": {
                     "_meta": {
-                        "projeto_nome": "p", "documento_fonte": "d.docx",
-                        "data_extracao": "2026-05-20T00:00:00Z", "origem": "gabarito_manual",
+                        "projeto_nome": "p",
+                        "documento_fonte": "d.docx",
+                        "data_extracao": "2026-05-20T00:00:00Z",
+                        "origem": "gabarito_manual",
                     },
                     "nome_projeto": "v2",
                     "descricao": "desc",
@@ -158,14 +162,14 @@ def test_coverage_404_when_project_not_visible(client, consultant_token):
     try:
         _purge_user(s, other_email)
         other = User(
-            email=other_email, password_hash=hash_password("pwd12345678"),
-            name="Other", role="consultant",
+            email=other_email,
+            password_hash=hash_password("pwd12345678"),
+            name="Other",
+            role="consultant",
         )
         s.add(other)
         s.commit()
-        login = client.post(
-            "/auth/login", json={"email": other_email, "password": "pwd12345678"}
-        )
+        login = client.post("/auth/login", json={"email": other_email, "password": "pwd12345678"})
         other_tok = login.json()["access_token"]
         r = client.post(
             "/projects",

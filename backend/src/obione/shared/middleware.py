@@ -1,4 +1,5 @@
 """Request-ID propagation + access log middleware."""
+
 import logging
 import time
 import uuid
@@ -32,8 +33,10 @@ def register_middleware(app: FastAPI) -> None:
             _logger.exception(
                 "request_failed",
                 extra={
-                    "request_id": request_id, "method": request.method,
-                    "path": request.url.path, "elapsed_ms": round(elapsed_ms, 2),
+                    "request_id": request_id,
+                    "method": request.method,
+                    "path": request.url.path,
+                    "elapsed_ms": round(elapsed_ms, 2),
                 },
             )
             raise
@@ -42,8 +45,10 @@ def register_middleware(app: FastAPI) -> None:
         _logger.info(
             "request",
             extra={
-                "request_id": request_id, "method": request.method,
-                "path": request.url.path, "status": response.status_code,
+                "request_id": request_id,
+                "method": request.method,
+                "path": request.url.path,
+                "status": response.status_code,
                 "elapsed_ms": round(elapsed_ms, 2),
             },
         )

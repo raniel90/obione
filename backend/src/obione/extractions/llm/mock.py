@@ -1,4 +1,5 @@
 """Mock extractor: loads the example JSON. Used in dev and tests."""
+
 import json
 from pathlib import Path
 

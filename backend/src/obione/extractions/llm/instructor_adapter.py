@@ -7,10 +7,11 @@ instructions — adding Instructor's JSON wrapper consistently produced all-null
 outputs, while a direct call with our schema-aware prompt fills 30+ of 44
 attributes.
 """
+
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from openai import OpenAI
 
@@ -48,11 +49,7 @@ class InstructorExtractor:
             api_key = "ollama"
         elif provider.startswith("openai/"):
             base_url = None
-            api_key = (
-                settings.LLM_API_KEY.get_secret_value()
-                if settings.LLM_API_KEY
-                else None
-            )
+            api_key = settings.LLM_API_KEY.get_secret_value() if settings.LLM_API_KEY else None
         else:
             # anthropic/*, others — not supported in this MVP path.
             raise ValueError(
@@ -87,7 +84,7 @@ class InstructorExtractor:
         payload["_meta"] = MPOMetadata(
             projeto_nome=self._project_name,
             documento_fonte=self._document_name,
-            data_extracao=datetime.now(tz=timezone.utc).isoformat(),
+            data_extracao=datetime.now(tz=UTC).isoformat(),
             origem="llm",
             modelo_llm=self._provider,
         ).model_dump(mode="json")

@@ -1,4 +1,5 @@
 """Extraction use cases."""
+
 import uuid
 
 from obione.auth.models import User
@@ -10,9 +11,9 @@ from obione.extractions.exceptions import (
     ExtractionNotFoundError,
     SchemaValidationError,
 )
-from obione.extractions.validation import validate_manual_extraction
 from obione.extractions.llm.port import AbstractExtractor
 from obione.extractions.models import Extraction
+from obione.extractions.validation import validate_manual_extraction
 from obione.projects.exceptions import ClientCannotMutateError
 from obione.projects.service import get_project_for_user
 from obione.unit_of_work import AbstractUnitOfWork
@@ -70,9 +71,7 @@ def create_extraction_from_document(
     with uow:
         document = uow.documents.get(document_id)
         if document is None or document.project_id != project.id:
-            raise ExtractionNotFoundError(
-                f"Document not found in this project: {document_id}"
-            )
+            raise ExtractionNotFoundError(f"Document not found in this project: {document_id}")
         # storage.read is safe outside the transaction — the blob is
         # content-addressable so no race with concurrent writes.
         content_bytes = storage.read(document.relative_path)
