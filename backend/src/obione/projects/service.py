@@ -4,7 +4,11 @@ import uuid
 from dataclasses import dataclass
 
 from obione.auth.models import User
-from obione.extractions.coverage import compute_coverage
+from obione.comments.models import Comment
+from obione.documents.models import Document
+from obione.extractions.coverage import CoverageReport, compute_coverage
+from obione.extractions.evaluation import EvaluationReport, compare_extractions
+from obione.extractions.models import Extraction
 from obione.projects.access_control import can_user_see, list_visible_projects
 from obione.projects.exceptions import ClientCannotMutateError, ProjectNotFoundError
 from obione.projects.models import Project
@@ -22,6 +26,21 @@ class PortfolioEntry:
     extraction_count: int
     coverage_percentage: float
     has_gabarito: bool
+
+
+@dataclass(frozen=True)
+class ProjectDetail:
+    """Consolidated read view for the project detail screen (US08)."""
+
+    project: Project
+    documents: list[Document]
+    latest_llm: Extraction | None
+    latest_gabarito: Extraction | None
+    coverage: CoverageReport
+    evaluation: EvaluationReport | None
+    recent_comments: list[Comment]
+    total_extractions: int
+    total_comments: int
 
 
 def _require_mutator(user: User) -> None:
@@ -101,6 +120,57 @@ def _derive_status(*, document_count: int, extraction_count: int, has_gabarito: 
     if document_count > 0:
         return "ingested"
     return "registered"
+
+
+def get_project_detail(
+    uow: AbstractUnitOfWork,
+    user: User,
+    project_id: uuid.UUID,
+    *,
+    comments_limit: int = 20,
+) -> ProjectDetail:
+    """Return the consolidated detail view (US08).
+
+    Distinct from /export: keeps only the latest extraction of each kind
+    and a configurable slice of recent comments. Coverage is computed from
+    whichever extraction (any source) is most recent. The evaluation block
+    is filled only when both an llm and a gabarito_manual exist.
+    """
+    project = get_project_for_user(uow, user, project_id)
+    with uow:
+        documents = uow.documents.list_by_project(project.id)
+        extractions = uow.extractions.list_by_project(project.id)
+        comments = uow.comments.list_by_project(project.id)
+
+    latest_llm = next((e for e in extractions if not _is_gabarito(e)), None)
+    latest_gabarito = next((e for e in extractions if _is_gabarito(e)), None)
+
+    most_recent = extractions[0] if extractions else None
+    coverage = compute_coverage(
+        most_recent.content if most_recent else {},
+        extraction_id=str(most_recent.id) if most_recent else None,
+    )
+
+    evaluation: EvaluationReport | None = None
+    if latest_llm is not None and latest_gabarito is not None:
+        evaluation = compare_extractions(latest_llm.content, latest_gabarito.content)
+
+    # Comments come back ascending; slice the tail and reverse → newest-first.
+    # `comments_limit == 0` means "skip the comments slice" (still report total).
+    tail = comments[-comments_limit:] if comments_limit > 0 else []
+    recent_comments = list(reversed(tail))
+
+    return ProjectDetail(
+        project=project,
+        documents=list(documents),
+        latest_llm=latest_llm,
+        latest_gabarito=latest_gabarito,
+        coverage=coverage,
+        evaluation=evaluation,
+        recent_comments=recent_comments,
+        total_extractions=len(extractions),
+        total_comments=len(comments),
+    )
 
 
 def list_portfolio_for_user(
