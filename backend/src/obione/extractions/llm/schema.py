@@ -1,13 +1,16 @@
 """Pydantic mirror of atividades/schema_extracao.json (v1.0.0).
 
-Used both as Instructor `response_model` (LLM populates structured output) and
-as the runtime DTO for the manual gabarito loader (Sprint 5). All 44 attributes
-are nullable — when the .docx doesn't mention an attribute the LLM must return
-null, never invent.
+`MPOAttributes` is the runtime container for one project's 44 attributes
+from the MPO Quadro 37 (Vieira 2022). Used both as Instructor `response_model`
+(LLM populates structured output) and as the gabarito-manual loader DTO in
+Sprint 5. All 44 attributes are nullable — when the .docx doesn't mention an
+attribute the extractor returns null, never inventing values.
 
 The Pydantic field names use snake_case Python identifiers; the `_meta`
 attribute is exposed via alias so the wire format (`{"_meta": {...}, ...}`)
-matches the JSON schema contract exactly.
+matches the JSON schema contract exactly. The 44 attribute keys keep their
+PT-BR names — they are the canonical academic identifiers and the protocol
+of evaluation references them by these names.
 """
 from __future__ import annotations
 
@@ -16,8 +19,8 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
-class MetaExtracao(BaseModel):
-    """Provenance metadata. NOT a per-attribute trace — see future work."""
+class MPOMetadata(BaseModel):
+    """Provenance metadata for an MPO extraction. NOT a per-attribute trace."""
 
     model_config = ConfigDict(extra="ignore")
 
@@ -42,17 +45,19 @@ StatusCronograma = Literal[
 ]
 
 
-class ProjetoExtraido(BaseModel):
-    """44 atributos do Quadro 37 (Vieira 2022). Todos nullable.
+class MPOAttributes(BaseModel):
+    """The 44 attributes of the MPO Quadro 37 (Vieira 2022). All nullable.
 
     Convention: when the source document does not mention an attribute, the
-    extractor must return ``None`` — never fabricate. The LLM is instructed via
-    the field ``description`` strings below (Instructor forwards them as hints).
+    extractor must return ``None`` — never fabricate. The LLM is instructed
+    via the field ``description`` strings below (Instructor forwards them as
+    hints). The wire format keeps PT-BR attribute names because they are the
+    canonical academic identifiers in ``atividades/schema_extracao.json``.
     """
 
     model_config = ConfigDict(populate_by_name=True, extra="ignore")
 
-    meta: MetaExtracao = Field(alias="_meta")
+    meta: MPOMetadata = Field(alias="_meta")
 
     @field_validator("porte", "status_cronograma", mode="before")
     @classmethod

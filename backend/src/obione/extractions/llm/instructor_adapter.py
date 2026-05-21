@@ -17,7 +17,7 @@ from openai import OpenAI
 from obione.extractions.llm.loader import extract_text_from_docx
 from obione.extractions.llm.port import ExtractionResult
 from obione.extractions.llm.prompts import build_extraction_messages
-from obione.extractions.llm.schema import MetaExtracao, ProjetoExtraido
+from obione.extractions.llm.schema import MPOAttributes, MPOMetadata
 from obione.settings import settings
 
 
@@ -84,7 +84,7 @@ class InstructorExtractor:
 
         # Drop any _meta the LLM emitted — server-stamped below.
         payload.pop("_meta", None)
-        payload["_meta"] = MetaExtracao(
+        payload["_meta"] = MPOMetadata(
             projeto_nome=self._project_name,
             documento_fonte=self._document_name,
             data_extracao=datetime.now(tz=timezone.utc).isoformat(),
@@ -92,8 +92,8 @@ class InstructorExtractor:
             modelo_llm=self._provider,
         ).model_dump(mode="json")
 
-        projeto = ProjetoExtraido.model_validate(payload)
+        attributes = MPOAttributes.model_validate(payload)
         return ExtractionResult(
-            content=projeto.model_dump(mode="json", by_alias=True),
+            content=attributes.model_dump(mode="json", by_alias=True),
             model_id=self._provider,
         )

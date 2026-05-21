@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from obione.extractions.llm.schema import MetaExtracao, ProjetoExtraido
+from obione.extractions.llm.schema import MPOMetadata, MPOAttributes
 
 
 def _make_meta(**overrides) -> dict:
@@ -19,7 +19,7 @@ def _make_meta(**overrides) -> dict:
 
 @pytest.mark.unit
 def test_schema_all_attributes_default_to_none():
-    p = ProjetoExtraido.model_validate({"_meta": _make_meta()})
+    p = MPOAttributes.model_validate({"_meta": _make_meta()})
     # Spot-check one field per category (8 categories total)
     assert p.nome_projeto is None  # conteudo_geral
     assert p.porte is None  # conteudo_geral / enum
@@ -35,13 +35,13 @@ def test_schema_all_attributes_default_to_none():
 @pytest.mark.unit
 def test_meta_required():
     with pytest.raises(Exception):
-        ProjetoExtraido.model_validate({})
+        MPOAttributes.model_validate({})
 
 
 @pytest.mark.unit
 def test_meta_origem_enforced():
     with pytest.raises(Exception):
-        ProjetoExtraido.model_validate(
+        MPOAttributes.model_validate(
             {"_meta": _make_meta(origem="invalid")}
         )
 
@@ -49,7 +49,7 @@ def test_meta_origem_enforced():
 @pytest.mark.unit
 def test_porte_enum_enforced():
     with pytest.raises(Exception):
-        ProjetoExtraido.model_validate(
+        MPOAttributes.model_validate(
             {"_meta": _make_meta(), "porte": "gigante"}
         )
 
@@ -57,7 +57,7 @@ def test_porte_enum_enforced():
 @pytest.mark.unit
 def test_status_cronograma_enum_enforced():
     with pytest.raises(Exception):
-        ProjetoExtraido.model_validate(
+        MPOAttributes.model_validate(
             {"_meta": _make_meta(), "status_cronograma": "em_andamento"}
         )
 
@@ -66,7 +66,7 @@ def test_status_cronograma_enum_enforced():
 def test_schema_roundtrips_example_file():
     """Round-trips atividades/schema_extracao_exemplo.json end-to-end."""
     data = json.loads(Path("/app/atividades/schema_extracao_exemplo.json").read_text())
-    p = ProjetoExtraido.model_validate(data)
+    p = MPOAttributes.model_validate(data)
     assert p.meta.projeto_nome == "valenca-odontologia"
     assert p.meta.origem == "gabarito_manual"
     assert p.nome_projeto == "Valença Odontologia — Plano de Marketing 2024"
@@ -83,7 +83,7 @@ def test_schema_roundtrips_example_file():
 @pytest.mark.unit
 def test_dump_uses_underscore_alias():
     """When dumping for the wire, the _meta key must be preserved."""
-    p = ProjetoExtraido.model_validate({"_meta": _make_meta()})
+    p = MPOAttributes.model_validate({"_meta": _make_meta()})
     dumped = p.model_dump(by_alias=True)
     assert "_meta" in dumped
     assert "meta" not in dumped
@@ -91,7 +91,7 @@ def test_dump_uses_underscore_alias():
 
 @pytest.mark.unit
 def test_meta_model_basic():
-    m = MetaExtracao(
+    m = MPOMetadata(
         projeto_nome="p", documento_fonte="d.docx",
         data_extracao="2026-05-20T00:00:00Z", origem="llm",
     )

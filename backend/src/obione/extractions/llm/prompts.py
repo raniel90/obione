@@ -1,7 +1,7 @@
 """Prompt construction for the MPO extraction call.
 
 Messages are PT-BR. The exact field list is embedded so JSON-mode models
-(which don't see the Pydantic schema) produce keys matching ProjetoExtraido.
+(which don't see the Pydantic schema) produce keys matching MPOAttributes.
 """
 
 # Order mirrors atividades/schema_extracao.json (44 attributes, grouped by category).
