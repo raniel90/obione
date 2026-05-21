@@ -7,6 +7,7 @@ in-scope attributes (`imagens_fotos` is the only fora-de-escopo today).
 
 Aligns with US09 from the backlog (Indicador de cobertura do MPO).
 """
+
 from __future__ import annotations
 
 import json
@@ -14,16 +15,16 @@ from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
-def _candidate_paths() -> tuple[Path, ...]:
-    """Schema lookup order: container mount first, then repo-relative fallback.
 
-    The fallback only applies when the file lives deep enough on the filesystem
-    (i.e. outside the container at `<repo>/backend/src/obione/extractions/`).
+def _candidate_paths() -> tuple[Path, ...]:
+    """Schema lookup order: container mount first, then every ancestor of
+    this file (so it works both in the Docker container under `/app` and on
+    bare-metal hosts like CI runners where the checkout depth varies).
     """
-    candidates = [Path("/app/atividades/schema_extracao.json")]
+    candidates: list[Path] = [Path("/app/atividades/schema_extracao.json")]
     here = Path(__file__).resolve()
-    if len(here.parents) > 5:
-        candidates.append(here.parents[5] / "atividades" / "schema_extracao.json")
+    for parent in here.parents:
+        candidates.append(parent / "atividades" / "schema_extracao.json")
     return tuple(candidates)
 
 
@@ -44,9 +45,7 @@ def _load_schema() -> dict:
     for path in _SCHEMA_CANDIDATES:
         if path.exists():
             return json.loads(path.read_text())
-    raise FileNotFoundError(
-        f"schema_extracao.json not found in any of: {_SCHEMA_CANDIDATES}"
-    )
+    raise FileNotFoundError(f"schema_extracao.json not found in any of: {_SCHEMA_CANDIDATES}")
 
 
 @lru_cache(maxsize=1)
@@ -105,9 +104,7 @@ class CoverageReport:
         return round(self.filled / self.total_in_scope * 100, 2)
 
 
-def compute_coverage(
-    content: dict, *, extraction_id: str | None = None
-) -> CoverageReport:
+def compute_coverage(content: dict, *, extraction_id: str | None = None) -> CoverageReport:
     """Compute per-category + aggregate coverage from an extraction `content` dict.
 
     `content` is the JSONB-shaped dict persisted in `Extraction.content` —
@@ -129,9 +126,7 @@ def compute_coverage(
         aggregate_total += 1
         value = content.get(spec.name)
         if value not in (None, "", [], {}):
-            per_category_filled[spec.category] = (
-                per_category_filled.get(spec.category, 0) + 1
-            )
+            per_category_filled[spec.category] = per_category_filled.get(spec.category, 0) + 1
             aggregate_filled += 1
 
     by_category = tuple(
