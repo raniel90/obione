@@ -1,18 +1,52 @@
 """HTTP routes for the projects bounded context."""
 import uuid
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 
 from obione.auth.dependencies import CurrentUser, get_uow
 from obione.projects import service
 from obione.projects.schemas import (
     AddClientRequest,
+    PortfolioProjectResponse,
     ProjectCreate,
     ProjectResponse,
     ProjectUpdate,
 )
+from obione.shared.exceptions import ForbiddenError
 
 router = APIRouter(prefix="/projects", tags=["projects"])
+
+
+@router.get("/portfolio", response_model=list[PortfolioProjectResponse])
+def get_portfolio(
+    user: CurrentUser,
+    domain: str | None = Query(default=None),
+) -> list[PortfolioProjectResponse]:
+    """Consultant/admin portfolio view with status + coverage (US07).
+
+    Clients can't access this view — they use GET /projects for the
+    plain list of their own assigned projects.
+    """
+    if user.role == "client":
+        raise ForbiddenError("Portfolio view is restricted to consultants and admins.")
+    entries = service.list_portfolio_for_user(get_uow(), user, domain=domain)
+    return [
+        PortfolioProjectResponse(
+            id=e.project.id,
+            name=e.project.name,
+            domain=e.project.domain,
+            description=e.project.description,
+            consultant_id=e.project.consultant_id,
+            created_at=e.project.created_at,
+            updated_at=e.project.updated_at,
+            status=e.status,  # type: ignore[arg-type]
+            document_count=e.document_count,
+            extraction_count=e.extraction_count,
+            coverage_percentage=e.coverage_percentage,
+            has_gabarito=e.has_gabarito,
+        )
+        for e in entries
+    ]
 
 
 @router.get("", response_model=list[ProjectResponse])
