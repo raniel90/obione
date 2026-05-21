@@ -48,6 +48,14 @@ class FakeCommentRepository:
         if comment.id is None:
             from obione.shared.ids import new_id
             comment.id = new_id()
+        # SQLAlchemy applies model defaults at flush time; in the Fake we
+        # have no flush, so set them here so service callers can read
+        # `created_at`/`updated_at` immediately after `add(...)`.
+        if comment.created_at is None:
+            from datetime import datetime, timezone
+            comment.created_at = datetime.now(tz=timezone.utc)
+        if comment.updated_at is None:
+            comment.updated_at = comment.created_at
         self._comments[comment.id] = comment
 
     def get(self, comment_id: uuid.UUID) -> Comment | None:
