@@ -7,6 +7,8 @@ from obione.auth.router import router as auth_router
 from obione.comments.router import comment_router
 from obione.comments.router import project_router as comments_project_router
 from obione.documents.router import router as documents_router
+from obione.drafts.router import draft_router
+from obione.drafts.router import project_router as drafts_project_router
 from obione.exports.router import router as exports_router
 from obione.extractions.router import router as extractions_router
 from obione.feed.router import router as feed_router
@@ -45,6 +47,8 @@ def create_app() -> FastAPI:
     app.include_router(likert_router)
     app.include_router(resumos_project_router)
     app.include_router(resumo_router)
+    app.include_router(drafts_project_router)
+    app.include_router(draft_router)
 
     @app.get("/", include_in_schema=False)
     def root():
