@@ -15,9 +15,7 @@ def test_factory_returns_instructor_for_ollama_provider():
     """OpenAI-compat client is initialized cheaply without network calls."""
     from obione.extractions.llm.instructor_adapter import InstructorExtractor
 
-    ex = build_extractor(
-        provider="ollama/llama3.1:8b", project_name="p", document_name="d"
-    )
+    ex = build_extractor(provider="ollama/llama3.1:8b", project_name="p", document_name="d")
     assert isinstance(ex, InstructorExtractor)
 
 
@@ -39,5 +37,6 @@ def test_factory_rejects_unsupported_provider():
     with pytest.raises(ValueError, match="Unsupported provider"):
         build_extractor(
             provider="anthropic/claude-sonnet-4-6",
-            project_name="p", document_name="d",
+            project_name="p",
+            document_name="d",
         )

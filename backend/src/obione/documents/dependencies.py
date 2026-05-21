@@ -1,4 +1,5 @@
 """Wiring of storage adapter selected by settings."""
+
 from obione.documents.storage.filesystem import FilesystemBlobStorage
 from obione.documents.storage.port import AbstractBlobStorage
 from obione.settings import settings

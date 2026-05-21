@@ -24,8 +24,12 @@ def test_create_from_pipeline_persists_extraction():
     project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
     extractor = MockExtractor()
     e = create_extraction_from_pipeline(
-        uow, extractor, consultant,
-        project_id=project.id, document_id=None, document_bytes=b"x",
+        uow,
+        extractor,
+        consultant,
+        project_id=project.id,
+        document_id=None,
+        document_bytes=b"x",
     )
     assert e.source == "llm"
     assert e.llm_model == "mock"
@@ -39,11 +43,14 @@ def test_create_manual_persists():
     consultant = _consultant()
     project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
     e = create_extraction_from_manual(
-        uow, consultant,
-        project_id=project.id, document_id=None,
+        uow,
+        consultant,
+        project_id=project.id,
+        document_id=None,
         content={
             "_meta": {
-                "projeto_nome": "p", "documento_fonte": "d.docx",
+                "projeto_nome": "p",
+                "documento_fonte": "d.docx",
                 "data_extracao": "2026-05-21T00:00:00Z",
                 "origem": "gabarito_manual",
             },

@@ -1,4 +1,5 @@
 """Document use cases."""
+
 import uuid
 
 from obione.auth.models import User
@@ -34,9 +35,7 @@ def upload_document(
         raise ClientCannotMutateError("Clients cannot upload documents.")
 
     if mime_type != DOCX_MIME and not filename.lower().endswith(".docx"):
-        raise UnsupportedMimeTypeError(
-            f"Only .docx is supported. Got: {filename} ({mime_type})"
-        )
+        raise UnsupportedMimeTypeError(f"Only .docx is supported. Got: {filename} ({mime_type})")
 
     if len(content) > max_size_mb * 1024 * 1024:
         raise FileTooLargeError(

@@ -22,8 +22,11 @@ from obione.unit_of_work import FakeUnitOfWork
 
 def _make_user(role: str = "consultant", email_suffix: str = "x") -> User:
     return User(
-        id=new_id(), email=f"{role}-{email_suffix}@x.com",
-        password_hash="x", name="N", role=role,
+        id=new_id(),
+        email=f"{role}-{email_suffix}@x.com",
+        password_hash="x",
+        name="N",
+        role=role,
     )
 
 
@@ -32,9 +35,7 @@ def test_consultant_posts_and_lists_comment():
     uow = FakeUnitOfWork()
     consultant = _make_user("consultant")
     project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
-    c = create_comment(
-        uow, consultant, project.id, CommentCreate(body="primeira observação")
-    )
+    c = create_comment(uow, consultant, project.id, CommentCreate(body="primeira observação"))
     assert c.project_id == project.id
     assert c.author_id == consultant.id
     assert c.parent_id is None
@@ -73,7 +74,9 @@ def test_reply_to_top_level_works():
     project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
     parent = create_comment(uow, consultant, project.id, CommentCreate(body="pai"))
     reply = create_comment(
-        uow, consultant, project.id,
+        uow,
+        consultant,
+        project.id,
         CommentCreate(body="resposta", parent_id=parent.id),
     )
     assert reply.parent_id == parent.id
@@ -86,12 +89,16 @@ def test_reply_to_reply_rejected():
     project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
     parent = create_comment(uow, consultant, project.id, CommentCreate(body="pai"))
     reply = create_comment(
-        uow, consultant, project.id,
+        uow,
+        consultant,
+        project.id,
         CommentCreate(body="resposta", parent_id=parent.id),
     )
     with pytest.raises(CannotReplyToReplyError):
         create_comment(
-            uow, consultant, project.id,
+            uow,
+            consultant,
+            project.id,
             CommentCreate(body="reply de reply", parent_id=reply.id),
         )
 
@@ -105,7 +112,9 @@ def test_reply_to_comment_in_other_project_rejected():
     c1 = create_comment(uow, consultant, p1.id, CommentCreate(body="em P1"))
     with pytest.raises(CommentNotFoundError):
         create_comment(
-            uow, consultant, p2.id,
+            uow,
+            consultant,
+            p2.id,
             CommentCreate(body="tentativa cross-project", parent_id=c1.id),
         )
 

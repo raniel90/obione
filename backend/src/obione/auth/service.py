@@ -1,4 +1,5 @@
 """Auth use cases. Pure functions; no FastAPI."""
+
 from obione.auth.exceptions import (
     EmailAlreadyExistsError,
     InvalidCredentialsError,
@@ -10,9 +11,7 @@ from obione.auth.security import encode_token, hash_password, verify_password
 from obione.unit_of_work import AbstractUnitOfWork
 
 
-def authenticate(
-    uow: AbstractUnitOfWork, *, email: str, password: str
-) -> tuple[str, int, User]:
+def authenticate(uow: AbstractUnitOfWork, *, email: str, password: str) -> tuple[str, int, User]:
     with uow:
         user = uow.users.get_by_email(email)
         if not user or not verify_password(password, user.password_hash):

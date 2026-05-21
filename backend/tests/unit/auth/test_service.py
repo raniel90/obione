@@ -12,7 +12,9 @@ from obione.auth.service import authenticate, create_user
 from obione.unit_of_work import FakeUnitOfWork
 
 
-def _make_user(email: str = "a@b.com", password: str = "secret123", role: str = "consultant") -> User:
+def _make_user(
+    email: str = "a@b.com", password: str = "secret123", role: str = "consultant"
+) -> User:
     u = User(email=email, password_hash=hash_password(password), name="X", role=role)
     return u
 
@@ -65,7 +67,10 @@ def test_create_user_duplicate_email_raises():
 def test_create_user_invalid_role_raises():
     uow = FakeUnitOfWork()
     data = UserCreate.model_construct(
-        email="x@x.com", password="pwd", name="N", role="superuser",
+        email="x@x.com",
+        password="pwd",
+        name="N",
+        role="superuser",
     )
     with pytest.raises(RoleNotAllowedError):
         create_user(uow, data)

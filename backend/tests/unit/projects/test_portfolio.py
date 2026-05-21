@@ -15,15 +15,21 @@ from obione.unit_of_work import FakeUnitOfWork
 
 def _user(role: str = "consultant", suffix: str = "x") -> User:
     return User(
-        id=new_id(), email=f"{role}-{suffix}@x.com",
-        password_hash="x", name="N", role=role,
+        id=new_id(),
+        email=f"{role}-{suffix}@x.com",
+        password_hash="x",
+        name="N",
+        role=role,
     )
 
 
 def _docx(project_id, sha: str = "a" * 64) -> Document:
     return Document(
-        project_id=project_id, original_name="d.docx", relative_path="x.docx",
-        sha256=sha, size_bytes=10,
+        project_id=project_id,
+        original_name="d.docx",
+        relative_path="x.docx",
+        sha256=sha,
+        size_bytes=10,
         mime_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         uploaded_by=None,
     )
@@ -62,11 +68,16 @@ def test_status_extracted_after_llm_extraction():
     consultant = _user("consultant")
     project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
     uow.documents.add(_docx(project.id))
-    uow.extractions.add(Extraction(
-        project_id=project.id, document_id=None, source="llm",
-        llm_model="mock", content={"_meta": {"origem": "llm"}, "nome_projeto": "X"},
-        created_by=None,
-    ))
+    uow.extractions.add(
+        Extraction(
+            project_id=project.id,
+            document_id=None,
+            source="llm",
+            llm_model="mock",
+            content={"_meta": {"origem": "llm"}, "nome_projeto": "X"},
+            created_by=None,
+        )
+    )
     entries = list_portfolio_for_user(uow, consultant)
     e = entries[0]
     assert e.status == "extracted"
@@ -79,12 +90,16 @@ def test_status_reviewed_when_gabarito_present():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
     project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
-    uow.extractions.add(Extraction(
-        project_id=project.id, document_id=None, source="manual",
-        llm_model=None,
-        content={"_meta": {"origem": "gabarito_manual"}, "nome_projeto": "X"},
-        created_by=consultant.id,
-    ))
+    uow.extractions.add(
+        Extraction(
+            project_id=project.id,
+            document_id=None,
+            source="manual",
+            llm_model=None,
+            content={"_meta": {"origem": "gabarito_manual"}, "nome_projeto": "X"},
+            created_by=consultant.id,
+        )
+    )
     entries = list_portfolio_for_user(uow, consultant)
     assert entries[0].status == "reviewed"
     assert entries[0].has_gabarito is True
@@ -96,16 +111,26 @@ def test_reviewed_overrides_extracted_when_both_present():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
     project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
-    uow.extractions.add(Extraction(
-        project_id=project.id, document_id=None, source="llm",
-        llm_model="mock", content={"_meta": {"origem": "llm"}},
-        created_by=None,
-    ))
-    uow.extractions.add(Extraction(
-        project_id=project.id, document_id=None, source="manual",
-        llm_model=None, content={"_meta": {"origem": "gabarito_manual"}},
-        created_by=consultant.id,
-    ))
+    uow.extractions.add(
+        Extraction(
+            project_id=project.id,
+            document_id=None,
+            source="llm",
+            llm_model="mock",
+            content={"_meta": {"origem": "llm"}},
+            created_by=None,
+        )
+    )
+    uow.extractions.add(
+        Extraction(
+            project_id=project.id,
+            document_id=None,
+            source="manual",
+            llm_model=None,
+            content={"_meta": {"origem": "gabarito_manual"}},
+            created_by=consultant.id,
+        )
+    )
     entries = list_portfolio_for_user(uow, consultant)
     assert entries[0].status == "reviewed"
     assert entries[0].extraction_count == 2

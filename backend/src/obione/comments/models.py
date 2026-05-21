@@ -5,12 +5,13 @@ replies set parent_id to a top-level comment. Service-layer guard prevents
 deeper nesting. Author FK uses ON DELETE SET NULL so comments survive user
 deletion (rendered as "[autor removido]" by the frontend).
 """
+
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from sqlalchemy import DateTime, ForeignKey, String, Text, func
+from sqlalchemy import DateTime, ForeignKey, Text, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -19,7 +20,7 @@ from obione.shared.ids import new_id
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class Comment(Base):

@@ -1,4 +1,5 @@
 """Visibility rules — pure functions, no I/O beyond repository calls via UoW."""
+
 from obione.auth.models import User
 from obione.projects.models import Project
 from obione.unit_of_work import AbstractUnitOfWork

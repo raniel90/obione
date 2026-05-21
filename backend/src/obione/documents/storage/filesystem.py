@@ -1,4 +1,5 @@
 """Filesystem adapter for AbstractBlobStorage + in-memory fake for tests."""
+
 import hashlib
 from pathlib import Path
 from uuid import UUID

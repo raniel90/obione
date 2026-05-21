@@ -1,4 +1,5 @@
 """FastAPI dependencies for the auth bounded context."""
+
 import uuid
 from typing import Annotated
 

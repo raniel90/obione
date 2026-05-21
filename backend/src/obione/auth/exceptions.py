@@ -1,4 +1,5 @@
 """Auth-specific typed exceptions."""
+
 from obione.shared.exceptions import ConflictError, ForbiddenError, UnauthorizedError
 
 

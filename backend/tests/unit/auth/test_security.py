@@ -39,6 +39,7 @@ def test_decode_invalid_token_raises():
 @pytest.mark.unit
 def test_decode_expired_token_raises(monkeypatch):
     from obione.settings import settings
+
     monkeypatch.setattr(settings, "JWT_EXPIRE_MINUTES", 0)
     token, _ = encode_token(sub="x")
     time.sleep(1)

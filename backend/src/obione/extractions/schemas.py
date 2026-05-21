@@ -9,9 +9,7 @@ class AttributeVerdictResponse(BaseModel):
     name: str
     category: str
     extraction_type: str
-    verdict: Literal[
-        "tp", "fp", "fn", "tn", "needs_human_review", "out_of_scope"
-    ]
+    verdict: Literal["tp", "fp", "fn", "tn", "needs_human_review", "out_of_scope"]
     llm_value: object | None = None
     gabarito_value: object | None = None
 

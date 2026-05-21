@@ -1,4 +1,5 @@
 """HTTP routes for the projects bounded context."""
+
 import uuid
 
 from fastapi import APIRouter, Query
@@ -52,8 +53,7 @@ def get_portfolio(
 @router.get("", response_model=list[ProjectResponse])
 def list_projects(user: CurrentUser) -> list[ProjectResponse]:
     return [
-        ProjectResponse.model_validate(p)
-        for p in service.list_projects_for_user(get_uow(), user)
+        ProjectResponse.model_validate(p) for p in service.list_projects_for_user(get_uow(), user)
     ]
 
 
@@ -83,8 +83,6 @@ def delete_project(project_id: uuid.UUID, user: CurrentUser) -> None:
 
 
 @router.post("/{project_id}/clients", status_code=201)
-def add_client(
-    project_id: uuid.UUID, payload: AddClientRequest, user: CurrentUser
-) -> dict:
+def add_client(project_id: uuid.UUID, payload: AddClientRequest, user: CurrentUser) -> dict:
     service.add_client_to_project(get_uow(), user, project_id, payload.user_id)
     return {"status": "added"}

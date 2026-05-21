@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from obione.extractions.llm.schema import MPOMetadata, MPOAttributes
+from obione.extractions.llm.schema import MPOAttributes, MPOMetadata
 
 
 def _make_meta(**overrides) -> dict:
@@ -41,31 +41,36 @@ def test_meta_required():
 @pytest.mark.unit
 def test_meta_origem_enforced():
     with pytest.raises(Exception):
-        MPOAttributes.model_validate(
-            {"_meta": _make_meta(origem="invalid")}
-        )
+        MPOAttributes.model_validate({"_meta": _make_meta(origem="invalid")})
 
 
 @pytest.mark.unit
 def test_porte_enum_enforced():
     with pytest.raises(Exception):
-        MPOAttributes.model_validate(
-            {"_meta": _make_meta(), "porte": "gigante"}
-        )
+        MPOAttributes.model_validate({"_meta": _make_meta(), "porte": "gigante"})
 
 
 @pytest.mark.unit
 def test_status_cronograma_enum_enforced():
     with pytest.raises(Exception):
-        MPOAttributes.model_validate(
-            {"_meta": _make_meta(), "status_cronograma": "em_andamento"}
-        )
+        MPOAttributes.model_validate({"_meta": _make_meta(), "status_cronograma": "em_andamento"})
 
 
 @pytest.mark.unit
 def test_schema_roundtrips_example_file():
-    """Round-trips atividades/schema_extracao_exemplo.json end-to-end."""
-    data = json.loads(Path("/app/atividades/schema_extracao_exemplo.json").read_text())
+    """Round-trips atividades/schema_extracao_exemplo.json end-to-end.
+
+    Walks ancestors so the test works both inside the Docker container
+    (`/app/atividades/...`) and on bare-metal CI runners where the checkout
+    sits at a different depth.
+    """
+    candidates = [Path("/app/atividades/schema_extracao_exemplo.json")]
+    for parent in Path(__file__).resolve().parents:
+        candidates.append(parent / "atividades" / "schema_extracao_exemplo.json")
+    example = next((c for c in candidates if c.exists()), None)
+    if example is None:
+        pytest.skip("schema_extracao_exemplo.json not found in any ancestor")
+    data = json.loads(example.read_text())
     p = MPOAttributes.model_validate(data)
     assert p.meta.projeto_nome == "valenca-odontologia"
     assert p.meta.origem == "gabarito_manual"
@@ -92,8 +97,10 @@ def test_dump_uses_underscore_alias():
 @pytest.mark.unit
 def test_meta_model_basic():
     m = MPOMetadata(
-        projeto_nome="p", documento_fonte="d.docx",
-        data_extracao="2026-05-20T00:00:00Z", origem="llm",
+        projeto_nome="p",
+        documento_fonte="d.docx",
+        data_extracao="2026-05-20T00:00:00Z",
+        origem="llm",
     )
     assert m.modelo_llm is None
     assert m.hash_documento is None

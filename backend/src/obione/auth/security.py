@@ -1,5 +1,6 @@
 """Password hashing (bcrypt) + JWT encode/decode. Pure functions."""
-from datetime import datetime, timedelta, timezone
+
+from datetime import UTC, datetime, timedelta
 
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -21,7 +22,7 @@ def verify_password(plain: str, hashed: str) -> bool:
 def encode_token(*, sub: str, extra: dict | None = None) -> tuple[str, int]:
     """Encode JWT. Returns (token, expires_in_seconds)."""
     expires_delta = timedelta(minutes=settings.JWT_EXPIRE_MINUTES)
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.now(tz=UTC)
     payload: dict = {
         "sub": sub,
         "iat": int(now.timestamp()),

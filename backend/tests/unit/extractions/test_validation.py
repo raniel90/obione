@@ -41,34 +41,26 @@ def test_meta_origem_must_be_valid_enum():
 
 @pytest.mark.unit
 def test_porte_must_be_pequeno_medio_or_grande():
-    errors = validate_manual_extraction(
-        {"_meta": _VALID_META, "porte": "gigante"}
-    )
+    errors = validate_manual_extraction({"_meta": _VALID_META, "porte": "gigante"})
     assert any("porte" in e for e in errors)
 
 
 @pytest.mark.unit
 def test_status_cronograma_enum_enforced():
-    errors = validate_manual_extraction(
-        {"_meta": _VALID_META, "status_cronograma": "em_andamento"}
-    )
+    errors = validate_manual_extraction({"_meta": _VALID_META, "status_cronograma": "em_andamento"})
     assert any("status_cronograma" in e for e in errors)
 
 
 @pytest.mark.unit
 def test_custo_must_be_number():
-    errors = validate_manual_extraction(
-        {"_meta": _VALID_META, "custo_estimado": "R$ 800,00"}
-    )
+    errors = validate_manual_extraction({"_meta": _VALID_META, "custo_estimado": "R$ 800,00"})
     assert any("custo_estimado" in e for e in errors)
 
 
 @pytest.mark.unit
 def test_unknown_top_level_attribute_rejected():
     """The schema has additionalProperties=false; bogus keys fail."""
-    errors = validate_manual_extraction(
-        {"_meta": _VALID_META, "atributo_inventado": "x"}
-    )
+    errors = validate_manual_extraction({"_meta": _VALID_META, "atributo_inventado": "x"})
     assert any("atributo_inventado" in e or "additional" in e.lower() for e in errors)
 
 

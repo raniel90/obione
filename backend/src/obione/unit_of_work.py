@@ -10,6 +10,7 @@ Without that, ORM objects loaded in the outer scope become orphaned on a
 closed session when the inner block exits, producing
 `InvalidRequestError: Object ... is already attached to session ...`.
 """
+
 from __future__ import annotations
 
 import abc
@@ -70,6 +71,7 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
         from obione.documents.repository import SqlAlchemyDocumentRepository
         from obione.extractions.repository import SqlAlchemyExtractionRepository
         from obione.projects.repository import SqlAlchemyProjectRepository
+
         self.users: SqlAlchemyUserRepository = SqlAlchemyUserRepository(self.session)
         self.projects: SqlAlchemyProjectRepository = SqlAlchemyProjectRepository(self.session)
         self.documents: SqlAlchemyDocumentRepository = SqlAlchemyDocumentRepository(self.session)
@@ -109,6 +111,7 @@ class FakeUnitOfWork(AbstractUnitOfWork):
         from obione.documents.repository import FakeDocumentRepository
         from obione.extractions.repository import FakeExtractionRepository
         from obione.projects.repository import FakeProjectRepository
+
         self.users: FakeUserRepository = FakeUserRepository()
         self.projects: FakeProjectRepository = FakeProjectRepository()
         self.documents: FakeDocumentRepository = FakeDocumentRepository()

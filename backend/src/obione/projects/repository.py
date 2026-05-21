@@ -1,4 +1,5 @@
 """Project repository (abstract + SqlAlchemy + Fake)."""
+
 from __future__ import annotations
 
 import uuid
@@ -33,9 +34,7 @@ class SqlAlchemyProjectRepository:
 
     def list_all(self) -> list[Project]:
         return list(
-            self._session.execute(
-                select(Project).order_by(Project.created_at.desc())
-            ).scalars()
+            self._session.execute(select(Project).order_by(Project.created_at.desc())).scalars()
         )
 
     def list_by_consultant(self, consultant_id: uuid.UUID) -> list[Project]:
@@ -85,6 +84,7 @@ class FakeProjectRepository:
     def add(self, project: Project) -> None:
         if project.id is None:
             from obione.shared.ids import new_id
+
             project.id = new_id()
         self._projects[project.id] = project
 

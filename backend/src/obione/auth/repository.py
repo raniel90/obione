@@ -1,4 +1,5 @@
 """User repository — abstract port + SqlAlchemy adapter + in-memory fake."""
+
 from __future__ import annotations
 
 import uuid
@@ -28,9 +29,7 @@ class SqlAlchemyUserRepository:
         return self._session.get(User, user_id)
 
     def get_by_email(self, email: str) -> User | None:
-        return self._session.execute(
-            select(User).where(User.email == email)
-        ).scalar_one_or_none()
+        return self._session.execute(select(User).where(User.email == email)).scalar_one_or_none()
 
     def list(self) -> list[User]:
         return list(self._session.execute(select(User)).scalars())
@@ -45,6 +44,7 @@ class FakeUserRepository:
     def add(self, user: User) -> None:
         if user.id is None:
             from obione.shared.ids import new_id
+
             user.id = new_id()
         self._users[user.id] = user
 

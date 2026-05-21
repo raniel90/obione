@@ -1,4 +1,5 @@
 """HTTP routes for extractions."""
+
 import uuid
 
 from fastapi import APIRouter, Depends
@@ -70,7 +71,10 @@ def get_evaluation(project_id: uuid.UUID, user: CurrentUser) -> EvaluationRespon
         ],
         estruturado_metrics=GroupMetricsResponse(
             group=metrics.group,
-            tp=metrics.tp, fp=metrics.fp, fn=metrics.fn, tn=metrics.tn,
+            tp=metrics.tp,
+            fp=metrics.fp,
+            fn=metrics.fn,
+            tn=metrics.tn,
             precision=metrics.precision,
             recall=metrics.recall,
             f1=metrics.f1,
@@ -82,10 +86,13 @@ def get_evaluation(project_id: uuid.UUID, user: CurrentUser) -> EvaluationRespon
 
 @router.post("/manual", response_model=ExtractionResponse, status_code=201)
 def create_manual_extraction(
-    project_id: uuid.UUID, payload: ManualExtractionCreate, user: CurrentUser,
+    project_id: uuid.UUID,
+    payload: ManualExtractionCreate,
+    user: CurrentUser,
 ) -> ExtractionResponse:
     e = service.create_extraction_from_manual(
-        get_uow(), user,
+        get_uow(),
+        user,
         project_id=project_id,
         document_id=payload.document_id,
         content=payload.content,
@@ -118,7 +125,11 @@ def create_from_document(
         document_name = doc.original_name
     extractor = get_extractor_for(project_name, document_name)
     e = service.create_extraction_from_document(
-        get_uow(), storage, extractor, user,
-        project_id=project_id, document_id=document_id,
+        get_uow(),
+        storage,
+        extractor,
+        user,
+        project_id=project_id,
+        document_id=document_id,
     )
     return ExtractionResponse.model_validate(e)

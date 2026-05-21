@@ -32,9 +32,8 @@ def test_uow_commits_explicit():
 @pytest.mark.unit
 def test_uow_rolls_back_on_exception():
     uow = _CountingUoW()
-    with pytest.raises(RuntimeError):
-        with uow:
-            raise RuntimeError("boom")
+    with pytest.raises(RuntimeError), uow:
+        raise RuntimeError("boom")
     assert uow.commit_count == 0
     assert uow.rollback_count == 1
 

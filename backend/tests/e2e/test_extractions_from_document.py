@@ -45,14 +45,14 @@ def consultant_token(client):
     try:
         _purge_user(s, email)
         u = User(
-            email=email, password_hash=hash_password("pwd12345678"),
-            name="C", role="consultant",
+            email=email,
+            password_hash=hash_password("pwd12345678"),
+            name="C",
+            role="consultant",
         )
         s.add(u)
         s.commit()
-        r = client.post(
-            "/auth/login", json={"email": email, "password": "pwd12345678"}
-        )
+        r = client.post("/auth/login", json={"email": email, "password": "pwd12345678"})
         yield r.json()["access_token"]
         _purge_user(s, email)
     finally:
@@ -81,9 +81,7 @@ def test_extract_from_uploaded_document(client, consultant_token):
         assert r.status_code == 201, r.text
         doc_id = r.json()["id"]
 
-        r = client.post(
-            f"/projects/{pid}/extractions/from-document/{doc_id}", headers=h
-        )
+        r = client.post(f"/projects/{pid}/extractions/from-document/{doc_id}", headers=h)
         assert r.status_code == 201, r.text
         body = r.json()
         assert body["source"] == "llm"
@@ -106,9 +104,7 @@ def test_extract_returns_404_for_unknown_document(client, consultant_token):
     pid = r.json()["id"]
     try:
         bogus = "00000000-0000-0000-0000-000000000000"
-        r = client.post(
-            f"/projects/{pid}/extractions/from-document/{bogus}", headers=h
-        )
+        r = client.post(f"/projects/{pid}/extractions/from-document/{bogus}", headers=h)
         assert r.status_code == 404
         assert r.json()["error"]["code"] == "extraction_not_found"
     finally:

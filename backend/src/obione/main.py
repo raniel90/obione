@@ -1,9 +1,11 @@
 """FastAPI app factory."""
+
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
 from obione.auth.router import router as auth_router
-from obione.comments.router import comment_router, project_router as comments_project_router
+from obione.comments.router import comment_router
+from obione.comments.router import project_router as comments_project_router
 from obione.documents.router import router as documents_router
 from obione.exports.router import router as exports_router
 from obione.extractions.router import router as extractions_router

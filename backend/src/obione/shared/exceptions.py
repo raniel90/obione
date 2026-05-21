@@ -1,4 +1,5 @@
 """Typed exception hierarchy. Mapped to HTTP responses by FastAPI handler."""
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 

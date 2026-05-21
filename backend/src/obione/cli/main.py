@@ -3,6 +3,7 @@
 Usage:
     python -m obione.cli create-user --email x@y.com --password secret --role admin --name "Name"
 """
+
 import argparse
 import sys
 

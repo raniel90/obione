@@ -1,4 +1,5 @@
 """HTTP routes for the auth bounded context."""
+
 from fastapi import APIRouter, Depends
 
 from obione.auth import service

@@ -7,11 +7,12 @@ coverage report computed from the latest extraction.
 
 CSV variants and Likert/Kappa columns ship in Sprint 5 along with US15-US17.
 """
+
 from __future__ import annotations
 
 import uuid
 from dataclasses import asdict, is_dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from obione.auth.models import User
@@ -34,9 +35,7 @@ def _to_jsonable(v: Any) -> Any:
     return v
 
 
-def export_project(
-    uow: AbstractUnitOfWork, user: User, project_id: uuid.UUID
-) -> dict:
+def export_project(uow: AbstractUnitOfWork, user: User, project_id: uuid.UUID) -> dict:
     project = get_project_for_user(uow, user, project_id)
     with uow:
         documents = uow.documents.list_by_project(project.id)
@@ -48,68 +47,70 @@ def export_project(
             extraction_id=str(latest_extraction.id) if latest_extraction else None,
         )
 
-    return _to_jsonable({
-        "schema_version": "1.0",
-        "exported_at": datetime.now(tz=timezone.utc).isoformat(),
-        "exported_by": user.id,
-        "project": {
-            "id": project.id,
-            "name": project.name,
-            "domain": project.domain,
-            "description": project.description,
-            "consultant_id": project.consultant_id,
-            "created_at": project.created_at,
-            "updated_at": project.updated_at,
-        },
-        "documents": [
-            {
-                "id": d.id,
-                "original_name": d.original_name,
-                "sha256": d.sha256,
-                "size_bytes": d.size_bytes,
-                "mime_type": d.mime_type,
-                "uploaded_by": d.uploaded_by,
-                "uploaded_at": d.uploaded_at,
-            }
-            for d in documents
-        ],
-        "extractions": [
-            {
-                "id": e.id,
-                "document_id": e.document_id,
-                "source": e.source,
-                "llm_model": e.llm_model,
-                "content": e.content,
-                "created_by": e.created_by,
-                "created_at": e.created_at,
-            }
-            for e in extractions
-        ],
-        "comments": [
-            {
-                "id": c.id,
-                "author_id": c.author_id,
-                "parent_id": c.parent_id,
-                "body": c.body,
-                "created_at": c.created_at,
-                "updated_at": c.updated_at,
-            }
-            for c in comments
-        ],
-        "coverage": {
-            "extraction_id": coverage.extraction_id,
-            "filled": coverage.filled,
-            "total_in_scope": coverage.total_in_scope,
-            "out_of_scope_count": coverage.out_of_scope_count,
-            "percentage": coverage.percentage,
-            "by_category": [
+    return _to_jsonable(
+        {
+            "schema_version": "1.0",
+            "exported_at": datetime.now(tz=UTC).isoformat(),
+            "exported_by": user.id,
+            "project": {
+                "id": project.id,
+                "name": project.name,
+                "domain": project.domain,
+                "description": project.description,
+                "consultant_id": project.consultant_id,
+                "created_at": project.created_at,
+                "updated_at": project.updated_at,
+            },
+            "documents": [
                 {
-                    "category": c.category,
-                    "filled": c.filled,
-                    "total_in_scope": c.total_in_scope,
-                    "percentage": c.percentage,
+                    "id": d.id,
+                    "original_name": d.original_name,
+                    "sha256": d.sha256,
+                    "size_bytes": d.size_bytes,
+                    "mime_type": d.mime_type,
+                    "uploaded_by": d.uploaded_by,
+                    "uploaded_at": d.uploaded_at,
                 }
-                for c in coverage.by_category
+                for d in documents
             ],
-        },
-    })
+            "extractions": [
+                {
+                    "id": e.id,
+                    "document_id": e.document_id,
+                    "source": e.source,
+                    "llm_model": e.llm_model,
+                    "content": e.content,
+                    "created_by": e.created_by,
+                    "created_at": e.created_at,
+                }
+                for e in extractions
+            ],
+            "comments": [
+                {
+                    "id": c.id,
+                    "author_id": c.author_id,
+                    "parent_id": c.parent_id,
+                    "body": c.body,
+                    "created_at": c.created_at,
+                    "updated_at": c.updated_at,
+                }
+                for c in comments
+            ],
+            "coverage": {
+                "extraction_id": coverage.extraction_id,
+                "filled": coverage.filled,
+                "total_in_scope": coverage.total_in_scope,
+                "out_of_scope_count": coverage.out_of_scope_count,
+                "percentage": coverage.percentage,
+                "by_category": [
+                    {
+                        "category": c.category,
+                        "filled": c.filled,
+                        "total_in_scope": c.total_in_scope,
+                        "percentage": c.percentage,
+                    }
+                    for c in coverage.by_category
+                ],
+            },
+        }
+    )

@@ -1,4 +1,5 @@
 """HTTP routes for documents."""
+
 import uuid
 
 from fastapi import APIRouter, Depends, File, UploadFile
@@ -28,7 +29,9 @@ async def upload_document(
 ) -> DocumentResponse:
     content = await file.read()
     doc = service.upload_document(
-        get_uow(), storage, user,
+        get_uow(),
+        storage,
+        user,
         project_id=project_id,
         filename=file.filename or "document.docx",
         content=content,

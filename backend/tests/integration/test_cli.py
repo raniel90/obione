@@ -17,8 +17,10 @@ def test_cli_create_user_persists(capsys):
         s.close()
 
     args = argparse.Namespace(
-        email="cli-test@x.com", password="cli-pwd-12345",
-        name="CLI User", role="admin",
+        email="cli-test@x.com",
+        password="cli-pwd-12345",
+        name="CLI User",
+        role="admin",
     )
     exit_code = cmd_create_user(args)
     assert exit_code == 0

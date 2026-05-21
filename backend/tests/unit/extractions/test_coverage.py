@@ -63,9 +63,9 @@ def test_full_extraction_has_100_coverage():
 def test_partial_coverage_with_per_category_breakdown():
     content = {
         "_meta": {},
-        "nome_projeto": "P",          # conteudo_geral
-        "descricao": "desc",          # conteudo_geral
-        "nome_stakeholders": ["A"],   # stakeholders
+        "nome_projeto": "P",  # conteudo_geral
+        "descricao": "desc",  # conteudo_geral
+        "nome_stakeholders": ["A"],  # stakeholders
         "data_inicio": "2026-01-01",  # cronograma
     }
     report = compute_coverage(content, extraction_id="abc-123")
@@ -94,10 +94,10 @@ def test_imagens_fotos_excluded_from_scope_even_when_present():
 def test_empty_string_and_empty_collections_dont_count():
     content = {
         "_meta": {},
-        "nome_projeto": "",                # empty string
-        "nome_stakeholders": [],           # empty list
-        "descricao": None,                  # explicit null
-        "tipo": "consultoria",              # filled
+        "nome_projeto": "",  # empty string
+        "nome_stakeholders": [],  # empty list
+        "descricao": None,  # explicit null
+        "tipo": "consultoria",  # filled
     }
     report = compute_coverage(content)
     assert report.filled == 1
@@ -122,8 +122,11 @@ def test_valenca_example_file_round_trips():
 @pytest.mark.unit
 def test_attribute_spec_is_a_dataclass():
     spec = AttributeSpec(
-        name="x", category="y", out_of_scope=False,
-        extraction_type="estruturado", value_type="string",
+        name="x",
+        category="y",
+        out_of_scope=False,
+        extraction_type="estruturado",
+        value_type="string",
     )
     assert spec.name == "x"
     assert spec.category == "y"
