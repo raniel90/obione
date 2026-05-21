@@ -96,3 +96,46 @@ Atributos que voltaram `null` foram, na maioria, genuinamente ausentes no docume
 - Rodar smoke nos outros 4 projetos do estudo (Freire Batista, Kaka JJ, Bem Viver, Dinoah) antes de abrir PR pro `main`.
 - Cobertura por categoria do MPO no Sprint 5 (US09 indicador de cobertura + US15 avaliação).
 - Reabilitar caminho Anthropic via Instructor antes da Sprint 5 (US15 benchmark OS vs SOTA).
+
+---
+
+# Segunda rodada — 4 docs restantes (2026-05-21)
+
+**Contexto:** backend MVP já mergeado em `main` via 9 PRs (até PR #11). Re-instalado Ollama (binário ainda no `/opt/homebrew/bin`), `ollama pull llama3.1:8b`, stack subido com `LLM_PROVIDER=ollama/llama3.1:8b`. Mesmo modelo, mesmo prompt, mesma máquina.
+
+## Resultados consolidados
+
+| Projeto | Atributos preenchidos | Cobertura | Latência |
+|---|---|---|---|
+| **Valença Odontologia** (piloto, 1ª rodada) | 19/43 | 44% | ~46 s |
+| **Freire Batista ADV** | 20/43 | 47% | 79 s |
+| **Kaka JJ — Jiu-jitsu** | 22/43 | 51% | 69 s |
+| **Bem Viver Fitoterápicos** | 20/43 | 47% | 71 s |
+| **Dinoah ADV** | 18/43 | 42% | 64 s |
+| **Média 5 projetos** | **20/43** | **46%** | **66 s** |
+
+> Denominador 43 (não 44): `imagens_fotos` é `fora_de_escopo` no MPO textual e não conta. Valença foi re-baselineado contra 43 para comparabilidade.
+
+## Bugs reais surgidos no smoke
+
+1. **Bem Viver derrubou a extração com `porte: "pequeno/médio"`** — Llama 3.1 8B hedgeou entre dois valores do enum. O `Literal["pequeno","medio","grande"]` rejeitou. **Fix:** estender o pre-validator de enums para (i) tirar acentos PT-BR (médio → medio) e (ii) tomar o primeiro valor antes de qualquer `/` ou `,`. Resolveu o caso sem precisar reprompted o LLM. Mudança em `extractions/llm/schema.py::_normalize_enums`.
+
+2. **Re-run com projetos antigos no DB falha o upload por sha256 duplicado.** Não é bug do produto — o smoke deveria limpar antes; ajustei o script de smoke (`/tmp/smoke_ollama_4docs.sh`) para deletar o projeto ao fim de cada iteração e a remover qualquer projeto residual de runs anteriores antes de começar.
+
+## Decisões do MPO confirmadas pelos resultados
+
+- **`fora_de_escopo` (imagens_fotos) faz sentido omitir** — nenhum dos 5 docs traz referência a imagem; manter no schema só inflaria o denominador.
+- **`origem: llm` vs `gabarito_manual` no `_meta` segura o cálculo de cobertura** — `coverage` filtra automaticamente.
+- **A cobertura de ~46% reflete a heterogeneidade real do corpus**: Kaka JJ (esporte, mais estruturado) puxou pra cima; Dinoah (jurídico, mais narrativo) puxou pra baixo. Sprint 5 (US15) materializa essa observação no relato.
+
+## Observações para o relato (T6)
+
+- Para cinco documentos heterogêneos (jurídico, esporte, fitoterápico, advocacia), Llama 3.1 8B aberto atinge ~46% de cobertura média do MPO em ~1 min por documento — **viável para batch overnight**, não viável para feedback interativo (>30 s assustaria o consultor).
+- A maioria dos atributos não-preenchidos são genuinamente ausentes nos `.docx` — não falha do modelo. Sprint 5 quantifica via precisão (TP/(TP+FP)) vs recall (TP/(TP+FN)) com o gabarito manual.
+- **3 falhas reais de prompt → schema** se manifestaram nos 5 docs (hedging em enum, accented enum, capitalized enum). Todas mitigadas via pre-validator. Pode ser case study no relato.
+
+## Próximos passos pós-smoke
+
+- ✅ Smoke nos 5 docs **concluído**. Pendente: Sprint 5 = rubrica humana 0/0,5/1 em atributos `texto_livre` + Cohen's Kappa entre Cynthia e Moisés.
+- Real LLM em **Resumo do Cliente** (US12) e **Drafts** (US13) usando `InstructorResumoGenerator` / `InstructorDraftGenerator` que landed no PR #11. Mudança: `LLM_PROVIDER=ollama/llama3.1:8b` já basta — o factory `dependencies.get_resumo_generator()` faz a troca.
+- Considerar **regenerar com `temperature=0`** para Sprint 5 (reduzir variância entre execuções no relato).

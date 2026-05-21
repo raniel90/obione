@@ -60,13 +60,30 @@ class MPOAttributes(BaseModel):
 
     @field_validator("porte", "status_cronograma", mode="before")
     @classmethod
-    def _lowercase_enums(cls, v: Any) -> Any:
-        """LLMs sometimes capitalize enum values ('Pequeno' vs 'pequeno').
-        Normalize to lowercase before Literal validation kicks in.
+    def _normalize_enums(cls, v: Any) -> Any:
+        """Coerce LLM-emitted enum values into our canonical form.
+
+        Real-world LLM outputs land in three common shapes that we want
+        to accept:
+        - Capitalized: "Pequeno" → "pequeno"
+        - Accented: "médio" → "medio" (our Literal is unaccented)
+        - Hedged: "pequeno/médio" → "pequeno" (first option wins)
+
+        Anything else passes through unchanged so Literal validation
+        still produces a clean error message.
         """
-        if isinstance(v, str):
-            return v.strip().lower()
-        return v
+        if not isinstance(v, str):
+            return v
+        normalized = v.strip().lower()
+        # Strip Portuguese accents/cedilla so the value matches Literal members.
+        translation = str.maketrans("áàâãäéèêëíìîïóòôõöúùûüç", "aaaaaeeeeiiiiooooouuuuc")
+        normalized = normalized.translate(translation)
+        # Hedged values: "pequeno/medio", "a, b" — take the first token.
+        for sep in ("/", ","):
+            if sep in normalized:
+                normalized = normalized.split(sep, 1)[0].strip()
+                break
+        return normalized
 
     # --- Conteúdo geral (15 atributos: 1-15) ---
     nome_projeto: str | None = Field(
