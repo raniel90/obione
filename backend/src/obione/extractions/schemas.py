@@ -2,7 +2,30 @@ import uuid
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class CategoryCoverageResponse(BaseModel):
+    category: str
+    filled: int
+    total_in_scope: int
+    percentage: float
+
+
+class CoverageResponse(BaseModel):
+    """MPO coverage report for a project (US09)."""
+
+    extraction_id: uuid.UUID | None = Field(
+        default=None,
+        description="ID of the extraction this report is computed against; null when the project has no extraction yet.",
+    )
+    filled: int
+    total_in_scope: int
+    out_of_scope_count: int = Field(
+        description="Attributes excluded from coverage (e.g. imagens_fotos)."
+    )
+    percentage: float = Field(description="Aggregate coverage in percent (0-100).")
+    by_category: list[CategoryCoverageResponse]
 
 
 class ExtractionResponse(BaseModel):

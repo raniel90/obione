@@ -9,7 +9,12 @@ from obione.documents.storage.port import AbstractBlobStorage
 from obione.extractions import service
 from obione.extractions.dependencies import get_extractor_for
 from obione.extractions.exceptions import ExtractionNotFoundError
-from obione.extractions.schemas import ExtractionResponse, ManualExtractionCreate
+from obione.extractions.schemas import (
+    CategoryCoverageResponse,
+    CoverageResponse,
+    ExtractionResponse,
+    ManualExtractionCreate,
+)
 from obione.unit_of_work import SqlAlchemyUnitOfWork
 
 router = APIRouter(prefix="/projects/{project_id}/extractions", tags=["extractions"])
@@ -19,6 +24,28 @@ router = APIRouter(prefix="/projects/{project_id}/extractions", tags=["extractio
 def list_extractions(project_id: uuid.UUID, user: CurrentUser) -> list[ExtractionResponse]:
     items = service.list_extractions_for_project(get_uow(), user, project_id)
     return [ExtractionResponse.model_validate(x) for x in items]
+
+
+@router.get("/coverage", response_model=CoverageResponse)
+def get_coverage(project_id: uuid.UUID, user: CurrentUser) -> CoverageResponse:
+    """MPO coverage report for the project (US09)."""
+    report = service.get_project_coverage(get_uow(), user, project_id)
+    return CoverageResponse(
+        extraction_id=uuid.UUID(report.extraction_id) if report.extraction_id else None,
+        filled=report.filled,
+        total_in_scope=report.total_in_scope,
+        out_of_scope_count=report.out_of_scope_count,
+        percentage=report.percentage,
+        by_category=[
+            CategoryCoverageResponse(
+                category=c.category,
+                filled=c.filled,
+                total_in_scope=c.total_in_scope,
+                percentage=c.percentage,
+            )
+            for c in report.by_category
+        ],
+    )
 
 
 @router.post("/manual", response_model=ExtractionResponse, status_code=201)
