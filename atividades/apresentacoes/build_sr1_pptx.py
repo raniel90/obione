@@ -350,19 +350,21 @@ def fix_slide_4_escopo_fundamentacao(slide) -> None:
 
 
 def fix_slide_5_cinco_grupos(slide) -> None:
-    """A detalhada — 5 grupos G1-G5 com textos curtos (≤90 chars)."""
+    """A detalhada — 5 grupos G1-G5 com textos curtos (≤90 chars).
+    Inclui a evidência empírica do smoke Ollama no card Pipeline LLM (G1).
+    """
     replace_run_text(slide, "RESULTADOS", "ESCOPO")
     replace_run_text(
         slide,
         "Cinco lacunas identificadas na literatura",
-        "5 grupos · 18 requisitos funcionais",
+        "5 grupos · 18 requisitos funcionais · smoke real Ollama em 5/5 docs",
     )
     # G1
     replace_run_text(slide, "Governança e Deploy", "Pipeline LLM")
     replace_run_text(
         slide,
         "Nenhum paper dedicado a conformidade LGPD/GDPR ou monitoramento de modelos em produção com interface conversacional",
-        "Extração via LLM dos atributos do Quadro 37 a partir de documentos .docx.",
+        "Extração dos 44 atributos via Llama 3.1 8B. Smoke em 5/5 projetos · 46% cobertura média em ~66s/doc.",
     )
     # G2
     replace_run_text(slide, "Integração entre camadas", "Observação")
@@ -391,6 +393,168 @@ def fix_slide_5_cinco_grupos(slide) -> None:
         slide,
         "Apenas 1 de 38 papers testou em contexto automotivo (manuais do Ford Fiesta · Medeiros et al., 2023), escopo muito limitado",
         "Precisão · recall · F1 · Kappa em 3 projetos + Likert × 2 audiências.",
+    )
+
+
+def _fix_5_card_slide(
+    slide,
+    top_label: str,
+    subtitle: str,
+    cards: list[tuple[str, str]],
+) -> None:
+    """Helper genérico para customizar um clone do slide-5-grupos.
+
+    `cards` é uma lista de exatamente 5 tuplas (título, corpo) substituindo,
+    em ordem, os 5 cards do template (G1-G5). Usa os textos do template como
+    string-de-busca; assume que o clone ainda não foi customizado.
+    """
+    template_titles = [
+        "Governança e Deploy",
+        "Integração entre camadas",
+        "Benchmark vs. realidade",
+        "Pipeline vs. agentes",
+        "Validação automotiva",
+    ]
+    template_bodies = [
+        "Nenhum paper dedicado a conformidade LGPD/GDPR ou monitoramento de modelos em produção com interface conversacional",
+        "Nenhum framework cobre as 7 camadas de forma unificada. O máximo encontrado foi 5/7 camadas em um único trabalho (Keskin et al., 2025)",
+        "Performance cai drasticamente em bancos reais: 86,6% no Spider → 41% no banco industrial da Petrobras (46 pontos · Gao et al., 2024 · Nascimento et al., 2025)",
+        "55% dos papers usam pipelines fixos sem capacidade de planejamento, memória ou uso de ferramentas externas",
+        "Apenas 1 de 38 papers testou em contexto automotivo (manuais do Ford Fiesta · Medeiros et al., 2023), escopo muito limitado",
+    ]
+    if len(cards) != 5:
+        raise ValueError(f"esperado 5 cards, recebi {len(cards)}")
+    replace_run_text(slide, "RESULTADOS", top_label)
+    replace_run_text(slide, "Cinco lacunas identificadas na literatura", subtitle)
+    # Já validamos len(cards) == 5 acima; zip simples basta. (zip(strict=) só em 3.10+)
+    for (new_title, new_body), tpl_title, tpl_body in zip(
+        cards, template_titles, template_bodies
+    ):
+        replace_run_text(slide, tpl_title, new_title)
+        replace_run_text(slide, tpl_body, new_body)
+
+
+def fix_slide_5a_fundacao_pipeline(slide) -> None:
+    """5a — Fundação + Pipeline LLM. 6 RFs em 5 cards (último combina RF05+RF06)."""
+    _fix_5_card_slide(
+        slide,
+        top_label="REQUISITOS · FUNDAÇÃO + PIPELINE",
+        subtitle="6 requisitos funcionais · sprints 2 e 3 · todos implementados",
+        cards=[
+            (
+                "RF01 · Autenticar",
+                "JWT com expiração de 24h. Admin cria usuários; sem cadastro público.",
+            ),
+            (
+                "RF02 · Perfis",
+                "Consultor, cliente, admin. Acesso semi-aberto materializa o modelo do MPO.",
+            ),
+            (
+                "RF03 · Cadastro",
+                "Projeto com nome, domínio (legal/health/sports/branding/gastronomy/other), descrição.",
+            ),
+            (
+                "RF04 · Upload .docx",
+                "Multipart com validação MIME + sha256 + limite de 50 MB. Rejeita duplicatas.",
+            ),
+            (
+                "RF05 + RF06 · Extração",
+                "44 atributos do Quadro 37 via LLM. Persistência com prompt + modelo registrados.",
+            ),
+        ],
+    )
+
+
+def fix_slide_5b_observacao_comunidade(slide) -> None:
+    """5b — Observação + Comunidade + IA. 7 RFs em 5 cards (alguns combinam)."""
+    _fix_5_card_slide(
+        slide,
+        top_label="REQUISITOS · OBSERVAÇÃO + COMUNIDADE + IA",
+        subtitle="7 requisitos funcionais · sprints 3 e 4 · todos implementados",
+        cards=[
+            (
+                "RF07 + RF09 · Portfólio",
+                "Visão do consultor com status derivado e cobertura % do MPO por projeto.",
+            ),
+            (
+                "RF08 · Detalhe",
+                "View consolidado: documentos, extrações, cobertura, comentários recentes.",
+            ),
+            (
+                "RF10 + RF11 · Diálogo",
+                "Comentários com 1 nível de threading. Feed in-app cronológico por visibilidade.",
+            ),
+            (
+                "RF12 · Resumo Cliente",
+                "IA tradutora: extração técnica vira narrativa acessível. Sempre revisada pelo consultor.",
+            ),
+            (
+                "RF13 · Drafts",
+                "IA redutora de fricção: próximos passos e pontos de atenção. Consultor edita e publica.",
+            ),
+        ],
+    )
+
+
+def fix_slide_5c_avaliacao(slide) -> None:
+    """5c — Avaliação DSR. 5 RFs em 5 cards, mapeamento direto."""
+    _fix_5_card_slide(
+        slide,
+        top_label="REQUISITOS · AVALIAÇÃO DSR",
+        subtitle="5 requisitos funcionais · sprint 5 · backend pronto · coleta humana pendente",
+        cards=[
+            (
+                "RF14 · Gabarito",
+                "Importação de gabarito manual validado contra o schema JSON dos 44 atributos.",
+            ),
+            (
+                "RF15 · Comparação",
+                "Critério híbrido: comparação exata (estruturado) + rubrica humana 0/0,5/1 + índice de concordância.",
+            ),
+            (
+                "RF16 · Likert Consultoria",
+                "4 dimensões: utilidade dos drafts, fricção, qualidade do resumo, manutenibilidade.",
+            ),
+            (
+                "RF17 · Likert Clientes",
+                "4 dimensões: clareza do resumo, utilidade do espaço, qualidade do diálogo, inclusão.",
+            ),
+            (
+                "RF18 · Exportação",
+                "Bundle JSON (research) + CSV long-format (rubrica). Subsidia o relato de experiência.",
+            ),
+        ],
+    )
+
+
+def fix_slide_5d_rnfs(slide) -> None:
+    """5d — RNFs (9 não funcionais agrupados em 5 temas)."""
+    _fix_5_card_slide(
+        slide,
+        top_label="REQUISITOS NÃO-FUNCIONAIS",
+        subtitle="9 RNFs organizados por tema · todos endereçados arquiteturalmente",
+        cards=[
+            (
+                "Segurança & LGPD",
+                "RNF01 · auth obrigatório em todas as rotas · RNF02 · NDA + criptografia + logs de acesso.",
+            ),
+            (
+                "Reprodutibilidade",
+                "RNF03 · versão do prompt e modelo LLM registrados · RNF04 · schema JSON versionado v1.0.0.",
+            ),
+            (
+                "Performance",
+                "RNF05 · extração LLM ≤ 90s/doc (medido 46-79s) · RNF06 · endpoints REST ≤ 500ms p95.",
+            ),
+            (
+                "Usabilidade",
+                "RNF07 · linguagem cidadã no Resumo do Cliente · sem jargão técnico · revisão obrigatória.",
+            ),
+            (
+                "Manutenibilidade & Custo",
+                "RNF08 · ports & adapters (LLM, storage) · RNF09 · Ollama local como default zero-cost.",
+            ),
+        ],
     )
 
 
@@ -497,46 +661,46 @@ def fix_slide_7_estamos_vs_proximos(slide) -> None:
 
     # Card esquerda
     replace_run_text(slide, "JÁ ESTOU FAZENDO", "ESTÁ FEITO")
-    replace_run_text(slide, "Independente de aprovação", "Sprint 1 · esta semana")
-    replace_run_text(slide, "Capítulo 2 da tese (RSL)", "Requisitos")
+    replace_run_text(slide, "Independente de aprovação", "Sprint 0 + Sprint 1 antecipada")
+    replace_run_text(slide, "Capítulo 2 da tese (RSL)", "Requisitos + protocolo")
     replace_run_text(
         slide,
         "Todos os dados estão consolidados em formato estruturado.",
-        "18 funcionais + 9 não funcionais em formato ficha.",
+        "18 RFs + 9 RNFs + rubrica híbrida 0/0,5/1 + Kappa.",
     )
-    replace_run_text(slide, "Submissão do artigo da RSL", "Atributos-alvo do MPO")
+    replace_run_text(slide, "Submissão do artigo da RSL", "Backend MVP entregue")
     replace_run_text(
         slide,
         "Target: IEEE Access (preferência por Qualis maior se viável).",
-        "44 atributos do Quadro 37 categorizados.",
+        "18/18 USs · 287 testes · 32 endpoints · 8 migrations · CI rodando.",
     )
-    replace_run_text(slide, "Implementação do MVP (Fase 1)", "Protocolo de avaliação")
+    replace_run_text(slide, "Implementação do MVP (Fase 1)", "Smoke real do pipeline LLM")
     replace_run_text(
         slide,
         "Orquestrador + Coletor + Visualizador.",
-        "Rubrica híbrida 0/0,5/1 + Kappa.",
+        "Llama 3.1 8B local em 5/5 projetos · 46% cobertura média.",
     )
 
     # Card direita
     replace_run_text(slide, "POSIÇÕES QUE DEFENDO", "PRÓXIMAS SEMANAS")
     replace_run_text(slide, "Quero confirmação", "O que vem agora")
-    replace_run_text(slide, "Manter as 5 RQs", "Sprint 2 (22 mai - 4 jun)")
+    replace_run_text(slide, "Manter as 5 RQs", "Frontend e gabarito (sprints 2-4)")
     replace_run_text(
         slide,
         "O FMD é integrado por design. RQ1 é estrutural; RQ2/RQ3/RQ5 são técnicas; RQ4 é validação unificadora.",
-        "Cadastro · upload · auth · pipeline LLM nos 5 projetos.",
+        "Bruno integra os 32 endpoints. Cynthia + Moisés produzem o gabarito manual.",
     )
-    replace_run_text(slide, "RQ4 com a Stellantis", "Gabaritos manuais")
+    replace_run_text(slide, "RQ4 com a Stellantis", "Sprint 5 destravada")
     replace_run_text(
         slide,
         "Aproveitar a relação institucional do grupo de pesquisa para a Fase 3.",
-        "Valença piloto · depois Freire Batista e Kaka JJ.",
+        "Backend compara via /extractions/evaluation · rubrica humana + Kappa.",
     )
     replace_run_text(slide, "RSL fechada com 38 papers", "Status Report 2 (19/06)")
     replace_run_text(
         slide,
         "Saturação temática atingida. Fechar Capítulo 2.",
-        "Dashboard + IA-Assistente operacionais.",
+        "Frontend pronto · IA-Assistente em uso real · Likert lançado.",
     )
 
 
@@ -563,19 +727,19 @@ def fix_slide_8_obrigado(slide) -> None:
 
 
 def add_speaker_notes(prs) -> None:
-    """Adiciona briefing como nota do apresentador em cada um dos 8 slides."""
+    """Adiciona briefing como nota do apresentador em cada um dos 12 slides."""
     notes = {
         0: """[Tempo: ~30s]
 
 Saudação inicial. Apresentar o grupo e a cadeira:
 "Somos Bruno, Cynthia, Moisés e Raniel, do grupo ObiOne, da cadeira Tópicos Avançados em Engenharia de Software, do prof. Ivaldir."
 
-Gancho: "Esse é o nosso Status Report 1. Vamos te mostrar o que é o ObiOne, o que vamos entregar até 10/07, e onde estamos agora."
+Gancho: "Esse é o nosso Status Report 1. Vamos te mostrar o que é o ObiOne, o que vamos entregar até 10/07, e onde estamos agora — e adianto: estamos bem mais à frente do que o cronograma original previa."
 """,
         1: """[Tempo: ~30s]
 
 Apresente o roteiro em 4 blocos sem detalhar:
-"Quatro partes: primeiro o contexto que motiva o projeto, depois o que vamos construir, o cronograma das 9 semanas restantes, e fechamos com o status atual."
+"Quatro partes: o contexto que motiva o projeto, o que vamos construir + os requisitos em detalhe, onde estamos hoje (incluindo o backend já entregue), e fechamos com o cronograma e os próximos passos."
 """,
         2: """[Tempo: ~2min — slide-chave para criar tensão narrativa]
 
@@ -615,55 +779,101 @@ FECHAMENTO: "Único a combinar observação MPO + extração com IA + comunidade
 
 Bases citadas: Quadro 37 do MPO (44 atributos); OPTI-PE (Vieira 2022 Cap. 5); levantamento de ferramentas de mercado.
 """,
-        4: """[Tempo: ~2min]
+        4: """[Tempo: ~1.5min]
 
 Descer ao nível da execução:
-"Agora o como — escopo organizado em 5 grupos, 18 requisitos funcionais."
+"Agora o como — escopo organizado em 5 grupos, 18 requisitos funcionais. Importante: o pipeline LLM já está comprovado — rodamos em 5/5 projetos do estudo com 46% de cobertura média em ~66s por documento."
 
 Aponte para cada grupo brevemente (NÃO leia tudo):
-- G1 PIPELINE LLM: extrai os 44 atributos via LLM, alimenta tudo
+- G1 PIPELINE LLM: extrai os 44 atributos via Llama 3.1 8B local. Smoke real feito.
 - G2 OBSERVAÇÃO: dashboard de cobertura — cliente vê apenas o seu projeto
 - G3 COMUNIDADE: auth, perfis semi-abertos, comentários e feed
 - G4 IA-ASSISTENTE: Resumo do Cliente (tradutora) + Drafts (redutora de fricção)
 - G5 AVALIAÇÃO: rubrica + Cohen's Kappa nos 3 projetos + Likert × 2 audiências
 
-FECHAMENTO: "Cada grupo materializa uma categoria do MPO. Detalhes técnicos no repositório."
+TRANSIÇÃO: "Vou agora detalhar cada bloco de requisitos — começando pela Fundação e o Pipeline."
 """,
         5: """[Tempo: ~1.5min]
 
-"São 9 semanas até 10/07, divididas em 4 marcos."
+CARD por CARD — Fundação + Pipeline:
+- RF01 AUTENTICAR: JWT 24h, admin cria contas, sem cadastro público.
+- RF02 PERFIS: 3 papéis (consultor, cliente, admin). Acesso semi-aberto = característica MPO.
+- RF03 CADASTRO: 6 domínios suportados (legal, health, sports, branding, gastronomy, other).
+- RF04 UPLOAD .DOCX: sha256 + 50 MB max, rejeita duplicatas.
+- RF05 + RF06 EXTRAÇÃO: 44 atributos do Quadro 37, prompt e modelo registrados em cada extração.
 
-Percorra rapidamente os marcos (use os subtítulos como âncora):
-- M1 PREPARAÇÃO (22-28 mai · ESTA SEMANA): atributos, protocolo, primeiros gabaritos. Destrava tudo o que vem.
-- M2 PIPELINE (29 mai - 11 jun): núcleo técnico. Cadastro + upload + auth + extração LLM nos 5 projetos.
-- M3 DASHBOARD + IA (12-25 jun): a comunidade ganha vida. Cobertura, perfis, comentários, Resumo do Cliente, Drafts assistidos. Status Report 2 em 19/06.
-- M4 AVALIAÇÃO (26 jun - 2 jul): fecha o ciclo DSR. Precisão, Recall, F1, Kappa, Likert × 2.
-
-FECHAMENTO: "Escrita do relato de 3-9/07. Apresentação final em 10/07."
+FECHAMENTO: "Os 6 requisitos da Fundação e do Pipeline estão TODOS implementados no backend."
 """,
         6: """[Tempo: ~1.5min]
 
+CARD por CARD — Observação + Comunidade + IA:
+- RF07 + RF09 PORTFÓLIO: visão do consultor com status derivado e cobertura % do MPO.
+- RF08 DETALHE: view consolidado por projeto.
+- RF10 + RF11 DIÁLOGO: comentários com 1 nível de threading + feed in-app cronológico.
+- RF12 RESUMO DO CLIENTE: IA TRADUTORA — extração técnica vira narrativa acessível.
+- RF13 DRAFTS: IA REDUTORA DE FRICÇÃO — propõe próximos passos e pontos de atenção.
+
+ENFATIZE: "Toda saída da IA passa por revisão do consultor antes de virar pública. O cliente nunca vê draft."
+""",
+        7: """[Tempo: ~1.5min]
+
+CARD por CARD — Avaliação DSR:
+- RF14 GABARITO: backend já carrega; produção do gabarito é responsabilidade de Cynthia e Moisés.
+- RF15 COMPARAÇÃO: critério híbrido — comparação exata em estruturados + rubrica humana 0/0,5/1 em texto livre + Cohen's Kappa entre avaliadores.
+- RF16 LIKERT CONSULTORIA: 4 dimensões — utilidade dos drafts, fricção, qualidade do resumo, manutenibilidade.
+- RF17 LIKERT CLIENTES: 4 dimensões — clareza, utilidade do espaço, qualidade do diálogo, sentido de inclusão.
+- RF18 EXPORTAÇÃO: JSON bundle (research) + CSV long-format (rubrica).
+
+DESTAQUE: "Todo o backend de avaliação está pronto. Sprint 5 vira coleta humana — não código."
+""",
+        8: """[Tempo: ~1min]
+
+5 TEMAS por 9 RNFs:
+- SEGURANÇA & LGPD (RNF01 + RNF02): auth obrigatório, criptografia em trânsito, logs de acesso.
+- REPRODUTIBILIDADE (RNF03 + RNF04): versão de prompt + modelo LLM registrados; schema JSON versionado.
+- PERFORMANCE (RNF05 + RNF06): extração ≤ 90s (medimos 46-79s) e REST ≤ 500ms p95.
+- USABILIDADE (RNF07): linguagem cidadã no Resumo do Cliente.
+- MANUTENIBILIDADE + CUSTO (RNF08 + RNF09): ports & adapters arquitetural + Ollama local zero-cost.
+
+PONTE: "RNFs não viram US, mas todos estão endereçados arquiteturalmente. Vamos ao cronograma."
+""",
+        9: """[Tempo: ~1.5min]
+
+"São 9 semanas até 10/07, divididas em 4 marcos. Mas atenção: M1 e parte de M2 já estão atingidos antecipadamente."
+
+Percorra rapidamente os marcos:
+- M1 PREPARAÇÃO (22-28 mai · esta semana): atributos, protocolo, primeiros gabaritos. ✅ ATINGIDO.
+- M2 PIPELINE (29 mai - 11 jun): núcleo técnico. Cadastro + upload + auth + extração LLM nos 5 projetos. ✅ ATINGIDO (3 semanas antecipado).
+- M3 DASHBOARD + IA (12-25 jun): a comunidade ganha vida. Backend pronto; falta o frontend.
+- M4 AVALIAÇÃO (26 jun - 2 jul): fecha o ciclo DSR. Precisão, Recall, F1, Kappa, Likert × 2. Backend pronto; falta coleta humana.
+
+FECHAMENTO: "Escrita do relato de 3-9/07. Apresentação final em 10/07."
+""",
+        10: """[Tempo: ~1.5min]
+
 "Onde estamos AGORA e o que vem nas próximas semanas."
 
-CARD ESQUERDO — ESTÁ FEITO (Sprint 1, esta semana — preparatória):
-1. REQUISITOS: 18 funcionais + 9 não funcionais, em formato ficha
-2. ATRIBUTOS-ALVO do MPO: os 44 do Quadro 37, categorizados por tipo
-3. PROTOCOLO DE AVALIAÇÃO: rubrica híbrida 0/0,5/1 + Cohen's Kappa
+CARD ESQUERDO — ESTÁ FEITO (Sprint 0 + Sprint 1 antecipada):
+1. REQUISITOS + PROTOCOLO: 18 RFs, 9 RNFs, rubrica híbrida 0/0,5/1 + Kappa.
+2. BACKEND MVP ENTREGUE: 18/18 USs implementadas. 287 testes verdes. CI rodando em cada PR.
+3. SMOKE REAL DO PIPELINE LLM: Llama 3.1 8B local em 5/5 projetos do estudo, 46% cobertura média.
 
 CARD DIREITO — PRÓXIMAS SEMANAS:
-4. SPRINT 2 (22 mai - 4 jun): cadastro + upload + auth + pipeline LLM rodando nos 5 projetos
-5. GABARITOS MANUAIS: Valença como piloto, depois Freire Batista e Kaka JJ — pareados (Cynthia + Moisés)
-6. STATUS REPORT 2 (19/06): dashboard + IA-Assistente operacionais
+4. FRONTEND + GABARITO (sprints 2-4): Bruno integra os 32 endpoints; Cynthia + Moisés produzem o gabarito de 3 projetos.
+5. SPRINT 5 DESTRAVADA: backend compara via /extractions/evaluation; falta a rubrica humana 0/0,5/1.
+6. STATUS REPORT 2 (19/06): frontend pronto, IA-Assistente em uso real, Likert lançado.
 """,
-        7: """[Tempo: ~30s + perguntas]
+        11: """[Tempo: ~30s + perguntas]
 
-"Esse foi nosso Status Report 1. Documentação completa no repositório raniel90/obione. Abrimos para perguntas."
+"Esse foi nosso Status Report 1. Documentação completa no repositório raniel90/obione — incluindo os 32 endpoints com request/response real (api_responses.md) e 5 diagramas Mermaid da arquitetura. Abrimos para perguntas."
 
 Antecipe perguntas prováveis (responda só se vierem):
-- "Como vão validar o LLM?" → rubrica híbrida + 2 avaliadores independentes + Kappa
-- "Quem são os clientes?" → consultoria parceira; 5 projetos reais de domínios distintos (jurídico, saúde, esporte, branding)
-- "E se a IA errar?" → IA gera draft, consultor revisa antes de publicar
-- "Por que LLM e não regex/parser?" → heterogeneidade dos .docx; LLM lida com variação semântica
+- "Como vão validar o LLM?" → rubrica híbrida + 2 avaliadores independentes + Kappa. Backend já compara estruturado.
+- "Quem são os clientes?" → consultoria parceira; 5 projetos reais de domínios distintos (jurídico, saúde, esporte, branding, fitoterápicos).
+- "E se a IA errar?" → IA gera DRAFT, consultor revisa antes de publicar. Cliente nunca vê não-revisado.
+- "Por que LLM e não regex/parser?" → heterogeneidade dos .docx; LLM lida com variação semântica. Comprovado em smoke.
+- "Por que 46% de cobertura?" → muitos atributos do MPO são genuinamente ausentes no documento. Sprint 5 quantifica via precisão/recall.
+- "Por que tão adiantado?" → IA generativa acelerou implementação; o trabalho intelectual (requisitos, arquitetura, protocolo) virou base sólida pra automação.
 """,
     }
     for idx, text in notes.items():
@@ -681,6 +891,16 @@ def main() -> int:
 
     print(f"Duplicando slide 3 (cards lado-a-lado) para criar S+C (novo slide 3)...")
     duplicate_slide(prs, src_idx=2, dst_idx=3)
+    print(f"  Após duplicação SCQA: {len(prs.slides)} slides")
+
+    print(f"Duplicando slide 5 (5-cards) 4× para slides 5a/5b/5c/5d...")
+    # Cada duplicação insere o clone na posição indicada e empurra os
+    # subsequentes para a direita. Por isso usamos dst_idx crescente (5,6,7,8)
+    # com src_idx fixo em 4 — o slide original permanece em 4.
+    duplicate_slide(prs, src_idx=4, dst_idx=5)
+    duplicate_slide(prs, src_idx=4, dst_idx=6)
+    duplicate_slide(prs, src_idx=4, dst_idx=7)
+    duplicate_slide(prs, src_idx=4, dst_idx=8)
     print(f"  Total de slides agora: {len(prs.slides)}")
 
     print("Slide 1: capa...")
@@ -695,17 +915,29 @@ def main() -> int:
     print("Slide 4: Q + A — Escopo + Fundamentação MPO...")
     fix_slide_4_escopo_fundamentacao(prs.slides[3])
 
-    print("Slide 5: A detalhada — 5 grupos G1-G5...")
+    print("Slide 5: 5 grupos (overview)...")
     fix_slide_5_cinco_grupos(prs.slides[4])
 
+    print("Slide 5a: Requisitos · Fundação + Pipeline...")
+    fix_slide_5a_fundacao_pipeline(prs.slides[5])
+
+    print("Slide 5b: Requisitos · Observação + Comunidade + IA...")
+    fix_slide_5b_observacao_comunidade(prs.slides[6])
+
+    print("Slide 5c: Requisitos · Avaliação DSR...")
+    fix_slide_5c_avaliacao(prs.slides[7])
+
+    print("Slide 5d: Requisitos Não-Funcionais...")
+    fix_slide_5d_rnfs(prs.slides[8])
+
     print("Slide 6: Cronograma (M1-M4 + PLANO B)...")
-    fix_slide_6_marcos(prs.slides[5])
+    fix_slide_6_marcos(prs.slides[9])
 
     print("Slide 7: Status (Então-Agora-Próximo)...")
-    fix_slide_7_estamos_vs_proximos(prs.slides[6])
+    fix_slide_7_estamos_vs_proximos(prs.slides[10])
 
     print("Slide 8: obrigado...")
-    fix_slide_8_obrigado(prs.slides[7])
+    fix_slide_8_obrigado(prs.slides[11])
 
     # Substituir {{FOOTER}} textual em todos os slides
     print("\nSubstituindo {{FOOTER}} global...")
@@ -715,12 +947,17 @@ def main() -> int:
         footer_count += replace_run_text(slide, "{{FOOTER}}", footer_text)
     print(f"  {footer_count} footers textuais atualizados")
 
-    print("\nAtualizando numeração de página (total=8)...")
-    n = update_footers(prs, total=8)
+    print("\nAtualizando numeração de página (total=12)...")
+    n = update_footers(prs, total=12)
     print(f"  {n} números de página atualizados")
 
-    print("\nAdicionando speaker notes (briefing por slide)...")
-    add_speaker_notes(prs)
+    # NOTA: speaker notes desativados temporariamente.
+    # Com 4 clones do slide-5-grupos, a infraestrutura de notesMaster do
+    # python-pptx falha em criar o part corretamente e o Keynote rejeita o
+    # arquivo. O conteúdo dos briefings vive em add_speaker_notes() pra
+    # uso manual; até resolver o root cause, deixamos os notes vazios.
+    # print("\nAdicionando speaker notes (briefing por slide)...")
+    # add_speaker_notes(prs)
 
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     prs.save(OUTPUT)
