@@ -13,13 +13,19 @@ def test_mock_extractor_returns_valid_dict():
 
 
 @pytest.mark.unit
-def test_mock_extractor_loads_example_from_container_mount():
-    """When /app/atividades is mounted, the mock returns the full 44-attribute
-    Valença example rather than the fallback stub.
+def test_mock_extractor_loads_example_when_available():
+    """When the example JSON can be found (container mount or repo-relative
+    ancestor walk), the mock returns the full Valença example rather than
+    the fallback stub. Skipped when neither is available — exercised in CI
+    and in the dev container.
     """
+    from obione.extractions.llm.mock import _example_candidates
+
+    if not any(c.exists() for c in _example_candidates()):
+        pytest.skip("schema_extracao_exemplo.json not found in any ancestor")
+
     extractor = MockExtractor()
     result = extractor.extract(b"x")
-    # Hallmarks of the full example file:
     assert result.content["_meta"]["projeto_nome"] == "valenca-odontologia"
     assert result.content["porte"] == "pequeno"
 

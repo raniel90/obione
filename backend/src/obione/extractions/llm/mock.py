@@ -17,16 +17,33 @@ _FALLBACK = {
 }
 
 
-_DEFAULT_EXAMPLE_PATH = "/app/atividades/schema_extracao_exemplo.json"
+def _example_candidates() -> list[Path]:
+    """Look for atividades/schema_extracao_exemplo.json in:
+    1. The container mount (`/app/atividades/...`)
+    2. Every ancestor of this file (works on bare-metal CI runners +
+       whatever local checkout depth a contributor uses).
+    """
+    candidates = [Path("/app/atividades/schema_extracao_exemplo.json")]
+    here = Path(__file__).resolve()
+    for parent in here.parents:
+        candidates.append(parent / "atividades" / "schema_extracao_exemplo.json")
+    return candidates
 
 
 class MockExtractor:
     def __init__(self, example_path: str | None = None):
-        self._example_path = example_path or _DEFAULT_EXAMPLE_PATH
+        self._example_path = example_path  # explicit override wins
+
+    def _resolve_path(self) -> Path | None:
+        if self._example_path:
+            p = Path(self._example_path)
+            return p if p.exists() else None
+        for candidate in _example_candidates():
+            if candidate.exists():
+                return candidate
+        return None
 
     def extract(self, document_bytes: bytes) -> ExtractionResult:
-        if Path(self._example_path).exists():
-            content = json.loads(Path(self._example_path).read_text())
-        else:
-            content = dict(_FALLBACK)
+        path = self._resolve_path()
+        content = json.loads(path.read_text()) if path else dict(_FALLBACK)
         return ExtractionResult(content=content, model_id="mock")
