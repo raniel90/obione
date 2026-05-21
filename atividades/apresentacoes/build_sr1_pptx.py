@@ -112,7 +112,7 @@ def fix_slide_1_capa(slide) -> None:
     replace_run_text(
         slide,
         "{{SUBTITULO}}",
-        "Apresentação à cadeira Tópicos Avançados em Engenharia de Software",
+        "Backend MVP entregue · 4 semanas antes do previsto",
     )
     replace_run_text(slide, "{{ROTULO_AUTOR}}", "Equipe")
     # Listar os 4 integrantes do grupo
@@ -193,16 +193,16 @@ def fix_slide_3_contextualizacao(slide) -> None:
     replace_run_text(slide, "Evidência da nossa RSL", "Três fontes de fricção")
 
     # Stat 1 — Manual
-    replace_run_text(slide, "30 / 38", "Manual")
+    replace_run_text(slide, "30 / 38", "44 atrib.")
     replace_run_text(
         slide,
         "papers cobrem apenas a camada Coleta",
-        "curadoria de atributos do projeto",
+        "por projeto, curados à mão",
     )
     replace_run_text(
         slide,
         "as 6 outras camadas estão sub-representadas",
-        "ler documentos, estruturar, atualizar",
+        "ler .docx, estruturar, atualizar",
     )
 
     # Stat 2 — Repetitivo
@@ -378,7 +378,7 @@ def fix_slide_5_cinco_grupos(slide) -> None:
     replace_run_text(
         slide,
         "Performance cai drasticamente em bancos reais: 86,6% no Spider → 41% no banco industrial da Petrobras (46 pontos · Gao et al., 2024 · Nascimento et al., 2025)",
-        "Auth, perfis semi-abertos, comentários e feed in-app.",
+        "Autenticação, perfis semi-abertos, comentários e feed in-app.",
     )
     # G4
     replace_run_text(slide, "Pipeline vs. agentes", "IA-Assistente")
@@ -392,7 +392,7 @@ def fix_slide_5_cinco_grupos(slide) -> None:
     replace_run_text(
         slide,
         "Apenas 1 de 38 papers testou em contexto automotivo (manuais do Ford Fiesta · Medeiros et al., 2023), escopo muito limitado",
-        "Precisão · recall · F1 · Kappa em 3 projetos + Likert × 2 audiências.",
+        "Precisão · recall · F1 · concordância humana em 3 projetos + Likert × 2.",
     )
 
 
@@ -435,62 +435,64 @@ def _fix_5_card_slide(
 
 
 def fix_slide_5a_fundacao_pipeline(slide) -> None:
-    """5a — Fundação + Pipeline LLM. 6 RFs em 5 cards (último combina RF05+RF06)."""
+    """5a — Fundação + Pipeline LLM. 6 RFs em 5 cards (último combina RF05+RF06).
+    Bodies enxutos: o orador detalha; o slide ancora.
+    """
     _fix_5_card_slide(
         slide,
         top_label="REQUISITOS · FUNDAÇÃO + PIPELINE",
-        subtitle="6 requisitos funcionais · sprints 2 e 3 · todos implementados",
+        subtitle="6 RFs · sprints 2 e 3 · todos implementados",
         cards=[
             (
                 "RF01 · Autenticar",
-                "JWT com expiração de 24h. Admin cria usuários; sem cadastro público.",
+                "JWT 24h. Admin cria usuários, sem cadastro público.",
             ),
             (
                 "RF02 · Perfis",
-                "Consultor, cliente, admin. Acesso semi-aberto materializa o modelo do MPO.",
+                "Consultor, cliente, admin. Acesso semi-aberto conforme MPO.",
             ),
             (
                 "RF03 · Cadastro",
-                "Projeto com nome, domínio (legal/health/sports/branding/gastronomy/other), descrição.",
+                "Projeto com nome, domínio e descrição.",
             ),
             (
                 "RF04 · Upload .docx",
-                "Multipart com validação MIME + sha256 + limite de 50 MB. Rejeita duplicatas.",
+                "Validação de tipo + checksum + limite 50 MB. Rejeita duplicatas.",
             ),
             (
                 "RF05 + RF06 · Extração",
-                "44 atributos do Quadro 37 via LLM. Persistência com prompt + modelo registrados.",
+                "44 atributos do Quadro 37 via LLM. Prompt e modelo registrados.",
             ),
         ],
     )
 
 
 def fix_slide_5b_observacao_comunidade(slide) -> None:
-    """5b — Observação + Comunidade + IA. 7 RFs em 5 cards (alguns combinam)."""
+    """5b — Observação + Comunidade + IA. 7 RFs em 5 cards."""
     _fix_5_card_slide(
         slide,
         top_label="REQUISITOS · OBSERVAÇÃO + COMUNIDADE + IA",
-        subtitle="7 requisitos funcionais · sprints 3 e 4 · todos implementados",
+        subtitle="7 RFs · sprints 3 e 4 · todos implementados",
         cards=[
             (
                 "RF07 + RF09 · Portfólio",
-                "Visão do consultor com status derivado e cobertura % do MPO por projeto.",
+                "Visão do consultor com status e cobertura % do MPO.",
             ),
             (
                 "RF08 · Detalhe",
-                "View consolidado: documentos, extrações, cobertura, comentários recentes.",
+                "Documentos, extrações, cobertura e comentários recentes do projeto.",
             ),
             (
                 "RF10 + RF11 · Diálogo",
-                "Comentários com 1 nível de threading. Feed in-app cronológico por visibilidade.",
+                "Comentários com 1 nível de threading + feed in-app cronológico.",
             ),
             (
                 "RF12 · Resumo Cliente",
-                "IA tradutora: extração técnica vira narrativa acessível. Sempre revisada pelo consultor.",
+                "IA tradutora. Sempre revisado pelo consultor antes de publicar.",
             ),
             (
                 "RF13 · Drafts",
-                "IA redutora de fricção: próximos passos e pontos de atenção. Consultor edita e publica.",
+                "IA redutora de fricção. Próximos passos e pontos de atenção.",
             ),
         ],
     )
@@ -501,27 +503,27 @@ def fix_slide_5c_avaliacao(slide) -> None:
     _fix_5_card_slide(
         slide,
         top_label="REQUISITOS · AVALIAÇÃO DSR",
-        subtitle="5 requisitos funcionais · sprint 5 · backend pronto · coleta humana pendente",
+        subtitle="Sprint 5 · backend pronto · coleta humana pendente",
         cards=[
             (
                 "RF14 · Gabarito",
-                "Importação de gabarito manual validado contra o schema JSON dos 44 atributos.",
+                "Gabarito humano carregado e validado contra os 44 atributos do MPO.",
             ),
             (
                 "RF15 · Comparação",
-                "Critério híbrido: comparação exata (estruturado) + rubrica humana 0/0,5/1 + índice de concordância.",
+                "Comparação exata em estruturado + rubrica humana 0/0,5/1 + concordância humana.",
             ),
             (
                 "RF16 · Likert Consultoria",
-                "4 dimensões: utilidade dos drafts, fricção, qualidade do resumo, manutenibilidade.",
+                "4 dimensões: drafts, fricção, qualidade do resumo, manutenibilidade.",
             ),
             (
                 "RF17 · Likert Clientes",
-                "4 dimensões: clareza do resumo, utilidade do espaço, qualidade do diálogo, inclusão.",
+                "4 dimensões: clareza, utilidade do espaço, diálogo, sentido de inclusão.",
             ),
             (
                 "RF18 · Exportação",
-                "Bundle JSON (research) + CSV long-format (rubrica). Subsidia o relato de experiência.",
+                "JSON (research) + CSV long-format (rubrica). Subsidia o relato.",
             ),
         ],
     )
@@ -532,27 +534,27 @@ def fix_slide_5d_rnfs(slide) -> None:
     _fix_5_card_slide(
         slide,
         top_label="REQUISITOS NÃO-FUNCIONAIS",
-        subtitle="9 RNFs organizados por tema · todos endereçados arquiteturalmente",
+        subtitle="9 RNFs por tema · todos endereçados arquiteturalmente",
         cards=[
             (
                 "Segurança & LGPD",
-                "RNF01 · auth obrigatório em todas as rotas · RNF02 · NDA + criptografia + logs de acesso.",
+                "Autenticação obrigatória (RNF01). NDA + criptografia + logs (RNF02).",
             ),
             (
                 "Reprodutibilidade",
-                "RNF03 · versão do prompt e modelo LLM registrados · RNF04 · schema JSON versionado v1.0.0.",
+                "Prompt e modelo LLM registrados (RNF03). Schema JSON versionado (RNF04).",
             ),
             (
                 "Performance",
-                "RNF05 · extração LLM ≤ 90s/doc (medido 46-79s) · RNF06 · endpoints REST ≤ 500ms p95.",
+                "Extração LLM ≤ 90s, medido 46-79s (RNF05). REST ≤ 500ms p95 (RNF06).",
             ),
             (
                 "Usabilidade",
-                "RNF07 · linguagem cidadã no Resumo do Cliente · sem jargão técnico · revisão obrigatória.",
+                "Linguagem cidadã no Resumo do Cliente. Revisão obrigatória (RNF07).",
             ),
             (
                 "Manutenibilidade & Custo",
-                "RNF08 · ports & adapters (LLM, storage) · RNF09 · Ollama local como default zero-cost.",
+                "Ports & adapters para LLM e storage (RNF08). Ollama local zero-cost (RNF09).",
             ),
         ],
     )
@@ -568,7 +570,7 @@ def fix_slide_6_marcos(slide) -> None:
     )
 
     # M1 PREPARAÇÃO
-    replace_run_text(slide, "FASE 1", "M1")
+    replace_run_text(slide, "FASE 1", "M1 ✓")
     replace_run_text(slide, "MVP", "PREPARAÇÃO")
     replace_run_texts_in_order(slide, "6–8 meses", ["22-28 mai", "29 mai - 11 jun"])
     replace_run_text(slide, "Orquestrador", "Atributos-alvo")
@@ -577,21 +579,21 @@ def fix_slide_6_marcos(slide) -> None:
     replace_run_text(
         slide,
         "Técnicas mais maduras na literatura (30 papers).",
-        "Destrava todo o Sprint 1.",
+        "Concluído. Destravou o Sprint 1.",
     )
-    replace_run_text(slide, "Artigo em conferência", "Status Report 1")
+    replace_run_text(slide, "Artigo em conferência", "Status Report 1 (hoje)")
 
     # M2 PIPELINE
-    replace_run_text(slide, "FASE 2", "M2")
+    replace_run_text(slide, "FASE 2", "M2 ✓")
     replace_run_text(slide, "Contribuição original", "PIPELINE")
-    replace_run_text(slide, "Governança (LGPD)", "Cadastro · upload · auth")
+    replace_run_text(slide, "Governança (LGPD)", "Cadastro · upload · autenticação")
     replace_run_text(slide, "+ AutoML", "+ Pipeline LLM nos 5 projetos")
     replace_run_text(
         slide,
         "Ataca os gaps onde não há publicações dedicadas.",
-        "Núcleo técnico da extração de atributos.",
+        "Backend antecipado. Smoke Ollama 5/5.",
     )
-    replace_run_text(slide, "Artigo em journal", "5 JSONs persistidos")
+    replace_run_text(slide, "Artigo em journal", "Extrações dos 5 projetos")
 
     # M3 DASHBOARD + IA
     replace_run_text(slide, "FASE 3", "M3")
@@ -694,7 +696,7 @@ def fix_slide_7_estamos_vs_proximos(slide) -> None:
     replace_run_text(
         slide,
         "Aproveitar a relação institucional do grupo de pesquisa para a Fase 3.",
-        "Backend compara via /extractions/evaluation · rubrica humana + Kappa.",
+        "Backend compara via /extractions/evaluation. Rubrica humana + concordância.",
     )
     replace_run_text(slide, "RSL fechada com 38 papers", "Status Report 2 (19/06)")
     replace_run_text(
@@ -705,11 +707,11 @@ def fix_slide_7_estamos_vs_proximos(slide) -> None:
 
 
 def fix_slide_8_obrigado(slide) -> None:
-    """Obrigado — sem menções individuais."""
+    """Obrigado — sem menções individuais, links pros artefatos."""
     replace_run_text(
         slide,
         "Resultados da RSL  ·  Framework FMD-Agent  ·  Worklog",
-        "github.com/raniel90/obione",
+        "github.com/raniel90/obione  ·  endpoints documentados  ·  diagramas de arquitetura",
     )
     replace_run_text(
         slide,
