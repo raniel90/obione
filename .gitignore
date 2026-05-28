@@ -10,3 +10,6 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+
+# impeccable critique snapshots (arquivo local, não versionar)
+.impeccable/
