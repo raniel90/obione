@@ -1,10 +1,10 @@
-# Requisitos — ObiOne (Pós-Pivot Comunidade)
+# Requisitos — ObiOne (Observatório de Projetos para Consultorias)
 
-Documento de especificação de requisitos do ObiOne, observatório-comunidade de projetos baseado no MPO (Quadro 37, terceira versão — Vieira, 2022) potencializado por IA Generativa.
+Documento de especificação de requisitos do ObiOne, **observatório de projetos para consultorias** baseado no MPO (Vieira, 2022) potencializado por IA Generativa.
 
-Reformulado em 16/05/2026 após o pivot que introduziu a dimensão de comunidade (ver `pivot_observatorio_comunidade.md`).
+Reformulado em 16/05/2026 pelo pivot que introduziu a dimensão de comunidade (ver `pivot_observatorio_comunidade.md`) e ampliado em 28/05/2026 pelo refinamento que reposiciona o ObiOne como observatório cross-cliente, fiel ao MPO completo — não apenas ao Quadro 37 (ver `refinamento_observatorio_consultorias.md`). O Quadro 37 passa a ser o **insumo** (a célula-projeto); o observatório é o agregado: portfólio, temáticas e conhecimento cross-projeto.
 
-Os requisitos funcionais (RF01–RF18) são derivados 1:1 das user stories do backlog. Os requisitos não funcionais (RNF01–RNF09) cobrem qualidade do produto, reprodutibilidade científica, restrições do ambiente acadêmico, conformidade LGPD e controle de custo de LLM. **Cada ficha registra explicitamente a rastreabilidade com o MPO** (Quadro 37 e/ou conceitos do modelo).
+Os requisitos funcionais (RF01–RF22) são derivados das user stories do backlog. Os requisitos não funcionais (RNF01–RNF10) cobrem qualidade do produto, reprodutibilidade científica, restrições do ambiente acadêmico, conformidade LGPD e controle de custo de LLM. **Cada ficha registra explicitamente a rastreabilidade com o MPO** (Quadro 37 e/ou conceitos do modelo).
 
 **Ordem dos requisitos**: as fichas estão organizadas em **fluxo lógico de construção**, da fundação técnica (autenticação + perfis) até a avaliação final. Os IDs RF01–RF18 são preservados para manter referências cruzadas em outros documentos, mas a ordem visual reflete a sequência em que o sistema é construído.
 
@@ -30,7 +30,7 @@ O ObiOne combina pipeline LLM de extração de atributos do MPO + espaço de com
 
 ## 2. Índice dos Requisitos Funcionais
 
-Os 18 RFs em ordem de construção (do mais fundacional ao mais derivado).
+Os 22 RFs em ordem de construção (do mais fundacional ao mais derivado).
 
 | # | ID | Título | Bloco | Sprint | MoSCoW |
 |---|---|---|---|---|---|
@@ -52,6 +52,12 @@ Os 18 RFs em ordem de construção (do mais fundacional ao mais derivado).
 | 16 | RF16 | Coletar feedback Likert da consultoria | 5 | 4 | Must |
 | 17 | RF17 | Coletar feedback Likert dos clientes | 5 | 4 | Must |
 | 18 | RF18 | Exportar resultados consolidados | 5 | 4 | **Should** |
+| 19 | RF19 | Categorizar projeto por temática/segmento | 6 — Observação de portfólio e conhecimento cross-projeto | Refino F1 | Must |
+| 20 | RF20 | Visualizar cockpit de portfólio (comparação cross-projeto) | 6 | Refino F1 | Must |
+| 21 | RF21 | Gerar síntese cross-projeto por temática (Conectora) | 6 | Refino F2 | Must |
+| 22 | RF22 | Publicar conhecimento comum para o cliente | 6 | Refino F2 | **Should** |
+
+> **Fases do refinamento (28/05/2026):** *Refino F1* (até SR2) entrega RF19-RF20 — observação cross-cliente; *Refino F2* (até a entrega final) entrega RF21-RF22 — conhecimento cross-projeto. Datas absolutas a confirmar com o grupo.
 
 ### Convenção de prioridade — MoSCoW
 
@@ -62,6 +68,7 @@ Os 18 RFs em ordem de construção (do mais fundacional ao mais derivado).
 **Justificativa dos "Should"**:
 - **RF11 (Feed in-app)**: comunicação interna do observatório. Se Sprint 3 atrasar, pode ser cortado — usuários ainda recebem notificações ao acessar comentários/resumos individualmente.
 - **RF18 (Exportação consolidada)**: facilita escrita do relato, mas fallback é fazer queries manuais no banco direto (mais trabalhoso porém viável).
+- **RF22 (Conhecimento comum para o cliente)**: camada de publicação cliente-facing. Se a Fase 2 atrasar, fallback é o consultor compartilhar a síntese (RF21) manualmente com o cliente. A síntese em si (RF21) permanece Must.
 
 ---
 
@@ -511,6 +518,104 @@ Fecha o ciclo de pesquisa. Sem este bloco, o DSR não tem evidência empírica p
 
 ---
 
+### 3.6 Bloco 6 — Observação de Portfólio e Conhecimento Cross-Projeto
+
+Onde o refinamento de 28/05/2026 (ver `refinamento_observatorio_consultorias.md`) acontece. O observatório deixa de tratar cada projeto isoladamente e passa a observar o **portfólio cross-cliente** — agrupando por temática, comparando indicadores e produzindo conhecimento que emerge do conjunto. Ativa os conceitos do MPO que estavam dormindo: *Conteúdo→Temáticas*, *Categorizar*, **Combinar**, *Visualizar/Acompanhar*. A célula-projeto (extração dos 44 atributos, RF05-RF06) é reaproveitada como insumo.
+
+---
+
+### RF19 — Categorizar projeto por temática/segmento
+
+**1. Identificação**
+- ID: RF19
+- Título: Categorizar projeto por temática/segmento
+- Prioridade: Must
+- Status: Backlog
+- Sprint/Release: Refino Fase 1 (até SR2) — data a confirmar
+
+**2. Detalhamento**
+- Descrição: Atribuir a cada projeto uma temática/segmento (jurídico, saúde, esporte, branding, …). A IA infere a temática a partir da extração + descrição; o consultor revisa e confirma (curadoria).
+- Justificativa de negócio: A temática é a base de todo agrupamento cross-cliente — sem ela não há comparação por segmento nem síntese de conhecimento. Materializa o conteúdo "Temáticas dos Projetos" do MPO, ausente até aqui.
+- Stakeholder: Consultoria.
+- Dependências: RF03 (projeto cadastrado), RF05/RF06 (extração como insumo da inferência).
+
+**3. Validação**
+- Critérios de aceite: IA sugere temática para o projeto; consultor pode aceitar ou sobrescrever; temática persistida e exibida no portfólio; projetos agrupáveis por temática.
+- Regras de negócio: A categorização da IA é sempre uma **sugestão** — o consultor confirma. Um projeto tem exatamente uma temática primária no MVP. Vocabulário de temáticas controlado (enum, alinhado ao domínio de RF03).
+- Rastreabilidade MPO: Conteúdo **Temáticas dos Projetos** (Vieira, 2022, p. 188) + processo **Categorizar/Classificar** (p. 197).
+- Observações: **Backend (Raniel):** novo bounded context `themes/`; categorizador via LLM port; endpoints `POST /projects/{id}/theme/suggest` + `PATCH /projects/{id}/theme`. **Frontend (Bruno):** badge de temática no card do projeto + UI de curadoria (aceitar/editar sugestão).
+
+---
+
+### RF20 — Visualizar cockpit de portfólio (comparação cross-projeto)
+
+**1. Identificação**
+- ID: RF20
+- Título: Visualizar cockpit de portfólio (comparação cross-projeto)
+- Prioridade: Must
+- Status: Backlog
+- Sprint/Release: Refino Fase 1 (até SR2) — data a confirmar
+
+**2. Detalhamento**
+- Descrição: Apresentar à consultoria uma visão agregada e comparável do portfólio: indicadores cross-projeto (status, porte, risco, % cobertura, evolução) agrupáveis por temática.
+- Justificativa de negócio: É o que dá "cara de observatório" à consultoria — observar o conjunto, não fichas isoladas. Materializa os processos Visualizar/Acompanhar do MPO, presentes nos casos reais da tese (dashboards comparativos do NPI/UFC e do ObrasPE).
+- Stakeholder: Consultoria.
+- Dependências: RF02 (perfis — consultoria apenas), RF09 (cobertura), RF19 (temáticas para agrupar).
+
+**3. Validação**
+- Critérios de aceite: Indicadores agregados por temática e no total; comparação lado-a-lado de projetos (status, porte, risco, cobertura); filtro por temática; cliente NÃO acessa o cockpit.
+- Regras de negócio: O cockpit é um **read-model** — apenas agrega dados já existentes, sem duplicar nem recalcular fora de banda. Exclusivo do perfil Consultor.
+- Rastreabilidade MPO: Processos **Acompanhar** (Vieira, 2022, p. 198) e **Avaliar** (p. 198) + característica **Abrangência** (p. 189) + conceito **Visualizar** (Farias Júnior et al., 2025).
+- Observações: **Backend (Raniel):** novo bounded context `portfolio/` (read-model/analytics); endpoint `GET /portfolio` com indicadores cross-projeto agrupáveis por temática. **Frontend (Bruno):** dashboard de cockpit com gráficos comparativos por temática + tabela cross-projeto.
+
+---
+
+### RF21 — Gerar síntese cross-projeto por temática (Conectora)
+
+**1. Identificação**
+- ID: RF21
+- Título: Gerar síntese cross-projeto por temática (Conectora)
+- Prioridade: Must
+- Status: Backlog
+- Sprint/Release: Refino Fase 2 (até entrega final) — data a confirmar
+
+**2. Detalhamento**
+- Descrição: A IA lê o conjunto de projetos de uma temática e produz um rascunho de síntese de portfólio — padrões recorrentes, riscos comuns, lições e boas práticas. O consultor revisa/edita e publica.
+- Justificativa de negócio: É o coração da contribuição de pesquisa do refinamento — IA Generativa **produzindo conhecimento** de portfólio (processo Combinar do MPO), não só extraindo atributos. Reativa o papel "Conectora" cortado no primeiro pivot.
+- Stakeholder: Consultoria (autor mediado pela IA); pesquisa.
+- Dependências: RF19 (temáticas), RF05/RF06 (extrações como insumo), LLM port.
+
+**3. Validação**
+- Critérios de aceite: IA gera rascunho de síntese por temática a partir das extrações dos projetos daquela temática; consultor edita antes de publicar; rascunho não publicado não é visível ao cliente; versão do prompt + modelo registrados; síntese só é gerada quando a temática tem ≥ 2 projetos.
+- Regras de negócio: Consultor **sempre** revisa antes de publicar — sem publicação automática (mesmo gate de RF12/RF13). A IA recebe dados anonimizados/agregados; nunca expõe atributo cru identificável de cliente específico (ver RNF10). Histórico de sínteses preservado.
+- Rastreabilidade MPO: Processo **Combinar** (Vieira, 2022, p. 198) — produção de conhecimento a partir da combinação de múltiplos projetos — + processos **Transformar** (p. 196) e **Categorizar/Classificar** (p. 197) + motivação **Conhecimento** (p. 204).
+- Observações: **Backend (Raniel):** novo bounded context `synthesis/` com `SynthesisGenerator` (adapters `Mock` + `Instructor`, espelhando `resumos`/`drafts`); ciclo `draft → review → published`; endpoints `POST /themes/{theme}/synthesis/generate` + `POST /synthesis/{id}/publish`. **Frontend (Bruno):** UI de revisão/edição da síntese para o consultor.
+
+---
+
+### RF22 — Publicar conhecimento comum para o cliente
+
+**1. Identificação**
+- ID: RF22
+- Título: Publicar conhecimento comum para o cliente
+- Prioridade: Should
+- Status: Backlog
+- Sprint/Release: Refino Fase 2 (até entrega final) — data a confirmar
+
+**2. Detalhamento**
+- Descrição: Expor ao cliente as sínteses publicadas da(s) sua(s) temática(s) como uma camada de conhecimento comum — padrões e boas práticas agregados do segmento, sem dados crus de outros clientes.
+- Justificativa de negócio: Dá ao cliente o "espaço de outros membros" que caracteriza um observatório (crítica do professor), respeitando o acesso semi-aberto. Materializa Comunicar/Disseminar.
+- Stakeholder: Clientes (consumidores); consultoria (curadora).
+- Dependências: RF21 (síntese publicada), RF02 (acesso semi-aberto).
+
+**3. Validação**
+- Critérios de aceite: Cliente vê as sínteses publicadas da sua temática; não vê rascunhos nem dados de outros clientes; conteúdo escopado por temática.
+- Regras de negócio: Apenas sínteses **publicadas** e **sanitizadas** (RNF10) chegam ao cliente. Cliente nunca acessa o cockpit (RF20) nem extrações de terceiros.
+- Rastreabilidade MPO: Processo **Comunicar** (Vieira, 2022, p. 197) + **Disponibilizar** (p. 196) + características **Acesso semi-aberto** e **Rede de Colaboração** (p. 189).
+- Observações: **Backend (Raniel):** endpoint `GET /knowledge` (client-facing) filtrando sínteses publicadas pela temática do cliente. **Frontend (Bruno):** seção "Conhecimento comum" na visão do cliente. **Cortável se a Fase 2 atrasar** — fallback: consultor compartilha a síntese manualmente com o cliente.
+
+---
+
 ## 4. Requisitos Não Funcionais (RNF)
 
 ### RNF04 — Reprodutibilidade científica
@@ -729,6 +834,30 @@ Fecha o ciclo de pesquisa. Sem este bloco, o DSR não tem evidência empírica p
 
 ---
 
+### RNF10 — Isolamento entre clientes e anonimização no conhecimento comum
+
+**1. Identificação**
+- ID: RNF10
+- Título: Isolamento entre clientes e anonimização no conhecimento comum
+- Categoria: Segurança / Compliance / LGPD
+- Prioridade: Must
+- Status: Backlog
+- Sprint/Release: Refino Fase 2 — aplicado em RF21 e RF22
+
+**2. Detalhamento**
+- Descrição: O conhecimento cross-projeto exposto a clientes deve ser agregado e anonimizado — nenhum atributo cru re-identificável de um cliente pode aparecer para outro.
+- Justificativa de negócio: O caso tem **dois clientes do mesmo segmento** (Freire Batista ADV e Dinoah ADV, ambos jurídico); sem isolamento, a síntese poderia vazar dados de um para o outro, violando LGPD e o NDA.
+- Stakeholder: Consultoria + clientes + pesquisa.
+- Dependências: RF02, RF21, RF22.
+
+**3. Validação**
+- Critérios de aceite: Síntese publicada não contém nome, valor ou trecho atribuível a um cliente específico; gate de revisão do consultor obrigatório antes de publicar; síntese só gerada com ≥ 2 projetos na temática (evita "agregado de um" que identifica o único cliente); rubrica de avaliação inclui "ausência de vazamento cross-cliente".
+- Regras de negócio: Cliente A nunca infere dados do Cliente B a partir do conhecimento comum. Quando a temática tem exatamente 2 clientes, atenção redobrada do consultor na sanitização.
+- Rastreabilidade MPO: Característica **Segurança** (Vieira, 2022, p. 192) + **Acesso semi-aberto** (p. 189) — extensão do RNF08 (LGPD) para a camada cross-projeto.
+- Observações: Complementa RNF08. O gate humano (consultor) é a principal salvaguarda, reforçado pelo limite de ≥ 2 projetos por temática.
+
+---
+
 ## 5. Premissas
 
 - O estudo de caso usa **5 projetos reais**: Freire Batista ADV, Valença Odontologia, Kaka JJ, Bem Viver Fitoterápicos, Dinoah ADV.
@@ -741,14 +870,14 @@ Fecha o ciclo de pesquisa. Sem este bloco, o DSR não tem evidência empírica p
 
 ## 6. Fora de Escopo
 
+> **Nota (refinamento 28/05/2026):** itens antes listados aqui foram **promovidos para escopo** — indicadores de portfólio e comparação cruzada (agora RF20), síntese de padrões e lições aprendidas cross-projeto (agora RF21), exposição ao cliente (RF22). Ver `refinamento_observatorio_consultorias.md`.
+
 - Atualização incremental, detecção de mudanças, versionamento.
 - Modelo próprio de classificação de risco (PMBOK).
 - Linha do tempo interativa.
-- Indicadores avançados de portfólio.
-- Comparação cruzada entre projetos.
-- Detecção automática de padrões, alertas, recomendações.
+- Alertas automáticos e recomendações proativas (a *síntese* de padrões cross-projeto entra via RF21, mas alertas/recomendações automáticos disparados pelo sistema ficam fora).
 - Chat com IA.
-- Sugestão automática de Lições Aprendidas (cortada pelo prazo).
 - Notificações por email externo (substituídas por feed in-app — RF11).
 - Extração de imagens/fotos.
 - OAuth, multi-tenancy, deploy em produção.
+- Cliente vê dados crus de outros clientes (vedado por RNF10 — apenas conhecimento agregado/sanitizado via RF22).
