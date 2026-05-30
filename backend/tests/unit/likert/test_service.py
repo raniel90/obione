@@ -35,17 +35,18 @@ def _user(role: str = "consultant", suffix: str = "x") -> User:
 _GOOD_CONS = {
     "utilidade_drafts": 4,
     "reducao_friccao": 5,
-    "qualidade_resumo": 3,
     "manutenibilidade_mediador": 4,
+    "valor_cockpit": 3,
+    "usabilidade_cbac": 4,
 }
 
 
 @pytest.mark.unit
-def test_consultoria_submission_creates_four_rows():
+def test_consultoria_submission_creates_one_row_per_dimension():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
     rows = submit_consultoria_feedback(uow, consultant, ConsultoriaLikertCreate(**_GOOD_CONS))
-    assert len(rows) == 4
+    assert len(rows) == len(CONSULTORIA_DIMENSIONS)
     assert {r.dimension for r in rows} == set(CONSULTORIA_DIMENSIONS)
     assert all(r.kind == "consultoria" for r in rows)
     assert all(r.project_id is None for r in rows)
@@ -65,19 +66,20 @@ def test_consultoria_accepts_admin():
     uow = FakeUnitOfWork()
     admin = _user("admin")
     rows = submit_consultoria_feedback(uow, admin, ConsultoriaLikertCreate(**_GOOD_CONS))
-    assert len(rows) == 4
+    assert len(rows) == len(CONSULTORIA_DIMENSIONS)
 
 
 _GOOD_CLIENT = {
-    "clareza_resumo": 5,
-    "utilidade_espaco": 4,
+    "clareza_atributos_liberados": 5,
+    "sentido_controle": 4,
+    "utilidade_liberado": 4,
     "qualidade_dialogo": 4,
     "sentido_inclusao": 5,
 }
 
 
 @pytest.mark.unit
-def test_client_submission_creates_four_rows_with_project_id():
+def test_client_submission_creates_one_row_per_dimension_with_project_id():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
     client = _user("client")
@@ -89,7 +91,7 @@ def test_client_submission_creates_four_rows_with_project_id():
     rows = submit_client_feedback(
         uow, client, ClientLikertCreate(project_id=project.id, **_GOOD_CLIENT)
     )
-    assert len(rows) == 4
+    assert len(rows) == len(CLIENT_DIMENSIONS)
     assert {r.dimension for r in rows} == set(CLIENT_DIMENSIONS)
     assert all(r.kind == "client" for r in rows)
     assert all(r.project_id == project.id for r in rows)

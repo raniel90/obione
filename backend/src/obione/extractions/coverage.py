@@ -49,6 +49,34 @@ def _load_schema() -> dict:
 
 
 @lru_cache(maxsize=1)
+def _attr_to_cat() -> dict[str, str]:
+    """Map every attribute key to its MPO category. Used by the CBAC layer."""
+    schema = _load_schema()
+    out: dict[str, str] = {}
+    for name, props in schema["properties"].items():
+        if name == "_meta":
+            continue
+        out[name] = props.get("x-categoria", "uncategorized")
+    return out
+
+
+def all_attributes() -> list[str]:
+    """Ordered list of the 44 Quadro-37 attribute keys (without `_meta`)."""
+    return list(_attr_to_cat().keys())
+
+
+def all_categories() -> list[str]:
+    """Ordered list of the 8 Quadro-37 category keys."""
+    return list(dict.fromkeys(_attr_to_cat().values()))
+
+
+def category_of(attribute_key: str) -> str:
+    """Return the MPO category of a Quadro-37 attribute key. Raises KeyError
+    when the key is not one of the 44 attributes."""
+    return _attr_to_cat()[attribute_key]
+
+
+@lru_cache(maxsize=1)
 def attribute_specs() -> tuple[AttributeSpec, ...]:
     """Return the immutable ordered tuple of (name, category, out_of_scope).
 
@@ -104,11 +132,21 @@ class CoverageReport:
         return round(self.filled / self.total_in_scope * 100, 2)
 
 
-def compute_coverage(content: dict, *, extraction_id: str | None = None) -> CoverageReport:
+def compute_coverage(
+    content: dict,
+    *,
+    extraction_id: str | None = None,
+    visible_attributes: set[str] | None = None,
+) -> CoverageReport:
     """Compute per-category + aggregate coverage from an extraction `content` dict.
 
     `content` is the JSONB-shaped dict persisted in `Extraction.content` —
     contains the 44 attribute keys at the top level (plus `_meta`).
+
+    `visible_attributes` narrows the denominator (and numerator) to a subset
+    of attribute keys — used by the CBAC layer so the cliente sees coverage
+    of what they were allowed to see, not coverage of the whole MPO.
+    `None` means "no scope filter" (consultant / admin view).
     """
     specs = attribute_specs()
 
@@ -121,6 +159,8 @@ def compute_coverage(content: dict, *, extraction_id: str | None = None) -> Cove
     for spec in specs:
         if spec.out_of_scope:
             out_of_scope_count += 1
+            continue
+        if visible_attributes is not None and spec.name not in visible_attributes:
             continue
         per_category_total[spec.category] = per_category_total.get(spec.category, 0) + 1
         aggregate_total += 1
@@ -135,8 +175,11 @@ def compute_coverage(content: dict, *, extraction_id: str | None = None) -> Cove
             filled=per_category_filled.get(cat, 0),
             total_in_scope=per_category_total[cat],
         )
-        # Preserve the schema's natural category ordering.
+        # Preserve the schema's natural category ordering. Categories that
+        # were entirely scoped out (zero in_scope after the filter) are
+        # skipped so the client doesn't see empty rows.
         for cat in dict.fromkeys(s.category for s in specs if not s.out_of_scope)
+        if per_category_total.get(cat, 0) > 0
     )
     return CoverageReport(
         extraction_id=extraction_id,

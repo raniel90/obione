@@ -89,8 +89,16 @@ def trio(client):
 _GOOD_CONS = {
     "utilidade_drafts": 5,
     "reducao_friccao": 4,
-    "qualidade_resumo": 5,
     "manutenibilidade_mediador": 4,
+    "valor_cockpit": 5,
+    "usabilidade_cbac": 4,
+}
+_GOOD_CLIENT_FIELDS = {
+    "clareza_atributos_liberados": 5,
+    "sentido_controle": 4,
+    "utilidade_liberado": 4,
+    "qualidade_dialogo": 5,
+    "sentido_inclusao": 5,
 }
 
 
@@ -99,7 +107,7 @@ def test_consultant_submits_then_summary_aggregates(client, trio):
     h = {"Authorization": f"Bearer {trio['cons_token']}"}
     r = client.post("/likert/consultoria", json=_GOOD_CONS, headers=h)
     assert r.status_code == 201, r.text
-    assert len(r.json()) == 4
+    assert len(r.json()) == 5
 
     r = client.get("/likert/summary?kind=consultoria", headers=h)
     assert r.status_code == 200
@@ -109,6 +117,8 @@ def test_consultant_submits_then_summary_aggregates(client, trio):
     dims = {d["dimension"]: d for d in body["by_dimension"]}
     assert dims["utilidade_drafts"]["mean"] == 5.0
     assert dims["reducao_friccao"]["mean"] == 4.0
+    assert dims["valor_cockpit"]["mean"] == 5.0
+    assert dims["usabilidade_cbac"]["mean"] == 4.0
 
 
 @pytest.mark.e2e
@@ -125,17 +135,11 @@ def test_client_submits_for_assigned_project(client, trio):
         client.post(f"/projects/{pid}/clients", json={"user_id": trio["cli_id"]}, headers=cons_h)
         r = client.post(
             "/likert/client",
-            json={
-                "project_id": pid,
-                "clareza_resumo": 5,
-                "utilidade_espaco": 4,
-                "qualidade_dialogo": 5,
-                "sentido_inclusao": 5,
-            },
+            json={"project_id": pid, **_GOOD_CLIENT_FIELDS},
             headers=cli_h,
         )
         assert r.status_code == 201, r.text
-        assert len(r.json()) == 4
+        assert len(r.json()) == 5
         assert all(row["project_id"] == pid for row in r.json())
     finally:
         client.delete(f"/projects/{pid}", headers=cons_h)
@@ -155,13 +159,7 @@ def test_client_blocked_from_project_not_assigned(client, trio):
         # Client not added — submission should 404 on the project lookup.
         r = client.post(
             "/likert/client",
-            json={
-                "project_id": pid,
-                "clareza_resumo": 5,
-                "utilidade_espaco": 4,
-                "qualidade_dialogo": 5,
-                "sentido_inclusao": 5,
-            },
+            json={"project_id": pid, **_GOOD_CLIENT_FIELDS},
             headers=cli_h,
         )
         assert r.status_code == 404
@@ -189,13 +187,7 @@ def test_client_blocked_for_consultant_role(client, trio):
     try:
         r = client.post(
             "/likert/client",
-            json={
-                "project_id": pid,
-                "clareza_resumo": 5,
-                "utilidade_espaco": 4,
-                "qualidade_dialogo": 5,
-                "sentido_inclusao": 5,
-            },
+            json={"project_id": pid, **_GOOD_CLIENT_FIELDS},
             headers=cons_h,
         )
         assert r.status_code == 403

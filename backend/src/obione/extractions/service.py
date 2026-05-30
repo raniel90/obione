@@ -30,6 +30,41 @@ def list_extractions_for_project(
         return uow.extractions.list_by_project(project_id)
 
 
+def filter_extraction_for_user(
+    uow: AbstractUnitOfWork, user: User, extraction: Extraction
+) -> Extraction:
+    """Strip attributes the CBAC of the project hides from the user.
+
+    Consultants and admins always see the full payload. Clients receive only
+    the attribute keys explicitly liberados via RF23 — hidden keys are
+    removed from `content` so the client cannot even infer their existence.
+
+    `_meta` always survives (provenance, not an attribute). Mutates and
+    returns the same `Extraction` object — caller decides whether to keep
+    the model alive (e.g. for `model_validate`) or stop here.
+    """
+    if user.role in ("consultant", "admin"):
+        return extraction
+    # Import locally to keep visibility a leaf dep of extractions, not a cycle.
+    from obione.visibility.service import resolve_visibility
+
+    resolved = resolve_visibility(uow, extraction.project_id)
+    raw = extraction.content or {}
+    meta = raw.get("_meta")
+    filtered = {k: v for k, v in raw.items() if k == "_meta" or resolved.get(k, False)}
+    if meta is not None and "_meta" not in filtered:
+        filtered["_meta"] = meta
+    extraction.content = filtered
+    return extraction
+
+
+def filter_extractions_for_user(
+    uow: AbstractUnitOfWork, user: User, extractions: list[Extraction]
+) -> list[Extraction]:
+    """Apply `filter_extraction_for_user` over a list (e.g. list endpoint)."""
+    return [filter_extraction_for_user(uow, user, e) for e in extractions]
+
+
 def extract_for_project(
     uow: AbstractUnitOfWork,
     extractor: AbstractExtractor,
@@ -73,16 +108,28 @@ def get_project_coverage(
 
     Uses any source (llm or manual) — whichever was created last. When the
     project has no extraction yet, returns a zero-coverage report so the UI
-    can render the empty-state without a 404.
+    can render the empty-state without a 404. For clients, the denominator
+    is restricted to the attributes liberated via CBAC so the percentage
+    reflects what they actually see.
     """
     get_project_for_user(uow, user, project_id)
+    visible_attributes: set[str] | None = None
+    if user.role == "client":
+        from obione.visibility.service import resolve_visibility
+
+        resolved = resolve_visibility(uow, project_id)
+        visible_attributes = {k for k, v in resolved.items() if v}
     with uow:
         extractions = uow.extractions.list_by_project(project_id)
         if not extractions:
-            return compute_coverage({})
+            return compute_coverage({}, visible_attributes=visible_attributes)
         # list_by_project orders by created_at desc, so [0] is the latest.
         latest = extractions[0]
-        return compute_coverage(latest.content, extraction_id=str(latest.id))
+        return compute_coverage(
+            latest.content,
+            extraction_id=str(latest.id),
+            visible_attributes=visible_attributes,
+        )
 
 
 def _is_gabarito_extraction(extraction) -> bool:

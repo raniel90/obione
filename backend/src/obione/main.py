@@ -18,6 +18,7 @@ from obione.settings import settings
 from obione.shared.exceptions import register_exception_handlers
 from obione.shared.logging import configure_logging
 from obione.shared.middleware import register_middleware
+from obione.visibility.router import router as visibility_router
 
 
 def create_app() -> FastAPI:
@@ -43,6 +44,7 @@ def create_app() -> FastAPI:
     app.include_router(likert_router)
     app.include_router(drafts_project_router)
     app.include_router(draft_router)
+    app.include_router(visibility_router)
 
     @app.get("/", include_in_schema=False)
     def root():
