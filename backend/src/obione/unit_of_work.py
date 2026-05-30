@@ -72,6 +72,7 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
         from obione.extractions.repository import SqlAlchemyExtractionRepository
         from obione.likert.repository import SqlAlchemyLikertRepository
         from obione.projects.repository import SqlAlchemyProjectRepository
+        from obione.themes.repository import SqlAlchemyThemeRepository
         from obione.visibility.repository import SqlAlchemyVisibilityRepository
 
         self.users: SqlAlchemyUserRepository = SqlAlchemyUserRepository(self.session)
@@ -85,6 +86,7 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
         self.visibility: SqlAlchemyVisibilityRepository = SqlAlchemyVisibilityRepository(
             self.session
         )
+        self.themes: SqlAlchemyThemeRepository = SqlAlchemyThemeRepository(self.session)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
@@ -118,6 +120,7 @@ class FakeUnitOfWork(AbstractUnitOfWork):
         from obione.extractions.repository import FakeExtractionRepository
         from obione.likert.repository import FakeLikertRepository
         from obione.projects.repository import FakeProjectRepository
+        from obione.themes.repository import FakeThemeRepository
         from obione.visibility.repository import FakeVisibilityRepository
 
         self.users: FakeUserRepository = FakeUserRepository()
@@ -127,6 +130,7 @@ class FakeUnitOfWork(AbstractUnitOfWork):
         self.likert: FakeLikertRepository = FakeLikertRepository()
         self.drafts: FakeDraftRepository = FakeDraftRepository()
         self.visibility: FakeVisibilityRepository = FakeVisibilityRepository()
+        self.themes: FakeThemeRepository = FakeThemeRepository()
 
     def commit(self) -> None:
         self.committed = True
