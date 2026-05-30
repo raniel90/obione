@@ -1,4 +1,4 @@
-.PHONY: help up down logs shell psql migrate migration migrate-down test test-unit test-integration test-e2e lint format seed clean
+.PHONY: help up down logs shell psql migrate migration migrate-down test test-unit test-integration test-e2e lint format seed seed-demo clean
 
 help:  ## List available targets
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-18s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -55,6 +55,9 @@ format:  ## Apply formatting + auto-fix linting
 seed:  ## Create admin@obione.dev / admin123
 	docker-compose exec backend python -m obione.cli create-user \
 		--email admin@obione.dev --password admin123 --role admin --name "Admin"
+
+seed-demo:  ## Rich seed: admin + consultor + 3 clientes + 4 projetos + extrações + CBAC + sugestão de tema
+	docker-compose exec backend python -m obione.cli seed-demo
 
 clean:  ## Stop containers AND remove volumes (DELETES DATA)
 	docker-compose down -v
