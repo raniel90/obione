@@ -13,6 +13,7 @@ from obione.extractions.router import router as extractions_router
 from obione.feed.router import router as feed_router
 from obione.health.router import router as health_router
 from obione.likert.router import router as likert_router
+from obione.portfolio.router import router as portfolio_router
 from obione.projects.router import router as projects_router
 from obione.settings import settings
 from obione.shared.exceptions import register_exception_handlers
@@ -49,6 +50,7 @@ def create_app() -> FastAPI:
     app.include_router(visibility_router)
     app.include_router(themes_project_router)
     app.include_router(themes_suggestion_router)
+    app.include_router(portfolio_router)
 
     @app.get("/", include_in_schema=False)
     def root():
