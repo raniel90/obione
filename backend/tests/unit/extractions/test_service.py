@@ -11,6 +11,7 @@ from obione.projects.schemas import ProjectCreate
 from obione.projects.service import create_project
 from obione.shared.ids import new_id
 from obione.unit_of_work import FakeUnitOfWork
+from tests._helpers import SAMPLE_DESCRIPTION
 
 
 def _consultant() -> User:
@@ -21,7 +22,9 @@ def _consultant() -> User:
 def test_create_from_pipeline_persists_extraction():
     uow = FakeUnitOfWork()
     consultant = _consultant()
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     extractor = MockExtractor()
     e = create_extraction_from_pipeline(
         uow,
@@ -41,7 +44,9 @@ def test_create_from_pipeline_persists_extraction():
 def test_create_manual_persists():
     uow = FakeUnitOfWork()
     consultant = _consultant()
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     e = create_extraction_from_manual(
         uow,
         consultant,

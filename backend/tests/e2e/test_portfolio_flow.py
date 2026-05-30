@@ -4,6 +4,7 @@ from obione.auth.models import User
 from obione.auth.security import hash_password
 from obione.projects.models import Project
 from obione.shared.database import SessionLocal
+from tests._helpers import SAMPLE_DESCRIPTION
 
 
 def _purge_users(s, emails: list[str]) -> None:
@@ -45,9 +46,15 @@ def tokens(client):
 @pytest.mark.e2e
 def test_portfolio_shows_status_progression(client, tokens):
     h = {"Authorization": f"Bearer {tokens['consultant_token']}"}
-    p1 = client.post("/projects", json={"name": "Bare", "domain": "legal"}, headers=h).json()["id"]
+    p1 = client.post(
+        "/projects",
+        json={"name": "Bare", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    ).json()["id"]
     p2 = client.post(
-        "/projects", json={"name": "WithExtraction", "domain": "health"}, headers=h
+        "/projects",
+        json={"name": "WithExtraction", "domain": "health", "description": SAMPLE_DESCRIPTION},
+        headers=h,
     ).json()["id"]
     try:
         # p2 gets a manual extraction → status 'reviewed'
@@ -84,12 +91,16 @@ def test_portfolio_shows_status_progression(client, tokens):
 @pytest.mark.e2e
 def test_portfolio_domain_filter(client, tokens):
     h = {"Authorization": f"Bearer {tokens['consultant_token']}"}
-    p_legal = client.post("/projects", json={"name": "L1", "domain": "legal"}, headers=h).json()[
-        "id"
-    ]
-    p_health = client.post("/projects", json={"name": "H1", "domain": "health"}, headers=h).json()[
-        "id"
-    ]
+    p_legal = client.post(
+        "/projects",
+        json={"name": "L1", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    ).json()["id"]
+    p_health = client.post(
+        "/projects",
+        json={"name": "H1", "domain": "health", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    ).json()["id"]
     try:
         r = client.get("/projects/portfolio?domain=legal", headers=h)
         assert r.status_code == 200

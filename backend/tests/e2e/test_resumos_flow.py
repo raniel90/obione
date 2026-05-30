@@ -4,6 +4,7 @@ from obione.auth.models import User
 from obione.auth.security import hash_password
 from obione.projects.models import Project
 from obione.shared.database import SessionLocal
+from tests._helpers import SAMPLE_DESCRIPTION
 
 _VALID_META_LLM = {
     "projeto_nome": "p",
@@ -63,7 +64,11 @@ def consultant_and_client(client):
 @pytest.mark.e2e
 def test_resumo_lifecycle_consultant(client, consultant_and_client):
     h = {"Authorization": f"Bearer {consultant_and_client['cons_token']}"}
-    pid = client.post("/projects", json={"name": "PR", "domain": "legal"}, headers=h).json()["id"]
+    pid = client.post(
+        "/projects",
+        json={"name": "PR", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    ).json()["id"]
     try:
         # Need an extraction first.
         client.post(
@@ -108,7 +113,11 @@ def test_resumo_lifecycle_consultant(client, consultant_and_client):
 @pytest.mark.e2e
 def test_generate_without_extraction_400(client, consultant_and_client):
     h = {"Authorization": f"Bearer {consultant_and_client['cons_token']}"}
-    pid = client.post("/projects", json={"name": "PRN", "domain": "legal"}, headers=h).json()["id"]
+    pid = client.post(
+        "/projects",
+        json={"name": "PRN", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    ).json()["id"]
     try:
         r = client.post(f"/projects/{pid}/resumos/generate", headers=h)
         assert r.status_code == 400
@@ -122,9 +131,11 @@ def test_client_only_sees_published(client, consultant_and_client):
     cons_h = {"Authorization": f"Bearer {consultant_and_client['cons_token']}"}
     cli_h = {"Authorization": f"Bearer {consultant_and_client['cli_token']}"}
 
-    pid = client.post("/projects", json={"name": "PRC", "domain": "legal"}, headers=cons_h).json()[
-        "id"
-    ]
+    pid = client.post(
+        "/projects",
+        json={"name": "PRC", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=cons_h,
+    ).json()["id"]
     try:
         client.post(
             f"/projects/{pid}/clients",
@@ -164,9 +175,11 @@ def test_client_only_sees_published(client, consultant_and_client):
 def test_client_cannot_generate_or_publish(client, consultant_and_client):
     cons_h = {"Authorization": f"Bearer {consultant_and_client['cons_token']}"}
     cli_h = {"Authorization": f"Bearer {consultant_and_client['cli_token']}"}
-    pid = client.post("/projects", json={"name": "PR2", "domain": "legal"}, headers=cons_h).json()[
-        "id"
-    ]
+    pid = client.post(
+        "/projects",
+        json={"name": "PR2", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=cons_h,
+    ).json()["id"]
     try:
         client.post(
             f"/projects/{pid}/clients",

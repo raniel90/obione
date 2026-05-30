@@ -11,6 +11,7 @@ from obione.projects.schemas import ProjectCreate
 from obione.projects.service import create_project
 from obione.shared.ids import new_id
 from obione.unit_of_work import FakeUnitOfWork
+from tests._helpers import SAMPLE_DESCRIPTION
 
 
 def _user(role: str = "consultant") -> User:
@@ -27,7 +28,7 @@ def test_export_includes_top_level_sections():
         ProjectCreate(
             name="P",
             domain="legal",
-            description="desc",
+            description=SAMPLE_DESCRIPTION,
         ),
     )
     bundle = export_project(uow, consultant, project.id)
@@ -47,7 +48,9 @@ def test_export_includes_top_level_sections():
 def test_export_returns_empty_collections_for_bare_project():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     bundle = export_project(uow, consultant, project.id)
     assert bundle["documents"] == []
     assert bundle["extractions"] == []
@@ -59,7 +62,9 @@ def test_export_returns_empty_collections_for_bare_project():
 def test_export_includes_all_child_entities():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
 
     uow.documents.add(
         Document(
@@ -96,7 +101,9 @@ def test_export_includes_all_child_entities():
 def test_export_includes_coverage_from_latest_extraction():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     uow.extractions.add(
         Extraction(
             project_id=project.id,
@@ -124,7 +131,9 @@ def test_export_includes_coverage_from_latest_extraction():
 def test_export_jsonable_uuids_and_datetimes():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     bundle = export_project(uow, consultant, project.id)
     # Project ID must be a string after _to_jsonable (so json.dumps works).
     import json
@@ -137,6 +146,8 @@ def test_export_rejects_invisible_project():
     uow = FakeUnitOfWork()
     cons_a = _user("consultant")
     cons_b = User(id=new_id(), email="b@x.com", password_hash="x", name="B", role="consultant")
-    project_of_a = create_project(uow, cons_a, ProjectCreate(name="A", domain="legal"))
+    project_of_a = create_project(
+        uow, cons_a, ProjectCreate(name="A", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     with pytest.raises(ProjectNotFoundError):
         export_project(uow, cons_b, project_of_a.id)

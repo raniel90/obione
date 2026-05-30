@@ -5,6 +5,7 @@ from obione.auth.security import hash_password
 from obione.comments.models import Comment
 from obione.projects.models import Project
 from obione.shared.database import SessionLocal
+from tests._helpers import SAMPLE_DESCRIPTION
 
 
 def _purge_users(s, emails: list[str]) -> None:
@@ -58,7 +59,11 @@ def consultant_and_client(client):
 def test_comment_create_list_reply(client, consultant_and_client):
     ctok = consultant_and_client["consultant_token"]
     h = {"Authorization": f"Bearer {ctok}"}
-    pid = client.post("/projects", json={"name": "PC", "domain": "legal"}, headers=h).json()["id"]
+    pid = client.post(
+        "/projects",
+        json={"name": "PC", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    ).json()["id"]
     try:
         r = client.post(f"/projects/{pid}/comments", json={"body": "primeira"}, headers=h)
         assert r.status_code == 201, r.text
@@ -85,9 +90,11 @@ def test_client_assigned_can_post_and_consultant_moderates(client, consultant_an
     cltok = consultant_and_client["client_token"]
     h_c = {"Authorization": f"Bearer {ctok}"}
     h_cli = {"Authorization": f"Bearer {cltok}"}
-    pid = client.post("/projects", json={"name": "PCM", "domain": "legal"}, headers=h_c).json()[
-        "id"
-    ]
+    pid = client.post(
+        "/projects",
+        json={"name": "PCM", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h_c,
+    ).json()["id"]
     try:
         client.post(
             f"/projects/{pid}/clients",
@@ -116,9 +123,11 @@ def test_non_author_cannot_edit(client, consultant_and_client):
     cltok = consultant_and_client["client_token"]
     h_c = {"Authorization": f"Bearer {ctok}"}
     h_cli = {"Authorization": f"Bearer {cltok}"}
-    pid = client.post("/projects", json={"name": "PNE", "domain": "legal"}, headers=h_c).json()[
-        "id"
-    ]
+    pid = client.post(
+        "/projects",
+        json={"name": "PNE", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h_c,
+    ).json()["id"]
     try:
         client.post(
             f"/projects/{pid}/clients",
@@ -139,7 +148,11 @@ def test_non_author_cannot_edit(client, consultant_and_client):
 def test_reply_to_reply_400(client, consultant_and_client):
     ctok = consultant_and_client["consultant_token"]
     h = {"Authorization": f"Bearer {ctok}"}
-    pid = client.post("/projects", json={"name": "PRR", "domain": "legal"}, headers=h).json()["id"]
+    pid = client.post(
+        "/projects",
+        json={"name": "PRR", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    ).json()["id"]
     try:
         parent_id = client.post(f"/projects/{pid}/comments", json={"body": "p"}, headers=h).json()[
             "id"

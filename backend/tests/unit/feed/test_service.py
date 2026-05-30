@@ -12,6 +12,7 @@ from obione.projects.schemas import ProjectCreate
 from obione.projects.service import add_client_to_project, create_project
 from obione.shared.ids import new_id
 from obione.unit_of_work import FakeUnitOfWork
+from tests._helpers import SAMPLE_DESCRIPTION
 
 
 def _user(role: str = "consultant", suffix: str = "x") -> User:
@@ -33,8 +34,12 @@ def test_consultant_sees_events_from_own_projects_only():
     uow = FakeUnitOfWork()
     cons_a = _user("consultant", "a")
     cons_b = _user("consultant", "b")
-    p_a = create_project(uow, cons_a, ProjectCreate(name="A", domain="legal"))
-    p_b = create_project(uow, cons_b, ProjectCreate(name="B", domain="health"))
+    p_a = create_project(
+        uow, cons_a, ProjectCreate(name="A", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
+    p_b = create_project(
+        uow, cons_b, ProjectCreate(name="B", domain="health", description=SAMPLE_DESCRIPTION)
+    )
 
     c_a = create_comment(uow, cons_a, p_a.id, CommentCreate(body="em A"))
     c_b = create_comment(uow, cons_b, p_b.id, CommentCreate(body="em B"))
@@ -50,8 +55,12 @@ def test_client_sees_only_assigned_projects():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
     client = _user("client")
-    p_visible = create_project(uow, consultant, ProjectCreate(name="V", domain="legal"))
-    p_hidden = create_project(uow, consultant, ProjectCreate(name="H", domain="health"))
+    p_visible = create_project(
+        uow, consultant, ProjectCreate(name="V", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
+    p_hidden = create_project(
+        uow, consultant, ProjectCreate(name="H", domain="health", description=SAMPLE_DESCRIPTION)
+    )
 
     add_client_to_project(uow, consultant, p_visible.id, client.id)
 
@@ -69,8 +78,12 @@ def test_admin_sees_all_projects():
     cons_a = _user("consultant", "a")
     cons_b = _user("consultant", "b")
     admin = _user("admin")
-    p_a = create_project(uow, cons_a, ProjectCreate(name="A", domain="legal"))
-    p_b = create_project(uow, cons_b, ProjectCreate(name="B", domain="health"))
+    p_a = create_project(
+        uow, cons_a, ProjectCreate(name="A", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
+    p_b = create_project(
+        uow, cons_b, ProjectCreate(name="B", domain="health", description=SAMPLE_DESCRIPTION)
+    )
     create_comment(uow, cons_a, p_a.id, CommentCreate(body="A"))
     create_comment(uow, cons_b, p_b.id, CommentCreate(body="B"))
 
@@ -83,7 +96,9 @@ def test_admin_sees_all_projects():
 def test_events_sorted_by_created_at_desc():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
 
     # Force three events with predictable timestamps.
     c1 = create_comment(uow, consultant, project.id, CommentCreate(body="oldest"))
@@ -101,7 +116,9 @@ def test_events_sorted_by_created_at_desc():
 def test_feed_merges_comments_extractions_documents():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
 
     create_comment(uow, consultant, project.id, CommentCreate(body="comment body"))
     extraction = Extraction(
@@ -135,7 +152,9 @@ def test_feed_merges_comments_extractions_documents():
 def test_feed_summary_for_extractions_uses_model_id():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     uow.extractions.add(
         Extraction(
             project_id=project.id,
@@ -156,7 +175,9 @@ def test_feed_summary_for_extractions_uses_model_id():
 def test_feed_truncates_long_comments_to_140_chars():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     long_body = "x" * 500
     create_comment(uow, consultant, project.id, CommentCreate(body=long_body))
     events = build_feed_for_user(uow, consultant)
@@ -175,7 +196,9 @@ def test_feed_empty_when_user_has_no_visible_projects():
 def test_feed_respects_limit():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     for i in range(20):
         c = create_comment(uow, consultant, project.id, CommentCreate(body=f"c{i}"))
         c.created_at = _now_offset(-i)

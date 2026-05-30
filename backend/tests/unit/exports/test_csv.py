@@ -11,6 +11,7 @@ from obione.projects.schemas import ProjectCreate
 from obione.projects.service import create_project
 from obione.shared.ids import new_id
 from obione.unit_of_work import FakeUnitOfWork
+from tests._helpers import SAMPLE_DESCRIPTION
 
 
 def _user(role: str = "consultant", suffix: str = "x") -> User:
@@ -31,7 +32,9 @@ def _parse(text: str) -> list[dict]:
 def test_csv_has_header_and_44_rows_per_extraction():
     uow = FakeUnitOfWork()
     consultant = _user()
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     uow.extractions.add(
         Extraction(
             project_id=project.id,
@@ -61,7 +64,9 @@ def test_csv_has_header_and_44_rows_per_extraction():
 def test_csv_columns_match_contract():
     uow = FakeUnitOfWork()
     consultant = _user()
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     uow.extractions.add(
         Extraction(
             project_id=project.id,
@@ -95,7 +100,9 @@ def test_csv_columns_match_contract():
 def test_csv_renders_arrays_with_semicolon_separator():
     uow = FakeUnitOfWork()
     consultant = _user()
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     uow.extractions.add(
         Extraction(
             project_id=project.id,
@@ -118,7 +125,9 @@ def test_csv_renders_arrays_with_semicolon_separator():
 def test_csv_null_becomes_empty_cell():
     uow = FakeUnitOfWork()
     consultant = _user()
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     uow.extractions.add(
         Extraction(
             project_id=project.id,
@@ -138,7 +147,9 @@ def test_csv_null_becomes_empty_cell():
 def test_csv_marks_imagens_fotos_as_out_of_scope():
     uow = FakeUnitOfWork()
     consultant = _user()
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     uow.extractions.add(
         Extraction(
             project_id=project.id,
@@ -162,7 +173,9 @@ def test_csv_includes_one_block_per_extraction():
     """Two extractions → 88 rows total (44 attrs × 2)."""
     uow = FakeUnitOfWork()
     consultant = _user()
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     for i in range(2):
         uow.extractions.add(
             Extraction(
@@ -184,7 +197,9 @@ def test_csv_includes_one_block_per_extraction():
 def test_csv_empty_when_project_has_no_extractions():
     uow = FakeUnitOfWork()
     consultant = _user()
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     body = export_project_attributes_csv(uow, consultant, project.id)
     rows = _parse(body)
     assert rows == []  # only the header line
@@ -195,6 +210,8 @@ def test_csv_rejects_invisible_project():
     uow = FakeUnitOfWork()
     cons_a = _user("consultant", "a")
     cons_b = _user("consultant", "b")
-    project_of_a = create_project(uow, cons_a, ProjectCreate(name="A", domain="legal"))
+    project_of_a = create_project(
+        uow, cons_a, ProjectCreate(name="A", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     with pytest.raises(ProjectNotFoundError):
         export_project_attributes_csv(uow, cons_b, project_of_a.id)

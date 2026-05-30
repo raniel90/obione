@@ -5,6 +5,7 @@ from obione.auth.security import hash_password
 from obione.comments.models import Comment
 from obione.projects.models import Project
 from obione.shared.database import SessionLocal
+from tests._helpers import SAMPLE_DESCRIPTION
 
 _VALID_META_GAB = {
     "projeto_nome": "p",
@@ -55,7 +56,11 @@ def consultant_token(client):
 @pytest.mark.e2e
 def test_detail_bare_project_empty_sections(client, consultant_token):
     h = {"Authorization": f"Bearer {consultant_token}"}
-    pid = client.post("/projects", json={"name": "PD", "domain": "legal"}, headers=h).json()["id"]
+    pid = client.post(
+        "/projects",
+        json={"name": "PD", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    ).json()["id"]
     try:
         r = client.get(f"/projects/{pid}/detail", headers=h)
         assert r.status_code == 200, r.text
@@ -76,7 +81,11 @@ def test_detail_bare_project_empty_sections(client, consultant_token):
 @pytest.mark.e2e
 def test_detail_includes_evaluation_when_both_extractions_present(client, consultant_token):
     h = {"Authorization": f"Bearer {consultant_token}"}
-    pid = client.post("/projects", json={"name": "PDE", "domain": "legal"}, headers=h).json()["id"]
+    pid = client.post(
+        "/projects",
+        json={"name": "PDE", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    ).json()["id"]
     try:
         # llm extraction
         client.post(
@@ -110,7 +119,11 @@ def test_detail_includes_evaluation_when_both_extractions_present(client, consul
 @pytest.mark.e2e
 def test_detail_comments_limit_query_param(client, consultant_token):
     h = {"Authorization": f"Bearer {consultant_token}"}
-    pid = client.post("/projects", json={"name": "PDC", "domain": "legal"}, headers=h).json()["id"]
+    pid = client.post(
+        "/projects",
+        json={"name": "PDC", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    ).json()["id"]
     try:
         for i in range(10):
             client.post(f"/projects/{pid}/comments", json={"body": f"c{i}"}, headers=h)
@@ -136,7 +149,11 @@ def test_detail_404_for_invisible_project(client, consultant_token):
 @pytest.mark.e2e
 def test_detail_comments_limit_validation(client, consultant_token):
     h = {"Authorization": f"Bearer {consultant_token}"}
-    pid = client.post("/projects", json={"name": "PDV", "domain": "legal"}, headers=h).json()["id"]
+    pid = client.post(
+        "/projects",
+        json={"name": "PDV", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    ).json()["id"]
     try:
         r = client.get(f"/projects/{pid}/detail?comments_limit=200", headers=h)
         assert r.status_code == 422  # max 100

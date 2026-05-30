@@ -14,6 +14,7 @@ from obione.projects.service import (
 )
 from obione.shared.ids import new_id
 from obione.unit_of_work import FakeUnitOfWork
+from tests._helpers import SAMPLE_DESCRIPTION
 
 
 def _user(role: str = "consultant", suffix: str = "x") -> User:
@@ -68,7 +69,9 @@ def _gabarito(project_id, **content_extras) -> Extraction:
 def test_detail_empty_project_has_zero_counts():
     uow = FakeUnitOfWork()
     consultant = _user()
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     d = get_project_detail(uow, consultant, project.id)
     assert d.project.id == project.id
     assert d.documents == []
@@ -85,7 +88,9 @@ def test_detail_empty_project_has_zero_counts():
 def test_detail_picks_latest_of_each_extraction_kind():
     uow = FakeUnitOfWork()
     consultant = _user()
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     uow.extractions.add(_llm(project.id, nome_projeto="LLM"))
     uow.extractions.add(_gabarito(project.id, nome_projeto="Gabarito"))
 
@@ -101,7 +106,9 @@ def test_detail_picks_latest_of_each_extraction_kind():
 def test_detail_evaluation_present_only_when_both_extractions_exist():
     uow = FakeUnitOfWork()
     consultant = _user()
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
 
     # Only llm — no evaluation
     uow.extractions.add(_llm(project.id, nome_projeto="X"))
@@ -119,7 +126,9 @@ def test_detail_evaluation_present_only_when_both_extractions_exist():
 def test_detail_coverage_uses_most_recent_extraction():
     uow = FakeUnitOfWork()
     consultant = _user()
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     # Most-recent insert wins in the Fake (it preserves insertion order;
     # the SqlAlchemy repo orders by created_at desc — both yield "[0] is latest").
     uow.extractions.add(_llm(project.id, nome_projeto="A"))
@@ -133,7 +142,9 @@ def test_detail_coverage_uses_most_recent_extraction():
 def test_detail_recent_comments_newest_first_with_limit():
     uow = FakeUnitOfWork()
     consultant = _user()
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     created_ids = []
     for i in range(25):
         c = create_comment(uow, consultant, project.id, CommentCreate(body=f"c{i}"))
@@ -150,7 +161,9 @@ def test_detail_recent_comments_newest_first_with_limit():
 def test_detail_zero_comments_limit_returns_empty_but_keeps_total():
     uow = FakeUnitOfWork()
     consultant = _user()
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     for i in range(3):
         create_comment(uow, consultant, project.id, CommentCreate(body=f"c{i}"))
     d = get_project_detail(uow, consultant, project.id, comments_limit=0)
@@ -162,7 +175,9 @@ def test_detail_zero_comments_limit_returns_empty_but_keeps_total():
 def test_detail_includes_document_metadata():
     uow = FakeUnitOfWork()
     consultant = _user()
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     uow.documents.add(_docx(project.id))
     uow.documents.add(_docx(project.id))
     d = get_project_detail(uow, consultant, project.id)
@@ -174,7 +189,9 @@ def test_detail_visibility_404_for_unassigned_client():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
     other_client = _user("client", "other")
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     with pytest.raises(ProjectNotFoundError):
         get_project_detail(uow, other_client, project.id)
 
@@ -184,7 +201,9 @@ def test_detail_visibility_assigned_client_sees_project():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
     client = _user("client")
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     add_client_to_project(uow, consultant, project.id, client.id)
     d = get_project_detail(uow, client, project.id)
     assert d.project.id == project.id

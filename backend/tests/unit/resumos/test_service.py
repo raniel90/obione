@@ -21,6 +21,7 @@ from obione.resumos.service import (
 )
 from obione.shared.ids import new_id
 from obione.unit_of_work import FakeUnitOfWork
+from tests._helpers import SAMPLE_DESCRIPTION
 
 
 def _user(role: str = "consultant", suffix: str = "x") -> User:
@@ -47,7 +48,9 @@ def _extraction(project_id, **content_extras) -> Extraction:
 
 
 def _project_with_extraction(uow, consultant):
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     uow.extractions.add(_extraction(project.id))
     return project
 
@@ -83,7 +86,9 @@ def test_generate_rejects_client_role():
 def test_generate_rejects_when_no_extraction():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     with pytest.raises(NoExtractionForResumoError):
         generate_resumo(uow, MockResumoGenerator(), consultant, project.id)
 

@@ -7,6 +7,7 @@ from obione.auth.models import User
 from obione.auth.security import hash_password
 from obione.projects.models import Project
 from obione.shared.database import SessionLocal
+from tests._helpers import SAMPLE_DESCRIPTION
 
 _VALID_META = {
     "projeto_nome": "p",
@@ -49,7 +50,11 @@ def consultant_token(client):
 @pytest.mark.e2e
 def test_valid_gabarito_accepted(client, consultant_token):
     h = {"Authorization": f"Bearer {consultant_token}"}
-    pid = client.post("/projects", json={"name": "GV", "domain": "legal"}, headers=h).json()["id"]
+    pid = client.post(
+        "/projects",
+        json={"name": "GV", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    ).json()["id"]
     try:
         r = client.post(
             f"/projects/{pid}/extractions/manual",
@@ -71,7 +76,11 @@ def test_valid_gabarito_accepted(client, consultant_token):
 @pytest.mark.e2e
 def test_invalid_gabarito_rejected_with_details(client, consultant_token):
     h = {"Authorization": f"Bearer {consultant_token}"}
-    pid = client.post("/projects", json={"name": "GI", "domain": "legal"}, headers=h).json()["id"]
+    pid = client.post(
+        "/projects",
+        json={"name": "GI", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    ).json()["id"]
     try:
         r = client.post(
             f"/projects/{pid}/extractions/manual",
@@ -103,7 +112,11 @@ def test_invalid_gabarito_rejected_with_details(client, consultant_token):
 @pytest.mark.e2e
 def test_gabarito_rejects_invented_attribute(client, consultant_token):
     h = {"Authorization": f"Bearer {consultant_token}"}
-    pid = client.post("/projects", json={"name": "GJ", "domain": "legal"}, headers=h).json()["id"]
+    pid = client.post(
+        "/projects",
+        json={"name": "GJ", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    ).json()["id"]
     try:
         r = client.post(
             f"/projects/{pid}/extractions/manual",

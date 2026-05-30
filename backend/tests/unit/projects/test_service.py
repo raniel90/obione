@@ -1,4 +1,5 @@
 import pytest
+from pydantic import ValidationError
 
 from obione.auth.models import User
 from obione.projects.exceptions import (
@@ -16,6 +17,7 @@ from obione.projects.service import (
 )
 from obione.shared.ids import new_id
 from obione.unit_of_work import FakeUnitOfWork
+from tests._helpers import SAMPLE_DESCRIPTION
 
 
 def _make_user(role: str = "consultant") -> User:
@@ -27,8 +29,10 @@ def test_admin_sees_all_projects():
     uow = FakeUnitOfWork()
     admin = _make_user("admin")
     c1 = _make_user("consultant")
-    create_project(uow, c1, ProjectCreate(name="A", domain="legal"))
-    create_project(uow, c1, ProjectCreate(name="B", domain="health"))
+    create_project(uow, c1, ProjectCreate(name="A", domain="legal", description=SAMPLE_DESCRIPTION))
+    create_project(
+        uow, c1, ProjectCreate(name="B", domain="health", description=SAMPLE_DESCRIPTION)
+    )
     assert len(list_projects_for_user(uow, admin)) == 2
 
 
@@ -37,8 +41,10 @@ def test_consultant_sees_only_own():
     uow = FakeUnitOfWork()
     c1 = _make_user("consultant")
     c2 = _make_user("consultant")
-    create_project(uow, c1, ProjectCreate(name="A", domain="legal"))
-    create_project(uow, c2, ProjectCreate(name="B", domain="health"))
+    create_project(uow, c1, ProjectCreate(name="A", domain="legal", description=SAMPLE_DESCRIPTION))
+    create_project(
+        uow, c2, ProjectCreate(name="B", domain="health", description=SAMPLE_DESCRIPTION)
+    )
     assert len(list_projects_for_user(uow, c1)) == 1
 
 
@@ -47,7 +53,9 @@ def test_client_sees_only_assigned():
     uow = FakeUnitOfWork()
     consultant = _make_user("consultant")
     client = _make_user("client")
-    p = create_project(uow, consultant, ProjectCreate(name="X", domain="legal"))
+    p = create_project(
+        uow, consultant, ProjectCreate(name="X", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     assert list_projects_for_user(uow, client) == []
     add_client_to_project(uow, consultant, p.id, client.id)
     assert len(list_projects_for_user(uow, client)) == 1
@@ -58,7 +66,9 @@ def test_get_not_found_when_not_visible():
     uow = FakeUnitOfWork()
     c1 = _make_user("consultant")
     c2 = _make_user("consultant")
-    p = create_project(uow, c1, ProjectCreate(name="X", domain="legal"))
+    p = create_project(
+        uow, c1, ProjectCreate(name="X", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     with pytest.raises(ProjectNotFoundError):
         get_project_for_user(uow, c2, p.id)
 
@@ -68,7 +78,9 @@ def test_client_cannot_create():
     uow = FakeUnitOfWork()
     client = _make_user("client")
     with pytest.raises(ClientCannotMutateError):
-        create_project(uow, client, ProjectCreate(name="X", domain="legal"))
+        create_project(
+            uow, client, ProjectCreate(name="X", domain="legal", description=SAMPLE_DESCRIPTION)
+        )
 
 
 @pytest.mark.unit
@@ -76,7 +88,9 @@ def test_client_cannot_update_or_delete():
     uow = FakeUnitOfWork()
     consultant = _make_user("consultant")
     client = _make_user("client")
-    p = create_project(uow, consultant, ProjectCreate(name="X", domain="legal"))
+    p = create_project(
+        uow, consultant, ProjectCreate(name="X", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     add_client_to_project(uow, consultant, p.id, client.id)
     with pytest.raises(ClientCannotMutateError):
         update_project(uow, client, p.id, ProjectUpdate(name="Y"))
@@ -89,6 +103,28 @@ def test_consultant_cannot_update_others_project():
     uow = FakeUnitOfWork()
     c1 = _make_user("consultant")
     c2 = _make_user("consultant")
-    p = create_project(uow, c1, ProjectCreate(name="X", domain="legal"))
+    p = create_project(
+        uow, c1, ProjectCreate(name="X", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     with pytest.raises(ProjectNotFoundError):
         update_project(uow, c2, p.id, ProjectUpdate(name="Y"))
+
+
+@pytest.mark.unit
+def test_project_create_rejects_short_description():
+    with pytest.raises(ValidationError) as exc:
+        ProjectCreate(name="P", domain="legal", description="too short")
+    assert "description" in str(exc.value)
+    assert "at least 200" in str(exc.value)
+
+
+@pytest.mark.unit
+def test_project_create_rejects_missing_description():
+    with pytest.raises(ValidationError):
+        ProjectCreate(name="P", domain="legal")
+
+
+@pytest.mark.unit
+def test_project_create_accepts_long_description():
+    payload = ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    assert payload.description == SAMPLE_DESCRIPTION

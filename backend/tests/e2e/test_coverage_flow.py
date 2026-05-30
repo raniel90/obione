@@ -5,6 +5,7 @@ from obione.auth.security import hash_password
 from obione.projects.models import Project
 from obione.settings import settings
 from obione.shared.database import SessionLocal
+from tests._helpers import SAMPLE_DESCRIPTION
 
 
 @pytest.fixture(autouse=True)
@@ -46,7 +47,11 @@ def consultant_token(client):
 @pytest.mark.e2e
 def test_coverage_zero_when_no_extraction(client, consultant_token):
     h = {"Authorization": f"Bearer {consultant_token}"}
-    r = client.post("/projects", json={"name": "PCov0", "domain": "legal"}, headers=h)
+    r = client.post(
+        "/projects",
+        json={"name": "PCov0", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    )
     pid = r.json()["id"]
     try:
         r = client.get(f"/projects/{pid}/extractions/coverage", headers=h)
@@ -65,7 +70,11 @@ def test_coverage_zero_when_no_extraction(client, consultant_token):
 @pytest.mark.e2e
 def test_coverage_after_manual_extraction(client, consultant_token):
     h = {"Authorization": f"Bearer {consultant_token}"}
-    r = client.post("/projects", json={"name": "PCov1", "domain": "legal"}, headers=h)
+    r = client.post(
+        "/projects",
+        json={"name": "PCov1", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    )
     pid = r.json()["id"]
     try:
         r = client.post(
@@ -105,7 +114,11 @@ def test_coverage_after_manual_extraction(client, consultant_token):
 def test_coverage_uses_latest_extraction(client, consultant_token):
     """When multiple extractions exist, the report reflects the most recent one."""
     h = {"Authorization": f"Bearer {consultant_token}"}
-    r = client.post("/projects", json={"name": "PCov2", "domain": "legal"}, headers=h)
+    r = client.post(
+        "/projects",
+        json={"name": "PCov2", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    )
     pid = r.json()["id"]
     try:
         # Older, smaller extraction
@@ -173,7 +186,7 @@ def test_coverage_404_when_project_not_visible(client, consultant_token):
         other_tok = login.json()["access_token"]
         r = client.post(
             "/projects",
-            json={"name": "PCovOther", "domain": "legal"},
+            json={"name": "PCovOther", "domain": "legal", "description": SAMPLE_DESCRIPTION},
             headers={"Authorization": f"Bearer {other_tok}"},
         )
         other_pid = r.json()["id"]

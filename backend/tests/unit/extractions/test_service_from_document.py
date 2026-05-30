@@ -14,6 +14,7 @@ from obione.projects.service import (
 )
 from obione.shared.ids import new_id
 from obione.unit_of_work import FakeUnitOfWork
+from tests._helpers import SAMPLE_DESCRIPTION
 
 
 class _CannedExtractor:
@@ -58,7 +59,9 @@ def test_create_from_document_reads_storage_and_persists():
     uow = FakeUnitOfWork()
     storage = FakeBlobStorage()
     consultant = _consultant()
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     doc = _seed_doc(uow, storage, project.id, uploader_id=consultant.id)
 
     extractor = _CannedExtractor()
@@ -83,8 +86,12 @@ def test_create_from_document_404_when_document_in_other_project():
     uow = FakeUnitOfWork()
     storage = FakeBlobStorage()
     consultant = _consultant()
-    p1 = create_project(uow, consultant, ProjectCreate(name="P1", domain="legal"))
-    p2 = create_project(uow, consultant, ProjectCreate(name="P2", domain="health"))
+    p1 = create_project(
+        uow, consultant, ProjectCreate(name="P1", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
+    p2 = create_project(
+        uow, consultant, ProjectCreate(name="P2", domain="health", description=SAMPLE_DESCRIPTION)
+    )
     doc_in_p2 = _seed_doc(uow, storage, p2.id, uploader_id=consultant.id)
 
     with pytest.raises(ExtractionNotFoundError):
@@ -103,7 +110,9 @@ def test_create_from_document_404_when_document_missing():
     uow = FakeUnitOfWork()
     storage = FakeBlobStorage()
     consultant = _consultant()
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
 
     with pytest.raises(ExtractionNotFoundError):
         create_extraction_from_document(
@@ -122,7 +131,9 @@ def test_create_from_document_forbidden_for_client():
     storage = FakeBlobStorage()
     consultant = _consultant()
     client = _client_user()
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     doc = _seed_doc(uow, storage, project.id, uploader_id=consultant.id)
     add_client_to_project(uow, consultant, project.id, client.id)
 

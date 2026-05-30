@@ -10,7 +10,11 @@ Domain = Literal["legal", "health", "sports", "branding", "gastronomy", "other"]
 class ProjectCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     domain: Domain
-    description: str | None = None
+    description: str = Field(
+        ...,
+        min_length=200,
+        description="Conteúdo bruto do projeto (substitui o upload de .docx).",
+    )
 
 
 class ProjectUpdate(BaseModel):
@@ -25,7 +29,7 @@ class ProjectResponse(BaseModel):
     id: uuid.UUID
     name: str
     domain: str
-    description: str | None
+    description: str
     consultant_id: uuid.UUID
     created_at: datetime
     updated_at: datetime
@@ -120,7 +124,7 @@ class PortfolioProjectResponse(BaseModel):
     id: uuid.UUID
     name: str
     domain: str
-    description: str | None
+    description: str
     consultant_id: uuid.UUID
     created_at: datetime
     updated_at: datetime

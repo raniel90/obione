@@ -8,6 +8,7 @@ from obione.auth.security import hash_password
 from obione.comments.models import Comment
 from obione.projects.models import Project
 from obione.shared.database import SessionLocal
+from tests._helpers import SAMPLE_DESCRIPTION
 
 _VALID_META = {
     "projeto_nome": "p",
@@ -57,7 +58,11 @@ def consultant_token(client):
 @pytest.mark.e2e
 def test_export_csv_returns_text_csv_with_attachment(client, consultant_token):
     h = {"Authorization": f"Bearer {consultant_token}"}
-    pid = client.post("/projects", json={"name": "PCSV", "domain": "legal"}, headers=h).json()["id"]
+    pid = client.post(
+        "/projects",
+        json={"name": "PCSV", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    ).json()["id"]
     try:
         client.post(
             f"/projects/{pid}/extractions/manual",
@@ -91,9 +96,11 @@ def test_export_csv_returns_text_csv_with_attachment(client, consultant_token):
 def test_export_default_format_remains_json(client, consultant_token):
     """No `format=` query → JSON bundle (backwards-compatible default)."""
     h = {"Authorization": f"Bearer {consultant_token}"}
-    pid = client.post("/projects", json={"name": "PCSV2", "domain": "legal"}, headers=h).json()[
-        "id"
-    ]
+    pid = client.post(
+        "/projects",
+        json={"name": "PCSV2", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    ).json()["id"]
     try:
         r = client.get(f"/projects/{pid}/export", headers=h)
         assert r.status_code == 200

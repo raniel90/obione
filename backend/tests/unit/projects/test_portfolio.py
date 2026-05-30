@@ -11,6 +11,7 @@ from obione.projects.service import (
 )
 from obione.shared.ids import new_id
 from obione.unit_of_work import FakeUnitOfWork
+from tests._helpers import SAMPLE_DESCRIPTION
 
 
 def _user(role: str = "consultant", suffix: str = "x") -> User:
@@ -39,7 +40,9 @@ def _docx(project_id, sha: str = "a" * 64) -> Document:
 def test_status_registered_when_no_documents():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     entries = list_portfolio_for_user(uow, consultant)
     assert len(entries) == 1
     e = entries[0]
@@ -55,7 +58,9 @@ def test_status_registered_when_no_documents():
 def test_status_ingested_after_document_upload():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     uow.documents.add(_docx(project.id))
     entries = list_portfolio_for_user(uow, consultant)
     assert entries[0].status == "ingested"
@@ -66,7 +71,9 @@ def test_status_ingested_after_document_upload():
 def test_status_extracted_after_llm_extraction():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     uow.documents.add(_docx(project.id))
     uow.extractions.add(
         Extraction(
@@ -89,7 +96,9 @@ def test_status_extracted_after_llm_extraction():
 def test_status_reviewed_when_gabarito_present():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     uow.extractions.add(
         Extraction(
             project_id=project.id,
@@ -110,7 +119,9 @@ def test_reviewed_overrides_extracted_when_both_present():
     """Even if an llm extraction exists too, gabarito_manual wins the status."""
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     uow.extractions.add(
         Extraction(
             project_id=project.id,
@@ -141,8 +152,12 @@ def test_consultant_sees_only_own_projects():
     uow = FakeUnitOfWork()
     cons_a = _user("consultant", "a")
     cons_b = _user("consultant", "b")
-    p_a = create_project(uow, cons_a, ProjectCreate(name="A", domain="legal"))
-    create_project(uow, cons_b, ProjectCreate(name="B", domain="health"))
+    p_a = create_project(
+        uow, cons_a, ProjectCreate(name="A", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
+    create_project(
+        uow, cons_b, ProjectCreate(name="B", domain="health", description=SAMPLE_DESCRIPTION)
+    )
     entries = list_portfolio_for_user(uow, cons_a)
     assert [e.project.id for e in entries] == [p_a.id]
 
@@ -153,8 +168,12 @@ def test_admin_sees_all_projects():
     cons_a = _user("consultant", "a")
     cons_b = _user("consultant", "b")
     admin = _user("admin")
-    create_project(uow, cons_a, ProjectCreate(name="A", domain="legal"))
-    create_project(uow, cons_b, ProjectCreate(name="B", domain="health"))
+    create_project(
+        uow, cons_a, ProjectCreate(name="A", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
+    create_project(
+        uow, cons_b, ProjectCreate(name="B", domain="health", description=SAMPLE_DESCRIPTION)
+    )
     entries = list_portfolio_for_user(uow, admin)
     assert len(entries) == 2
 
@@ -163,9 +182,15 @@ def test_admin_sees_all_projects():
 def test_domain_filter():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
-    create_project(uow, consultant, ProjectCreate(name="L", domain="legal"))
-    create_project(uow, consultant, ProjectCreate(name="H", domain="health"))
-    create_project(uow, consultant, ProjectCreate(name="L2", domain="legal"))
+    create_project(
+        uow, consultant, ProjectCreate(name="L", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
+    create_project(
+        uow, consultant, ProjectCreate(name="H", domain="health", description=SAMPLE_DESCRIPTION)
+    )
+    create_project(
+        uow, consultant, ProjectCreate(name="L2", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
 
     legal = list_portfolio_for_user(uow, consultant, domain="legal")
     assert {e.project.name for e in legal} == {"L", "L2"}
@@ -179,8 +204,12 @@ def test_client_sees_only_assigned():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
     client = _user("client")
-    visible = create_project(uow, consultant, ProjectCreate(name="V", domain="legal"))
-    create_project(uow, consultant, ProjectCreate(name="H", domain="health"))
+    visible = create_project(
+        uow, consultant, ProjectCreate(name="V", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
+    create_project(
+        uow, consultant, ProjectCreate(name="H", domain="health", description=SAMPLE_DESCRIPTION)
+    )
     add_client_to_project(uow, consultant, visible.id, client.id)
     entries = list_portfolio_for_user(uow, client)
     assert [e.project.id for e in entries] == [visible.id]

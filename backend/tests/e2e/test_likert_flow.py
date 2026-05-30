@@ -5,6 +5,7 @@ from obione.auth.security import hash_password
 from obione.likert.models import LikertResponse
 from obione.projects.models import Project
 from obione.shared.database import SessionLocal
+from tests._helpers import SAMPLE_DESCRIPTION
 
 
 def _purge_users(s, emails: list[str]) -> None:
@@ -115,9 +116,11 @@ def test_client_submits_for_assigned_project(client, trio):
     cons_h = {"Authorization": f"Bearer {trio['cons_token']}"}
     cli_h = {"Authorization": f"Bearer {trio['cli_token']}"}
 
-    pid = client.post("/projects", json={"name": "PLik", "domain": "legal"}, headers=cons_h).json()[
-        "id"
-    ]
+    pid = client.post(
+        "/projects",
+        json={"name": "PLik", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=cons_h,
+    ).json()["id"]
     try:
         client.post(f"/projects/{pid}/clients", json={"user_id": trio["cli_id"]}, headers=cons_h)
         r = client.post(
@@ -144,7 +147,9 @@ def test_client_blocked_from_project_not_assigned(client, trio):
     cli_h = {"Authorization": f"Bearer {trio['cli_token']}"}
 
     pid = client.post(
-        "/projects", json={"name": "PHidden", "domain": "legal"}, headers=cons_h
+        "/projects",
+        json={"name": "PHidden", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=cons_h,
     ).json()["id"]
     try:
         # Client not added — submission should 404 on the project lookup.
@@ -176,9 +181,11 @@ def test_consultoria_rejected_for_client_role(client, trio):
 def test_client_blocked_for_consultant_role(client, trio):
     """Consultants can't submit client-side feedback (only admins can multi-cast)."""
     cons_h = {"Authorization": f"Bearer {trio['cons_token']}"}
-    pid = client.post("/projects", json={"name": "PCR", "domain": "legal"}, headers=cons_h).json()[
-        "id"
-    ]
+    pid = client.post(
+        "/projects",
+        json={"name": "PCR", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=cons_h,
+    ).json()["id"]
     try:
         r = client.post(
             "/likert/client",

@@ -6,6 +6,7 @@ from obione.auth.models import User
 from obione.auth.security import hash_password
 from obione.projects.models import Project
 from obione.shared.database import SessionLocal
+from tests._helpers import SAMPLE_DESCRIPTION
 
 DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 
@@ -47,7 +48,11 @@ def consultant_token(client):
 @pytest.mark.e2e
 def test_upload_and_list_document(client, consultant_token):
     h = {"Authorization": f"Bearer {consultant_token}"}
-    r = client.post("/projects", json={"name": "PDoc", "domain": "legal"}, headers=h)
+    r = client.post(
+        "/projects",
+        json={"name": "PDoc", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    )
     pid = r.json()["id"]
     try:
         files = {"file": ("test.docx", io.BytesIO(b"fake docx content"), DOCX_MIME)}
@@ -64,7 +69,11 @@ def test_upload_and_list_document(client, consultant_token):
 @pytest.mark.e2e
 def test_upload_rejects_pdf(client, consultant_token):
     h = {"Authorization": f"Bearer {consultant_token}"}
-    r = client.post("/projects", json={"name": "PDoc2", "domain": "legal"}, headers=h)
+    r = client.post(
+        "/projects",
+        json={"name": "PDoc2", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    )
     pid = r.json()["id"]
     try:
         files = {"file": ("evil.pdf", io.BytesIO(b"%PDF"), "application/pdf")}

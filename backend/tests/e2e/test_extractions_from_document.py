@@ -8,6 +8,7 @@ from obione.auth.security import hash_password
 from obione.projects.models import Project
 from obione.settings import settings
 from obione.shared.database import SessionLocal
+from tests._helpers import SAMPLE_DESCRIPTION
 
 DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 
@@ -67,7 +68,11 @@ def test_extract_from_uploaded_document(client, consultant_token):
     Valença example mounted at /app/atividades.
     """
     h = {"Authorization": f"Bearer {consultant_token}"}
-    r = client.post("/projects", json={"name": "PPipe", "domain": "legal"}, headers=h)
+    r = client.post(
+        "/projects",
+        json={"name": "PPipe", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    )
     pid = r.json()["id"]
     try:
         files = {
@@ -100,7 +105,11 @@ def test_extract_from_uploaded_document(client, consultant_token):
 @pytest.mark.e2e
 def test_extract_returns_404_for_unknown_document(client, consultant_token):
     h = {"Authorization": f"Bearer {consultant_token}"}
-    r = client.post("/projects", json={"name": "PPipe2", "domain": "legal"}, headers=h)
+    r = client.post(
+        "/projects",
+        json={"name": "PPipe2", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    )
     pid = r.json()["id"]
     try:
         bogus = "00000000-0000-0000-0000-000000000000"

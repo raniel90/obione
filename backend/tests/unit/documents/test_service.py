@@ -13,6 +13,7 @@ from obione.projects.schemas import ProjectCreate
 from obione.projects.service import create_project
 from obione.shared.ids import new_id
 from obione.unit_of_work import FakeUnitOfWork
+from tests._helpers import SAMPLE_DESCRIPTION
 
 DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 
@@ -27,7 +28,9 @@ def _client_user() -> User:
 
 def _setup_project(uow: FakeUnitOfWork) -> tuple[User, Project]:
     consultant = _consultant()
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     return consultant, project
 
 
