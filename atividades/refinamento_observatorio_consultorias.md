@@ -204,8 +204,8 @@ Após este documento de 28/05/2026 e antes do início da implementação, o grup
 
 A entrada de conteúdo do projeto deixa de ser `.docx` anexado e passa a ser um campo `description` (texto longo, ≥ 200 caracteres) no payload de criação do projeto. A extração LLM lê desse campo. Implicações:
 
-- Sai do escopo o requisito **RF04 (Fazer upload de documentos)**.
-- O requisito **RF05 (Extrair atributos do MPO via LLM)** mantém a meta, troca a fonte: passa de `documento.bytes` para `projeto.description`.
+- Sai do escopo o requisito **RF04 (Fazer upload de documentos)** da numeração de 28/05. Na versão atual do `requisitos.md` (numeração contígua 01-19) ele não existe mais.
+- O requisito **Extrair atributos do MPO via LLM** (RF05 em ambas as versões) mantém a meta, troca a fonte: passa de `documento.bytes` para `projeto.description`.
 - Sai o contexto `documents/` do backend (modelo, storage, rotas).
 - Cada extração registra adicionalmente um `source_description_hash` (SHA-256) para que a UI sinalize quando a descrição foi editada depois da última extração.
 - O processo **Coletar** do MPO (Vieira, 2022, p. 195) continua materializado — a fonte simplesmente muda de mídia.
@@ -216,17 +216,17 @@ Motivação: o estudo de caso tem 5 projetos reais e a fonte é prosa estruturad
 
 A camada de conhecimento cross-cliente do refino original — Conectora (síntese) + conhecimento comum publicado — é substituída por uma **governança granular de visibilidade**: o consultor configura, por projeto, quais categorias e atributos do Quadro 37 ficam visíveis ao cliente. O default é "tudo oculto" (privacy by default). O cliente vê apenas o que foi liberado, e atributos não liberados **sequer aparecem** na resposta da API.
 
-Implicações no escopo:
+Implicações no escopo (referências usam a numeração de 28/05 para os requisitos REMOVIDOS, e a numeração atual do `requisitos.md` para os requisitos VIGENTES):
 
-- Saem do MVP os requisitos **RF12 (Resumo do Cliente)**, **RF21 (Conectora)** e **RF22 (Conhecimento comum publicado)**.
-- Entra o novo **RF23 (Configurar visibilidade do projeto via CBAC)**, com granularidade categoria + override por atributo.
+- Saem do MVP os requisitos **RF12 (Resumo do Cliente)**, **RF21 (Conectora)** e **RF22 (Conhecimento comum publicado)** — todos da numeração de 28/05; sem equivalente na numeração atual.
+- Entra o **RF04 (Configurar visibilidade do projeto via CBAC)** com granularidade categoria + override por atributo. Era RF23 na numeração de 28/05 (último bloco); foi promovido ao Bloco 1 da Fundação.
 - O **RNF10** é reescrito: vira "isolamento estrito entre clientes via CBAC" — sem síntese cross-cliente, não há mais necessidade de anonimização cross-cliente; o cliente nunca vê o que não foi liberado, e nunca atributos de outro cliente.
-- As dimensões do **Likert (RF16 e RF17)** são reescritas para refletir o CBAC: a consultoria ganha `valor_cockpit` e `usabilidade_cbac`; o cliente troca `clareza_resumo`/`utilidade_espaco` por `clareza_atributos_liberados`, `sentido_controle` e `utilidade_liberado`.
+- As dimensões do **Likert** (RF17 consultoria e RF18 clientes na numeração atual) são reescritas para refletir o CBAC: a consultoria ganha `valor_cockpit` e `usabilidade_cbac`; o cliente troca `clareza_resumo`/`utilidade_espaco` por `clareza_atributos_liberados`, `sentido_controle` e `utilidade_liberado`.
 
 Sobrevivem da Fase 1 deste refino:
 
-- **RF19 (Categorizar projeto por temática/segmento)** — sugestão por IA com log de acurácia (alimenta o protocolo de avaliação).
-- **RF20 (Cockpit de portfólio cross-cliente)** — read-model puro para o consultor.
+- **RF13 (Categorizar projeto por temática/segmento)** — sugestão por IA com log de acurácia (alimenta o protocolo de avaliação).
+- **RF14 (Visualizar cockpit de portfólio cross-cliente)** — read-model puro para o consultor.
 
 Motivação:
 

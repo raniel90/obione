@@ -1,8 +1,8 @@
 # Protocolo de Avaliação — ObiOne
 
-Documento metodológico para a avaliação do ObiOne. Cobre três frentes complementares: **(i)** a avaliação quantitativa do pipeline LLM de extração (Quadro 37 do MPO), **(ii)** a avaliação da categorização de temática por IA (RF19), e **(iii)** a avaliação qualitativa da governança CBAC (RF23) e do cockpit cross-cliente (RF20) via Likert.
+Documento metodológico para a avaliação do ObiOne. Cobre três frentes complementares: **(i)** a avaliação quantitativa do pipeline LLM de extração (Quadro 37 do MPO), **(ii)** a avaliação da categorização de temática por IA (RF13), e **(iii)** a avaliação qualitativa da governança CBAC (RF04) e do cockpit cross-cliente (RF14) via Likert.
 
-**Insumos:** `atributos_alvo_mpo.md` (44 atributos categorizados como `estruturado` / `texto_livre` / `fora_de_escopo`); log `theme_suggestions` (gerado pela RF19); respostas Likert das audiências (consultoria via RF16; clientes via RF17).
+**Insumos:** `atributos_alvo_mpo.md` (44 atributos categorizados como `estruturado` / `texto_livre` / `fora_de_escopo`); log `theme_suggestions` (gerado pela RF13); respostas Likert das audiências (consultoria via RF17; clientes via RF18).
 
 **Aplicação:** o critério híbrido de extração (§§ 1-4) é aplicado em 3 projetos do estudo de caso — **Valença Odontologia** (piloto), **Freire Batista ADV** e **Kaka JJ** — por **Cynthia** e **Moisés** como dois avaliadores independentes. A acurácia da categorização (§ 5) e o Likert (§ 6) são aplicados nos 5 projetos do estudo.
 
@@ -205,7 +205,7 @@ Kappa calculado:
 | 0,61 – 0,80 | Substancial |
 | 0,81 – 1,00 | Quase perfeita |
 
-**Threshold de aceitação do projeto:** Kappa agregado ≥ **0,60** (substancial). Abaixo desse limite, registrar como limitação metodológica no relato (RF15 já prevê isso).
+**Threshold de aceitação do projeto:** Kappa agregado ≥ **0,60** (substancial). Abaixo desse limite, registrar como limitação metodológica no relato (RF16 já prevê isso).
 
 Atributos individuais com Kappa < 0,60 devem ser sinalizados no resultado da avaliação.
 
@@ -220,7 +220,7 @@ Reportado como média por projeto e total.
 
 ---
 
-## 5. Acurácia da Categorização de Temática (RF19)
+## 5. Acurácia da Categorização de Temática (RF13)
 
 A sugestão automática de temática (`domain` do projeto) por IA — implementada como contexto `themes/` no backend — é avaliada por **comparação direta** entre o que o classificador propõe e a decisão final do consultor humano. O log `theme_suggestions` (criado pela migration 0014) registra cada sugestão com seu `suggested_domain`, `confidence`, `model_id` e o estado `accepted` + `accepted_at` + `accepted_by`. Quando aceita, a temática propaga para `projects.domain`; quando ignorada, o registro permanece como evidência de que a IA propôs uma classificação alternativa.
 
@@ -246,19 +246,19 @@ A meta é **acurácia top-1 ≥ 80 %**. Abaixo desse limite, registrar a categor
 
 ## 6. Avaliação Qualitativa da Governança CBAC e do Cockpit (Likert)
 
-A camada de governança (CBAC, RF23) e o cockpit cross-cliente (RF20) — substitutos do Resumo do Cliente e da Conectora no refino de 29/05 — são avaliados pela percepção das duas audiências. As dimensões do Likert foram reescritas no requisitos.md de 29/05 e implementadas no backend (`obione.likert.schemas`).
+A camada de governança (CBAC, RF04) e o cockpit cross-cliente (RF14) são avaliados pela percepção das duas audiências. As dimensões do Likert foram reescritas em 29/05 e implementadas no backend (`obione.likert.schemas`).
 
-### 6.1 Dimensões do consultor (RF16, N ≈ 4)
+### 6.1 Dimensões do consultor (RF17, N ≈ 4)
 
 | Dimensão | O que mede |
 |---|---|
 | `utilidade_drafts` | Utilidade dos drafts internos (US13) na curadoria do observatório |
 | `reducao_friccao` | Quanto a IA reduziu o trabalho de manter o observatório informativo |
 | `manutenibilidade_mediador` | Sustentabilidade do papel de mediador entre IA, atributos e cliente |
-| `valor_cockpit` | Valor do cockpit cross-cliente (RF20) para a decisão da consultoria |
-| `usabilidade_cbac` | Usabilidade e confiança na governança CBAC (RF23) ao decidir o que liberar |
+| `valor_cockpit` | Valor do cockpit cross-cliente (RF14) para a decisão da consultoria |
+| `usabilidade_cbac` | Usabilidade e confiança na governança CBAC (RF04) ao decidir o que liberar |
 
-### 6.2 Dimensões do cliente (RF17, N ≈ 5-10)
+### 6.2 Dimensões do cliente (RF18, N ≈ 5-10)
 
 | Dimensão | O que mede |
 |---|---|
@@ -283,7 +283,7 @@ A camada de governança (CBAC, RF23) e o cockpit cross-cliente (RF20) — substi
 
 ### 6.5 Saída no bundle de exportação
 
-A `RF18 (Exportar resultados consolidados)` inclui um snapshot do CBAC de cada projeto — a configuração de visibilidade que estava ativa no momento da submissão dos clientes. Isso permite cruzar, no relato, a percepção do cliente com **quanto** foi liberado (proxy: número de atributos visíveis / 43).
+A `RF19 (Exportar resultados consolidados)` inclui um snapshot do CBAC de cada projeto — a configuração de visibilidade que estava ativa no momento da submissão dos clientes. Isso permite cruzar, no relato, a percepção do cliente com **quanto** foi liberado (proxy: número de atributos visíveis / 43).
 
 ---
 
@@ -332,7 +332,7 @@ Após executar este protocolo nas três frentes (extração nos 3 projetos com g
 | Likert clientes | Histograma 1-5 por dimensão | Gráfico ou tabela |
 | CBAC | Snapshot da configuração de visibilidade no momento da coleta | Por projeto |
 
-Tudo exportável via RF18.
+Tudo exportável via RF19.
 
 ---
 
@@ -357,7 +357,7 @@ A infraestrutura técnica (schema, extração, log de sugestões, formulários L
 4. **Invocação da IA de categorização** — para cada projeto, `POST /projects/{id}/themes/suggest`; conferir o `suggested_domain` com o consenso humano para alimentar a matriz de confusão da § 5.
 5. **Configuração do CBAC pelo consultor** — para cada cliente do estudo, decidir e aplicar via `PUT /projects/{id}/visibility/...` antes da janela de uso do cliente (≥ 2 semanas).
 6. **Coleta Likert** — disparar os formulários para a consultoria (5 dimensões da § 6.1) e para os clientes (5 dimensões da § 6.2) após a janela de uso.
-7. **Exportação consolidada** — `GET /exports/...` (RF18) para produzir o bundle final que alimenta o relato e o artigo.
+7. **Exportação consolidada** — `GET /exports/...` (RF19) para produzir o bundle final que alimenta o relato e o artigo.
 
 ---
 

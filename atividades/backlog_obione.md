@@ -14,9 +14,9 @@ Após a entrega original em 21/05/2026 (18/18 US do MVP-comunidade) o projeto pa
 | PR | Milestone | Escopo |
 |---|---|---|
 | #18 | M1 — Cleanup pré-CBAC | Remove `documents/` e `resumos/`; `description` obrigatório; extração via `project.description` com SHA-256. Migrations 0009-0012. |
-| #20 | M2 — CBAC | Novo `visibility/` (RF23); filtragem nos GET de extração; coverage do cliente escopado; Likert reescrito (RF16/RF17 v2). Migration 0013. |
-| #21 | M3 — Themes | Novo `themes/` (RF19): sugestão por IA + log de acurácia. Migration 0014. |
-| #22 | M4 — Portfolio | Novo `portfolio/` (RF20): cockpit cross-cliente como read-model puro. |
+| #20 | M2 — CBAC | Novo `visibility/` (RF04); filtragem nos GET de extração; coverage do cliente escopado; Likert reescrito (RF17/RF18 v2). Migration 0013. |
+| #21 | M3 — Themes | Novo `themes/` (RF13): sugestão por IA + log de acurácia. Migration 0014. |
+| #22 | M4 — Portfolio | Novo `portfolio/` (RF14): cockpit cross-cliente como read-model puro. |
 
 **Estado final:** 294 testes verdes, 6 migrations aplicadas (0009-0014), contextos novos `visibility/`, `themes/`, `portfolio/`, contextos removidos `documents/` e `resumos/`. CI verde em todo PR.
 
@@ -25,7 +25,7 @@ Após a entrega original em 21/05/2026 (18/18 US do MVP-comunidade) o projeto pa
 | US original | Estado após 29/05 | Substituto / observação |
 |---|---|---|
 | US01 Autenticar | ✅ Mantida | Sem mudança |
-| US02 Perfis semi-abertos | ✅ Mantida + estendida | Acesso do cliente agora depende de **RF23 (CBAC)**, além do vínculo |
+| US02 Perfis semi-abertos | ✅ Mantida + estendida | Acesso do cliente agora depende de **RF04 (CBAC)**, além do vínculo |
 | US03 Cadastrar projeto | ✅ Mantida + estendida | Payload agora inclui `description` obrigatório (≥ 200 chars) |
 | US04 Upload `.docx` | ❌ **Removida** | Substituída pelo campo `description` do US03 |
 | US05 Extrair via LLM | ✅ Mantida + alterada | Fonte = `project.description`; registra `source_description_hash` |
@@ -39,7 +39,7 @@ Após a entrega original em 21/05/2026 (18/18 US do MVP-comunidade) o projeto pa
 | US13 Drafts internos | ✅ Mantida | Continua sendo ferramenta interna do consultor |
 | US14 Importar gabarito | ✅ Mantida | Sem mudança |
 | US15 Comparar vs gabarito | ✅ Mantida | Sem mudança |
-| US16 Likert consultoria | ✅ Mantida + reescrita | 5 dimensões: utilidade_drafts, reducao_friccao, manutenibilidade_mediador, **valor_cockpit (RF20)**, **usabilidade_cbac (RF23)** |
+| US16 Likert consultoria | ✅ Mantida + reescrita | 5 dimensões: utilidade_drafts, reducao_friccao, manutenibilidade_mediador, **valor_cockpit (RF14)**, **usabilidade_cbac (RF04)** |
 | US17 Likert clientes | ✅ Mantida + reescrita | 5 dimensões: **clareza_atributos_liberados**, **sentido_controle**, **utilidade_liberado**, qualidade_dialogo, sentido_inclusao |
 | US18 Exportar resultados | ✅ Mantida + estendida | Bundle inclui snapshot do CBAC do projeto |
 | **US19 Sugestão de temática (novo)** | ✅ Entregue | IA propõe `project.domain`; consultor aceita/ignora; log alimenta protocolo de acurácia |
@@ -56,7 +56,7 @@ Após a entrega original em 21/05/2026 (18/18 US do MVP-comunidade) o projeto pa
 - Smoke real com Ollama nos 5 projetos: rodar `POST /projects/{id}/extractions` em cada um para revalidar a extração agora que a fonte é `description`.
 - Aplicação da rubrica humana 0/0,5/1 em texto livre + Cohen's Kappa (Sprint 5, depende de 2 avaliadores). Mantido conforme protocolo original.
 - Coleta efetiva dos respondentes Likert com as **novas dimensões** (consultoria N ≈ 4, clientes N = 5-10).
-- Acurácia da categorização (RF19) usando o log `theme_suggestions` — métrica nova, ver `protocolo_avaliacao.md` §5.
+- Acurácia da categorização (RF13) usando o log `theme_suggestions` — métrica nova, ver `protocolo_avaliacao.md` §5.
 
 ---
 

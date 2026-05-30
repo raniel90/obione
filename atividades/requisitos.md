@@ -1,12 +1,10 @@
 # Requisitos do ObiOne (Observatório de Projetos para Consultorias)
 
-ObiOne é um **observatório de projetos para consultorias** baseado no MPO, *Model for Projects Observatories* (Vieira, 2022), potencializado por IA Generativa. Uma consultoria observa seu universo de clientes, projetos e temáticas; cada cliente acessa o próprio projeto, em modelo de acesso semi-aberto governado por **Content-Based Access Control (CBAC)**.
+ObiOne é um **observatório de projetos para consultorias** baseado no MPO, *Model for Projects Observatories* (Vieira, 2022), potencializado por IA Generativa. Uma consultoria observa seu universo de clientes, projetos e temáticas; cada cliente acessa o próprio projeto, em modelo de **acesso semi-aberto** governado por **Content-Based Access Control (CBAC)** ancorado nos atributos do Quadro 37.
 
 A IA Generativa atua sobre o texto descritivo de cada projeto em três papéis complementares: (i) **extratora** dos 44 atributos do Quadro 37; (ii) **categorizadora**, sugerindo a temática/segmento ao consultor; (iii) **assistente** do consultor, propondo rascunhos de próximos passos e pontos de atenção. O Quadro 37 do MPO é o insumo, a célula-projeto. O CBAC garante que o cliente veja apenas o que o consultor liberou.
 
-Esta versão (29/05/2026) revisa a versão anterior (28/05): a fonte da extração passa a ser um campo `description` no payload de criação do projeto (sem upload de `.docx`); o gate de "consultor revisa e publica resumo/síntese" é substituído por CBAC ancorado nos atributos do MPO; saem do escopo o Resumo do Cliente, a Conectora (síntese cross-projeto) e a camada de conhecimento comum publicada. Sobrevivem a categorização assistida por IA e o cockpit cross-cliente da consultoria.
-
-Este documento especifica **19 requisitos funcionais** e **10 requisitos não funcionais**. Cada requisito registra explicitamente sua **rastreabilidade com o MPO**. Os IDs são preservados em relação à versão anterior (com gaps onde houve remoção) para manter rastreabilidade.
+Este documento especifica **19 requisitos funcionais (RF01–RF19)** e **10 requisitos não funcionais (RNF01–RNF10)**. Cada requisito registra explicitamente sua **rastreabilidade com o MPO**.
 
 ---
 
@@ -16,7 +14,8 @@ Este documento especifica **19 requisitos funcionais** e **10 requisitos não fu
 |---|---|---|---|
 | RF01 | Autenticar usuário | 1 | Must |
 | RF02 | Gerenciar perfis e acesso semi-aberto | 1 | Must |
-| RF03 | Cadastrar projeto (com descrição textual) | 1 | Must |
+| RF03 | Cadastrar projeto com descrição textual | 1 | Must |
+| RF04 | Configurar visibilidade do projeto via CBAC | 1 | Must |
 | RF05 | Extrair atributos do MPO via LLM | 2 | Must |
 | RF06 | Persistir extração estruturada | 2 | Must |
 | RF07 | Visualizar portfólio de projetos (perfil-aware) | 3 | Must |
@@ -24,19 +23,16 @@ Este documento especifica **19 requisitos funcionais** e **10 requisitos não fu
 | RF09 | Calcular e exibir cobertura do MPO | 3 | Must |
 | RF10 | Comentar no projeto | 4 | Must |
 | RF11 | Visualizar feed in-app de novidades | 4 | Should |
-| RF13 | Gerar drafts de "Próximos Passos / Pontos de Atenção" | 4 | Must |
-| RF14 | Importar e validar gabarito manual | 5 | Must |
-| RF15 | Comparar extração automática vs. gabarito | 5 | Must |
-| RF16 | Coletar feedback Likert da consultoria | 5 | Must |
-| RF17 | Coletar feedback Likert dos clientes | 5 | Must |
-| RF18 | Exportar resultados consolidados | 5 | Should |
-| RF19 | Categorizar projeto por temática/segmento | 6 | Must |
-| RF20 | Visualizar cockpit de portfólio (comparação cross-projeto) | 6 | Must |
-| RF23 | Configurar visibilidade do projeto via CBAC | 7 | Must |
+| RF12 | Gerar drafts de "Próximos Passos / Pontos de Atenção" | 4 | Must |
+| RF13 | Categorizar projeto por temática/segmento | 5 | Must |
+| RF14 | Visualizar cockpit de portfólio cross-cliente | 5 | Must |
+| RF15 | Importar e validar gabarito manual | 6 | Must |
+| RF16 | Comparar extração automática vs. gabarito | 6 | Must |
+| RF17 | Coletar feedback Likert da consultoria | 6 | Must |
+| RF18 | Coletar feedback Likert dos clientes | 6 | Must |
+| RF19 | Exportar resultados consolidados | 6 | Should |
 
-**Blocos:** (1) Fundação técnica e ingestão · (2) Pipeline LLM · (3) Observação e visualização · (4) Comunidade e assistente do consultor · (5) Avaliação DSR · (6) Observação cross-cliente · (7) Governança de visibilidade.
-
-**Removidos em relação à versão de 28/05:** RF04 (upload de `.docx` — substituído pelo campo `description` no RF03); RF12 (Resumo do Cliente — substituído pela ficha de atributos liberados via CBAC); RF21 (Conectora — síntese cross-projeto); RF22 (Conhecimento Comum publicado ao cliente).
+**Blocos:** (1) Fundação técnica e governança · (2) Pipeline LLM · (3) Observação e visualização · (4) Comunidade e assistente do consultor · (5) Observação cross-cliente · (6) Avaliação DSR.
 
 **Prioridade (MoSCoW):** *Must*: não-negociável para fechar o trabalho acadêmico; *Should*: importante, mas com fallback declarado se o prazo apertar.
 
@@ -44,7 +40,7 @@ Este documento especifica **19 requisitos funcionais** e **10 requisitos não fu
 
 ## 2. Requisitos Funcionais
 
-### Bloco 1: Fundação técnica e ingestão
+### Bloco 1: Fundação técnica e governança
 
 #### RF01: Autenticar usuário
 - **Descrição.** Permitir login no observatório com email + senha, mantendo a sessão via JWT.
@@ -55,20 +51,28 @@ Este documento especifica **19 requisitos funcionais** e **10 requisitos não fu
 - **Rastreabilidade MPO.** Característica **Segurança** (Vieira, 2022, p. 192).
 
 #### RF02: Gerenciar perfis e acesso semi-aberto
-- **Descrição.** Garantir que cada usuário acessa apenas o que seu perfil permite. Perfis: Consultor (todos os projetos) e Cliente (apenas o projeto associado, e apenas os atributos liberados pelo CBAC).
-- **Justificativa.** Materializa a característica "Acesso semi-aberto" do MPO, agora operacionalizada por CBAC (ver RF23), e é fundamental para a LGPD.
+- **Descrição.** Garantir que cada usuário acessa apenas o que seu perfil permite. Perfis: Consultor (todos os projetos da consultoria) e Cliente (apenas o projeto associado, e apenas os atributos liberados pelo CBAC).
+- **Justificativa.** Materializa a característica "Acesso semi-aberto" do MPO em conjunto com o CBAC (RF04). Fundamental para a LGPD.
 - **Dependências.** RF01.
-- **Critérios de aceite.** Vínculo cliente↔projeto persistido; endpoints e telas filtram por perfil; o filtro de visibilidade interno aplica-se aos atributos da extração antes de devolver ao cliente; acesso indevido retorna 403; a consultoria cria contas; cliente recebe convite com senha provisória.
-- **Regras de negócio.** Um cliente vinculado a no máximo 1 projeto (MVP). Consultor acessa todos. Cliente A nunca acessa dados do Cliente B. O cliente nunca vê atributos do seu projeto que o consultor não tenha liberado via RF23.
+- **Critérios de aceite.** Vínculo cliente↔projeto persistido; endpoints e telas filtram por perfil; o filtro de visibilidade do CBAC aplica-se aos atributos da extração antes de devolver ao cliente; acesso indevido retorna 403; a consultoria cria contas; cliente recebe convite com senha provisória.
+- **Regras de negócio.** Um cliente vinculado a no máximo 1 projeto (MVP). Consultor acessa todos os projetos da consultoria. Cliente A nunca acessa dados do Cliente B. O cliente nunca vê atributos do seu projeto que o consultor não tenha liberado via RF04.
 - **Rastreabilidade MPO.** Característica **Acesso semi-aberto** (p. 189) + agentes **Equipe de Gestão** e **Usuários do Observatório** (pp. 200-201).
 
-#### RF03: Cadastrar projeto (com descrição textual)
-- **Descrição.** Permitir que o consultor cadastre um projeto informando nome, temática/domínio e uma **descrição textual longa** (`description`) que carrega o conteúdo bruto a ser processado pela IA.
-- **Justificativa.** Toda extração, visualização e interação ancora em um projeto cadastrado. O campo `description` substitui o upload de `.docx` da versão anterior, simplificando ingestão e atendendo casos em que o consultor recebe o material em formatos diversos (texto colado, email, ata).
+#### RF03: Cadastrar projeto com descrição textual
+- **Descrição.** Permitir que o consultor cadastre um projeto informando nome, temática/segmento e uma **descrição textual longa** (`description`) com o conteúdo bruto a ser processado pela IA.
+- **Justificativa.** Toda extração, visualização e interação ancora em um projeto cadastrado. O conteúdo textual da `description` é o insumo do pipeline LLM.
 - **Dependências.** RF01.
 - **Critérios de aceite.** Campos obrigatórios validados (nome, temática, descrição com tamanho mínimo); ID único gerado automaticamente; listagem disponível; descrição editável via PATCH (consultor pode disparar nova extração após editar).
-- **Regras de negócio.** Temática/domínio limitada a enum (jurídico, saúde, esporte, branding, doceria, outros); pode ser sugerida pela IA e confirmada pelo consultor (ver RF19). Apenas o perfil Consultor cria projetos. Editar a `description` não re-extrai automaticamente; o consultor dispara explicitamente.
-- **Rastreabilidade MPO.** Processo **Coletar** (p. 195) — agora aplicado a um campo textual no payload em vez de arquivo anexado.
+- **Regras de negócio.** Temática/segmento limitada a enum (jurídico, saúde, esporte, branding, doceria, outros); pode ser sugerida pela IA e confirmada pelo consultor (ver RF13). Apenas o perfil Consultor cria projetos. Editar a `description` não re-extrai automaticamente; o consultor dispara explicitamente.
+- **Rastreabilidade MPO.** Processo **Coletar** (p. 195).
+
+#### RF04: Configurar visibilidade do projeto via CBAC
+- **Descrição.** Permitir que o consultor configure, por projeto, quais atributos do MPO ficam visíveis ao cliente. A configuração tem **dois níveis**: liberação por **categoria** (uma das 8 categorias do Quadro 37, propaga a todos os atributos daquela categoria) e **override por atributo individual** (vence sobre a categoria). O estado default ao criar o projeto é "**tudo oculto**" (privacy by default).
+- **Justificativa.** Materializa a característica Acesso semi-aberto do MPO como uma governança granular e auditável: o cliente vê exatamente o que o consultor decidiu liberar, nem mais nem menos. Atende LGPD/NDA sem depender de revisão humana de texto livre.
+- **Dependências.** RF02, lista dos 44 atributos do Quadro 37 (schema versionado).
+- **Critérios de aceite.** Endpoint de configuração disponível ao consultor (e admin); leitura do estado atual devolve as 8 categorias com seu estado + lista de overrides + mapa resolvido dos 44 atributos; alterações (libera/oculta categoria, libera/oculta atributo, remover override) refletem imediatamente em todos os endpoints servidos ao cliente (RF08, RF09, RF11, RF18); cliente recebe 403 ao tentar configurar.
+- **Regras de negócio.** Resolução: o override por atributo, se existir, vence; senão, vale o estado da categoria; senão (ausência de configuração), o atributo é oculto. Mudança de visibilidade é aplicada imediatamente; não há retroatividade sobre eventos de feed já entregues. Apenas o consultor "dono" do projeto (vínculo `consultant_id`) e o admin podem configurar.
+- **Rastreabilidade MPO.** Característica **Acesso semi-aberto** (p. 189) + característica **Segurança** (p. 192).
 
 ### Bloco 2: Pipeline LLM
 
@@ -95,13 +99,13 @@ Este documento especifica **19 requisitos funcionais** e **10 requisitos não fu
 - **Justificativa.** Permite ao consultor curar e priorizar o que precisa de atenção no observatório.
 - **Dependências.** RF02, RF09.
 - **Critérios de aceite.** Lista projetos com nome, temática, status derivado (`cadastrado` → `extraído` → `avaliado`) e % de cobertura; filtro por temática.
-- **Regras de negócio.** Cliente não acessa esta tela (é redirecionado ao seu detalhe, RF08). Status é derivado, nunca editado. A comparação cross-projeto agrupada por temática é a RF20; aqui é a lista perfil-aware.
+- **Regras de negócio.** Cliente não acessa esta tela (é redirecionado ao seu detalhe, RF08). Status é derivado, nunca editado. A comparação cross-projeto agrupada por temática é a RF14; aqui é a lista perfil-aware.
 - **Rastreabilidade MPO.** Característica **Abrangência** (p. 189) + processo **Disponibilizar** (p. 196).
 
 #### RF08: Visualizar detalhe do projeto
-- **Descrição.** Exibir os atributos extraídos de um projeto, agrupados por categoria do Quadro 37, com trecho de origem. Para o cliente, devolve apenas os atributos liberados pelo CBAC (RF23); para consultor/admin, devolve todos.
+- **Descrição.** Exibir os atributos extraídos de um projeto, agrupados por categoria do Quadro 37, com trecho de origem. Para o cliente, devolve apenas os atributos liberados pelo CBAC (RF04); para consultor/admin, devolve todos.
 - **Justificativa.** É onde o conhecimento do observatório se materializa: o consultor inspeciona o todo, o cliente vê apenas o que foi explicitamente liberado.
-- **Dependências.** RF02, RF05/RF06, RF23.
+- **Dependências.** RF02, RF05/RF06, RF04.
 - **Critérios de aceite.** Atributos das 8 categorias agrupados; preenchidos e vazios visíveis (para o consultor); valor + trecho de origem por atributo; cliente recebe apenas os atributos com flag de visibilidade `true` no momento da consulta; atributos ocultos não aparecem na resposta da API (não há placeholder revelando estrutura).
 - **Regras de negócio.** Cliente acessa apenas o seu projeto; consultor acessa todos. Acesso indevido retorna 403. O filtro CBAC é aplicado no service layer antes de qualquer serialização.
 - **Rastreabilidade MPO.** Conteúdo **Projetos** (p. 186) + processo **Disponibilizar** (p. 196) + característica **Acesso semi-aberto** (p. 189).
@@ -109,7 +113,7 @@ Este documento especifica **19 requisitos funcionais** e **10 requisitos não fu
 #### RF09: Calcular e exibir cobertura do MPO
 - **Descrição.** Calcular a cobertura (% de atributos preenchidos vs. total de atributos-alvo) por projeto e exibir matriz cruzada no portfólio. Para o cliente, o denominador é restrito aos atributos liberados via CBAC.
 - **Justificativa.** Indicador-chave da avaliação quantitativa: abrangência da extração frente ao MPO. Para o cliente, o cálculo restrito evita inferência sobre o que está oculto.
-- **Dependências.** RF05, RF23.
+- **Dependências.** RF05, RF04.
 - **Critérios de aceite.** Para consultor/admin: % calculada sobre os 44 atributos in_scope; matriz projetos × atributos; destaque visual quando < 50%; sinalização saudável quando ≥ 80%. Para cliente: denominador = atributos liberados; numerador = preenchidos entre os liberados.
 - **Regras de negócio.** Atributos `fora_de_escopo` excluídos do denominador. Atributos ocultos do cliente também são excluídos do denominador para o cliente.
 - **Rastreabilidade MPO.** Característica **Abrangência** (p. 189) + processo **Avaliar** (p. 198).
@@ -127,12 +131,12 @@ Este documento especifica **19 requisitos funcionais** e **10 requisitos não fu
 #### RF11: Visualizar feed in-app de novidades
 - **Descrição.** Mostrar feed das novidades do projeto: novo comentário, nova extração, novo draft publicado. Para o cliente, eventos relativos a atributos não liberados pelo CBAC são suprimidos.
 - **Justificativa.** Materializa o processo Acompanhar do MPO. Mantém a comunidade viva sem depender de email.
-- **Dependências.** RF02, RF10, RF13, RF23.
+- **Dependências.** RF02, RF10, RF12, RF04.
 - **Critérios de aceite.** Feed filtrado por perfil; indicador de não-lido; navegação direta para o evento; para o cliente, eventos do tipo "atributo atualizado" só aparecem se o atributo estava liberado no momento do envio.
-- **Regras de negócio.** Sem email externo, apenas in-app. Eventos antigos (> 30 dias) podem ser arquivados. Mudança posterior do CBAC não retro-filtra eventos já entregues (decisão consciente do MVP).
+- **Regras de negócio.** Sem email externo, apenas in-app. Eventos antigos (> 30 dias) podem ser arquivados. Mudança posterior do CBAC não retro-filtra eventos já entregues.
 - **Rastreabilidade MPO.** Processo **Acompanhar** (p. 198).
 
-#### RF13: Gerar drafts de "Próximos Passos / Pontos de Atenção"
+#### RF12: Gerar drafts de "Próximos Passos / Pontos de Atenção"
 - **Descrição.** A IA propõe rascunhos de próximos passos e pontos de atenção a partir da extração + comentários recentes; o consultor revisa e mantém os drafts como ferramenta interna de decisão.
 - **Justificativa.** Papel de IA-assistente: reduz o trabalho do consultor de extrair conclusões da extração.
 - **Dependências.** RF05/RF06, RF10.
@@ -140,77 +144,67 @@ Este documento especifica **19 requisitos funcionais** e **10 requisitos não fu
 - **Regras de negócio.** Recurso exclusivo do consultor; nunca aparece ao cliente. Histórico preservado.
 - **Rastreabilidade MPO.** Processos **Transformar** + **Categorizar/Classificar** (pp. 196-197) + motivação **Tomada de Decisão** (p. 203).
 
-### Bloco 5: Avaliação DSR
+### Bloco 5: Observação cross-cliente
 
-#### RF14: Importar e validar gabarito manual
-- **Descrição.** Carregar os gabaritos manuais produzidos na fase preparatória (3 projetos) e validá-los contra o schema.
-- **Justificativa.** Sem gabarito, não há baseline para precisão/recall/F1.
-- **Dependências.** Gabaritos produzidos, RF05/RF06.
-- **Critérios de aceite.** Carga via arquivo JSON; validação contra o schema; persistência com `origem: manual`; integridade verificada antes da RF15.
-- **Regras de negócio.** Apenas 3 projetos têm gabarito; os demais são avaliados por cobertura + Likert.
-- **Rastreabilidade MPO.** Infraestrutura de avaliação DSR, sem mapeamento direto.
+O observatório deixa de tratar cada projeto isoladamente e passa a observar o **portfólio cross-cliente** da consultoria, agrupando por temática e comparando indicadores. Ativa os conceitos do MPO *Conteúdo→Temáticas*, *Categorizar* e *Visualizar/Acompanhar*.
 
-#### RF15: Comparar extração automática vs. gabarito (critério híbrido)
-- **Descrição.** Calcular precisão, recall, F1 e índice de concordância comparando a extração automática com o gabarito manual, com critério híbrido por tipo de atributo.
-- **Justificativa.** Essência da avaliação quantitativa do DSR.
-- **Dependências.** RF14, RF05.
-- **Critérios de aceite.** Atributos `estruturado` por comparação normalizada exata (TP/FP/FN); atributos `texto_livre` por rubrica 0/0,5/1 aplicada por dois avaliadores; concordância por atributo e agregada; métricas por grupo + total; tempo manual vs. automático registrado; visualização tabular.
-- **Regras de negócio.** Atributos com baixa concordância sinalizados como limitação. Métricas calculadas apenas nos 3 projetos com gabarito.
-- **Rastreabilidade MPO.** Processo **Avaliar** (p. 198).
-
-#### RF16: Coletar feedback Likert da consultoria
-- **Descrição.** Registrar a percepção da equipe da consultoria sobre a assistência da IA, a governança via CBAC e o valor do observatório.
-- **Justificativa.** Metade da avaliação qualitativa do DSR: valida a hipótese de que a IA reduz a fricção do consultor e que o CBAC viabiliza acesso semi-aberto na prática.
-- **Dependências.** RF13, RF20, RF23.
-- **Critérios de aceite.** Formulário em escala 1-5 cobrindo: utilidade dos drafts (RF13), redução de fricção, manutenibilidade do papel de mediador, valor do cockpit cross-cliente para decisão (RF20) e usabilidade/confiança na governança CBAC (RF23); N esperado ~4 (toda a equipe); persistência + relatório agregado.
-- **Regras de negócio.** Aplicado após a equipe ter usado o sistema com os projetos do estudo.
-- **Rastreabilidade MPO.** Agente **Equipe de Gestão e Desenvolvimento do Observatório** (p. 201) + motivações **Conhecimento** e **Engajamento** (p. 204).
-
-#### RF17: Coletar feedback Likert dos clientes
-- **Descrição.** Registrar a percepção dos clientes finais sobre clareza dos atributos liberados, sentido de controle e transparência, utilidade do espaço, qualidade do diálogo e sentido de inclusão.
-- **Justificativa.** Metade da avaliação qualitativa do DSR: valida a hipótese de que a ficha de atributos liberados é compreensível e que o CBAC produz percepção de controle/transparência adequada ao cliente.
-- **Dependências.** RF08, RF10, RF11, RF23.
-- **Critérios de aceite.** Formulário em escala 1-5 cobrindo: clareza dos atributos liberados, sentido de controle / transparência sobre o que vê, utilidade do que foi liberado, qualidade do diálogo, sentido de inclusão; identificação do projeto (respondente anônimo opcional); N esperado 5-10.
-- **Regras de negócio.** Aplicado após pelo menos 2 semanas de uso pelos clientes.
-- **Rastreabilidade MPO.** Agentes **Partes Interessadas dos Projetos** + **Usuários do Observatório** (pp. 200-201) + motivações **Engajamento** e **Conhecimento** (p. 204) + característica **Interatividade** (p. 191).
-
-#### RF18: Exportar resultados consolidados
-- **Descrição.** Gerar exportação única (CSV/JSON) com todos os dados de avaliação para alimentar o relato e o artigo.
-- **Justificativa.** Sem exportação, a escrita do relato fica refém de queries manuais.
-- **Dependências.** RF15, RF16, RF17, RF09.
-- **Critérios de aceite.** Arquivo único com extrações, cobertura, métricas (precisão/recall/F1/concordância) por grupo, respostas Likert (consultoria + clientes), métricas de engajamento (nº de comentários, nº de drafts) e configurações de CBAC por projeto (snapshot do que esteve visível ao cliente).
-- **Regras de negócio.** Cabeçalhos compatíveis com planilha (Excel, Google Sheets).
-- **Rastreabilidade MPO.** Infraestrutura de avaliação, sem mapeamento direto.
-
-### Bloco 6: Observação cross-cliente
-
-O observatório deixa de tratar cada projeto isoladamente e passa a observar o **portfólio cross-cliente** da consultoria, agrupando por temática e comparando indicadores. Ativa os conceitos do MPO antes ausentes: *Conteúdo→Temáticas*, *Categorizar*, *Visualizar/Acompanhar*.
-
-#### RF19: Categorizar projeto por temática/segmento
+#### RF13: Categorizar projeto por temática/segmento
 - **Descrição.** Atribuir a cada projeto uma temática/segmento (jurídico, saúde, esporte, branding, doceria, outros). A IA infere a partir da `description` + extração; o consultor revisa e confirma.
-- **Justificativa.** A temática é a base de todo agrupamento cross-cliente. Materializa o conteúdo "Temáticas dos Projetos" do MPO, ausente até a versão anterior.
+- **Justificativa.** A temática é a base de todo agrupamento cross-cliente. Materializa o conteúdo "Temáticas dos Projetos" do MPO.
 - **Dependências.** RF03, RF05/RF06.
 - **Critérios de aceite.** A IA sugere a temática com nível de confiança; o consultor aceita ou sobrescreve; temática persistida no projeto e exibida no portfólio; projetos agrupáveis por temática; o log de sugestões é preservado (para a avaliação de acurácia da categorização).
 - **Regras de negócio.** A categorização da IA é sempre uma sugestão; o consultor confirma. A temática é o mesmo campo que o `domínio` do RF03 (mesmo enum, termo do MPO), agora assistido por IA. Um projeto tem exatamente uma temática no MVP.
 - **Rastreabilidade MPO.** Conteúdo **Temáticas dos Projetos** (p. 188) + processo **Categorizar/Classificar** (p. 197).
 
-#### RF20: Visualizar cockpit de portfólio (comparação cross-projeto)
+#### RF14: Visualizar cockpit de portfólio cross-cliente
 - **Descrição.** Apresentar à consultoria uma visão agregada e comparável do portfólio: indicadores cross-projeto (status, cobertura, distribuição por temática) agrupáveis por temática.
 - **Justificativa.** É o que dá "cara de observatório" à consultoria: observar o conjunto, não fichas isoladas. Materializa os processos Visualizar/Acompanhar do MPO, presentes nos casos reais da tese.
-- **Dependências.** RF02 (consultoria apenas), RF09, RF19.
+- **Dependências.** RF02 (consultoria apenas), RF09, RF13.
 - **Critérios de aceite.** Indicadores agregados por temática e no total; comparação de cobertura média e distribuição de status por temática; filtro por temática; cliente não acessa o cockpit (403).
 - **Regras de negócio.** O cockpit é um read-model: apenas agrega dados já existentes, sem duplicá-los. Exclusivo do perfil Consultor (e admin).
 - **Rastreabilidade MPO.** Processos **Acompanhar** e **Avaliar** (p. 198) + característica **Abrangência** (p. 189) + conceito **Visualizar** (Farias Júnior et al., 2025).
 
-### Bloco 7: Governança de visibilidade
+### Bloco 6: Avaliação DSR
 
-#### RF23: Configurar visibilidade do projeto via CBAC
-- **Descrição.** Permitir que o consultor configure, por projeto, quais atributos do MPO ficam visíveis ao cliente. A configuração tem **dois níveis**: liberação por **categoria** (uma das 8 categorias do Quadro 37, propaga a todos os atributos daquela categoria) e **override por atributo individual** (vence sobre a categoria). O estado default ao criar o projeto é "**tudo oculto**" (privacy by default).
-- **Justificativa.** Substitui o gate de "consultor revisa e publica resumo/síntese" por uma governança granular e auditável: o cliente vê exatamente o que o consultor decidiu liberar, nem mais nem menos. Materializa a característica Acesso semi-aberto do MPO de forma operacional, e atende LGPD/NDA sem depender de revisão humana de texto livre.
-- **Dependências.** RF02, RF05/RF06.
-- **Critérios de aceite.** Endpoint de configuração disponível ao consultor (e admin); leitura do estado atual devolve as 8 categorias com seu estado + lista de overrides + mapa resolvido dos 44 atributos; alterações (libera/oculta categoria, libera/oculta atributo, remover override) refletem imediatamente em todos os endpoints servidos ao cliente (RF08, RF09, RF11, RF17); cliente recebe 403 ao tentar configurar.
-- **Regras de negócio.** Resolução: o override por atributo, se existir, vence; senão, vale o estado da categoria; senão (ausência de configuração), o atributo é oculto. Mudança de visibilidade é aplicada imediatamente; não há retroatividade sobre eventos de feed já entregues. Apenas o consultor "dono" do projeto (vínculo `consultant_id`) e o admin podem configurar.
-- **Rastreabilidade MPO.** Característica **Acesso semi-aberto** (p. 189) + característica **Segurança** (p. 192).
+#### RF15: Importar e validar gabarito manual
+- **Descrição.** Carregar os gabaritos manuais produzidos na fase preparatória (3 projetos) e validá-los contra o schema.
+- **Justificativa.** Sem gabarito, não há baseline para precisão/recall/F1.
+- **Dependências.** Gabaritos produzidos, RF05/RF06.
+- **Critérios de aceite.** Carga via arquivo JSON; validação contra o schema; persistência com `origem: manual`; integridade verificada antes da RF16.
+- **Regras de negócio.** Apenas 3 projetos têm gabarito; os demais são avaliados por cobertura + Likert.
+- **Rastreabilidade MPO.** Infraestrutura de avaliação DSR, sem mapeamento direto.
+
+#### RF16: Comparar extração automática vs. gabarito (critério híbrido)
+- **Descrição.** Calcular precisão, recall, F1 e índice de concordância comparando a extração automática com o gabarito manual, com critério híbrido por tipo de atributo.
+- **Justificativa.** Essência da avaliação quantitativa do DSR.
+- **Dependências.** RF15, RF05.
+- **Critérios de aceite.** Atributos `estruturado` por comparação normalizada exata (TP/FP/FN); atributos `texto_livre` por rubrica 0/0,5/1 aplicada por dois avaliadores; concordância por atributo e agregada; métricas por grupo + total; tempo manual vs. automático registrado; visualização tabular.
+- **Regras de negócio.** Atributos com baixa concordância sinalizados como limitação. Métricas calculadas apenas nos 3 projetos com gabarito.
+- **Rastreabilidade MPO.** Processo **Avaliar** (p. 198).
+
+#### RF17: Coletar feedback Likert da consultoria
+- **Descrição.** Registrar a percepção da equipe da consultoria sobre a assistência da IA, a governança via CBAC e o valor do observatório.
+- **Justificativa.** Metade da avaliação qualitativa do DSR: valida a hipótese de que a IA reduz a fricção do consultor e que o CBAC viabiliza acesso semi-aberto na prática.
+- **Dependências.** RF12, RF14, RF04.
+- **Critérios de aceite.** Formulário em escala 1-5 cobrindo: utilidade dos drafts (RF12), redução de fricção, manutenibilidade do papel de mediador, valor do cockpit cross-cliente para decisão (RF14) e usabilidade/confiança na governança CBAC (RF04); N esperado ~4 (toda a equipe); persistência + relatório agregado.
+- **Regras de negócio.** Aplicado após a equipe ter usado o sistema com os projetos do estudo.
+- **Rastreabilidade MPO.** Agente **Equipe de Gestão e Desenvolvimento do Observatório** (p. 201) + motivações **Conhecimento** e **Engajamento** (p. 204).
+
+#### RF18: Coletar feedback Likert dos clientes
+- **Descrição.** Registrar a percepção dos clientes finais sobre clareza dos atributos liberados, sentido de controle e transparência, utilidade do espaço, qualidade do diálogo e sentido de inclusão.
+- **Justificativa.** Metade da avaliação qualitativa do DSR: valida a hipótese de que a ficha de atributos liberados é compreensível e que o CBAC produz percepção de controle/transparência adequada ao cliente.
+- **Dependências.** RF08, RF10, RF11, RF04.
+- **Critérios de aceite.** Formulário em escala 1-5 cobrindo: clareza dos atributos liberados, sentido de controle / transparência sobre o que vê, utilidade do que foi liberado, qualidade do diálogo, sentido de inclusão; identificação do projeto (respondente anônimo opcional); N esperado 5-10.
+- **Regras de negócio.** Aplicado após pelo menos 2 semanas de uso pelos clientes.
+- **Rastreabilidade MPO.** Agentes **Partes Interessadas dos Projetos** + **Usuários do Observatório** (pp. 200-201) + motivações **Engajamento** e **Conhecimento** (p. 204) + característica **Interatividade** (p. 191).
+
+#### RF19: Exportar resultados consolidados
+- **Descrição.** Gerar exportação única (CSV/JSON) com todos os dados de avaliação para alimentar o relato e o artigo.
+- **Justificativa.** Sem exportação, a escrita do relato fica refém de queries manuais.
+- **Dependências.** RF16, RF17, RF18, RF09.
+- **Critérios de aceite.** Arquivo único com extrações, cobertura, métricas (precisão/recall/F1/concordância) por grupo, respostas Likert (consultoria + clientes), métricas de engajamento (nº de comentários, nº de drafts) e configurações de CBAC por projeto (snapshot do que esteve visível ao cliente).
+- **Regras de negócio.** Cabeçalhos compatíveis com planilha (Excel, Google Sheets).
+- **Rastreabilidade MPO.** Infraestrutura de avaliação, sem mapeamento direto.
 
 ---
 
@@ -225,7 +219,7 @@ O observatório deixa de tratar cada projeto isoladamente e passa a observar o *
 #### RNF02: Usabilidade
 - **Categoria.** Usabilidade.
 - **Descrição.** Um cliente sem conhecimento técnico deve conseguir acessar seu projeto, ler os atributos liberados, comentar e navegar pelo feed sem treinamento. O consultor deve conseguir configurar o CBAC do projeto sem ambiguidade.
-- **Critérios de aceite.** Avaliado via dimensões "clareza dos atributos liberados" e "sentido de controle" do Likert dos clientes (RF17); e "usabilidade da governança CBAC" do Likert da consultoria (RF16).
+- **Critérios de aceite.** Avaliado via dimensões "clareza dos atributos liberados" e "sentido de controle" do Likert dos clientes (RF18); e "usabilidade da governança CBAC" do Likert da consultoria (RF17).
 - **Rastreabilidade MPO.** Característica **Usabilidade** (p. 192).
 
 #### RNF03: Manutenibilidade e organização
@@ -239,7 +233,7 @@ O observatório deixa de tratar cada projeto isoladamente e passa a observar o *
 - **Descrição.** Toda saída de IA registra versão do prompt, identificador do modelo, timestamp e parâmetros relevantes; cada extração registra o *hash* da `description` que a originou.
 - **Critérios de aceite.** Cada extração, draft e sugestão de temática carrega versão do prompt + modelo + timestamp + parâmetros. Extrações carregam adicionalmente o hash da descrição-fonte.
 - **Regras de negócio.** Mudança de prompt incrementa a versão registrada.
-- **Rastreabilidade MPO.** Qualidade de método científico, aplicado a RF05, RF13 e RF19.
+- **Rastreabilidade MPO.** Qualidade de método científico, aplicado a RF05, RF12 e RF13.
 
 #### RNF05: Rastreabilidade de origem
 - **Categoria.** Confiabilidade.
@@ -262,7 +256,7 @@ O observatório deixa de tratar cada projeto isoladamente e passa a observar o *
 #### RNF08: Conformidade LGPD
 - **Categoria.** Segurança / Compliance.
 - **Descrição.** Dados dos projetos dos clientes em formato semi-aberto exigem medidas mínimas de proteção e consentimento.
-- **Critérios de aceite.** NDA com clientes participantes; consentimento explícito para uso anonimizado dos resultados; isolamento por perfil (RF02); governança CBAC operacional (RF23); criptografia em trânsito; logs de acesso ao observatório.
+- **Critérios de aceite.** NDA com clientes participantes; consentimento explícito para uso anonimizado dos resultados; isolamento por perfil (RF02); governança CBAC operacional (RF04); criptografia em trânsito; logs de acesso ao observatório.
 - **Regras de negócio.** Cliente A nunca acessa dados do Cliente B. Estendido pelo RNF10.
 - **Rastreabilidade MPO.** Característica **Segurança** (p. 192), que menciona explicitamente política aderente à LGPD.
 
@@ -278,7 +272,7 @@ O observatório deixa de tratar cada projeto isoladamente e passa a observar o *
 - **Descrição.** O cliente só vê os atributos do MPO explicitamente liberados pelo consultor para o seu próprio projeto. Nunca vê atributos não liberados, nunca vê dados de outros clientes, nunca infere a existência de atributo oculto a partir da estrutura da resposta. O estado default é "tudo oculto".
 - **Justificativa.** O estudo tem dois clientes do mesmo segmento (jurídico); sem isolamento estrito, mesmo a inferência por estrutura de payload poderia revelar informação indevida. O CBAC com "ausência = oculto" e "atributo oculto sumido da resposta" elimina essa superfície.
 - **Critérios de aceite.** Atributos não liberados não aparecem no payload servido ao cliente (não há placeholder "oculto"); cobertura cliente usa denominador escopado; feed cliente filtra eventos por visibilidade; testes e2e cobrem os 3 endpoints (RF08, RF09, RF11) para garantir o isolamento.
-- **Regras de negócio.** Mudança de CBAC tem efeito imediato sobre reads; não há retroatividade sobre eventos de feed já entregues (decisão consciente do MVP).
+- **Regras de negócio.** Mudança de CBAC tem efeito imediato sobre reads; não há retroatividade sobre eventos de feed já entregues.
 - **Rastreabilidade MPO.** Características **Segurança** (p. 192) e **Acesso semi-aberto** (p. 189).
 
 ---
@@ -286,7 +280,7 @@ O observatório deixa de tratar cada projeto isoladamente e passa a observar o *
 ## 4. Premissas
 
 - O estudo de caso usa **5 projetos reais** de uma consultoria, atendendo clientes em segmentos distintos (jurídico, saúde, esporte, branding).
-- O conteúdo bruto de cada projeto é passado ao sistema como **texto descritivo** (campo `description` no payload de criação), substituindo o upload de `.docx` da versão anterior.
+- O conteúdo bruto de cada projeto é passado ao sistema como **texto descritivo** (campo `description` no payload de criação).
 - **Gabarito manual produzido em 3 projetos**; os demais são avaliados por cobertura + Likert.
 - A coleta Likert depende de acesso aos stakeholders dos projetos. N esperado: ~4 (consultoria) + ~5-10 (clientes).
 - Valença Odontologia atua como projeto piloto para calibrar a rubrica de avaliação.
@@ -296,9 +290,9 @@ O observatório deixa de tratar cada projeto isoladamente e passa a observar o *
 
 ## 5. Fora de Escopo
 
-- Upload de arquivos (`.docx`, PDF, imagens) — substituído pelo campo `description` no payload (RF03).
-- Resumo do projeto em linguagem narrativa gerado pela IA para o cliente — substituído pela ficha de atributos liberados via CBAC (RF08 + RF23).
-- Síntese cross-projeto por temática gerada pela IA (Conectora) e camada de conhecimento comum publicada ao cliente — escopo deslocado para trabalhos futuros.
+- Upload de arquivos (`.docx`, PDF, imagens).
+- Resumo do projeto em linguagem narrativa gerado pela IA para o cliente.
+- Síntese cross-projeto por temática gerada pela IA (Conectora) e camada de conhecimento comum publicada ao cliente.
 - Atualização incremental, detecção de mudanças automatizadas e versionamento granular de extrações.
 - Modelo próprio de classificação de risco (PMBOK).
 - Linha do tempo interativa.
@@ -306,7 +300,7 @@ O observatório deixa de tratar cada projeto isoladamente e passa a observar o *
 - Chat com IA.
 - Notificações por email externo (substituídas pelo feed in-app, RF11).
 - OAuth, multi-tenancy e deploy em produção.
-- Cliente acessar dados de outros clientes (vedado por RF23 + RNF10).
+- Cliente acessar dados de outros clientes (vedado por RF04 + RNF10).
 - Cliente ver atributos não liberados ou inferir a existência deles a partir da resposta (vedado pelo RNF10).
 
 ---
