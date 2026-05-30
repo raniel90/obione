@@ -72,7 +72,6 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
         from obione.extractions.repository import SqlAlchemyExtractionRepository
         from obione.likert.repository import SqlAlchemyLikertRepository
         from obione.projects.repository import SqlAlchemyProjectRepository
-        from obione.resumos.repository import SqlAlchemyResumoRepository
 
         self.users: SqlAlchemyUserRepository = SqlAlchemyUserRepository(self.session)
         self.projects: SqlAlchemyProjectRepository = SqlAlchemyProjectRepository(self.session)
@@ -81,7 +80,6 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
         )
         self.comments: SqlAlchemyCommentRepository = SqlAlchemyCommentRepository(self.session)
         self.likert: SqlAlchemyLikertRepository = SqlAlchemyLikertRepository(self.session)
-        self.resumos: SqlAlchemyResumoRepository = SqlAlchemyResumoRepository(self.session)
         self.drafts: SqlAlchemyDraftRepository = SqlAlchemyDraftRepository(self.session)
         return self
 
@@ -116,14 +114,12 @@ class FakeUnitOfWork(AbstractUnitOfWork):
         from obione.extractions.repository import FakeExtractionRepository
         from obione.likert.repository import FakeLikertRepository
         from obione.projects.repository import FakeProjectRepository
-        from obione.resumos.repository import FakeResumoRepository
 
         self.users: FakeUserRepository = FakeUserRepository()
         self.projects: FakeProjectRepository = FakeProjectRepository()
         self.extractions: FakeExtractionRepository = FakeExtractionRepository()
         self.comments: FakeCommentRepository = FakeCommentRepository()
         self.likert: FakeLikertRepository = FakeLikertRepository()
-        self.resumos: FakeResumoRepository = FakeResumoRepository()
         self.drafts: FakeDraftRepository = FakeDraftRepository()
 
     def commit(self) -> None:

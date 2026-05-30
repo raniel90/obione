@@ -12,7 +12,6 @@ from obione.drafts.models import Draft  # noqa: F401
 from obione.extractions.models import Extraction  # noqa: F401
 from obione.likert.models import LikertResponse  # noqa: F401
 from obione.projects.models import Project, ProjectClient  # noqa: F401
-from obione.resumos.models import Resumo  # noqa: F401
 from obione.settings import settings
 from obione.shared.database import Base
 
