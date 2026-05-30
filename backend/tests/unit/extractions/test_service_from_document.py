@@ -16,6 +16,10 @@ from obione.shared.ids import new_id
 from obione.unit_of_work import FakeUnitOfWork
 from tests._helpers import SAMPLE_DESCRIPTION
 
+pytestmark = pytest.mark.skip(
+    reason="documents/ context removed in M1.4; this file will be deleted then."
+)
+
 
 class _CannedExtractor:
     """Records the bytes it was given so we can assert the storage round-trip."""

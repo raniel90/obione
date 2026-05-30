@@ -30,6 +30,21 @@ def list_extractions(project_id: uuid.UUID, user: CurrentUser) -> list[Extractio
     return [ExtractionResponse.model_validate(x) for x in items]
 
 
+@router.post("", response_model=ExtractionResponse, status_code=201)
+def create_extraction(project_id: uuid.UUID, user: CurrentUser) -> ExtractionResponse:
+    """Run the LLM pipeline on the project's `description` and persist.
+
+    No request body — the source text comes from `project.description`. The
+    provider is picked from `settings.LLM_PROVIDER` ("mock" by default).
+    """
+    with SqlAlchemyUnitOfWork() as uow:
+        project = uow.projects.get(project_id)
+        project_name = project.name if project else "unknown"
+    extractor = get_extractor_for(project_name)
+    e = service.extract_for_project(get_uow(), extractor, user, project_id=project_id)
+    return ExtractionResponse.model_validate(e)
+
+
 @router.get("/coverage", response_model=CoverageResponse)
 def get_coverage(project_id: uuid.UUID, user: CurrentUser) -> CoverageResponse:
     """MPO coverage report for the project (US09)."""
@@ -123,7 +138,8 @@ def create_from_document(
         project = uow.projects.get(doc.project_id)
         project_name = project.name if project else "unknown"
         document_name = doc.original_name
-    extractor = get_extractor_for(project_name, document_name)
+    _ = document_name  # forwarded only for prompt context, no longer used
+    extractor = get_extractor_for(project_name)
     e = service.create_extraction_from_document(
         get_uow(),
         storage,

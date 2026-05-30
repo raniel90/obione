@@ -10,6 +10,10 @@ from obione.settings import settings
 from obione.shared.database import SessionLocal
 from tests._helpers import SAMPLE_DESCRIPTION
 
+pytestmark = pytest.mark.skip(
+    reason="documents/ context removed in M1.4; this file will be deleted then."
+)
+
 DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 
 

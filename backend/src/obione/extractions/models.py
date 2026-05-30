@@ -35,6 +35,7 @@ class Extraction(Base):
     )
     source: Mapped[str] = mapped_column(String(32), nullable=False)
     llm_model: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    source_description_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
     content: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
     created_by: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
