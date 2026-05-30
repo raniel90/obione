@@ -1,10 +1,12 @@
 # Protocolo de Avaliação — ObiOne
 
-Documento metodológico para a avaliação quantitativa do pipeline LLM do ObiOne. Define o critério de comparação entre extração automática e gabarito manual, a rubrica de pontuação humana, o protocolo de resolução de divergências e as fórmulas das métricas.
+Documento metodológico para a avaliação do ObiOne. Cobre três frentes complementares: **(i)** a avaliação quantitativa do pipeline LLM de extração (Quadro 37 do MPO), **(ii)** a avaliação da categorização de temática por IA (RF19), e **(iii)** a avaliação qualitativa da governança CBAC (RF23) e do cockpit cross-cliente (RF20) via Likert.
 
-**Insumos:** `atributos_alvo_mpo.md` (44 atributos categorizados como `estruturado` / `texto_livre` / `fora_de_escopo`).
+**Insumos:** `atributos_alvo_mpo.md` (44 atributos categorizados como `estruturado` / `texto_livre` / `fora_de_escopo`); log `theme_suggestions` (gerado pela RF19); respostas Likert das audiências (consultoria via RF16; clientes via RF17).
 
-**Aplicação:** este protocolo é aplicado em 3 projetos do estudo de caso — **Valença Odontologia** (piloto), **Freire Batista ADV** e **Kaka JJ** — por **Cynthia** e **Moisés** como dois avaliadores independentes.
+**Aplicação:** o critério híbrido de extração (§§ 1-4) é aplicado em 3 projetos do estudo de caso — **Valença Odontologia** (piloto), **Freire Batista ADV** e **Kaka JJ** — por **Cynthia** e **Moisés** como dois avaliadores independentes. A acurácia da categorização (§ 5) e o Likert (§ 6) são aplicados nos 5 projetos do estudo.
+
+> **Atualização 29/05/2026.** O escopo do protocolo foi revisto após o pivot CBAC + no-upload (apêndice §12 de `refinamento_observatorio_consultorias.md`). Saem do escopo de avaliação a **Conectora** (RF21, síntese cross-projeto, removida) e o **Resumo do Cliente** (RF12, removido). Entram a **acurácia da categorização de temática** (§ 5) e a **avaliação da governança CBAC + cockpit** via Likert reescrito (§ 6). As métricas de extração das §§ 1-4 mudam apenas em um detalhe: a "fonte" passa a ser `project.description` em vez de `.docx`, mas o critério de match e a rubrica continuam idênticos.
 
 ---
 
@@ -212,13 +214,90 @@ Atributos individuais com Kappa < 0,60 devem ser sinalizados no resultado da ava
 Métrica complementar para evidenciar o ganho de eficiência da IA:
 
 - **Manual:** tempo total reportado por cada avaliador para produzir seu gabarito (em minutos).
-- **Automático:** tempo medido pelo sistema entre `POST /projects/{id}/extract` e persistência da extração (em segundos/minutos).
+- **Automático:** tempo medido pelo sistema entre `POST /projects/{id}/extractions` e persistência da extração (em segundos/minutos).
 
 Reportado como média por projeto e total.
 
 ---
 
-## 5. Cobertura do MPO (complementar)
+## 5. Acurácia da Categorização de Temática (RF19)
+
+A sugestão automática de temática (`domain` do projeto) por IA — implementada como contexto `themes/` no backend — é avaliada por **comparação direta** entre o que o classificador propõe e a decisão final do consultor humano. O log `theme_suggestions` (criado pela migration 0014) registra cada sugestão com seu `suggested_domain`, `confidence`, `model_id` e o estado `accepted` + `accepted_at` + `accepted_by`. Quando aceita, a temática propaga para `projects.domain`; quando ignorada, o registro permanece como evidência de que a IA propôs uma classificação alternativa.
+
+### 5.1 Conjunto de avaliação
+
+Os **5 projetos** do estudo de caso (não apenas os 3 com gabarito de extração). O consultor produz a sugestão da IA via `POST /projects/{id}/themes/suggest` e, depois, decide aceitá-la ou sobrescrever manualmente `projects.domain`. Para garantir um trial controlado:
+
+1. Antes de qualquer sugestão da IA, **Cynthia** e **Moisés** anotam independentemente a categoria esperada de cada projeto (`legal`, `health`, `sports`, `branding`, `gastronomy`, `other`) a partir do `description` cadastrado. A categoria de cada projeto é o **consenso humano** desses dois rótulos.
+2. A IA é então invocada e seu `suggested_domain` é registrado.
+
+### 5.2 Métricas
+
+- **Acurácia top-1.** Proporção de sugestões cujo `suggested_domain` coincide com o consenso humano.
+- **Calibração.** Para cada faixa de `confidence` (0,0-0,33; 0,34-0,67; 0,68-1,0), comparar a acurácia observada com a confiança média. Idealmente os valores são próximos (calibração honesta).
+- **Acurácia por temática.** Matriz de confusão 6×6 (6 enums) com contagens absolutas. Permite identificar temáticas onde o classificador erra sistematicamente.
+- **Taxa de aceitação.** Proporção de sugestões que o consultor aceitou via `POST /themes/suggestions/{id}/accept`. Complementar à acurácia top-1 — captura a percepção do consultor sobre a utilidade da sugestão.
+
+### 5.3 Threshold de aceitação do projeto
+
+A meta é **acurácia top-1 ≥ 80 %**. Abaixo desse limite, registrar a categorização como contribuição parcial (a IA ajuda mas não substitui a curadoria) e discutir como limitação. Como o conjunto é pequeno (N = 5), não há base estatística para um threshold mais rigoroso — a matriz de confusão completa é o artefato principal a apresentar no relato.
+
+---
+
+## 6. Avaliação Qualitativa da Governança CBAC e do Cockpit (Likert)
+
+A camada de governança (CBAC, RF23) e o cockpit cross-cliente (RF20) — substitutos do Resumo do Cliente e da Conectora no refino de 29/05 — são avaliados pela percepção das duas audiências. As dimensões do Likert foram reescritas no requisitos.md de 29/05 e implementadas no backend (`obione.likert.schemas`).
+
+### 6.1 Dimensões do consultor (RF16, N ≈ 4)
+
+| Dimensão | O que mede |
+|---|---|
+| `utilidade_drafts` | Utilidade dos drafts internos (US13) na curadoria do observatório |
+| `reducao_friccao` | Quanto a IA reduziu o trabalho de manter o observatório informativo |
+| `manutenibilidade_mediador` | Sustentabilidade do papel de mediador entre IA, atributos e cliente |
+| `valor_cockpit` | Valor do cockpit cross-cliente (RF20) para a decisão da consultoria |
+| `usabilidade_cbac` | Usabilidade e confiança na governança CBAC (RF23) ao decidir o que liberar |
+
+### 6.2 Dimensões do cliente (RF17, N ≈ 5-10)
+
+| Dimensão | O que mede |
+|---|---|
+| `clareza_atributos_liberados` | Clareza do que o cliente vê na ficha de atributos liberados |
+| `sentido_controle` | Sentido de controle / transparência sobre o que foi liberado para ele |
+| `utilidade_liberado` | Utilidade prática do que foi liberado para o cliente acompanhar o projeto |
+| `qualidade_dialogo` | Qualidade dos comentários e do diálogo no espaço do observatório |
+| `sentido_inclusao` | Sentido de inclusão do cliente como parte do observatório |
+
+### 6.3 Aplicação
+
+- A consultoria responde **uma vez** após ≥ 2 semanas usando o sistema com os 5 projetos do estudo.
+- Cada cliente responde **uma vez** após ≥ 2 semanas tendo acesso ao seu projeto, com o CBAC configurado e ao menos uma extração visível.
+- Cada submissão gera uma linha por dimensão (5 linhas por respondente), persistidas em `likert_responses`.
+
+### 6.4 Métricas
+
+- **Estatísticas descritivas por dimensão**: mediana, média, mínimo, máximo, contagem.
+- **Histograma 1-5** por dimensão.
+- **Triangulação** entre dimensões do consultor e do cliente quando aplicável — por exemplo, `usabilidade_cbac` (consultor) cruzada com `clareza_atributos_liberados` + `sentido_controle` (cliente) para discutir se a governança que o consultor sentiu confortável produziu, do lado do cliente, percepção de clareza e controle.
+- **Plano B em N baixo.** Se o N total ficar abaixo de 8, reportar como limitação metodológica (LANDIS & KOCH, 1977, é insuficiente para inferência); apresentar os dados como **casos** e não como amostra.
+
+### 6.5 Saída no bundle de exportação
+
+A `RF18 (Exportar resultados consolidados)` inclui um snapshot do CBAC de cada projeto — a configuração de visibilidade que estava ativa no momento da submissão dos clientes. Isso permite cruzar, no relato, a percepção do cliente com **quanto** foi liberado (proxy: número de atributos visíveis / 43).
+
+---
+
+## 7. Métricas e Artefatos Removidos pelo Refino 29/05
+
+Itens que constavam na proposta de 28/05 e saíram do escopo de avaliação:
+
+- **Rubrica humana sobre a Conectora.** Avaliaria fidelidade, utilidade, ausência de alucinação e **ausência de vazamento cross-cliente** das sínteses cross-projeto. Como a Conectora (RF21) saiu do MVP, esta rubrica não é aplicada. Mencionar no relato como trabalho futuro.
+- **Likert sobre o Resumo do Cliente.** Substituído pelas dimensões `clareza_atributos_liberados` e `utilidade_liberado` (§ 6.2). O artefato avaliado deixa de ser uma narrativa gerada por IA e passa a ser a ficha de atributos liberados pelo CBAC.
+- **Likert sobre o conhecimento comum cross-cliente.** Removido junto com RF22.
+
+---
+
+## 8. Cobertura do MPO (complementar)
 
 Separado das métricas de precisão/recall/F1 (que medem **acurácia**), a cobertura do MPO mede **abrangência** da extração frente ao Quadro 37:
 
@@ -230,26 +309,34 @@ Calculada para **todos os 5 projetos** (não só os 3 com gabarito) — ver RF09
 
 ---
 
-## 6. Saída Esperada da Avaliação
+## 9. Saída Esperada da Avaliação
 
-Após executar este protocolo nos 3 projetos:
+Após executar este protocolo nas três frentes (extração nos 3 projetos com gabarito, categorização e Likert nos 5 projetos):
 
-| Métrica | Apresentação |
-|---|---|
-| Precisão / Recall / F1 — estruturado | Tabela por projeto + agregado |
-| Precisão / Recall / F1 — texto livre | Tabela por projeto + agregado |
-| Precisão / Recall / F1 — total ponderado | Tabela por projeto + agregado |
-| Cohen's Kappa | Por atributo (28 valores) + agregado |
-| Tempo manual vs. automático | Minutos por projeto + ganho percentual |
-| Cobertura do MPO | Por projeto (5) + heatmap projetos × atributos |
-| Lista de atributos com Kappa < 0,60 | Discussão como limitação no relato |
-| Lista de divergências fortes resolvidas | Por projeto |
+| Frente | Métrica | Apresentação |
+|---|---|---|
+| Extração (3 projetos) | Precisão / Recall / F1 — estruturado | Tabela por projeto + agregado |
+| Extração (3 projetos) | Precisão / Recall / F1 — texto livre | Tabela por projeto + agregado |
+| Extração (3 projetos) | Precisão / Recall / F1 — total ponderado | Tabela por projeto + agregado |
+| Extração (3 projetos) | Cohen's Kappa | Por atributo (28 valores) + agregado |
+| Extração (3 projetos) | Tempo manual vs. automático | Minutos por projeto + ganho percentual |
+| Extração (3 projetos) | Lista de atributos com Kappa < 0,60 | Discussão como limitação no relato |
+| Extração (3 projetos) | Lista de divergências fortes resolvidas | Por projeto |
+| Extração (5 projetos) | Cobertura do MPO | Por projeto + heatmap projetos × atributos |
+| Categorização (5 projetos) | Acurácia top-1 | Valor agregado |
+| Categorização (5 projetos) | Calibração por faixa de confidence | Tabela 3 faixas × (confidence média, acurácia observada) |
+| Categorização (5 projetos) | Matriz de confusão 6×6 | Tabela completa |
+| Categorização (5 projetos) | Taxa de aceitação pelo consultor | Valor agregado |
+| Likert consultoria | Estatísticas descritivas por dimensão (5) | Tabela |
+| Likert clientes | Estatísticas descritivas por dimensão (5) | Tabela |
+| Likert clientes | Histograma 1-5 por dimensão | Gráfico ou tabela |
+| CBAC | Snapshot da configuração de visibilidade no momento da coleta | Por projeto |
 
 Tudo exportável via RF18.
 
 ---
 
-## 7. Riscos e Mitigações Específicas do Protocolo
+## 10. Riscos e Mitigações Específicas do Protocolo
 
 | Risco | Mitigação |
 |---|---|
@@ -260,12 +347,17 @@ Tudo exportável via RF18.
 
 ---
 
-## 8. Próximos Passos
+## 11. Próximos Passos
 
-1. **Revisão pela Cynthia** desta proposta de protocolo — confirmar exemplos da rubrica e ajustar limites se necessário.
-2. **Sessão de calibração** Cynthia + Moisés (~30 min) antes de iniciar Valença.
-3. **T1.3 — Schema de extração** (Raniel) — derivar JSON Schema formal de `atributos_alvo_mpo.md` para uso na extração automática e validação dos gabaritos.
-4. **T1.4 — Produção dos gabaritos** — seguindo o procedimento da seção 3.
+A infraestrutura técnica (schema, extração, log de sugestões, formulários Likert, exportação) já está implementada em `main`. Os próximos passos são todos de **coleta**:
+
+1. **Sessão de calibração da rubrica** — Cynthia + Moisés (~30 min) revisando este documento e os exemplos da § 2.1 juntos antes de iniciar Valença.
+2. **Produção dos gabaritos de extração** — Cynthia e Moisés conforme procedimento da § 3, nos 3 projetos.
+3. **Rotulagem humana da temática** — Cynthia e Moisés rotulam independentemente, antes da invocação da IA, a categoria esperada de cada um dos 5 projetos (§ 5.1).
+4. **Invocação da IA de categorização** — para cada projeto, `POST /projects/{id}/themes/suggest`; conferir o `suggested_domain` com o consenso humano para alimentar a matriz de confusão da § 5.
+5. **Configuração do CBAC pelo consultor** — para cada cliente do estudo, decidir e aplicar via `PUT /projects/{id}/visibility/...` antes da janela de uso do cliente (≥ 2 semanas).
+6. **Coleta Likert** — disparar os formulários para a consultoria (5 dimensões da § 6.1) e para os clientes (5 dimensões da § 6.2) após a janela de uso.
+7. **Exportação consolidada** — `GET /exports/...` (RF18) para produzir o bundle final que alimenta o relato e o artigo.
 
 ---
 

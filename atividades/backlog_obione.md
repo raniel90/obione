@@ -1,8 +1,68 @@
 # ObiOne — Backlog de Produto (Pós-Pivot Comunidade)
 
-> Versão pós-pivot do backlog (16/05/2026), alinhada à proposta acadêmica reformulada, à metodologia DSR e ao calendário real da disciplina TAES (semana 8 atual, entrega em 10/07/2026).
+> Versão pós-pivot do backlog (16/05/2026), alinhada à proposta acadêmica reformulada, à metodologia DSR e ao calendário real da disciplina TAES.
 
-## Status do MVP — atualizado em 21/05/2026
+## Status do MVP — atualizado em 30/05/2026 (pós-refino CBAC)
+
+Após a entrega original em 21/05/2026 (18/18 US do MVP-comunidade) o projeto passou por duas rodadas de refino:
+
+- **28/05/2026 — Refino para observatório PARA consultorias** (`refinamento_observatorio_consultorias.md`): adiciona RF19-RF22 (temática, cockpit cross-cliente, Conectora, conhecimento comum) e RNF10 (isolamento/anonimização).
+- **29/05/2026 — Revisão CBAC + no-upload** (apêndice §12 do refino): substitui Conectora por **Content-Based Access Control** e remove o upload de `.docx` (vira campo `description` no projeto).
+
+**Backend reexecutado em 4 PRs entre 29 e 30/05/2026 — todos mergeados em `main`:**
+
+| PR | Milestone | Escopo |
+|---|---|---|
+| #18 | M1 — Cleanup pré-CBAC | Remove `documents/` e `resumos/`; `description` obrigatório; extração via `project.description` com SHA-256. Migrations 0009-0012. |
+| #20 | M2 — CBAC | Novo `visibility/` (RF23); filtragem nos GET de extração; coverage do cliente escopado; Likert reescrito (RF16/RF17 v2). Migration 0013. |
+| #21 | M3 — Themes | Novo `themes/` (RF19): sugestão por IA + log de acurácia. Migration 0014. |
+| #22 | M4 — Portfolio | Novo `portfolio/` (RF20): cockpit cross-cliente como read-model puro. |
+
+**Estado final:** 294 testes verdes, 6 migrations aplicadas (0009-0014), contextos novos `visibility/`, `themes/`, `portfolio/`, contextos removidos `documents/` e `resumos/`. CI verde em todo PR.
+
+### Diff de User Stories após o refino 29/05
+
+| US original | Estado após 29/05 | Substituto / observação |
+|---|---|---|
+| US01 Autenticar | ✅ Mantida | Sem mudança |
+| US02 Perfis semi-abertos | ✅ Mantida + estendida | Acesso do cliente agora depende de **RF23 (CBAC)**, além do vínculo |
+| US03 Cadastrar projeto | ✅ Mantida + estendida | Payload agora inclui `description` obrigatório (≥ 200 chars) |
+| US04 Upload `.docx` | ❌ **Removida** | Substituída pelo campo `description` do US03 |
+| US05 Extrair via LLM | ✅ Mantida + alterada | Fonte = `project.description`; registra `source_description_hash` |
+| US06 Persistir extração | ✅ Mantida + alterada | Sem `document_id`; ganha hash da descrição |
+| US07 Portfólio (perfil-aware) | ✅ Mantida | Status agora `registered → extracted → reviewed` (sai `ingested`) |
+| US08 Detalhe do projeto | ✅ Mantida + estendida | Cliente recebe apenas atributos liberados pelo CBAC |
+| US09 Cobertura do MPO | ✅ Mantida + estendida | Para o cliente, denominador escopado nos atributos liberados |
+| US10 Comentar | ✅ Mantida | Sem mudança |
+| US11 Feed in-app | ✅ Mantida | Eventos `new_document` removidos; `new_comment` e `new_extraction` permanecem |
+| US12 Resumo do Cliente | ❌ **Removida** | CBAC substitui — cliente vê a ficha de atributos liberados |
+| US13 Drafts internos | ✅ Mantida | Continua sendo ferramenta interna do consultor |
+| US14 Importar gabarito | ✅ Mantida | Sem mudança |
+| US15 Comparar vs gabarito | ✅ Mantida | Sem mudança |
+| US16 Likert consultoria | ✅ Mantida + reescrita | 5 dimensões: utilidade_drafts, reducao_friccao, manutenibilidade_mediador, **valor_cockpit (RF20)**, **usabilidade_cbac (RF23)** |
+| US17 Likert clientes | ✅ Mantida + reescrita | 5 dimensões: **clareza_atributos_liberados**, **sentido_controle**, **utilidade_liberado**, qualidade_dialogo, sentido_inclusao |
+| US18 Exportar resultados | ✅ Mantida + estendida | Bundle inclui snapshot do CBAC do projeto |
+| **US19 Sugestão de temática (novo)** | ✅ Entregue | IA propõe `project.domain`; consultor aceita/ignora; log alimenta protocolo de acurácia |
+| **US20 Cockpit cross-cliente (novo)** | ✅ Entregue | Read-model agregando por temática; cliente recebe 403 |
+| US21 Conectora (síntese) | ❌ **Removida (29/05)** | Era do refino 28/05; CBAC substitui o gate de revisão |
+| US22 Conhecimento comum publicado | ❌ **Removida (29/05)** | Idem |
+| **US23 CBAC (novo)** | ✅ Entregue | Configura visibilidade por categoria + override por atributo (privacy by default) |
+
+**Total de US ativas pós-refino:** 19 (US01, US02, US03, US05-US11, US13-US20, US23). Removidas: US04, US12, US21, US22.
+
+### Pendências (não-bloqueantes do código)
+
+- Frontend (Bruno) — implementação React/Vite/Lovable das telas novas: configuração CBAC (consultor), ficha de atributos liberados (cliente), cockpit cross-cliente, fluxo de sugestão de temática.
+- Smoke real com Ollama nos 5 projetos: rodar `POST /projects/{id}/extractions` em cada um para revalidar a extração agora que a fonte é `description`.
+- Aplicação da rubrica humana 0/0,5/1 em texto livre + Cohen's Kappa (Sprint 5, depende de 2 avaliadores). Mantido conforme protocolo original.
+- Coleta efetiva dos respondentes Likert com as **novas dimensões** (consultoria N ≈ 4, clientes N = 5-10).
+- Acurácia da categorização (RF19) usando o log `theme_suggestions` — métrica nova, ver `protocolo_avaliacao.md` §5.
+
+---
+
+## Histórico — Status do MVP em 21/05/2026 (pré-refino)
+
+> Mantido como registro histórico do MVP-comunidade entregue antes dos refinos de 28-29/05. As US abaixo são as 18 originais; a tabela de diff acima indica o que mudou.
 
 **Backend: 18/18 US implementadas (100%).** Suíte: 265 testes verdes (unit + integration + e2e), 8 migrations, 32 endpoints HTTP. CI rodando em todo PR. Mergeados em `main` via 9 PRs sequenciais (#1 chassis → #9 docs).
 

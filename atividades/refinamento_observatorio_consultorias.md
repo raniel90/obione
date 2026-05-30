@@ -193,3 +193,71 @@ Riscos R7-R12 do pivot anterior continuam válidos.
 - VIEIRA, J. K. M.; FARIAS JÚNIOR, I. H.; MOURA, H. P. **Observatories as Transparency Instruments for Projects**. CISTI, 2020.
 - VIEIRA, J. K. M.; FARIAS JÚNIOR, I. H.; MOURA, H. P. **Utilization of a Conceptual Model in Projects Observatories Development: A Case Study**. SBSI.
 - `pivot_observatorio_comunidade.md` — primeiro pivot (16/05/2026).
+
+---
+
+## 12. Apêndice — Revisão de 29/05/2026
+
+Após este documento de 28/05/2026 e antes do início da implementação, o grupo decidiu duas mudanças adicionais que mantêm o **posicionamento** (observatório de projetos para consultorias) e o **eixo cross-cliente**, mas substituem dois mecanismos centrais por escolhas mais enxutas, mais alinhadas à LGPD e mais factíveis no tempo restante.
+
+### 12.1 Sem upload de arquivo
+
+A entrada de conteúdo do projeto deixa de ser `.docx` anexado e passa a ser um campo `description` (texto longo, ≥ 200 caracteres) no payload de criação do projeto. A extração LLM lê desse campo. Implicações:
+
+- Sai do escopo o requisito **RF04 (Fazer upload de documentos)**.
+- O requisito **RF05 (Extrair atributos do MPO via LLM)** mantém a meta, troca a fonte: passa de `documento.bytes` para `projeto.description`.
+- Sai o contexto `documents/` do backend (modelo, storage, rotas).
+- Cada extração registra adicionalmente um `source_description_hash` (SHA-256) para que a UI sinalize quando a descrição foi editada depois da última extração.
+- O processo **Coletar** do MPO (Vieira, 2022, p. 195) continua materializado — a fonte simplesmente muda de mídia.
+
+Motivação: o estudo de caso tem 5 projetos reais e a fonte é prosa estruturada; manter pipeline de `.docx` para depois discartá-lo no MVP é custo de engenharia sem retorno de pesquisa.
+
+### 12.2 Conectora substituída por **Content-Based Access Control (CBAC)**
+
+A camada de conhecimento cross-cliente do refino original — Conectora (síntese) + conhecimento comum publicado — é substituída por uma **governança granular de visibilidade**: o consultor configura, por projeto, quais categorias e atributos do Quadro 37 ficam visíveis ao cliente. O default é "tudo oculto" (privacy by default). O cliente vê apenas o que foi liberado, e atributos não liberados **sequer aparecem** na resposta da API.
+
+Implicações no escopo:
+
+- Saem do MVP os requisitos **RF12 (Resumo do Cliente)**, **RF21 (Conectora)** e **RF22 (Conhecimento comum publicado)**.
+- Entra o novo **RF23 (Configurar visibilidade do projeto via CBAC)**, com granularidade categoria + override por atributo.
+- O **RNF10** é reescrito: vira "isolamento estrito entre clientes via CBAC" — sem síntese cross-cliente, não há mais necessidade de anonimização cross-cliente; o cliente nunca vê o que não foi liberado, e nunca atributos de outro cliente.
+- As dimensões do **Likert (RF16 e RF17)** são reescritas para refletir o CBAC: a consultoria ganha `valor_cockpit` e `usabilidade_cbac`; o cliente troca `clareza_resumo`/`utilidade_espaco` por `clareza_atributos_liberados`, `sentido_controle` e `utilidade_liberado`.
+
+Sobrevivem da Fase 1 deste refino:
+
+- **RF19 (Categorizar projeto por temática/segmento)** — sugestão por IA com log de acurácia (alimenta o protocolo de avaliação).
+- **RF20 (Cockpit de portfólio cross-cliente)** — read-model puro para o consultor.
+
+Motivação:
+
+- A Conectora cumpre um papel de pesquisa relevante (Combinar do MPO) mas tem alto risco no prazo — alucinação, vazamento cross-cliente, exigência de N ≥ 2 por temática.
+- O CBAC entrega a característica **Acesso semi-aberto** de forma operacional, auditável e enxuta, sem depender de outra rodada de IA para o cliente.
+- O Resumo do Cliente em linguagem cidadã (RF12) deixa de existir como artefato separado — o conteúdo visível ao cliente é a própria ficha de atributos liberados, com rótulos pensados para leitura não técnica.
+
+### 12.3 Cobertura do MPO após a revisão
+
+| Conceito | Cobertura |
+|---|---|
+| Estruturas → Conteúdos → Projetos | Mantido (extração dos 44 atributos) |
+| Estruturas → Conteúdos → Temáticas | Mantido (RF19, sugestão de temática) |
+| Estruturas → Características → Acesso semi-aberto | **Reforçado** (CBAC granular) |
+| Processos → Gerenciar Dados | Mantido (Coletar, Tratar, Armazenar, Disponibilizar) |
+| Processos → Produzir Conhecimento → Categorizar | Mantido (RF19) |
+| Processos → Produzir Conhecimento → **Combinar** | **Sai do MVP** (sem Conectora) |
+| Processos → Produzir Conhecimento → Visualizar/Acompanhar | Mantido (RF20, cockpit cross-cliente) |
+| Agentes → Motivações | Mantidos (Transparência reforçada pelo CBAC; Conhecimento, Decisão, Engajamento) |
+
+A perda da capacidade **Combinar** é o trade-off explícito desta revisão. O texto de relato deve registrar isso como decisão consciente, com a Conectora indicada como trabalho futuro.
+
+### 12.4 Execução do plano
+
+O backend desta revisão foi executado entre 29 e 30/05/2026 em **quatro PRs** sequenciais, todos mergeados em `main`:
+
+| PR | Milestone | Conteúdo |
+|---|---|---|
+| #18 | M1 — Cleanup pré-CBAC | Remove `documents/` e `resumos/`; `description` obrigatório; extração lê da `description` com `source_description_hash`. Migrations 0009-0012. |
+| #20 | M2 — CBAC | Novo contexto `visibility/` (RF23); filtragem nas leituras de extração; coverage do cliente escopado; Likert reescrito. Migration 0013. |
+| #21 | M3 — Themes | Novo contexto `themes/` (RF19): sugestão por IA (mock + Instructor) e log de sugestões. Migration 0014. |
+| #22 | M4 — Portfolio | Novo contexto `portfolio/` (RF20): cockpit cross-cliente como read-model puro. Sem migration. |
+
+Estado final em `main`: 294 testes verdes, 6 migrations aplicadas, contextos novos `visibility/`, `themes/`, `portfolio/`, contextos removidos `documents/` e `resumos/`. O documento `requisitos.md` foi reescrito em 29/05 com 19 RF + 10 RNF (IDs preservados com gaps em relação à versão de 28/05).
