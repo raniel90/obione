@@ -14,6 +14,10 @@ from obione.likert.models import LikertResponse  # noqa: F401
 from obione.projects.models import Project, ProjectClient  # noqa: F401
 from obione.settings import settings
 from obione.shared.database import Base
+from obione.visibility.models import (  # noqa: F401
+    ProjectAttributeVisibility,
+    ProjectCategoryVisibility,
+)
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)

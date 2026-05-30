@@ -24,6 +24,7 @@ router = APIRouter(prefix="/projects/{project_id}/extractions", tags=["extractio
 @router.get("", response_model=list[ExtractionResponse])
 def list_extractions(project_id: uuid.UUID, user: CurrentUser) -> list[ExtractionResponse]:
     items = service.list_extractions_for_project(get_uow(), user, project_id)
+    items = service.filter_extractions_for_user(get_uow(), user, items)
     return [ExtractionResponse.model_validate(x) for x in items]
 
 
