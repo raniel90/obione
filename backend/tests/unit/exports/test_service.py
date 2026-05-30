@@ -3,7 +3,6 @@ import pytest
 from obione.auth.models import User
 from obione.comments.schemas import CommentCreate
 from obione.comments.service import create_comment
-from obione.documents.models import Document
 from obione.exports.service import export_project
 from obione.extractions.models import Extraction
 from obione.projects.exceptions import ProjectNotFoundError
@@ -37,11 +36,11 @@ def test_export_includes_top_level_sections():
         "exported_at",
         "exported_by",
         "project",
-        "documents",
         "extractions",
         "comments",
         "coverage",
     } <= set(bundle)
+    assert "documents" not in bundle
 
 
 @pytest.mark.unit
@@ -52,7 +51,6 @@ def test_export_returns_empty_collections_for_bare_project():
         uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
     )
     bundle = export_project(uow, consultant, project.id)
-    assert bundle["documents"] == []
     assert bundle["extractions"] == []
     assert bundle["comments"] == []
     assert bundle["coverage"]["filled"] == 0
@@ -66,21 +64,9 @@ def test_export_includes_all_child_entities():
         uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
     )
 
-    uow.documents.add(
-        Document(
-            project_id=project.id,
-            original_name="d.docx",
-            relative_path="docs/x.docx",
-            sha256="a" * 64,
-            size_bytes=100,
-            mime_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            uploaded_by=consultant.id,
-        )
-    )
     uow.extractions.add(
         Extraction(
             project_id=project.id,
-            document_id=None,
             source="llm",
             llm_model="mock",
             content={"_meta": {}, "nome_projeto": "X"},
@@ -90,7 +76,6 @@ def test_export_includes_all_child_entities():
     create_comment(uow, consultant, project.id, CommentCreate(body="hi"))
 
     bundle = export_project(uow, consultant, project.id)
-    assert len(bundle["documents"]) == 1
     assert len(bundle["extractions"]) == 1
     assert len(bundle["comments"]) == 1
     assert bundle["extractions"][0]["source"] == "llm"
@@ -107,7 +92,6 @@ def test_export_includes_coverage_from_latest_extraction():
     uow.extractions.add(
         Extraction(
             project_id=project.id,
-            document_id=None,
             source="manual",
             llm_model=None,
             content={

@@ -1,7 +1,6 @@
 import pytest
 
 from obione.auth.models import User
-from obione.documents.models import Document
 from obione.extractions.models import Extraction
 from obione.projects.schemas import ProjectCreate
 from obione.projects.service import (
@@ -24,20 +23,8 @@ def _user(role: str = "consultant", suffix: str = "x") -> User:
     )
 
 
-def _docx(project_id, sha: str = "a" * 64) -> Document:
-    return Document(
-        project_id=project_id,
-        original_name="d.docx",
-        relative_path="x.docx",
-        sha256=sha,
-        size_bytes=10,
-        mime_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        uploaded_by=None,
-    )
-
-
 @pytest.mark.unit
-def test_status_registered_when_no_documents():
+def test_status_registered_when_no_extraction():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
     project = create_project(
@@ -48,23 +35,9 @@ def test_status_registered_when_no_documents():
     e = entries[0]
     assert e.project.id == project.id
     assert e.status == "registered"
-    assert e.document_count == 0
     assert e.extraction_count == 0
     assert e.coverage_percentage == 0.0
     assert e.has_gabarito is False
-
-
-@pytest.mark.unit
-def test_status_ingested_after_document_upload():
-    uow = FakeUnitOfWork()
-    consultant = _user("consultant")
-    project = create_project(
-        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
-    )
-    uow.documents.add(_docx(project.id))
-    entries = list_portfolio_for_user(uow, consultant)
-    assert entries[0].status == "ingested"
-    assert entries[0].document_count == 1
 
 
 @pytest.mark.unit
@@ -74,11 +47,9 @@ def test_status_extracted_after_llm_extraction():
     project = create_project(
         uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
     )
-    uow.documents.add(_docx(project.id))
     uow.extractions.add(
         Extraction(
             project_id=project.id,
-            document_id=None,
             source="llm",
             llm_model="mock",
             content={"_meta": {"origem": "llm"}, "nome_projeto": "X"},
@@ -102,7 +73,6 @@ def test_status_reviewed_when_gabarito_present():
     uow.extractions.add(
         Extraction(
             project_id=project.id,
-            document_id=None,
             source="manual",
             llm_model=None,
             content={"_meta": {"origem": "gabarito_manual"}, "nome_projeto": "X"},
@@ -125,7 +95,6 @@ def test_reviewed_overrides_extracted_when_both_present():
     uow.extractions.add(
         Extraction(
             project_id=project.id,
-            document_id=None,
             source="llm",
             llm_model="mock",
             content={"_meta": {"origem": "llm"}},
@@ -135,7 +104,6 @@ def test_reviewed_overrides_extracted_when_both_present():
     uow.extractions.add(
         Extraction(
             project_id=project.id,
-            document_id=None,
             source="manual",
             llm_model=None,
             content={"_meta": {"origem": "gabarito_manual"}},

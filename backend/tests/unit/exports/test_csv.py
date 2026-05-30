@@ -38,7 +38,6 @@ def test_csv_has_header_and_44_rows_per_extraction():
     uow.extractions.add(
         Extraction(
             project_id=project.id,
-            document_id=None,
             source="llm",
             llm_model="mock",
             content={
@@ -70,7 +69,6 @@ def test_csv_columns_match_contract():
     uow.extractions.add(
         Extraction(
             project_id=project.id,
-            document_id=None,
             source="llm",
             llm_model="mock",
             content={"_meta": {"origem": "llm"}, "nome_projeto": "X"},
@@ -106,7 +104,6 @@ def test_csv_renders_arrays_with_semicolon_separator():
     uow.extractions.add(
         Extraction(
             project_id=project.id,
-            document_id=None,
             source="llm",
             llm_model="mock",
             content={
@@ -131,7 +128,6 @@ def test_csv_null_becomes_empty_cell():
     uow.extractions.add(
         Extraction(
             project_id=project.id,
-            document_id=None,
             source="llm",
             llm_model="mock",
             content={"_meta": {"origem": "llm"}, "nome_projeto": None},
@@ -153,7 +149,6 @@ def test_csv_marks_imagens_fotos_as_out_of_scope():
     uow.extractions.add(
         Extraction(
             project_id=project.id,
-            document_id=None,
             source="llm",
             llm_model="mock",
             content={"_meta": {"origem": "llm"}},
@@ -180,7 +175,6 @@ def test_csv_includes_one_block_per_extraction():
         uow.extractions.add(
             Extraction(
                 project_id=project.id,
-                document_id=None,
                 source="llm" if i == 0 else "manual",
                 llm_model="mock" if i == 0 else None,
                 content={"_meta": {"origem": "llm" if i == 0 else "gabarito_manual"}},

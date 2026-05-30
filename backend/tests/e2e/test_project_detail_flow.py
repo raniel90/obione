@@ -66,12 +66,12 @@ def test_detail_bare_project_empty_sections(client, consultant_token):
         assert r.status_code == 200, r.text
         body = r.json()
         assert body["project"]["id"] == pid
-        assert body["documents"] == []
+        assert "documents" not in body
         assert body["latest_llm_extraction"] is None
         assert body["latest_gabarito"] is None
         assert body["evaluation"] is None
         assert body["recent_comments"] == []
-        assert body["counts"] == {"documents": 0, "extractions": 0, "comments": 0}
+        assert body["counts"] == {"extractions": 0, "comments": 0}
         assert body["coverage"]["filled"] == 0
         assert body["coverage"]["total_in_scope"] == 43
     finally:

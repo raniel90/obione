@@ -5,7 +5,6 @@ import pytest
 from obione.auth.models import User
 from obione.comments.schemas import CommentCreate
 from obione.comments.service import create_comment
-from obione.documents.models import Document
 from obione.extractions.models import Extraction
 from obione.feed.service import build_feed_for_user
 from obione.projects.schemas import ProjectCreate
@@ -123,7 +122,6 @@ def test_feed_merges_comments_extractions_documents():
     create_comment(uow, consultant, project.id, CommentCreate(body="comment body"))
     extraction = Extraction(
         project_id=project.id,
-        document_id=None,
         source="llm",
         llm_model="mock",
         content={"_meta": {}},
@@ -131,21 +129,10 @@ def test_feed_merges_comments_extractions_documents():
         created_at=_now_offset(-10),
     )
     uow.extractions.add(extraction)
-    doc = Document(
-        project_id=project.id,
-        original_name="x.docx",
-        relative_path="x.docx",
-        sha256="0" * 64,
-        size_bytes=1,
-        mime_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        uploaded_by=consultant.id,
-        uploaded_at=_now_offset(-5),
-    )
-    uow.documents.add(doc)
 
     events = build_feed_for_user(uow, consultant)
     kinds = {e.kind for e in events}
-    assert kinds == {"new_comment", "new_extraction", "new_document"}
+    assert kinds == {"new_comment", "new_extraction"}
 
 
 @pytest.mark.unit
@@ -158,7 +145,6 @@ def test_feed_summary_for_extractions_uses_model_id():
     uow.extractions.add(
         Extraction(
             project_id=project.id,
-            document_id=None,
             source="llm",
             llm_model="ollama/llama3.1:8b",
             content={"_meta": {}},

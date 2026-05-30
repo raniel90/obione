@@ -39,17 +39,7 @@ class AddClientRequest(BaseModel):
     user_id: uuid.UUID
 
 
-PortfolioStatus = Literal["registered", "ingested", "extracted", "reviewed"]
-
-
-class DocumentBrief(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-    id: uuid.UUID
-    original_name: str
-    sha256: str
-    size_bytes: int
-    mime_type: str
-    uploaded_at: datetime
+PortfolioStatus = Literal["registered", "extracted", "reviewed"]
 
 
 class ExtractionBrief(BaseModel):
@@ -102,7 +92,6 @@ class ProjectDetailResponse(BaseModel):
     """
 
     project: "ProjectResponse"
-    documents: list[DocumentBrief]
     latest_llm_extraction: ExtractionBrief | None
     latest_gabarito: ExtractionBrief | None
     coverage: CoverageSummary
@@ -130,12 +119,11 @@ class PortfolioProjectResponse(BaseModel):
     updated_at: datetime
     status: PortfolioStatus = Field(
         description=(
-            "Derived from data: 'registered' (no docs), 'ingested' (has docs, "
-            "no extraction), 'extracted' (has llm extraction), 'reviewed' "
+            "Derived from data: 'registered' (no extraction yet), "
+            "'extracted' (has llm extraction), 'reviewed' "
             "(has a gabarito_manual extraction)."
         )
     )
-    document_count: int
     extraction_count: int
     coverage_percentage: float = Field(
         description="MPO coverage of the latest extraction (0-100), 0 if none."

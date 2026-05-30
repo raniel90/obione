@@ -68,7 +68,6 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
         self.session = self._session_factory()
         from obione.auth.repository import SqlAlchemyUserRepository
         from obione.comments.repository import SqlAlchemyCommentRepository
-        from obione.documents.repository import SqlAlchemyDocumentRepository
         from obione.drafts.repository import SqlAlchemyDraftRepository
         from obione.extractions.repository import SqlAlchemyExtractionRepository
         from obione.likert.repository import SqlAlchemyLikertRepository
@@ -77,7 +76,6 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
 
         self.users: SqlAlchemyUserRepository = SqlAlchemyUserRepository(self.session)
         self.projects: SqlAlchemyProjectRepository = SqlAlchemyProjectRepository(self.session)
-        self.documents: SqlAlchemyDocumentRepository = SqlAlchemyDocumentRepository(self.session)
         self.extractions: SqlAlchemyExtractionRepository = SqlAlchemyExtractionRepository(
             self.session
         )
@@ -114,7 +112,6 @@ class FakeUnitOfWork(AbstractUnitOfWork):
         self.committed = False
         from obione.auth.repository import FakeUserRepository
         from obione.comments.repository import FakeCommentRepository
-        from obione.documents.repository import FakeDocumentRepository
         from obione.drafts.repository import FakeDraftRepository
         from obione.extractions.repository import FakeExtractionRepository
         from obione.likert.repository import FakeLikertRepository
@@ -123,7 +120,6 @@ class FakeUnitOfWork(AbstractUnitOfWork):
 
         self.users: FakeUserRepository = FakeUserRepository()
         self.projects: FakeProjectRepository = FakeProjectRepository()
-        self.documents: FakeDocumentRepository = FakeDocumentRepository()
         self.extractions: FakeExtractionRepository = FakeExtractionRepository()
         self.comments: FakeCommentRepository = FakeCommentRepository()
         self.likert: FakeLikertRepository = FakeLikertRepository()

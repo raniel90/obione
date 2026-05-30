@@ -3,7 +3,6 @@ import pytest
 from obione.auth.models import User
 from obione.comments.schemas import CommentCreate
 from obione.comments.service import create_comment
-from obione.documents.models import Document
 from obione.extractions.models import Extraction
 from obione.projects.exceptions import ProjectNotFoundError
 from obione.projects.schemas import ProjectCreate
@@ -27,24 +26,11 @@ def _user(role: str = "consultant", suffix: str = "x") -> User:
     )
 
 
-def _docx(project_id) -> Document:
-    return Document(
-        project_id=project_id,
-        original_name="d.docx",
-        relative_path="x.docx",
-        sha256="a" * 64,
-        size_bytes=10,
-        mime_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        uploaded_by=None,
-    )
-
-
 def _llm(project_id, **content_extras) -> Extraction:
     content = {"_meta": {"origem": "llm"}}
     content.update(content_extras)
     return Extraction(
         project_id=project_id,
-        document_id=None,
         source="llm",
         llm_model="mock",
         content=content,
@@ -57,7 +43,6 @@ def _gabarito(project_id, **content_extras) -> Extraction:
     content.update(content_extras)
     return Extraction(
         project_id=project_id,
-        document_id=None,
         source="manual",
         llm_model=None,
         content=content,
@@ -74,7 +59,6 @@ def test_detail_empty_project_has_zero_counts():
     )
     d = get_project_detail(uow, consultant, project.id)
     assert d.project.id == project.id
-    assert d.documents == []
     assert d.latest_llm is None
     assert d.latest_gabarito is None
     assert d.evaluation is None
@@ -169,19 +153,6 @@ def test_detail_zero_comments_limit_returns_empty_but_keeps_total():
     d = get_project_detail(uow, consultant, project.id, comments_limit=0)
     assert d.recent_comments == []
     assert d.total_comments == 3
-
-
-@pytest.mark.unit
-def test_detail_includes_document_metadata():
-    uow = FakeUnitOfWork()
-    consultant = _user()
-    project = create_project(
-        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
-    )
-    uow.documents.add(_docx(project.id))
-    uow.documents.add(_docx(project.id))
-    d = get_project_detail(uow, consultant, project.id)
-    assert len(d.documents) == 2
 
 
 @pytest.mark.unit

@@ -28,11 +28,6 @@ class Extraction(Base):
         nullable=False,
         index=True,
     )
-    document_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey("documents.id", ondelete="SET NULL"),
-        nullable=True,
-    )
     source: Mapped[str] = mapped_column(String(32), nullable=False)
     llm_model: Mapped[str | None] = mapped_column(String(128), nullable=True)
     source_description_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)

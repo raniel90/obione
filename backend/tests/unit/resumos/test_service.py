@@ -39,7 +39,6 @@ def _extraction(project_id, **content_extras) -> Extraction:
     content.update(content_extras)
     return Extraction(
         project_id=project_id,
-        document_id=None,
         source="llm",
         llm_model="mock",
         content=content,

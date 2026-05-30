@@ -1,9 +1,9 @@
 """Project export use cases (US18 backend slice).
 
 `export_project` returns the JSON bundle with everything a researcher needs
-to feed the Sprint 5 evaluation pipeline: project metadata, documents
-(metadata + hash only), all extractions (any source), all comments, and
-the coverage report from the latest extraction.
+to feed the Sprint 5 evaluation pipeline: project metadata, all extractions
+(any source), all comments, and the coverage report from the latest
+extraction.
 
 `export_project_attributes_csv` returns a "long" CSV — one row per
 (extraction × attribute) — which is the format the academic protocol
@@ -113,7 +113,6 @@ def export_project_attributes_csv(
 def export_project(uow: AbstractUnitOfWork, user: User, project_id: uuid.UUID) -> dict:
     project = get_project_for_user(uow, user, project_id)
     with uow:
-        documents = uow.documents.list_by_project(project.id)
         extractions = uow.extractions.list_by_project(project.id)
         comments = uow.comments.list_by_project(project.id)
         latest_extraction = extractions[0] if extractions else None
@@ -136,24 +135,12 @@ def export_project(uow: AbstractUnitOfWork, user: User, project_id: uuid.UUID) -
                 "created_at": project.created_at,
                 "updated_at": project.updated_at,
             },
-            "documents": [
-                {
-                    "id": d.id,
-                    "original_name": d.original_name,
-                    "sha256": d.sha256,
-                    "size_bytes": d.size_bytes,
-                    "mime_type": d.mime_type,
-                    "uploaded_by": d.uploaded_by,
-                    "uploaded_at": d.uploaded_at,
-                }
-                for d in documents
-            ],
             "extractions": [
                 {
                     "id": e.id,
-                    "document_id": e.document_id,
                     "source": e.source,
                     "llm_model": e.llm_model,
+                    "source_description_hash": e.source_description_hash,
                     "content": e.content,
                     "created_by": e.created_by,
                     "created_at": e.created_at,

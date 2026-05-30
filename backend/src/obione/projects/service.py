@@ -5,7 +5,6 @@ from dataclasses import dataclass
 
 from obione.auth.models import User
 from obione.comments.models import Comment
-from obione.documents.models import Document
 from obione.extractions.coverage import CoverageReport, compute_coverage
 from obione.extractions.evaluation import EvaluationReport, compare_extractions
 from obione.extractions.models import Extraction
@@ -22,7 +21,6 @@ class PortfolioEntry:
 
     project: Project
     status: str
-    document_count: int
     extraction_count: int
     coverage_percentage: float
     has_gabarito: bool
@@ -33,7 +31,6 @@ class ProjectDetail:
     """Consolidated read view for the project detail screen (US08)."""
 
     project: Project
-    documents: list[Document]
     latest_llm: Extraction | None
     latest_gabarito: Extraction | None
     coverage: CoverageReport
@@ -112,13 +109,13 @@ def _is_gabarito(extraction) -> bool:
     return origem == "gabarito_manual"
 
 
-def _derive_status(*, document_count: int, extraction_count: int, has_gabarito: bool) -> str:
+def _derive_status(*, extraction_count: int, has_gabarito: bool) -> str:
+    """Derived portfolio status: 'registered' (no extraction yet),
+    'extracted' (has LLM extraction), 'reviewed' (has gabarito_manual)."""
     if has_gabarito:
         return "reviewed"
     if extraction_count > 0:
         return "extracted"
-    if document_count > 0:
-        return "ingested"
     return "registered"
 
 
@@ -138,7 +135,6 @@ def get_project_detail(
     """
     project = get_project_for_user(uow, user, project_id)
     with uow:
-        documents = uow.documents.list_by_project(project.id)
         extractions = uow.extractions.list_by_project(project.id)
         comments = uow.comments.list_by_project(project.id)
 
@@ -162,7 +158,6 @@ def get_project_detail(
 
     return ProjectDetail(
         project=project,
-        documents=list(documents),
         latest_llm=latest_llm,
         latest_gabarito=latest_gabarito,
         coverage=coverage,
@@ -191,7 +186,6 @@ def list_portfolio_for_user(
             projects = [p for p in projects if p.domain == domain]
         entries: list[PortfolioEntry] = []
         for project in projects:
-            documents = uow.documents.list_by_project(project.id)
             extractions = uow.extractions.list_by_project(project.id)
             has_gabarito = any(_is_gabarito(e) for e in extractions)
             if extractions:
@@ -204,11 +198,9 @@ def list_portfolio_for_user(
                 PortfolioEntry(
                     project=project,
                     status=_derive_status(
-                        document_count=len(documents),
                         extraction_count=len(extractions),
                         has_gabarito=has_gabarito,
                     ),
-                    document_count=len(documents),
                     extraction_count=len(extractions),
                     coverage_percentage=coverage_pct,
                     has_gabarito=has_gabarito,

@@ -10,7 +10,6 @@ from obione.projects.schemas import (
     AddClientRequest,
     CommentBrief,
     CoverageSummary,
-    DocumentBrief,
     EvaluationSummary,
     ExtractionBrief,
     PortfolioProjectResponse,
@@ -47,7 +46,6 @@ def get_portfolio(
             created_at=e.project.created_at,
             updated_at=e.project.updated_at,
             status=e.status,  # type: ignore[arg-type]
-            document_count=e.document_count,
             extraction_count=e.extraction_count,
             coverage_percentage=e.coverage_percentage,
             has_gabarito=e.has_gabarito,
@@ -98,7 +96,6 @@ def get_project_detail(
         )
     return ProjectDetailResponse(
         project=ProjectResponse.model_validate(detail.project),
-        documents=[DocumentBrief.model_validate(d) for d in detail.documents],
         latest_llm_extraction=(
             ExtractionBrief.model_validate(detail.latest_llm) if detail.latest_llm else None
         ),
@@ -119,7 +116,6 @@ def get_project_detail(
         evaluation=evaluation_dto,
         recent_comments=[CommentBrief.model_validate(c) for c in detail.recent_comments],
         counts={
-            "documents": len(detail.documents),
             "extractions": detail.total_extractions,
             "comments": detail.total_comments,
         },

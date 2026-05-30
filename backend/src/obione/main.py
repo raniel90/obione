@@ -6,7 +6,6 @@ from fastapi.responses import RedirectResponse
 from obione.auth.router import router as auth_router
 from obione.comments.router import comment_router
 from obione.comments.router import project_router as comments_project_router
-from obione.documents.router import router as documents_router
 from obione.drafts.router import draft_router
 from obione.drafts.router import project_router as drafts_project_router
 from obione.exports.router import router as exports_router
@@ -38,7 +37,6 @@ def create_app() -> FastAPI:
     app.include_router(health_router)
     app.include_router(auth_router)
     app.include_router(projects_router)
-    app.include_router(documents_router)
     app.include_router(extractions_router)
     app.include_router(comments_project_router)
     app.include_router(comment_router)

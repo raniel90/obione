@@ -21,11 +21,6 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     JWT_EXPIRE_MINUTES: int = 60 * 24
 
-    # Storage
-    STORAGE_BACKEND: Literal["filesystem"] = "filesystem"
-    STORAGE_ROOT: str = "/app/storage"
-    MAX_UPLOAD_SIZE_MB: int = 50
-
     # LLM (Sprint 2)
     LLM_PROVIDER: str = "mock"
     LLM_BASE_URL: str | None = None

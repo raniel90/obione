@@ -27,7 +27,6 @@ def _llm_extraction(project_id, content_extras: dict | None = None):
     content.update(content_extras or {})
     return Extraction(
         project_id=project_id,
-        document_id=None,
         source="llm",
         llm_model="mock",
         content=content,
@@ -47,7 +46,6 @@ def _gabarito(project_id, content_extras: dict | None = None):
     content.update(content_extras or {})
     return Extraction(
         project_id=project_id,
-        document_id=None,
         source="manual",
         llm_model=None,
         content=content,

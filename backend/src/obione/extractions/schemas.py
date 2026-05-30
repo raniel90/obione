@@ -64,13 +64,12 @@ class ExtractionResponse(BaseModel):
 
     id: uuid.UUID
     project_id: uuid.UUID
-    document_id: uuid.UUID | None
     source: Literal["llm", "manual"]
     llm_model: str | None
+    source_description_hash: str | None
     content: dict
     created_at: datetime
 
 
 class ManualExtractionCreate(BaseModel):
-    document_id: uuid.UUID | None = None
     content: dict
