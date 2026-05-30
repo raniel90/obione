@@ -6,7 +6,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-FeedKind = Literal["new_comment", "new_extraction", "new_document"]
+FeedKind = Literal["new_comment", "new_extraction"]
 
 
 class FeedEvent(BaseModel):
@@ -18,7 +18,7 @@ class FeedEvent(BaseModel):
         description="User that produced the event; null for LLM-generated extractions.",
     )
     target_id: uuid.UUID = Field(
-        description="ID of the entity the event describes (comment/extraction/document)."
+        description="ID of the entity the event describes (comment/extraction)."
     )
     created_at: datetime
     summary: str = Field(description="Short human-readable line (~140 chars) safe for clients.")

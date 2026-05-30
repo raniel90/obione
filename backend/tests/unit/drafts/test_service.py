@@ -22,6 +22,7 @@ from obione.projects.schemas import ProjectCreate
 from obione.projects.service import add_client_to_project, create_project
 from obione.shared.ids import new_id
 from obione.unit_of_work import FakeUnitOfWork
+from tests._helpers import SAMPLE_DESCRIPTION
 
 
 def _user(role: str = "consultant", suffix: str = "x") -> User:
@@ -39,7 +40,6 @@ def _extraction_for(project_id, **content_extras) -> Extraction:
     content.update(content_extras)
     return Extraction(
         project_id=project_id,
-        document_id=None,
         source="llm",
         llm_model="mock",
         content=content,
@@ -48,7 +48,9 @@ def _extraction_for(project_id, **content_extras) -> Extraction:
 
 
 def _project_with_extraction(uow, consultant, **extras):
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     uow.extractions.add(_extraction_for(project.id, **extras))
     return project
 
@@ -87,7 +89,9 @@ def test_generate_rejects_client_role():
 def test_generate_rejects_when_no_extraction():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     with pytest.raises(NoExtractionForDraftError):
         generate_drafts(uow, MockDraftGenerator(), consultant, project.id)
 

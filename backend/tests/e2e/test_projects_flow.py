@@ -4,6 +4,7 @@ from obione.auth.models import User
 from obione.auth.security import hash_password
 from obione.projects.models import Project
 from obione.shared.database import SessionLocal
+from tests._helpers import SAMPLE_DESCRIPTION
 
 
 def _purge_test_users(s, emails: list[str]) -> None:
@@ -56,7 +57,11 @@ def _login(client, email: str, password: str) -> str:
 def test_consultant_creates_and_lists_project(client, seeded_users):
     token = _login(client, "e2e-c@x.com", "pwd1234567")
     h = {"Authorization": f"Bearer {token}"}
-    r = client.post("/projects", json={"name": "P", "domain": "legal"}, headers=h)
+    r = client.post(
+        "/projects",
+        json={"name": "P", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    )
     assert r.status_code == 201, r.text
     project_id = r.json()["id"]
     r = client.get("/projects", headers=h)
@@ -72,7 +77,7 @@ def test_client_cannot_see_unassigned_project(client, seeded_users):
     client_tok = _login(client, "e2e-cl@x.com", "pwd1234567")
     r = client.post(
         "/projects",
-        json={"name": "Hidden", "domain": "health"},
+        json={"name": "Hidden", "domain": "health", "description": SAMPLE_DESCRIPTION},
         headers={"Authorization": f"Bearer {consultant_tok}"},
     )
     project_id = r.json()["id"]
@@ -94,7 +99,7 @@ def test_client_sees_assigned_project_after_add(client, seeded_users):
 
     r = client.post(
         "/projects",
-        json={"name": "Shared", "domain": "branding"},
+        json={"name": "Shared", "domain": "branding", "description": SAMPLE_DESCRIPTION},
         headers={"Authorization": f"Bearer {consultant_tok}"},
     )
     project_id = r.json()["id"]

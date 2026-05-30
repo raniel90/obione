@@ -68,18 +68,16 @@ _FIELD_LIST = """\
 """
 
 
-def build_extraction_messages(
-    *, doc_text: str, project_name: str, document_name: str
-) -> list[dict]:
+def build_extraction_messages(*, doc_text: str, project_name: str) -> list[dict]:
     system = (
         "Você é um analista do MPO (Modelo de Observatório de Projetos, "
         "Vieira 2022). Sua única tarefa é EXTRAIR os 44 atributos do Quadro 37 "
-        "do documento abaixo e emitir UM ÚNICO objeto JSON usando EXATAMENTE "
+        "do texto abaixo e emitir UM ÚNICO objeto JSON usando EXATAMENTE "
         "os 44 nomes de campos listados (snake_case, sem aspas customizadas, "
         "sem estruturas aninhadas além do que o tipo indicar). Não inclua "
         "comentários, markdown nem prosa antes ou depois do JSON.\n\n"
         "Princípios:\n"
-        "1. EXTRAIA tudo que o documento mencionar.\n"
+        "1. EXTRAIA tudo que o texto mencionar.\n"
         "2. Use null APENAS para atributos genuinamente ausentes.\n"
         "3. NUNCA invente valores que não estejam no texto.\n"
         "4. PT-BR. Datas em ISO 8601 (YYYY-MM-DD); 'jan/2026' → '2026-01-01'.\n"
@@ -90,7 +88,7 @@ def build_extraction_messages(
     )
     user = (
         f"Projeto: {project_name}\n"
-        f"Documento: {document_name}\n\n"
+        "Origem: descrição livre do projeto\n\n"
         f"===CONTEUDO===\n{doc_text}\n===FIM==="
     )
     return [

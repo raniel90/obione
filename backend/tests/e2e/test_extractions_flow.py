@@ -4,6 +4,7 @@ from obione.auth.models import User
 from obione.auth.security import hash_password
 from obione.projects.models import Project
 from obione.shared.database import SessionLocal
+from tests._helpers import SAMPLE_DESCRIPTION
 
 
 def _purge_user(s, email: str) -> None:
@@ -40,7 +41,11 @@ def consultant_token(client):
 @pytest.mark.e2e
 def test_create_manual_then_list(client, consultant_token):
     h = {"Authorization": f"Bearer {consultant_token}"}
-    r = client.post("/projects", json={"name": "PExt", "domain": "legal"}, headers=h)
+    r = client.post(
+        "/projects",
+        json={"name": "PExt", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    )
     pid = r.json()["id"]
     try:
         r = client.post(

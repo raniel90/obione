@@ -15,7 +15,6 @@ from datetime import UTC, datetime
 
 from openai import OpenAI
 
-from obione.extractions.llm.loader import extract_text_from_docx
 from obione.extractions.llm.port import ExtractionResult
 from obione.extractions.llm.prompts import build_extraction_messages
 from obione.extractions.llm.schema import MPOAttributes, MPOMetadata
@@ -33,11 +32,9 @@ class InstructorExtractor:
         provider: str,
         *,
         project_name: str = "unknown",
-        document_name: str = "document.docx",
     ):
         self._provider = provider
         self._project_name = project_name
-        self._document_name = document_name
         self._model_name = provider.split("/", 1)[1] if "/" in provider else provider
 
         if provider.startswith("ollama/"):
@@ -59,12 +56,10 @@ class InstructorExtractor:
 
         self._client = OpenAI(base_url=base_url, api_key=api_key or "unused")
 
-    def extract(self, document_bytes: bytes) -> ExtractionResult:
-        doc_text = extract_text_from_docx(document_bytes)
+    def extract(self, text: str) -> ExtractionResult:
         messages = build_extraction_messages(
-            doc_text=doc_text,
+            doc_text=text,
             project_name=self._project_name,
-            document_name=self._document_name,
         )
 
         completion = self._client.chat.completions.create(
@@ -83,7 +78,7 @@ class InstructorExtractor:
         payload.pop("_meta", None)
         payload["_meta"] = MPOMetadata(
             projeto_nome=self._project_name,
-            documento_fonte=self._document_name,
+            documento_fonte="project_description",
             data_extracao=datetime.now(tz=UTC).isoformat(),
             origem="llm",
             modelo_llm=self._provider,

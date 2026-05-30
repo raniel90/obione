@@ -6,7 +6,7 @@ from obione.extractions.llm.mock import MockExtractor
 @pytest.mark.unit
 def test_mock_extractor_returns_valid_dict():
     extractor = MockExtractor()
-    result = extractor.extract(b"any content")
+    result = extractor.extract("any text content for the project description")
     assert isinstance(result.content, dict)
     assert "_meta" in result.content
     assert result.model_id == "mock"
@@ -25,7 +25,7 @@ def test_mock_extractor_loads_example_when_available():
         pytest.skip("schema_extracao_exemplo.json not found in any ancestor")
 
     extractor = MockExtractor()
-    result = extractor.extract(b"x")
+    result = extractor.extract("x")
     assert result.content["_meta"]["projeto_nome"] == "valenca-odontologia"
     assert result.content["porte"] == "pequeno"
 
@@ -33,6 +33,6 @@ def test_mock_extractor_loads_example_when_available():
 @pytest.mark.unit
 def test_mock_extractor_falls_back_when_example_missing(tmp_path):
     extractor = MockExtractor(example_path=str(tmp_path / "missing.json"))
-    result = extractor.extract(b"x")
+    result = extractor.extract("x")
     assert "_meta" in result.content
     assert result.content["_meta"]["projeto_nome"] == "mock-project"

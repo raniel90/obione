@@ -5,6 +5,7 @@ from obione.auth.security import hash_password
 from obione.comments.models import Comment
 from obione.projects.models import Project
 from obione.shared.database import SessionLocal
+from tests._helpers import SAMPLE_DESCRIPTION
 
 
 def _purge_users(s, emails: list[str]) -> None:
@@ -52,12 +53,16 @@ def test_feed_shows_events_for_own_projects_only(client, two_consultants):
     h_a = {"Authorization": f"Bearer {two_consultants['a_token']}"}
     h_b = {"Authorization": f"Bearer {two_consultants['b_token']}"}
 
-    pid_a = client.post("/projects", json={"name": "FA", "domain": "legal"}, headers=h_a).json()[
-        "id"
-    ]
-    pid_b = client.post("/projects", json={"name": "FB", "domain": "health"}, headers=h_b).json()[
-        "id"
-    ]
+    pid_a = client.post(
+        "/projects",
+        json={"name": "FA", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h_a,
+    ).json()["id"]
+    pid_b = client.post(
+        "/projects",
+        json={"name": "FB", "domain": "health", "description": SAMPLE_DESCRIPTION},
+        headers=h_b,
+    ).json()["id"]
     try:
         client.post(f"/projects/{pid_a}/comments", json={"body": "em A"}, headers=h_a)
         client.post(f"/projects/{pid_b}/comments", json={"body": "em B"}, headers=h_b)
@@ -94,7 +99,11 @@ def test_feed_shows_events_for_own_projects_only(client, two_consultants):
 @pytest.mark.e2e
 def test_feed_limit_query_param(client, two_consultants):
     h = {"Authorization": f"Bearer {two_consultants['a_token']}"}
-    pid = client.post("/projects", json={"name": "FL", "domain": "legal"}, headers=h).json()["id"]
+    pid = client.post(
+        "/projects",
+        json={"name": "FL", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    ).json()["id"]
     try:
         for i in range(6):
             client.post(f"/projects/{pid}/comments", json={"body": f"c{i}"}, headers=h)

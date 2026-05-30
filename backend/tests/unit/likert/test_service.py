@@ -19,6 +19,7 @@ from obione.projects.schemas import ProjectCreate
 from obione.projects.service import add_client_to_project, create_project
 from obione.shared.ids import new_id
 from obione.unit_of_work import FakeUnitOfWork
+from tests._helpers import SAMPLE_DESCRIPTION
 
 
 def _user(role: str = "consultant", suffix: str = "x") -> User:
@@ -80,7 +81,9 @@ def test_client_submission_creates_four_rows_with_project_id():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
     client = _user("client")
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     add_client_to_project(uow, consultant, project.id, client.id)
 
     rows = submit_client_feedback(
@@ -98,7 +101,9 @@ def test_client_rejects_unassigned_project():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
     other_client = _user("client", "other")
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     # other_client is NOT in project_clients.
     with pytest.raises(ProjectNotFoundError):
         submit_client_feedback(
@@ -110,7 +115,9 @@ def test_client_rejects_unassigned_project():
 def test_client_rejects_consultant_role():
     uow = FakeUnitOfWork()
     consultant = _user("consultant")
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     with pytest.raises(WrongLikertRoleError):
         submit_client_feedback(
             uow, consultant, ClientLikertCreate(project_id=project.id, **_GOOD_CLIENT)

@@ -43,7 +43,7 @@ class MockExtractor:
                 return candidate
         return None
 
-    def extract(self, document_bytes: bytes) -> ExtractionResult:
+    def extract(self, text: str) -> ExtractionResult:
         path = self._resolve_path()
         content = json.loads(path.read_text()) if path else dict(_FALLBACK)
         return ExtractionResult(content=content, model_id="mock")

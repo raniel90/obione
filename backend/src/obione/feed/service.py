@@ -1,11 +1,10 @@
 """Activity feed use case (US11).
 
-Builds an in-memory chronological merge of three event sources scoped to the
+Builds an in-memory chronological merge of event sources scoped to the
 projects the calling user is allowed to see:
 
   - new_comment    when someone comments in a visible project
   - new_extraction when an extraction (llm or manual) is created
-  - new_document   when a document is uploaded
 
 No new tables, no caching — sources are queried fresh per request. Volume is
 small (5 projects × ~10s of items each) so this is cheap. If the feed grows
@@ -76,18 +75,6 @@ def build_feed_for_user(uow: AbstractUnitOfWork, user: User, *, limit: int = 50)
                         summary=summary,
                     )
                 )
-            for d in uow.documents.list_by_project(project.id):
-                events.append(
-                    _RawEvent(
-                        kind="new_document",
-                        project=project,
-                        actor_id=d.uploaded_by,
-                        target_id=d.id,
-                        created_at=d.uploaded_at,
-                        summary=f"Documento anexado: {d.original_name}",
-                    )
-                )
-
         events.sort(key=lambda e: e.created_at, reverse=True)
         events = events[:limit]
         return [

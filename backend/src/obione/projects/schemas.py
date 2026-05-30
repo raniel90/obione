@@ -10,7 +10,11 @@ Domain = Literal["legal", "health", "sports", "branding", "gastronomy", "other"]
 class ProjectCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     domain: Domain
-    description: str | None = None
+    description: str = Field(
+        ...,
+        min_length=200,
+        description="Conteúdo bruto do projeto (substitui o upload de .docx).",
+    )
 
 
 class ProjectUpdate(BaseModel):
@@ -25,7 +29,7 @@ class ProjectResponse(BaseModel):
     id: uuid.UUID
     name: str
     domain: str
-    description: str | None
+    description: str
     consultant_id: uuid.UUID
     created_at: datetime
     updated_at: datetime
@@ -35,17 +39,7 @@ class AddClientRequest(BaseModel):
     user_id: uuid.UUID
 
 
-PortfolioStatus = Literal["registered", "ingested", "extracted", "reviewed"]
-
-
-class DocumentBrief(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-    id: uuid.UUID
-    original_name: str
-    sha256: str
-    size_bytes: int
-    mime_type: str
-    uploaded_at: datetime
+PortfolioStatus = Literal["registered", "extracted", "reviewed"]
 
 
 class ExtractionBrief(BaseModel):
@@ -98,7 +92,6 @@ class ProjectDetailResponse(BaseModel):
     """
 
     project: "ProjectResponse"
-    documents: list[DocumentBrief]
     latest_llm_extraction: ExtractionBrief | None
     latest_gabarito: ExtractionBrief | None
     coverage: CoverageSummary
@@ -120,18 +113,17 @@ class PortfolioProjectResponse(BaseModel):
     id: uuid.UUID
     name: str
     domain: str
-    description: str | None
+    description: str
     consultant_id: uuid.UUID
     created_at: datetime
     updated_at: datetime
     status: PortfolioStatus = Field(
         description=(
-            "Derived from data: 'registered' (no docs), 'ingested' (has docs, "
-            "no extraction), 'extracted' (has llm extraction), 'reviewed' "
+            "Derived from data: 'registered' (no extraction yet), "
+            "'extracted' (has llm extraction), 'reviewed' "
             "(has a gabarito_manual extraction)."
         )
     )
-    document_count: int
     extraction_count: int
     coverage_percentage: float = Field(
         description="MPO coverage of the latest extraction (0-100), 0 if none."

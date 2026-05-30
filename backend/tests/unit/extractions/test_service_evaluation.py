@@ -8,6 +8,7 @@ from obione.projects.schemas import ProjectCreate
 from obione.projects.service import create_project
 from obione.shared.ids import new_id
 from obione.unit_of_work import FakeUnitOfWork
+from tests._helpers import SAMPLE_DESCRIPTION
 
 
 def _consultant() -> User:
@@ -26,7 +27,6 @@ def _llm_extraction(project_id, content_extras: dict | None = None):
     content.update(content_extras or {})
     return Extraction(
         project_id=project_id,
-        document_id=None,
         source="llm",
         llm_model="mock",
         content=content,
@@ -46,7 +46,6 @@ def _gabarito(project_id, content_extras: dict | None = None):
     content.update(content_extras or {})
     return Extraction(
         project_id=project_id,
-        document_id=None,
         source="manual",
         llm_model=None,
         content=content,
@@ -58,7 +57,9 @@ def _gabarito(project_id, content_extras: dict | None = None):
 def test_evaluation_requires_both_llm_and_gabarito():
     uow = FakeUnitOfWork()
     consultant = _consultant()
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
 
     with pytest.raises(EvaluationNotAvailableError):
         get_project_evaluation(uow, consultant, project.id)
@@ -72,7 +73,9 @@ def test_evaluation_requires_both_llm_and_gabarito():
 def test_evaluation_pairs_llm_with_gabarito():
     uow = FakeUnitOfWork()
     consultant = _consultant()
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     uow.extractions.add(
         _llm_extraction(
             project.id,
@@ -106,7 +109,9 @@ def test_evaluation_uses_most_recent_of_each_source():
     """When multiple llm or gabarito extractions exist, the latest wins."""
     uow = FakeUnitOfWork()
     consultant = _consultant()
-    project = create_project(uow, consultant, ProjectCreate(name="P", domain="legal"))
+    project = create_project(
+        uow, consultant, ProjectCreate(name="P", domain="legal", description=SAMPLE_DESCRIPTION)
+    )
     # Older llm with wrong value
     uow.extractions.add(_llm_extraction(project.id, {"nome_projeto": "errado"}))
     # Newer llm with right value (Fake list_by_project returns insertion order;

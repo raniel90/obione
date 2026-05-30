@@ -1,14 +1,13 @@
 """Extraction use cases."""
 
+import hashlib
 import uuid
 
 from obione.auth.models import User
-from obione.documents.storage.port import AbstractBlobStorage
 from obione.extractions.coverage import CoverageReport, compute_coverage
 from obione.extractions.evaluation import EvaluationReport, compare_extractions
 from obione.extractions.exceptions import (
     EvaluationNotAvailableError,
-    ExtractionNotFoundError,
     SchemaValidationError,
 )
 from obione.extractions.llm.port import AbstractExtractor
@@ -19,6 +18,10 @@ from obione.projects.service import get_project_for_user
 from obione.unit_of_work import AbstractUnitOfWork
 
 
+def _sha256(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
 def list_extractions_for_project(
     uow: AbstractUnitOfWork, user: User, project_id: uuid.UUID
 ) -> list[Extraction]:
@@ -27,60 +30,34 @@ def list_extractions_for_project(
         return uow.extractions.list_by_project(project_id)
 
 
-def create_extraction_from_pipeline(
+def extract_for_project(
     uow: AbstractUnitOfWork,
     extractor: AbstractExtractor,
     user: User,
     *,
     project_id: uuid.UUID,
-    document_id: uuid.UUID | None,
-    document_bytes: bytes,
 ) -> Extraction:
-    project = get_project_for_user(uow, user, project_id)
-    result = extractor.extract(document_bytes)
-    with uow:
-        extraction = Extraction(
-            project_id=project.id,
-            document_id=document_id,
-            source="llm",
-            llm_model=result.model_id,
-            content=result.content,
-            created_by=None,
-        )
-        uow.extractions.add(extraction)
-        uow.commit()
-        return extraction
+    """Run the LLM pipeline on the project's `description` field and persist.
 
-
-def create_extraction_from_document(
-    uow: AbstractUnitOfWork,
-    storage: AbstractBlobStorage,
-    extractor: AbstractExtractor,
-    user: User,
-    *,
-    project_id: uuid.UUID,
-    document_id: uuid.UUID,
-) -> Extraction:
-    """Run the LLM pipeline on an already-uploaded document and persist.
+    The project's `description` (substituting the previous .docx upload) is
+    the sole source of truth. The hash of the description is stored on the
+    extraction so the UI can detect drift after the consultant edits the
+    description.
 
     Only consultants/admins can trigger an extraction. Clients are read-only.
     """
     project = get_project_for_user(uow, user, project_id)
     if user.role == "client":
         raise ClientCannotMutateError("Clients cannot trigger extractions.")
+    text = project.description
+    description_hash = _sha256(text)
+    result = extractor.extract(text)
     with uow:
-        document = uow.documents.get(document_id)
-        if document is None or document.project_id != project.id:
-            raise ExtractionNotFoundError(f"Document not found in this project: {document_id}")
-        # storage.read is safe outside the transaction — the blob is
-        # content-addressable so no race with concurrent writes.
-        content_bytes = storage.read(document.relative_path)
-        result = extractor.extract(content_bytes)
         extraction = Extraction(
             project_id=project.id,
-            document_id=document.id,
             source="llm",
             llm_model=result.model_id,
+            source_description_hash=description_hash,
             content=result.content,
             created_by=None,
         )
@@ -156,7 +133,6 @@ def create_extraction_from_manual(
     user: User,
     *,
     project_id: uuid.UUID,
-    document_id: uuid.UUID | None,
     content: dict,
 ) -> Extraction:
     project = get_project_for_user(uow, user, project_id)
@@ -169,7 +145,6 @@ def create_extraction_from_manual(
     with uow:
         extraction = Extraction(
             project_id=project.id,
-            document_id=document_id,
             source="manual",
             llm_model=None,
             content=content,

@@ -4,6 +4,7 @@ from obione.auth.models import User
 from obione.auth.security import hash_password
 from obione.projects.models import Project
 from obione.shared.database import SessionLocal
+from tests._helpers import SAMPLE_DESCRIPTION
 
 
 def _purge_user(s, email: str) -> None:
@@ -48,7 +49,11 @@ _META_GAB = {**_META_LLM, "origem": "gabarito_manual"}
 @pytest.mark.e2e
 def test_evaluation_404_when_only_one_source(client, consultant_token):
     h = {"Authorization": f"Bearer {consultant_token}"}
-    pid = client.post("/projects", json={"name": "EV1", "domain": "legal"}, headers=h).json()["id"]
+    pid = client.post(
+        "/projects",
+        json={"name": "EV1", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    ).json()["id"]
     try:
         # Only gabarito, no llm yet.
         client.post(
@@ -66,7 +71,11 @@ def test_evaluation_404_when_only_one_source(client, consultant_token):
 @pytest.mark.e2e
 def test_evaluation_with_llm_and_gabarito(client, consultant_token):
     h = {"Authorization": f"Bearer {consultant_token}"}
-    pid = client.post("/projects", json={"name": "EV2", "domain": "legal"}, headers=h).json()["id"]
+    pid = client.post(
+        "/projects",
+        json={"name": "EV2", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    ).json()["id"]
     try:
         # Gabarito ("ground truth")
         client.post(
@@ -126,7 +135,11 @@ def test_evaluation_with_llm_and_gabarito(client, consultant_token):
 @pytest.mark.e2e
 def test_evaluation_uses_most_recent_llm_when_multiple(client, consultant_token):
     h = {"Authorization": f"Bearer {consultant_token}"}
-    pid = client.post("/projects", json={"name": "EV3", "domain": "legal"}, headers=h).json()["id"]
+    pid = client.post(
+        "/projects",
+        json={"name": "EV3", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    ).json()["id"]
     try:
         # Gabarito
         client.post(
