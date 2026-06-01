@@ -7,17 +7,15 @@ import type { User } from "./api/types";
 
 type Status = "loading" | "unauthenticated" | "authenticated";
 
-interface AuthValue {
-  status: Status;
-  user: User | null;
+type AuthShared = {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-}
+};
 
-interface AuthValueAuthenticated extends AuthValue {
-  status: "authenticated";
-  user: User;
-}
+type AuthValue =
+  | ({ status: "loading"; user: null } & AuthShared)
+  | ({ status: "unauthenticated"; user: null } & AuthShared)
+  | ({ status: "authenticated"; user: User } & AuthShared);
 
 const AuthContext = createContext<AuthValue | undefined>(undefined);
 
@@ -73,10 +71,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStatus("unauthenticated");
   }, []);
 
-  const value: AuthValue = { status, user, login, logout };
+  const value: AuthValue =
+    status === "authenticated"
+      ? { status, user: user as User, login, logout }
+      : { status, user: null, login, logout };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth(): AuthValue {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used within <AuthProvider>");
@@ -84,10 +86,11 @@ export function useAuth(): AuthValue {
 }
 
 // Helper for components that require auth — narrows the type at the call site.
+// eslint-disable-next-line react-refresh/only-export-components
 export function useUser(): User {
   const a = useAuth();
   if (a.status !== "authenticated") {
     throw new Error("useUser called while unauthenticated — wrap component in <RequireAuth>");
   }
-  return (a as AuthValueAuthenticated).user;
+  return a.user;
 }
