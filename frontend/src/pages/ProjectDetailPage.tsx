@@ -38,7 +38,7 @@ export function ProjectDetailPage() {
     [isStaff, llmContent],
   );
 
-  if (detailQ.isLoading) {
+  if (detailQ.isLoading || extractionsQ.isLoading) {
     return (
       <div className="mx-auto max-w-4xl space-y-4 px-6 py-12">
         <Skeleton className="h-8 w-64" />
@@ -100,7 +100,14 @@ export function ProjectDetailPage() {
 
       <section>
         <h2 className="mb-3 text-lg font-semibold">Atributos do projeto</h2>
-        {grouped.length === 0 ? (
+        {extractionsQ.isError ? (
+          <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4 text-sm">
+            <p className="mb-2 text-destructive">Erro ao carregar atributos.</p>
+            <Button variant="outline" size="sm" onClick={() => extractionsQ.refetch()}>
+              Tentar de novo
+            </Button>
+          </div>
+        ) : grouped.length === 0 ? (
           <p className="text-muted-foreground">Extração ainda não executada.</p>
         ) : (
           <AttributeAccordion categories={grouped} coverageByCategory={catCoverage} />

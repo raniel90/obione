@@ -100,4 +100,12 @@ describe("ProjectDetailPage", () => {
     setup(CONSULTANT);
     await waitFor(() => expect(screen.getByText(/extração ainda não executada/i)).toBeInTheDocument());
   });
+
+  it("shows an attributes error (not the empty state) when extractions fail but detail succeeds", async () => {
+    vi.spyOn(projectsApi, "getProjectDetail").mockResolvedValue(detail());
+    vi.spyOn(extractionsApi, "listExtractions").mockRejectedValue(new ApiError(500, "server_error", "x"));
+    setup(CONSULTANT);
+    await waitFor(() => expect(screen.getByText(/erro ao carregar atributos/i)).toBeInTheDocument());
+    expect(screen.queryByText(/extração ainda não executada/i)).not.toBeInTheDocument();
+  });
 });
