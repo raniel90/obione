@@ -1,4 +1,4 @@
-.PHONY: help up down logs shell psql migrate migration migrate-down test test-unit test-integration test-e2e lint format seed seed-demo clean
+.PHONY: help up up-all down logs shell psql migrate migration migrate-down test test-unit test-integration test-e2e lint format seed seed-demo frontend-dev frontend-build frontend-lint clean
 
 help:  ## List available targets
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-18s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -10,6 +10,15 @@ up:  ## Start postgres + backend in background
 	@curl -fsS http://localhost:8000/health > /dev/null 2>&1 \
 		&& echo "✓ Backend up: http://localhost:8000/docs" \
 		|| (echo "✗ Backend did not respond — check 'make logs'" && exit 1)
+
+up-all:  ## Start postgres + backend + frontend in background
+	docker-compose --profile full up -d --build
+	@echo "Waiting for backend + frontend..."
+	@sleep 8
+	@curl -fsS http://localhost:8000/health > /dev/null 2>&1 \
+		&& echo "✓ Backend up: http://localhost:8000/docs" \
+		|| (echo "✗ Backend did not respond — check 'make logs'" && exit 1)
+	@echo "✓ Frontend dev: http://localhost:5173 (npm install may still be running — tail with 'docker-compose logs -f frontend')"
 
 down:  ## Stop containers (keep volumes)
 	docker-compose down
@@ -59,5 +68,15 @@ seed:  ## Create admin@obione.dev / admin123
 seed-demo:  ## Rich seed: admin + consultor + 3 clientes + 4 projetos + extrações + CBAC + sugestão de tema
 	docker-compose exec backend python -m obione.cli seed-demo
 
+frontend-dev:  ## Start only the frontend container (dev mode)
+	docker-compose --profile full up -d --build frontend
+	@echo "✓ Frontend dev: http://localhost:5173"
+
+frontend-build:  ## Production build (npm run build) of the frontend
+	cd ../frontend && npm install && npm run build
+
+frontend-lint:  ## Run ESLint on the frontend
+	cd ../frontend && npm install && npm run lint
+
 clean:  ## Stop containers AND remove volumes (DELETES DATA)
-	docker-compose down -v
+	docker-compose --profile full down -v
