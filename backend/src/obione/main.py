@@ -1,6 +1,7 @@
 """FastAPI app factory."""
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
 from obione.auth.router import router as auth_router
@@ -33,6 +34,13 @@ def create_app() -> FastAPI:
         version="0.1.0",
     )
 
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.CORS_ORIGINS,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     register_middleware(app)
     register_exception_handlers(app)
 
