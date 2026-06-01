@@ -18,7 +18,15 @@ function Probe() {
     <div>
       <span data-testid="status">{a.status}</span>
       {a.status === "authenticated" && <span data-testid="email">{a.user.email}</span>}
-      <button onClick={() => a.login("c@x.com", "pwd12345678")}>login</button>
+      <button
+        onClick={() => {
+          a.login("c@x.com", "pwd12345678").catch(() => {
+            /* swallowed for the test probe; real callers handle this */
+          });
+        }}
+      >
+        login
+      </button>
       <button onClick={() => a.logout()}>logout</button>
     </div>
   );
@@ -120,5 +128,36 @@ describe("AuthProvider", () => {
 
     expect(screen.getByTestId("status").textContent).toBe("unauthenticated");
     expect(localStorage.getItem(TOKEN_STORAGE_KEY)).toBeNull();
+  });
+
+  it("clears token and stays unauthenticated when /me fails after a successful login", async () => {
+    vi.spyOn(authApi, "login").mockResolvedValue({
+      access_token: "t",
+      token_type: "bearer",
+      expires_in: 3600,
+    });
+    vi.spyOn(authApi, "me").mockRejectedValue(new Error("me-failed"));
+
+    render(
+      <AuthProvider>
+        <Probe />
+      </AuthProvider>,
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("status").textContent).toBe("unauthenticated"),
+    );
+
+    await act(async () => {
+      try {
+        screen.getByText("login").click();
+      } catch {
+        /* error surfaces via the rejected promise inside the handler */
+      }
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId("status").textContent).toBe("unauthenticated");
+      expect(localStorage.getItem(TOKEN_STORAGE_KEY)).toBeNull();
+    });
   });
 });

@@ -1,8 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import * as authApi from "./api/auth";
-import { clearStoredToken, setStoredToken } from "./api/token";
-import { getStoredToken } from "./api/token";
+import { clearStoredToken, getStoredToken, setStoredToken } from "./api/token";
 import type { User } from "./api/types";
 
 type Status = "loading" | "unauthenticated" | "authenticated";
@@ -60,9 +59,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (email: string, password: string) => {
     const tok = await authApi.login({ email, password });
     setStoredToken(tok.access_token);
-    const u = await authApi.me();
-    setUser(u);
-    setStatus("authenticated");
+    try {
+      const u = await authApi.me();
+      setUser(u);
+      setStatus("authenticated");
+    } catch (err) {
+      clearStoredToken();
+      setUser(null);
+      setStatus("unauthenticated");
+      throw err;
+    }
   }, []);
 
   const logout = useCallback(() => {
