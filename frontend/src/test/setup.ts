@@ -1,4 +1,10 @@
 import "@testing-library/jest-dom/vitest";
+import { afterEach } from "vitest";
+import { cleanup } from "@testing-library/react";
+
+afterEach(() => {
+  cleanup();
+});
 
 // Node 25 ships a built-in Web Storage API behind the `--localstorage-file`
 // flag that Vitest workers pass without a value. The resulting native

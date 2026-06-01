@@ -1,5 +1,5 @@
-import { afterEach, describe, it, expect, beforeEach, vi } from "vitest";
-import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import { AuthProvider, useAuth } from "./auth-context";
 import * as authApi from "./api/auth";
 import { TOKEN_STORAGE_KEY } from "./api/token";
@@ -36,10 +36,6 @@ describe("AuthProvider", () => {
   beforeEach(() => {
     localStorage.clear();
     vi.restoreAllMocks();
-  });
-
-  afterEach(() => {
-    cleanup();
   });
 
   it("starts loading, then resolves to unauthenticated when no token", async () => {
