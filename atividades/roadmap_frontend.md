@@ -83,11 +83,22 @@ consultoria e dos clientes), RF19 (exportar resultados consolidados). Ver també
 
 ## 6. Dívidas & notas
 
-- **Numeração de RFs desatualizada em `telas_observatorio.md`.** Aquele doc cita
-  "RF19" para temática e "RF20" para cockpit — esquema antigo, anterior à
-  renumeração. Os números canônicos são **RF13** (temática) e **RF14** (cockpit);
-  "RF19" hoje é "Exportar resultados consolidados" e não existe RF20. Corrigir o
-  `telas_observatorio.md` fica fora do escopo deste roadmap (dívida registrada).
+- **Numeração de RFs desatualizada em `telas_observatorio.md`.** Aquele doc usa um
+  esquema antigo, anterior à renumeração do `requisitos.md` (canônico, RF01–RF19).
+  Mapeamento explícito do que o `telas_observatorio.md` cita → canônico:
+
+  | Tela (`telas_observatorio.md`) | RF citado lá | RF canônico (`requisitos.md`) |
+  |---|---|---|
+  | Tela de Acesso | RF01, RF02 | RF01, RF02 (iguais) |
+  | Observatório de Projetos | RF07, RF09, **RF20** | RF07, RF09, **RF14** (cockpit) |
+  | Domínios | **RF19**, **RF20** | **RF13** (temática), **RF14** (comparação) |
+  | Design System | RNF02 | RNF02 (igual) |
+
+  Ou seja: o "RF19" de lá = **RF13** (categorizar por temática) e o "RF20" de lá =
+  **RF14** (cockpit/comparação cross-projeto). No `requisitos.md` atual, "RF19" é
+  "Exportar resultados consolidados" e **não existe RF20**. Corrigir o
+  `telas_observatorio.md` em si fica fora do escopo deste roadmap (dívida registrada;
+  este roadmap usa sempre a numeração canônica).
 - **e2e de temática exige `LLM_PROVIDER=mock` no backend.** Com o provedor padrão de
   LLM (ex.: `ollama/...`), o endpoint `themes/suggest` falha com `APIConnectionError`
   (500) por não alcançar um LLM externo. O classificador `mock` é determinístico por
