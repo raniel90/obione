@@ -152,3 +152,13 @@ export interface Cockpit {
   status_distribution: StatusDistribution;
   themes: ThemeBreakdown[];
 }
+
+export interface Comment {
+  id: string;
+  project_id: string;
+  author_id: string | null;
+  parent_id: string | null;
+  body: string;
+  created_at: string;
+  updated_at: string;
+}
