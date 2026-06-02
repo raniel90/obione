@@ -7,6 +7,7 @@ import * as authApi from "@/lib/api/auth";
 import * as projectsApi from "@/lib/api/projects";
 import * as extractionsApi from "@/lib/api/extractions";
 import * as themesApi from "@/lib/api/themes";
+import * as commentsApi from "@/lib/api/comments";
 import { TOKEN_STORAGE_KEY } from "@/lib/api/token";
 import { ApiError } from "@/lib/api/error";
 import { ProjectDetailPage } from "./ProjectDetailPage";
@@ -40,6 +41,7 @@ function setup(user: User) {
   localStorage.setItem(TOKEN_STORAGE_KEY, "good");
   vi.spyOn(authApi, "me").mockResolvedValue(user);
   vi.spyOn(themesApi, "listThemeSuggestions").mockResolvedValue([]);
+  vi.spyOn(commentsApi, "listComments").mockResolvedValue([]);
   return renderWithProviders(
     <Routes>
       <Route

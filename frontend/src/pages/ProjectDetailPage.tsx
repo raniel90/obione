@@ -9,7 +9,7 @@ import { categoryCoverage } from "@/lib/mpo/coverage";
 import { ApiError } from "@/lib/api/error";
 import { AttributeAccordion } from "@/components/attribute-accordion";
 import { CoverageBar } from "@/components/coverage-bar";
-import { CommentsList } from "@/components/comments-list";
+import { CommentsSection } from "@/components/comments-section";
 import { EvaluationPanel } from "@/components/evaluation-panel";
 import { DomainBadge } from "@/components/domain-badge";
 import { ThemeSection } from "@/components/theme-section";
@@ -134,7 +134,7 @@ export function ProjectDetailPage() {
       <section>
         <Separator className="mb-4" />
         <h2 className="mb-3 text-lg font-semibold">Comentários</h2>
-        <CommentsList comments={detail.recent_comments} />
+        <CommentsSection projectId={id} currentUserId={user.id} isStaff={isStaff} />
       </section>
     </div>
   );
