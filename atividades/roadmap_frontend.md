@@ -41,7 +41,7 @@ placeholder ou código parcial.
 | **M1** | Auth JWT + roteamento com guards por perfil | Login | ✅ mergeado | #24 |
 | **M2** | Lista perfil-aware + detalhe com 44 atributos MPO por categoria + CBAC | Lista, Detalhe | ✅ mergeado | #25 |
 | **M3** | Temática (RF13): sugerir/aceitar/histórico (só-staff) | Temática (no detalhe) | ✅ mergeado | #26 |
-| **M4** | UI de configuração do CBAC pelo consultor | Config CBAC | 🔜 a fazer | — |
+| **M4** | UI de configuração do CBAC pelo consultor | Config CBAC | ✅ mergeado | #27 |
 | **M5** | Cockpit cross-cliente real (agregação por temática) | Cockpit | 🔜 a fazer | — |
 
 Camada de e2e (Playwright) introduzida no M3 e aplicada retroativamente a M1/M2.
@@ -56,31 +56,17 @@ Camada de e2e (Playwright) introduzida no M3 e aplicada retroativamente a M1/M2.
 | **Lista / Observatório** | `/projects` | RF07 (portfólio perfil-aware) | M2 | ✅ | unit da lista + `e2e/projects-list.spec.ts` |
 | **Detalhe do projeto** | `/projects/:id` | RF08 (detalhe), RF09 (cobertura); consome RF04 (CBAC) | M2 | ✅ | `ProjectDetailPage.test.tsx` + `e2e/project-detail.spec.ts` |
 | **Temática (IA)** | seção no detalhe (só-staff) | RF13 (categorizar por temática/segmento) | M3 | ✅ | `theme-*.test.tsx` + `e2e/themes.spec.ts` |
-| **Config CBAC** | `/projects/:id/visibility` | RF04 (configurar visibilidade via CBAC) | M4 | 🔜 falta | — |
+| **Config CBAC** | `/projects/:id/visibility` | RF04 (configurar visibilidade via CBAC) | M4 | ✅ | `visibility-*.test.tsx` + `ProjectVisibilityPage.test.tsx` + `e2e/visibility.spec.ts` |
 | **Cockpit do portfólio** | `/portfolio/cockpit` | RF14 (cockpit cross-cliente) | M5 | 🔜 placeholder | — |
 
 Legenda: ✅ pronto (todos os critérios da §2) · 🔜 falta (não atende a §2 ainda).
 
-Snapshot de verificação (após o merge do M3): **Vitest 97/97** (26 arquivos) ·
-**Playwright 13/13** (login, lista, detalhe/CBAC, temática) · build + lint limpos.
+Snapshot de verificação (após o merge do M4): **Vitest 114/114** (30 arquivos) ·
+**Playwright 15/15** (login, lista, detalhe/CBAC, temática, visibilidade) · build + lint limpos.
 
 ---
 
 ## 5. O que falta
-
-### M4 — UI de configuração do CBAC (RF04)
-
-Rota `/projects/:id/visibility` (só-staff), consumindo o contexto `visibility` do
-backend (`GET/PUT /projects/{id}/visibility`, `PUT/DELETE .../categories|attributes`).
-O consultor/admin configura a visibilidade do projeto para o cliente: lê o estado
-atual (8 categorias + overrides + mapa resolvido dos 44 atributos) e libera/oculta por
-categoria ou por atributo. Alterações refletem imediatamente no que o cliente vê no
-detalhe (RF08/RF09).
-
-**Critério de pronto:** implementada conforme spec; Vitest da tela; **e2e** que
-configura uma categoria como consultor e verifica, como cliente, que o detalhe passa
-a mostrar/ocultar os atributos correspondentes; cliente recebe 403 ao tentar
-configurar; mergeada via PR.
 
 ### M5 — Cockpit cross-cliente (RF14)
 
