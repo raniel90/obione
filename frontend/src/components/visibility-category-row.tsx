@@ -54,7 +54,7 @@ export function VisibilityCategoryRow({
               <VisibilityAttributeRow
                 key={a.key}
                 attr={a}
-                choice={choiceByAttr[a.key]}
+                choice={choiceByAttr[a.key] ?? "inherit"}
                 resolved={!!resolved[a.key]}
                 onChange={(choice) => onChangeAttr(a.key, choice)}
               />
