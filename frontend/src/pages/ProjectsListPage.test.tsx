@@ -59,4 +59,16 @@ describe("ProjectsListPage", () => {
     setup();
     await waitFor(() => expect(screen.getByText(/nenhum projeto/i)).toBeInTheDocument());
   });
+
+  it("pre-filters by the ?domain= query param", async () => {
+    vi.spyOn(projectsApi, "listProjects").mockResolvedValue(PROJECTS);
+    renderWithProviders(
+      <Routes>
+        <Route path="/projects" element={<ProjectsListPage />} />
+      </Routes>,
+      { initialEntries: ["/projects?domain=legal"] },
+    );
+    await waitFor(() => expect(screen.getByText("Freire Batista ADV")).toBeInTheDocument());
+    expect(screen.queryByText("Valença Odontologia")).not.toBeInTheDocument();
+  });
 });

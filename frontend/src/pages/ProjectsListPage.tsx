@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { format, parseISO } from "date-fns";
 import { useProjects } from "@/lib/queries/use-projects";
 import { DomainBadge } from "@/components/domain-badge";
@@ -30,7 +30,11 @@ export function ProjectsListPage() {
   const navigate = useNavigate();
   const { data, isLoading, isError, refetch } = useProjects();
   const [search, setSearch] = useState("");
-  const [domain, setDomain] = useState<Domain | "all">("all");
+  const [searchParams] = useSearchParams();
+  const domainParam = searchParams.get("domain");
+  const initialDomain: Domain | "all" =
+    domainParam && domainParam in DOMAIN_LABELS ? (domainParam as Domain) : "all";
+  const [domain, setDomain] = useState<Domain | "all">(initialDomain);
 
   const filtered = useMemo(() => {
     const list = data ?? [];
