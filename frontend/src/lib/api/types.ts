@@ -100,3 +100,16 @@ export interface ExtractionRun {
   content: ExtractionContent;
   created_at: string;
 }
+
+export interface ThemeSuggestion {
+  id: string;
+  project_id: string;
+  suggested_domain: Domain;
+  confidence: number;
+  model_id: string;
+  reasoning: string | null;
+  accepted: boolean;
+  accepted_by: string | null;
+  accepted_at: string | null;
+  created_at: string;
+}
