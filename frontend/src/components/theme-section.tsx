@@ -50,9 +50,9 @@ export function ThemeSection({ projectId, currentDomain }: Props) {
         </Button>
       </div>
 
-      <p className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
+      <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
         Temática atual: <DomainBadge domain={currentDomain} />
-      </p>
+      </div>
 
       {suggestionsQ.isLoading ? (
         <Skeleton className="h-28 w-full" />
