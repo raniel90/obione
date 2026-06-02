@@ -61,8 +61,8 @@ Camada de e2e (Playwright) introduzida no M3 e aplicada retroativamente a M1/M2.
 
 Legenda: ✅ pronto (todos os critérios da §2) · 🔜 falta (não atende a §2 ainda).
 
-Snapshot de verificação (após RF10/comentários, PR #29): **Vitest 136/136** (37 arquivos) ·
-**Playwright 19/19** (login, lista, detalhe/CBAC, temática, visibilidade, cockpit, comentários) · build + lint limpos.
+Snapshot de verificação (após RF12/drafts, PR #30): **Vitest 154/154** (41 arquivos) ·
+**Playwright 21/21** (login, lista, detalhe/CBAC, temática, visibilidade, cockpit, comentários, drafts) · build + lint limpos.
 
 **Roadmap de telas COMPLETO (M0–M5).** As 6 telas atendem à Definição de Pronto (§2).
 
@@ -109,12 +109,16 @@ consultoria e dos clientes), RF19 (exportar resultados consolidados). Ver també
   ser só-leitura: postar (qualquer um que vê o projeto, incl. cliente — **primeira
   interação de escrita do cliente**), editar (autor), excluir (autor ou moderação:
   admin/consultor dono). Threading (respostas 1-nível) fica para uma iteração futura.
+- **RF12 (drafts / IA) — ✅ ENTREGUE (PR #30).** Seção "Próximos Passos & Pontos de
+  Atenção" no detalhe: staff gera com IA (lote via LLM), edita, publica e descarta;
+  cliente vê só os publicados (read-only). Fecha o tripé da IA (extração → temática →
+  drafts). Fora de escopo: reordenar, regenerar item, histórico, despublicar.
 - **RFs ainda não cobertos por tela no frontend** (fora dos milestones de tela
-  atuais): RF11 (feed in-app de novidades), RF12 (drafts de "Próximos Passos / Pontos
-  de Atenção"), RF15–RF18 (importar/validar gabarito, comparar extração × gabarito,
-  Likert da consultoria e dos clientes — o painel de avaliação no detalhe apenas
-  exibe métricas quando presentes), RF19 (exportar resultados consolidados). Entram em
-  ciclos futuros (spec → plano → implementação) ou ficam como escopo de backend/CLI.
+  atuais): RF11 (feed in-app de novidades), RF15–RF18 (importar/validar gabarito,
+  comparar extração × gabarito, Likert da consultoria e dos clientes — o painel de
+  avaliação no detalhe apenas exibe métricas quando presentes), RF19 (exportar
+  resultados consolidados). Entram em ciclos futuros (spec → plano → implementação) ou
+  ficam como escopo de backend/CLI.
 
 ---
 
