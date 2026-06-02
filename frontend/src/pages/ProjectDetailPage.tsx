@@ -13,6 +13,7 @@ import { CommentsSection } from "@/components/comments-section";
 import { EvaluationPanel } from "@/components/evaluation-panel";
 import { DomainBadge } from "@/components/domain-badge";
 import { ThemeSection } from "@/components/theme-section";
+import { DraftsSection } from "@/components/drafts-section";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -130,6 +131,11 @@ export function ProjectDetailPage() {
           <EvaluationPanel evaluation={detail.evaluation} />
         </section>
       )}
+
+      <section>
+        <Separator className="mb-4" />
+        <DraftsSection projectId={id} canAuthor={isStaff} />
+      </section>
 
       <section>
         <Separator className="mb-4" />

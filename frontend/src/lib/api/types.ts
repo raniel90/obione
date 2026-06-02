@@ -162,3 +162,22 @@ export interface Comment {
   created_at: string;
   updated_at: string;
 }
+
+export type DraftKind = "next_step" | "attention_point";
+export type DraftStatus = "draft" | "published";
+
+export interface Draft {
+  id: string;
+  project_id: string;
+  source_extraction_id: string | null;
+  kind: DraftKind;
+  title: string | null;
+  body: string;
+  status: DraftStatus;
+  llm_model: string | null;
+  generated_by: string | null;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
