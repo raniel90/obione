@@ -19,7 +19,7 @@ interface Props {
   comment: Comment;
   canEdit: boolean;
   canDelete: boolean;
-  onEdit: (body: string) => void;
+  onEdit: (body: string) => void | Promise<unknown>;
   onDelete: () => void;
   pending?: boolean;
 }
@@ -36,8 +36,14 @@ export function CommentItem({ comment, canEdit, canDelete, onEdit, onDelete, pen
           submitLabel="Salvar"
           pending={pending}
           onSubmit={(body) => {
-            onEdit(body);
-            setEditing(false);
+            // Fecha o modo de edição só no sucesso; em erro o form continua
+            // aberto com o texto digitado (o CommentForm não reseta ao editar).
+            const result = onEdit(body);
+            if (result instanceof Promise) {
+              result.then(() => setEditing(false)).catch(() => {});
+            } else {
+              setEditing(false);
+            }
           }}
           onCancel={() => setEditing(false)}
         />

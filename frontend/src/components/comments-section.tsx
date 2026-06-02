@@ -27,7 +27,8 @@ export function CommentsSection({ projectId, currentUserId, isStaff }: Props) {
     });
   }
   function handleUpdate(commentId: string, body: string) {
-    updateMutation.mutate(
+    // Devolve a promise pra o CommentItem fechar o modo de edição só no sucesso.
+    return updateMutation.mutateAsync(
       { commentId, body },
       {
         onSuccess: () => toast.success("Comentário atualizado"),
