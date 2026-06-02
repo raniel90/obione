@@ -113,3 +113,21 @@ export interface ThemeSuggestion {
   accepted_at: string | null;
   created_at: string;
 }
+
+export interface CategoryVisibility {
+  category_key: string;
+  visible: boolean;
+  updated_at: string;
+}
+
+export interface AttributeVisibility {
+  attribute_key: string;
+  visible: boolean;
+  updated_at: string;
+}
+
+export interface VisibilityState {
+  categories: CategoryVisibility[];
+  overrides: AttributeVisibility[];
+  resolved: Record<string, boolean>;
+}
