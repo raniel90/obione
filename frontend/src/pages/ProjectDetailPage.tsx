@@ -99,6 +99,12 @@ export function ProjectDetailPage() {
         />
       )}
 
+      {isStaff && (
+        <Button asChild variant="outline" size="sm">
+          <Link to={`/projects/${id}/visibility`}>Configurar visibilidade</Link>
+        </Button>
+      )}
+
       {isStaff && <ThemeSection projectId={id} currentDomain={project.domain} />}
 
       <section>

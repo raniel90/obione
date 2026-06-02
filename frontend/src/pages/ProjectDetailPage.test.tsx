@@ -127,4 +127,21 @@ describe("ProjectDetailPage", () => {
     await waitFor(() => expect(screen.getByText("Projeto X")).toBeInTheDocument());
     expect(screen.queryByText(/temática \(classificação ia\)/i)).not.toBeInTheDocument();
   });
+
+  it("shows the visibility config link for a consultant", async () => {
+    vi.spyOn(projectsApi, "getProjectDetail").mockResolvedValue(detail());
+    vi.spyOn(extractionsApi, "listExtractions").mockResolvedValue([run({ _meta: META, nome_projeto: "Projeto X" })]);
+    setup(CONSULTANT);
+    await waitFor(() =>
+      expect(screen.getByRole("link", { name: /configurar visibilidade/i })).toBeInTheDocument(),
+    );
+  });
+
+  it("hides the visibility config link for a client", async () => {
+    vi.spyOn(projectsApi, "getProjectDetail").mockResolvedValue(detail());
+    vi.spyOn(extractionsApi, "listExtractions").mockResolvedValue([run({ _meta: META, nome_projeto: "Projeto X" })]);
+    setup(CLIENT);
+    await waitFor(() => expect(screen.getByText("Projeto X")).toBeInTheDocument());
+    expect(screen.queryByRole("link", { name: /configurar visibilidade/i })).not.toBeInTheDocument();
+  });
 });
