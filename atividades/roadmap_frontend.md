@@ -61,8 +61,8 @@ Camada de e2e (Playwright) introduzida no M3 e aplicada retroativamente a M1/M2.
 
 Legenda: ✅ pronto (todos os critérios da §2) · 🔜 falta (não atende a §2 ainda).
 
-Snapshot de verificação (após o merge do M5): **Vitest 122/122** (34 arquivos) ·
-**Playwright 17/17** (login, lista, detalhe/CBAC, temática, visibilidade, cockpit) · build + lint limpos.
+Snapshot de verificação (após RF10/comentários, PR #29): **Vitest 136/136** (37 arquivos) ·
+**Playwright 19/19** (login, lista, detalhe/CBAC, temática, visibilidade, cockpit, comentários) · build + lint limpos.
 
 **Roadmap de telas COMPLETO (M0–M5).** As 6 telas atendem à Definição de Pronto (§2).
 
@@ -105,13 +105,16 @@ consultoria e dos clientes), RF19 (exportar resultados consolidados). Ver també
   keyword e é o mesmo que a suíte de testes do backend fixa. O `seed-demo` já usa o
   mock diretamente no código, por isso seeda uma sugestão mesmo com outro provedor
   configurado.
+- **RF10 (comentar) — ✅ ENTREGUE (PR #29).** Os comentários no detalhe deixaram de
+  ser só-leitura: postar (qualquer um que vê o projeto, incl. cliente — **primeira
+  interação de escrita do cliente**), editar (autor), excluir (autor ou moderação:
+  admin/consultor dono). Threading (respostas 1-nível) fica para uma iteração futura.
 - **RFs ainda não cobertos por tela no frontend** (fora dos milestones de tela
-  atuais): RF10 (postar comentário — hoje os comentários são só-leitura no detalhe),
-  RF11 (feed in-app de novidades), RF12 (drafts de "Próximos Passos / Pontos de
-  Atenção"), RF15–RF18 (importar/validar gabarito, comparar extração × gabarito,
+  atuais): RF11 (feed in-app de novidades), RF12 (drafts de "Próximos Passos / Pontos
+  de Atenção"), RF15–RF18 (importar/validar gabarito, comparar extração × gabarito,
   Likert da consultoria e dos clientes — o painel de avaliação no detalhe apenas
   exibe métricas quando presentes), RF19 (exportar resultados consolidados). Entram em
-  milestones futuros ou ficam como escopo de backend/CLI.
+  ciclos futuros (spec → plano → implementação) ou ficam como escopo de backend/CLI.
 
 ---
 
