@@ -3,7 +3,9 @@ import { ACCOUNTS, login } from "./helpers";
 
 const PROJECT = "Freire Batista ADV";
 
-test.describe("Drafts / IA — RF12", () => {
+// .serial: the client test depends on the consultant test having published a
+// draft on this project — make the ordering explicit and retry-safe.
+test.describe.serial("Drafts / IA — RF12", () => {
   test("consultant generates, edits and publishes a draft", async ({ page }) => {
     await login(page, ACCOUNTS.consultor);
     await page.goto("/projects");
