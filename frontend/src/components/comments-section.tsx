@@ -11,10 +11,10 @@ import { useDeleteComment } from "@/lib/queries/use-delete-comment";
 interface Props {
   projectId: string;
   currentUserId: string;
-  isStaff: boolean;
+  canModerate: boolean;
 }
 
-export function CommentsSection({ projectId, currentUserId, isStaff }: Props) {
+export function CommentsSection({ projectId, currentUserId, canModerate }: Props) {
   const commentsQ = useComments(projectId);
   const createMutation = useCreateComment(projectId);
   const updateMutation = useUpdateComment(projectId);
@@ -65,7 +65,7 @@ export function CommentsSection({ projectId, currentUserId, isStaff }: Props) {
               key={c.id}
               comment={c}
               canEdit={c.author_id === currentUserId}
-              canDelete={c.author_id === currentUserId || isStaff}
+              canDelete={c.author_id === currentUserId || canModerate}
               onEdit={(body) => handleUpdate(c.id, body)}
               onDelete={() => handleDelete(c.id)}
               pending={updateMutation.isPending || deleteMutation.isPending}

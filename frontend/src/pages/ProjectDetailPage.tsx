@@ -134,7 +134,11 @@ export function ProjectDetailPage() {
       <section>
         <Separator className="mb-4" />
         <h2 className="mb-3 text-lg font-semibold">Comentários</h2>
-        <CommentsSection projectId={id} currentUserId={user.id} isStaff={isStaff} />
+        <CommentsSection
+          projectId={id}
+          currentUserId={user.id}
+          canModerate={user.role === "admin" || project.consultant_id === user.id}
+        />
       </section>
     </div>
   );
