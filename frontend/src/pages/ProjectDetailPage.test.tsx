@@ -6,6 +6,7 @@ import { RequireAuth } from "@/components/require-auth";
 import * as authApi from "@/lib/api/auth";
 import * as projectsApi from "@/lib/api/projects";
 import * as extractionsApi from "@/lib/api/extractions";
+import * as themesApi from "@/lib/api/themes";
 import { TOKEN_STORAGE_KEY } from "@/lib/api/token";
 import { ApiError } from "@/lib/api/error";
 import { ProjectDetailPage } from "./ProjectDetailPage";
@@ -38,6 +39,7 @@ const META = { origem: "llm", projeto_nome: "X", documento_fonte: "x.docx", data
 function setup(user: User) {
   localStorage.setItem(TOKEN_STORAGE_KEY, "good");
   vi.spyOn(authApi, "me").mockResolvedValue(user);
+  vi.spyOn(themesApi, "listThemeSuggestions").mockResolvedValue([]);
   return renderWithProviders(
     <Routes>
       <Route
@@ -107,5 +109,22 @@ describe("ProjectDetailPage", () => {
     setup(CONSULTANT);
     await waitFor(() => expect(screen.getByText(/erro ao carregar atributos/i)).toBeInTheDocument());
     expect(screen.queryByText(/extração ainda não executada/i)).not.toBeInTheDocument();
+  });
+
+  it("shows the theme section for a consultant", async () => {
+    vi.spyOn(projectsApi, "getProjectDetail").mockResolvedValue(detail());
+    vi.spyOn(extractionsApi, "listExtractions").mockResolvedValue([run({ _meta: META, nome_projeto: "Projeto X" })]);
+    setup(CONSULTANT);
+    await waitFor(() =>
+      expect(screen.getByText(/temática \(classificação ia\)/i)).toBeInTheDocument(),
+    );
+  });
+
+  it("hides the theme section for a client", async () => {
+    vi.spyOn(projectsApi, "getProjectDetail").mockResolvedValue(detail());
+    vi.spyOn(extractionsApi, "listExtractions").mockResolvedValue([run({ _meta: META, nome_projeto: "Projeto X" })]);
+    setup(CLIENT);
+    await waitFor(() => expect(screen.getByText("Projeto X")).toBeInTheDocument());
+    expect(screen.queryByText(/temática \(classificação ia\)/i)).not.toBeInTheDocument();
   });
 });

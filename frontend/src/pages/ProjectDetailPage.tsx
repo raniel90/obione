@@ -12,6 +12,7 @@ import { CoverageBar } from "@/components/coverage-bar";
 import { CommentsList } from "@/components/comments-list";
 import { EvaluationPanel } from "@/components/evaluation-panel";
 import { DomainBadge } from "@/components/domain-badge";
+import { ThemeSection } from "@/components/theme-section";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -97,6 +98,8 @@ export function ProjectDetailPage() {
           total={detail.coverage.total_in_scope}
         />
       )}
+
+      {isStaff && <ThemeSection projectId={id} currentDomain={project.domain} />}
 
       <section>
         <h2 className="mb-3 text-lg font-semibold">Atributos do projeto</h2>
