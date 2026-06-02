@@ -131,3 +131,24 @@ export interface VisibilityState {
   overrides: AttributeVisibility[];
   resolved: Record<string, boolean>;
 }
+
+export interface StatusDistribution {
+  registered: number;
+  extracted: number;
+  reviewed: number;
+}
+
+export interface ThemeBreakdown {
+  domain: Domain;
+  count: number;
+  avg_coverage: number;
+  status_distribution: StatusDistribution;
+  reviewed_pct: number;
+}
+
+export interface Cockpit {
+  total_projects: number;
+  avg_coverage_overall: number;
+  status_distribution: StatusDistribution;
+  themes: ThemeBreakdown[];
+}
