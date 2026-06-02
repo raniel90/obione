@@ -35,7 +35,7 @@ export function DraftsSection({ projectId, canAuthor }: Props) {
   }
   function handleUpdate(draftId: string, patch: { title: string; body: string }) {
     return updateMutation.mutateAsync(
-      { draftId, patch: { title: patch.title || undefined, body: patch.body } },
+      { draftId, patch: { title: patch.title, body: patch.body } },
       {
         onSuccess: () => toast.success("Draft atualizado"),
         onError: () => toast.error("Não foi possível atualizar o draft."),
