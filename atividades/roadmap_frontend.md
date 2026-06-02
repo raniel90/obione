@@ -42,7 +42,7 @@ placeholder ou código parcial.
 | **M2** | Lista perfil-aware + detalhe com 44 atributos MPO por categoria + CBAC | Lista, Detalhe | ✅ mergeado | #25 |
 | **M3** | Temática (RF13): sugerir/aceitar/histórico (só-staff) | Temática (no detalhe) | ✅ mergeado | #26 |
 | **M4** | UI de configuração do CBAC pelo consultor | Config CBAC | ✅ mergeado | #27 |
-| **M5** | Cockpit cross-cliente real (agregação por temática) | Cockpit | 🔜 a fazer | — |
+| **M5** | Cockpit cross-cliente real (agregação por temática) | Cockpit | ✅ mergeado | #28 |
 
 Camada de e2e (Playwright) introduzida no M3 e aplicada retroativamente a M1/M2.
 
@@ -57,26 +57,27 @@ Camada de e2e (Playwright) introduzida no M3 e aplicada retroativamente a M1/M2.
 | **Detalhe do projeto** | `/projects/:id` | RF08 (detalhe), RF09 (cobertura); consome RF04 (CBAC) | M2 | ✅ | `ProjectDetailPage.test.tsx` + `e2e/project-detail.spec.ts` |
 | **Temática (IA)** | seção no detalhe (só-staff) | RF13 (categorizar por temática/segmento) | M3 | ✅ | `theme-*.test.tsx` + `e2e/themes.spec.ts` |
 | **Config CBAC** | `/projects/:id/visibility` | RF04 (configurar visibilidade via CBAC) | M4 | ✅ | `visibility-*.test.tsx` + `ProjectVisibilityPage.test.tsx` + `e2e/visibility.spec.ts` |
-| **Cockpit do portfólio** | `/portfolio/cockpit` | RF14 (cockpit cross-cliente) | M5 | 🔜 placeholder | — |
+| **Cockpit do portfólio** | `/portfolio/cockpit` | RF14 (cockpit cross-cliente) | M5 | ✅ | `cockpit-kpis.test.tsx` + `theme-breakdown-table.test.tsx` + `PortfolioCockpitPage.test.tsx` + `e2e/cockpit.spec.ts` |
 
 Legenda: ✅ pronto (todos os critérios da §2) · 🔜 falta (não atende a §2 ainda).
 
-Snapshot de verificação (após o merge do M4): **Vitest 114/114** (30 arquivos) ·
-**Playwright 15/15** (login, lista, detalhe/CBAC, temática, visibilidade) · build + lint limpos.
+Snapshot de verificação (após o merge do M5): **Vitest 122/122** (34 arquivos) ·
+**Playwright 17/17** (login, lista, detalhe/CBAC, temática, visibilidade, cockpit) · build + lint limpos.
+
+**Roadmap de telas COMPLETO (M0–M5).** As 6 telas atendem à Definição de Pronto (§2).
 
 ---
 
 ## 5. O que falta
 
-### M5 — Cockpit cross-cliente (RF14)
+**Nenhuma tela pendente** — o roadmap M0–M5 está completo (6 telas ✅, cada uma com
+Vitest + e2e conforme a Definição de Pronto).
 
-Substituir o placeholder de `/portfolio/cockpit` pela agregação real do portfólio:
-indicadores no topo, agrupamento/comparação por temática (domínio) cross-projeto,
-perfil-aware (só consultor/admin).
-
-**Critério de pronto:** implementado conforme spec; Vitest; **e2e** que loga como
-consultor e valida os agregados por temática contra o `seed-demo`; cliente não acessa
-a tela (role guard); mergeado via PR.
+O que resta são itens de **backlog fora dos milestones de tela**, que entram em ciclos
+futuros (spec → plano → implementação próprios): RF10 (postar comentário — hoje só
+leitura), RF11 (feed in-app), RF12 (drafts de Próximos Passos / Pontos de Atenção),
+RF15–RF18 (importar/validar gabarito, comparar extração × gabarito, Likert da
+consultoria e dos clientes), RF19 (exportar resultados consolidados). Ver também §6.
 
 ---
 
