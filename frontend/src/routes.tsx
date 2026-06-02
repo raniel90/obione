@@ -6,6 +6,7 @@ import { LoginPage } from "@/pages/LoginPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { PortfolioCockpitPage } from "@/pages/PortfolioCockpitPage";
 import { ProjectDetailPage } from "@/pages/ProjectDetailPage";
+import { ProjectVisibilityPage } from "@/pages/ProjectVisibilityPage";
 import { ProjectsListPage } from "@/pages/ProjectsListPage";
 
 export function AppRoutes() {
@@ -44,6 +45,16 @@ export function AppRoutes() {
           element={
             <RequireAuth>
               <ProjectDetailPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/projects/:id/visibility"
+          element={
+            <RequireAuth>
+              <RequireRole role={["consultant", "admin"]}>
+                <ProjectVisibilityPage />
+              </RequireRole>
             </RequireAuth>
           }
         />
