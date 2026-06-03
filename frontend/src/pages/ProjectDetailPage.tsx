@@ -42,7 +42,7 @@ export function ProjectDetailPage() {
 
   if (detailQ.isLoading || extractionsQ.isLoading) {
     return (
-      <div className="mx-auto max-w-4xl space-y-4 px-6 py-12">
+      <div className="space-y-4">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-40 w-full" />
       </div>
@@ -53,19 +53,19 @@ export function ProjectDetailPage() {
     const status = detailQ.error instanceof ApiError ? detailQ.error.status : 0;
     if (status === 404) {
       return (
-        <div className="mx-auto max-w-md px-6 py-24 text-center">
+        <div className="py-12 text-center">
           <h1 className="text-2xl font-bold">Projeto não encontrado</h1>
           <p className="mt-2 text-muted-foreground">
             Ele não existe ou você não tem acesso.
           </p>
-          <Link to="/" className="mt-6 inline-block text-sm text-primary underline">
-            Voltar ao início
+          <Link to="/projects" className="mt-6 inline-block text-sm text-primary underline">
+            Voltar aos projetos
           </Link>
         </div>
       );
     }
     return (
-      <div className="mx-auto max-w-md px-6 py-24 text-center">
+      <div className="py-12 text-center">
         <p className="mb-3 text-destructive">Erro ao carregar o projeto.</p>
         <Button variant="outline" size="sm" onClick={() => detailQ.refetch()}>
           Tentar de novo
@@ -78,11 +78,8 @@ export function ProjectDetailPage() {
   const project = detail.project;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8 px-6 py-12">
+    <div className="space-y-8">
       <header className="space-y-2">
-        <Link to="/projects" className="text-sm text-muted-foreground hover:underline">
-          ← Projetos
-        </Link>
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-2xl font-bold">{project.name}</h1>
           <DomainBadge domain={project.domain} />

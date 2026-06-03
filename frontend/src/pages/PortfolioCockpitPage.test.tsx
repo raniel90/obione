@@ -67,11 +67,4 @@ describe("PortfolioCockpitPage", () => {
     );
     expect(screen.getByRole("button", { name: /tentar de novo/i })).toBeInTheDocument();
   });
-
-  it("has a link to the feed", async () => {
-    vi.spyOn(portfolioApi, "getCockpit").mockResolvedValue(COCKPIT);
-    setup();
-    await waitFor(() => expect(screen.getByText("Cockpit do Portfólio")).toBeInTheDocument());
-    expect(screen.getByRole("link", { name: "Novidades" })).toHaveAttribute("href", "/feed");
-  });
 });

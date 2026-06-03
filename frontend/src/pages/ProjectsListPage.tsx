@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { format, parseISO } from "date-fns";
 import { useProjects } from "@/lib/queries/use-projects";
 import { DomainBadge } from "@/components/domain-badge";
@@ -47,13 +47,8 @@ export function ProjectsListPage() {
   }, [data, search, domain]);
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-12">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Projetos</h1>
-        <Link to="/feed" className="text-sm text-primary hover:underline">
-          Novidades
-        </Link>
-      </div>
+    <div>
+      <h1 className="mb-6 text-2xl font-bold">Projetos</h1>
 
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
         <Input
