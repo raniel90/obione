@@ -113,12 +113,17 @@ consultoria e dos clientes), RF19 (exportar resultados consolidados). Ver també
   Atenção" no detalhe: staff gera com IA (lote via LLM), edita, publica e descarta;
   cliente vê só os publicados (read-only). Fecha o tripé da IA (extração → temática →
   drafts). Fora de escopo: reordenar, regenerar item, histórico, despublicar.
+- **RF17–RF18 (Likert da consultoria + dos clientes) — NÃO será frontend.** Decidido em
+  2026-06-02: é o **instrumento de avaliação DSR** do artefato (N pequeno, one-shot,
+  alimenta o relato), não uma funcionalidade de produto. A **coleta fica externa**
+  (ex.: Google Form) e a **metodologia** (dimensões, momento de coleta, reporte) é
+  decisão acadêmica a definir à parte. O backend `likert` permanece como está (pode
+  exportar o agregado pro relato via CLI/script). Sem UI no frontend.
 - **RFs ainda não cobertos por tela no frontend** (fora dos milestones de tela
-  atuais): RF11 (feed in-app de novidades), RF15–RF18 (importar/validar gabarito,
-  comparar extração × gabarito, Likert da consultoria e dos clientes — o painel de
-  avaliação no detalhe apenas exibe métricas quando presentes), RF19 (exportar
-  resultados consolidados). Entram em ciclos futuros (spec → plano → implementação) ou
-  ficam como escopo de backend/CLI.
+  atuais): RF11 (feed in-app de novidades), RF19 (exportar resultados consolidados).
+  RF15–RF16 (gabarito / comparação) já aparecem no `EvaluationPanel` do detalhe quando
+  presentes; importação de gabarito é escopo de backend/CLI. Entram em ciclos futuros
+  (spec → plano → implementação) se/quando priorizados.
 
 ---
 
