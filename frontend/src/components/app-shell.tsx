@@ -1,5 +1,5 @@
 import { NavLink, Link } from "react-router-dom";
-import { LogOut, Monitor, Moon, Sun } from "lucide-react";
+import { LogOut, Moon, Shield, Sun, UserRound } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useTheme } from "@/components/theme-provider";
 import { ObiOneWordmark } from "@/components/obione-logo";
@@ -118,7 +118,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       {user.email}
                     </span>
                     <span className="mt-1 inline-flex w-fit items-center gap-1 text-xs font-normal text-muted-foreground">
-                      <Monitor className="size-3" />
+                      {isStaff ? (
+                        <Shield className="size-3" />
+                      ) : (
+                        <UserRound className="size-3" />
+                      )}
                       {ROLE_LABELS[user.role]}
                     </span>
                   </DropdownMenuLabel>

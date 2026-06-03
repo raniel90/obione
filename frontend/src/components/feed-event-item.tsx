@@ -4,14 +4,22 @@ import { FileText, MessageSquare } from "lucide-react";
 import type { FeedEvent } from "@/lib/api/types";
 
 export function FeedEventItem({ event }: { event: FeedEvent }) {
-  const Icon = event.kind === "new_comment" ? MessageSquare : FileText;
+  const isComment = event.kind === "new_comment";
+  const Icon = isComment ? MessageSquare : FileText;
   return (
     <li>
       <Link
         to={`/projects/${event.project_id}`}
-        className="flex items-start gap-3 rounded-md border p-3 text-sm hover:bg-muted/50"
+        className="flex items-start gap-3 rounded-lg border p-3 text-sm transition-colors hover:border-foreground/20 hover:bg-muted/50"
       >
-        <Icon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+        <span
+          aria-hidden
+          className={`mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md ${
+            isComment ? "bg-info/10 text-info" : "bg-success/10 text-success"
+          }`}
+        >
+          <Icon className="size-4" />
+        </span>
         <div className="min-w-0">
           <p>
             <span className="font-medium">{event.project_name}</span>{" "}
