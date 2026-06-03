@@ -13,3 +13,11 @@ venv/
 
 # impeccable critique snapshots (arquivo local, não versionar)
 .impeccable/
+
+# Local tooling / agent scaffolding (não versionar)
+.agents/
+.claude/skills/impeccable
+.playwright-mcp/
+skills-lock.json
+test-results/
+playwright-report/
