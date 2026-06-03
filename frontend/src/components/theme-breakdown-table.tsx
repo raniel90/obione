@@ -9,7 +9,31 @@ import {
 } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
 import { DomainBadge } from "@/components/domain-badge";
-import type { ThemeBreakdown } from "@/lib/api/types";
+import type { StatusDistribution, ThemeBreakdown } from "@/lib/api/types";
+
+const STATUS_SEGMENTS = [
+  { key: "registered", label: "Registrados", dot: "bg-muted-foreground" },
+  { key: "extracted", label: "Extraídos", dot: "bg-info" },
+  { key: "reviewed", label: "Revisados", dot: "bg-success" },
+] as const;
+
+/** Color-coded registered / extracted / reviewed counts (shared legend). */
+function StatusDots({ status }: { status: StatusDistribution }) {
+  return (
+    <div className="flex items-center gap-3">
+      {STATUS_SEGMENTS.map((seg) => (
+        <span
+          key={seg.key}
+          className="flex items-center gap-1.5 tabular-nums"
+          title={`${seg.label}: ${status[seg.key]}`}
+        >
+          <span aria-hidden className={`size-2 shrink-0 rounded-full ${seg.dot}`} />
+          {status[seg.key]}
+        </span>
+      ))}
+    </div>
+  );
+}
 
 export function ThemeBreakdownTable({ themes }: { themes: ThemeBreakdown[] }) {
   return (
@@ -19,7 +43,7 @@ export function ThemeBreakdownTable({ themes }: { themes: ThemeBreakdown[] }) {
           <TableHead>Temática</TableHead>
           <TableHead>Projetos</TableHead>
           <TableHead>Cobertura</TableHead>
-          <TableHead>Status (R/E/Rev)</TableHead>
+          <TableHead title="Registrados · Extraídos · Revisados">Status</TableHead>
           <TableHead>Revisado</TableHead>
         </TableRow>
       </TableHeader>
@@ -42,7 +66,7 @@ export function ThemeBreakdownTable({ themes }: { themes: ThemeBreakdown[] }) {
                 </div>
               </TableCell>
               <TableCell className="text-muted-foreground">
-                {s.registered}/{s.extracted}/{s.reviewed}
+                <StatusDots status={s} />
               </TableCell>
               <TableCell>{Math.round(t.reviewed_pct)}%</TableCell>
             </TableRow>
