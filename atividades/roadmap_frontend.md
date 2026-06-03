@@ -46,6 +46,12 @@ placeholder ou código parcial.
 
 Camada de e2e (Playwright) introduzida no M3 e aplicada retroativamente a M1/M2.
 
+| Pós-M5 | **UI polish (impeccable) + app shell** — passe de craft em todas as telas | (transversal) | ✅ mergeado | #33 |
+
+O passe de polish (PR #33) é **transversal** — não acrescenta tela nova; refina as 6
+existentes e adiciona a casca de navegação (ver §6). Sem mudança de comportamento,
+escopo ou role-aware.
+
 ---
 
 ## 4. Inventário de telas (espinha)
@@ -61,10 +67,11 @@ Camada de e2e (Playwright) introduzida no M3 e aplicada retroativamente a M1/M2.
 
 Legenda: ✅ pronto (todos os critérios da §2) · 🔜 falta (não atende a §2 ainda).
 
-Snapshot de verificação (após RF11/feed, PR #32): **Vitest 162/162** (44 arquivos) ·
+Snapshot de verificação (após UI polish, PR #33): **Vitest 168/168** (46 arquivos) ·
 **Playwright 23/23** (login, lista, detalhe/CBAC, temática, visibilidade, cockpit, comentários, drafts, feed) · build + lint limpos.
 
-**Roadmap de telas COMPLETO (M0–M5).** As 6 telas atendem à Definição de Pronto (§2).
+**Roadmap de telas COMPLETO (M0–M5).** As 6 telas atendem à Definição de Pronto (§2),
+agora com o **passe de UI polish + app shell** aplicado (PR #33 — ver §3 e §6).
 
 ---
 
@@ -122,6 +129,22 @@ features de tela foi entregue: **RF10** (comentários), **RF12** (drafts/IA) e *
   (gabarito / comparação) já aparecem no `EvaluationPanel` do detalhe quando presentes;
   importação de gabarito é escopo de backend/CLI. RF17–RF18 (Likert) é avaliação DSR fora
   do app (acima). RF19 (export) foi cortado do escopo.
+- **UI polish (impeccable) + app shell — ✅ MERGEADO (PR #33).** Passe de craft
+  *transversal* (tom restrained, sem mudar comportamento/escopo/role-aware) nas 6 telas:
+  - **App shell** (`components/app-shell.tsx`): header com logo (→`/`), **nav perfil-aware**
+    (Projetos · Cockpit[só staff] · Novidades), toggle de tema e menu do usuário (Sair).
+    Aplicado como *layout route* via `<Outlet>` sobre as rotas autenticadas; `/login` e 404
+    ficam fora. Removeu os back-links ad-hoc e os wrappers `max-w-*` das páginas — o shell
+    dá container e navegação unificados. **O link "Novidades" migrou das landings para a
+    nav do shell** (supersede a nota de RF11 sobre "link nas duas landings").
+  - **Sinais legíveis**: `DomainBadge` com ponto colorido por domínio (lista/detalhe/cockpit);
+    `CockpitKpis` virou painel único dividido (não grid de cards) com status em pontos
+    coloridos (registrado/extraído/revisado); `ThemeBreakdownTable` trocou "R/E/Rev" (0/0/1)
+    pelos mesmos pontos.
+  - **Consistência**: novo `EmptyState` (ícone + msg) em lista/cockpit/feed/atributos; login
+    em card; `FeedEventItem` com ícone tintado por tipo; breadcrumb no detalhe/visibilidade.
+  - **Role-aware preservado**: cliente não vê Cockpit na nav nem seções staff; guards intactos.
+    Verde: Vitest 168/168 · e2e 23/23 · tour headless 2 perfis (11/11 checks role-aware).
 
 ---
 
