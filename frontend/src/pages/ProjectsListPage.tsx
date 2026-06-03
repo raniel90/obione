@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { format, parseISO } from "date-fns";
+import { FolderOpen } from "lucide-react";
 import { useProjects } from "@/lib/queries/use-projects";
 import { DomainBadge } from "@/components/domain-badge";
+import { EmptyState } from "@/components/empty-state";
 import { DOMAIN_LABELS } from "@/lib/mpo/catalog";
 import { Input } from "@/components/ui/input";
 import {
@@ -47,13 +49,8 @@ export function ProjectsListPage() {
   }, [data, search, domain]);
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-12">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Projetos</h1>
-        <Link to="/feed" className="text-sm text-primary hover:underline">
-          Novidades
-        </Link>
-      </div>
+    <div>
+      <h1 className="mb-6 text-2xl font-bold">Projetos</h1>
 
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
         <Input
@@ -95,7 +92,19 @@ export function ProjectsListPage() {
       )}
 
       {!isLoading && !isError && filtered.length === 0 && (
-        <p className="text-muted-foreground">Nenhum projeto ainda.</p>
+        <EmptyState
+          icon={FolderOpen}
+          message={
+            (data ?? []).length === 0
+              ? "Nenhum projeto ainda."
+              : "Nenhum projeto encontrado."
+          }
+          description={
+            (data ?? []).length === 0
+              ? undefined
+              : "Ajuste a busca ou o filtro de domínio."
+          }
+        />
       )}
 
       {!isLoading && !isError && filtered.length > 0 && (

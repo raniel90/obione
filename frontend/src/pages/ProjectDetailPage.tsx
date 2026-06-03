@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
 import { format, parseISO } from "date-fns";
+import { FileText, SlidersHorizontal } from "lucide-react";
 import { useProjectDetail } from "@/lib/queries/use-project-detail";
 import { useExtractions } from "@/lib/queries/use-extractions";
 import { useUser } from "@/lib/auth-context";
@@ -14,6 +15,7 @@ import { EvaluationPanel } from "@/components/evaluation-panel";
 import { DomainBadge } from "@/components/domain-badge";
 import { ThemeSection } from "@/components/theme-section";
 import { DraftsSection } from "@/components/drafts-section";
+import { EmptyState } from "@/components/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -42,7 +44,7 @@ export function ProjectDetailPage() {
 
   if (detailQ.isLoading || extractionsQ.isLoading) {
     return (
-      <div className="mx-auto max-w-4xl space-y-4 px-6 py-12">
+      <div className="space-y-4">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-40 w-full" />
       </div>
@@ -53,19 +55,19 @@ export function ProjectDetailPage() {
     const status = detailQ.error instanceof ApiError ? detailQ.error.status : 0;
     if (status === 404) {
       return (
-        <div className="mx-auto max-w-md px-6 py-24 text-center">
+        <div className="py-12 text-center">
           <h1 className="text-2xl font-bold">Projeto não encontrado</h1>
           <p className="mt-2 text-muted-foreground">
             Ele não existe ou você não tem acesso.
           </p>
-          <Link to="/" className="mt-6 inline-block text-sm text-primary underline">
-            Voltar ao início
+          <Link to="/projects" className="mt-6 inline-block text-sm text-primary underline">
+            Voltar aos projetos
           </Link>
         </div>
       );
     }
     return (
-      <div className="mx-auto max-w-md px-6 py-24 text-center">
+      <div className="py-12 text-center">
         <p className="mb-3 text-destructive">Erro ao carregar o projeto.</p>
         <Button variant="outline" size="sm" onClick={() => detailQ.refetch()}>
           Tentar de novo
@@ -78,11 +80,17 @@ export function ProjectDetailPage() {
   const project = detail.project;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8 px-6 py-12">
+    <div className="space-y-8">
       <header className="space-y-2">
-        <Link to="/projects" className="text-sm text-muted-foreground hover:underline">
-          ← Projetos
-        </Link>
+        <nav className="text-sm text-muted-foreground" aria-label="Trilha">
+          <Link to="/projects" className="hover:text-foreground hover:underline">
+            Projetos
+          </Link>
+          <span className="px-1.5" aria-hidden>
+            /
+          </span>
+          <span className="text-foreground">{project.name}</span>
+        </nav>
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-2xl font-bold">{project.name}</h1>
           <DomainBadge domain={project.domain} />
@@ -102,7 +110,10 @@ export function ProjectDetailPage() {
 
       {isStaff && (
         <Button asChild variant="outline" size="sm">
-          <Link to={`/projects/${id}/visibility`}>Configurar visibilidade</Link>
+          <Link to={`/projects/${id}/visibility`}>
+            <SlidersHorizontal className="size-4" />
+            Configurar visibilidade
+          </Link>
         </Button>
       )}
 
@@ -118,7 +129,11 @@ export function ProjectDetailPage() {
             </Button>
           </div>
         ) : grouped.length === 0 ? (
-          <p className="text-muted-foreground">Extração ainda não executada.</p>
+          <EmptyState
+            icon={FileText}
+            message="Extração ainda não executada."
+            description="Os 44 atributos do MPO aparecem aqui após a extração via IA."
+          />
         ) : (
           <AttributeAccordion categories={grouped} coverageByCategory={catCoverage} />
         )}

@@ -19,7 +19,7 @@ export function ProjectVisibilityPage() {
 
   if (stateQ.isLoading) {
     return (
-      <div className="mx-auto max-w-4xl space-y-4 px-6 py-12">
+      <div className="space-y-4">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-40 w-full" />
       </div>
@@ -28,7 +28,7 @@ export function ProjectVisibilityPage() {
 
   if (stateQ.isError) {
     return (
-      <div className="mx-auto max-w-md px-6 py-24 text-center">
+      <div className="py-12 text-center">
         <p className="mb-3 text-destructive">Erro ao carregar a visibilidade.</p>
         <Button variant="outline" size="sm" onClick={() => stateQ.refetch()}>
           Tentar de novo
@@ -66,11 +66,26 @@ export function ProjectVisibilityPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 px-6 py-12">
+    <div className="space-y-6">
       <header className="space-y-2">
-        <Link to={`/projects/${id}`} className="text-sm text-muted-foreground hover:underline">
-          ← Detalhe do projeto
-        </Link>
+        <nav className="text-sm text-muted-foreground" aria-label="Trilha">
+          <Link to="/projects" className="hover:text-foreground hover:underline">
+            Projetos
+          </Link>
+          <span className="px-1.5" aria-hidden>
+            /
+          </span>
+          <Link
+            to={`/projects/${id}`}
+            className="hover:text-foreground hover:underline"
+          >
+            Projeto
+          </Link>
+          <span className="px-1.5" aria-hidden>
+            /
+          </span>
+          <span className="text-foreground">Visibilidade</span>
+        </nav>
         <h1 className="text-2xl font-bold">Visibilidade do cliente</h1>
         <p className="text-sm text-muted-foreground">
           Cliente vê {visibleCount} de {TOTAL} atributos.

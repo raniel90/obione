@@ -48,7 +48,11 @@ export function LoginPage() {
           <h1 className="text-2xl font-bold">Entrar no ObiOne</h1>
           <p className="text-sm text-muted-foreground">Observatório de Projetos</p>
         </div>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-4 rounded-xl border bg-card p-6 shadow-sm"
+          noValidate
+        >
           <div className="space-y-1">
             <Label htmlFor="email">Email</Label>
             <Input

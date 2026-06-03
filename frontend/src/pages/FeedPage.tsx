@@ -1,6 +1,7 @@
-import { Link } from "react-router-dom";
+import { Bell } from "lucide-react";
 import { useFeed } from "@/lib/queries/use-feed";
 import { FeedEventItem } from "@/components/feed-event-item";
+import { EmptyState } from "@/components/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 
@@ -9,13 +10,9 @@ export function FeedPage() {
   const events = feedQ.data ?? [];
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-12">
-      <Link to="/" className="text-sm text-muted-foreground hover:underline">
-        ← Voltar
-      </Link>
-
+    <div className="mx-auto max-w-2xl">
       {feedQ.isLoading ? (
-        <div className="mt-2 space-y-2">
+        <div className="space-y-2">
           <Skeleton className="mb-6 h-6 w-40" />
           <Skeleton className="h-14 w-full" />
           <Skeleton className="h-14 w-full" />
@@ -23,7 +20,7 @@ export function FeedPage() {
         </div>
       ) : (
         <>
-          <h1 className="mb-6 mt-2 text-2xl font-bold">Novidades</h1>
+          <h1 className="mb-6 text-2xl font-bold">Novidades</h1>
 
           {feedQ.isError ? (
             <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4 text-sm">
@@ -33,7 +30,11 @@ export function FeedPage() {
               </Button>
             </div>
           ) : events.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhuma novidade ainda.</p>
+            <EmptyState
+              icon={Bell}
+              message="Nenhuma novidade ainda."
+              description="Novos comentários e extrações dos seus projetos aparecem aqui."
+            />
           ) : (
             <ul className="space-y-2">
               {events.map((event) => (

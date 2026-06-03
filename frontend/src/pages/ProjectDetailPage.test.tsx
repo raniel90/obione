@@ -71,7 +71,11 @@ describe("ProjectDetailPage", () => {
       run({ _meta: META, nome_projeto: "Projeto X", custo_estimado: 1000 }),
     ]);
     setup(CONSULTANT);
-    await waitFor(() => expect(screen.getByText("Freire Batista ADV")).toBeInTheDocument());
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: "Freire Batista ADV" }),
+      ).toBeInTheDocument(),
+    );
     expect(screen.getByText("Projeto X")).toBeInTheDocument();
   });
 
