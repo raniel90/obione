@@ -61,8 +61,8 @@ Camada de e2e (Playwright) introduzida no M3 e aplicada retroativamente a M1/M2.
 
 Legenda: ✅ pronto (todos os critérios da §2) · 🔜 falta (não atende a §2 ainda).
 
-Snapshot de verificação (após RF12/drafts, PR #30): **Vitest 154/154** (41 arquivos) ·
-**Playwright 21/21** (login, lista, detalhe/CBAC, temática, visibilidade, cockpit, comentários, drafts) · build + lint limpos.
+Snapshot de verificação (após RF11/feed, PR #32): **Vitest 162/162** (44 arquivos) ·
+**Playwright 23/23** (login, lista, detalhe/CBAC, temática, visibilidade, cockpit, comentários, drafts, feed) · build + lint limpos.
 
 **Roadmap de telas COMPLETO (M0–M5).** As 6 telas atendem à Definição de Pronto (§2).
 
@@ -70,14 +70,10 @@ Snapshot de verificação (após RF12/drafts, PR #30): **Vitest 154/154** (41 ar
 
 ## 5. O que falta
 
-**Nenhuma tela pendente** — o roadmap M0–M5 está completo (6 telas ✅, cada uma com
-Vitest + e2e conforme a Definição de Pronto).
-
-O que resta são itens de **backlog fora dos milestones de tela**, que entram em ciclos
-futuros (spec → plano → implementação próprios): RF10 (postar comentário — hoje só
-leitura), RF11 (feed in-app), RF12 (drafts de Próximos Passos / Pontos de Atenção),
-RF15–RF18 (importar/validar gabarito, comparar extração × gabarito, Likert da
-consultoria e dos clientes). Ver também §6.
+**Nada pendente no frontend.** O roadmap M0–M5 está completo (6 telas ✅) e o backlog de
+features de tela foi entregue: **RF10** (comentários), **RF12** (drafts/IA) e **RF11**
+(feed) — cada um com seu ciclo spec → plano → implementação + e2e. Detalhes e decisões
+(RF15–RF16 gabarito, RF17–RF18 Likert fora do app, RF19 export cortado) em §6.
 
 ---
 
@@ -118,11 +114,14 @@ consultoria e dos clientes). Ver também §6.
   (ex.: Google Form) e a **metodologia** (dimensões, momento de coleta, reporte) é
   decisão acadêmica a definir à parte. O backend `likert` permanece como está (pode
   exportar o agregado pro relato via CLI/script). Sem UI no frontend.
-- **RFs ainda não cobertos por tela no frontend** (fora dos milestones de tela
-  atuais): RF11 (feed in-app de novidades).
-  RF15–RF16 (gabarito / comparação) já aparecem no `EvaluationPanel` do detalhe quando
-  presentes; importação de gabarito é escopo de backend/CLI. Entram em ciclos futuros
-  (spec → plano → implementação) se/quando priorizados.
+- **RF11 (feed in-app) — ✅ ENTREGUE (PR #32).** Tela `/feed` ("Novidades") read-only,
+  perfil-aware: lista comentários + extrações recentes dos projetos visíveis ao usuário;
+  link "Novidades" nas duas landings; cada evento leva ao projeto. O backend escopa por
+  visibilidade (cliente vê do vinculado; staff dos seus/todos).
+- **Backlog de telas de frontend: encerrado.** Não há mais RF de tela pendente. RF15–RF16
+  (gabarito / comparação) já aparecem no `EvaluationPanel` do detalhe quando presentes;
+  importação de gabarito é escopo de backend/CLI. RF17–RF18 (Likert) é avaliação DSR fora
+  do app (acima). RF19 (export) foi cortado do escopo.
 
 ---
 
