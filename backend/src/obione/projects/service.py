@@ -128,10 +128,10 @@ def get_project_detail(
 ) -> ProjectDetail:
     """Return the consolidated detail view (US08).
 
-    Distinct from /export: keeps only the latest extraction of each kind
-    and a configurable slice of recent comments. Coverage is computed from
-    whichever extraction (any source) is most recent. The evaluation block
-    is filled only when both an llm and a gabarito_manual exist.
+    Keeps only the latest extraction of each kind and a configurable slice of
+    recent comments. Coverage is computed from whichever extraction (any source)
+    is most recent. The evaluation block is filled only when both an llm and a
+    gabarito_manual exist.
     """
     project = get_project_for_user(uow, user, project_id)
     with uow:

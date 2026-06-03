@@ -23,11 +23,10 @@ chars) são truncados com indicação explícita.
 | 6 | Comments | Top + reply + list + patch (US10) |
 | 7 | Feed | `GET /feed` (US11) |
 | 8 | Project detail | `GET /projects/{id}/detail` (US08) |
-| 9 | Export | JSON + CSV (US18) |
-| 10 | Resumo do Cliente | generate → patch → publish (US12) |
-| 11 | Drafts | generate batch → patch/delete → publish (US13) |
-| 12 | Likert | consultoria + client + summary (US16, US17) |
-| 13 | Casos de erro | 401, 403, 404, 422 |
+| 9 | Resumo do Cliente | generate → patch → publish (US12) |
+| 10 | Drafts | generate batch → patch/delete → publish (US13) |
+| 11 | Likert | consultoria + client + summary (US16, US17) |
+| 12 | Casos de erro | 401, 403, 404, 422 |
 
 ---
 
@@ -1147,92 +1146,7 @@ Content-Type: application/json
 ... (+588 chars truncados)
 ```
 
-## 9. Export (US18)
-### GET /projects/{id}/export (json default)
-
-Bundle completo: project + documents + ALL extractions + ALL comments + coverage. Para download/research.
-
-**Request**
-
-```http
-GET /projects/8e086056-c45c-46bc-9333-acb819b713b1/export HTTP/1.1
-Authorization: Bearer eyJhbGciOiJIUz...XRj7lQ
-Content-Type: application/json
-```
-
-**Response** — `200 OK`
-
-```json
-{
-  "schema_version": "1.0",
-  "exported_at": "2026-05-21T16:16:32.530921+00:00",
-  "exported_by": "8dd3025c-65ad-4907-94c9-393508fd9e33",
-  "project": {
-    "id": "8e086056-c45c-46bc-9333-acb819b713b1",
-    "name": "Demo API Report",
-    "domain": "legal",
-    "description": "descrição atualizada via PATCH",
-    "consultant_id": "8dd3025c-65ad-4907-94c9-393508fd9e33",
-    "created_at": "2026-05-21T16:14:35.174589+00:00",
-    "updated_at": "2026-05-21T16:14:35.194986+00:00"
-  },
-  "documents": [
-    {
-      "id": "cb2b01c6-250c-4514-ba7c-2cbda1465755",
-      "original_name": "Valenca.docx",
-      "sha256": "89fb8d9972b17482955b54011ff6125c63349feffb03037c7bb8f2d0de6296b0",
-      "size_bytes": 8947,
-      "mime_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "uploaded_by": "8dd3025c-65ad-4907-94c9-393508fd9e33",
-      "uploaded_at": "2026-05-21T16:14:35.274072+00:00"
-    }
-  ],
-  "extractions": [
-    {
-      "id": "8d67006e-e179-40fe-a297-2b192deecd5a",
-      "document_id": "cb2b01c6-250c-4514-ba7c-2cbda1465755",
-      "source": "llm",
-      "llm_model": "ollama/llama3.1:8b",
-      "content": {
-        "tipo": "Jurídico + Compliance documental + Proteção contratual",
-        "_meta": {
-          "origem": "llm",
-          "modelo_llm": "ollama/llama3.1:8b",
-          "projeto_nome": "Demo API Report",
-          "data_extracao": "2026-05-21T16:16:31.893958+00:00",
-          "hash_documento": null,
-          "documento_fonte": "Valenca.doc
-
-... (+6142 chars truncados)
-```
-
-### GET /projects/{id}/export?format=csv
-
-Long-format CSV — uma linha por (extração × atributo). Formato direto para a rubrica humana Sprint 5.
-
-**Request**
-
-```http
-GET /projects/8e086056-c45c-46bc-9333-acb819b713b1/export?format=csv HTTP/1.1
-Authorization: Bearer eyJhbGciOiJIUz...XRj7lQ
-Content-Type: application/json
-```
-
-**Response** — `200 OK`
-
-```text
-project_id,project_name,extraction_id,extraction_source,extraction_llm_model,extraction_created_at,attribute_name,attribute_category,attribute_type,attribute_out_of_scope,attribute_value
-8e086056-c45c-46bc-9333-acb819b713b1,Demo API Report,8d67006e-e179-40fe-a297-2b192deecd5a,llm,ollama/llama3.1:8b,2026-05-21T16:16:32.020760+00:00,nome_projeto,conteudo_geral,estruturado,false,Revisão contratual e termos de consentimento odontológico
-8e086056-c45c-46bc-9333-acb819b713b1,Demo API Report,8d67006e-e179-40fe-a297-2b192deecd5a,llm,ollama/llama3.1:8b,2026-05-21T16:16:32.020760+00:00,descricao,conteudo_geral,texto_livre,false,"Construir contrato de tratamento, incluir cláusulas protetivas e de imagem, criar termos de consentimento."
-8e086056-c45c-46bc-9333-acb819b713b1,Demo API Report,8d67006e-e179-40fe-a297-2b192deecd5a,llm,ollama/llama3.1:8b,2026-05-21T16:16:32.020760+00:00,local_execucao,conteudo_geral,estruturado,false,
-8e086056-c45c-46bc-9333-acb819b713b1,Demo API Report,8d67006e-e179-40fe-a297-2b192deecd5a,llm,ollama/llama3.1:8b,2026-05-21T16:16:32.020760+00:00,tipo,conteudo_geral,estruturado,false,Jurídico + Compliance documental + Proteção contratual
-8e086056-c45c-46bc-9333-acb819b713b1,Demo API Report,8d67006e-e179-40fe-a297-2b192deecd5a,llm,ollama/llama3.1:8b,2026-05-21T16:16:32.020760+00:00,porte,conteudo_geral,estruturado,false,pequeno
-8e086056-c45c-46bc-9333-acb819b713b1,Demo API Report,8d67006e-e179-40fe-a297-2b192deecd5a,llm,ollama/llama3.1:8b,2026-05-21T16:16:32
-
-... (+24410 chars truncados)
-```
-
-## 10. Resumo do Cliente (US12)
+## 9. Resumo do Cliente (US12)
 ### POST /projects/{id}/resumos/generate
 
 **US12** Gera resumo em status `draft` a partir da extração mais recente. Chamada real ao Ollama — gera narrativa PT-BR em Markdown.
@@ -1407,7 +1321,7 @@ Content-Type: application/json
 }
 ```
 
-## 11. Drafts — Próximos Passos / Pontos de Atenção (US13)
+## 10. Drafts — Próximos Passos / Pontos de Atenção (US13)
 ### POST /projects/{id}/drafts/generate
 
 **US13** Gera batch de N drafts (`kind ∈ {next_step, attention_point}`). Chamada real ao Ollama — gera próximos passos e pontos de atenção em JSON.
@@ -1638,7 +1552,7 @@ Content-Type: application/json
 }
 ```
 
-## 12. Likert feedback (US16 + US17)
+## 11. Likert feedback (US16 + US17)
 ### POST /likert/consultoria
 
 **US16** Consultor/admin envia avaliação Likert 1-5 sobre as 4 dimensões da consultoria.
@@ -1946,7 +1860,7 @@ Content-Type: application/json
 }
 ```
 
-## 13. Casos de erro (validação)
+## 12. Casos de erro (validação)
 ### GET /auth/me sem token
 
 Sem Authorization header → 401.
@@ -2059,7 +1973,7 @@ Content-Type: application/json
 }
 ```
 
-## 14. Cleanup
+## 13. Cleanup
 ### DELETE /projects/{id}
 
 Apaga projeto. Cascade para documents, extractions, comments, resumos, drafts.

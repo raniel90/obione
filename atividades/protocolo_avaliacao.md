@@ -281,10 +281,6 @@ A camada de governança (CBAC, RF04) e o cockpit cross-cliente (RF14) são avali
 - **Triangulação** entre dimensões do consultor e do cliente quando aplicável — por exemplo, `usabilidade_cbac` (consultor) cruzada com `clareza_atributos_liberados` + `sentido_controle` (cliente) para discutir se a governança que o consultor sentiu confortável produziu, do lado do cliente, percepção de clareza e controle.
 - **Plano B em N baixo.** Se o N total ficar abaixo de 8, reportar como limitação metodológica (LANDIS & KOCH, 1977, é insuficiente para inferência); apresentar os dados como **casos** e não como amostra.
 
-### 6.5 Saída no bundle de exportação
-
-A `RF19 (Exportar resultados consolidados)` inclui um snapshot do CBAC de cada projeto — a configuração de visibilidade que estava ativa no momento da submissão dos clientes. Isso permite cruzar, no relato, a percepção do cliente com **quanto** foi liberado (proxy: número de atributos visíveis / 43).
-
 ---
 
 ## 7. Métricas e Artefatos Removidos pelo Refino 29/05
@@ -332,7 +328,7 @@ Após executar este protocolo nas três frentes (extração nos 3 projetos com g
 | Likert clientes | Histograma 1-5 por dimensão | Gráfico ou tabela |
 | CBAC | Snapshot da configuração de visibilidade no momento da coleta | Por projeto |
 
-Tudo exportável via RF19.
+Todos esses dados são consolidados manualmente para o relato.
 
 ---
 
@@ -349,7 +345,7 @@ Tudo exportável via RF19.
 
 ## 11. Próximos Passos
 
-A infraestrutura técnica (schema, extração, log de sugestões, formulários Likert, exportação) já está implementada em `main`. Os próximos passos são todos de **coleta**:
+A infraestrutura técnica (schema, extração, log de sugestões, formulários Likert) já está implementada em `main`. Os próximos passos são todos de **coleta**:
 
 1. **Sessão de calibração da rubrica** — Cynthia + Moisés (~30 min) revisando este documento e os exemplos da § 2.1 juntos antes de iniciar Valença.
 2. **Produção dos gabaritos de extração** — Cynthia e Moisés conforme procedimento da § 3, nos 3 projetos.
@@ -357,7 +353,7 @@ A infraestrutura técnica (schema, extração, log de sugestões, formulários L
 4. **Invocação da IA de categorização** — para cada projeto, `POST /projects/{id}/themes/suggest`; conferir o `suggested_domain` com o consenso humano para alimentar a matriz de confusão da § 5.
 5. **Configuração do CBAC pelo consultor** — para cada cliente do estudo, decidir e aplicar via `PUT /projects/{id}/visibility/...` antes da janela de uso do cliente (≥ 2 semanas).
 6. **Coleta Likert** — disparar os formulários para a consultoria (5 dimensões da § 6.1) e para os clientes (5 dimensões da § 6.2) após a janela de uso.
-7. **Exportação consolidada** — `GET /exports/...` (RF19) para produzir o bundle final que alimenta o relato e o artigo.
+7. **Consolidação manual dos dados** — agregar resultados de extração, categorização e Likert para alimentar o relato e o artigo.
 
 ---
 

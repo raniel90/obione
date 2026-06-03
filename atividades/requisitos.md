@@ -4,7 +4,7 @@ ObiOne é um **observatório de projetos para consultorias** baseado no MPO, *Mo
 
 A IA Generativa atua sobre o texto descritivo de cada projeto em três papéis complementares: (i) **extratora** dos 44 atributos do Quadro 37; (ii) **categorizadora**, sugerindo a temática/segmento ao consultor; (iii) **assistente** do consultor, propondo rascunhos de próximos passos e pontos de atenção. O Quadro 37 do MPO é o insumo, a célula-projeto. O CBAC garante que o cliente veja apenas o que o consultor liberou.
 
-Este documento especifica **19 requisitos funcionais (RF01–RF19)** e **10 requisitos não funcionais (RNF01–RNF10)**. Cada requisito registra explicitamente sua **rastreabilidade com o MPO**.
+Este documento especifica **18 requisitos funcionais (RF01–RF18)** e **10 requisitos não funcionais (RNF01–RNF10)**. Cada requisito registra explicitamente sua **rastreabilidade com o MPO**.
 
 ---
 
@@ -30,7 +30,6 @@ Este documento especifica **19 requisitos funcionais (RF01–RF19)** e **10 requ
 | RF16 | Comparar extração automática vs. gabarito | 6 | Must |
 | RF17 | Coletar feedback Likert da consultoria | 6 | Must |
 | RF18 | Coletar feedback Likert dos clientes | 6 | Must |
-| RF19 | Exportar resultados consolidados | 6 | Should |
 
 **Blocos:** (1) Fundação técnica e governança · (2) Pipeline LLM · (3) Observação e visualização · (4) Comunidade e assistente do consultor · (5) Observação cross-cliente · (6) Avaliação DSR.
 
@@ -197,14 +196,6 @@ O observatório deixa de tratar cada projeto isoladamente e passa a observar o *
 - **Critérios de aceite.** Formulário em escala 1-5 cobrindo: clareza dos atributos liberados, sentido de controle / transparência sobre o que vê, utilidade do que foi liberado, qualidade do diálogo, sentido de inclusão; identificação do projeto (respondente anônimo opcional); N esperado 5-10.
 - **Regras de negócio.** Aplicado após pelo menos 2 semanas de uso pelos clientes.
 - **Rastreabilidade MPO.** Agentes **Partes Interessadas dos Projetos** + **Usuários do Observatório** (pp. 200-201) + motivações **Engajamento** e **Conhecimento** (p. 204) + característica **Interatividade** (p. 191).
-
-#### RF19: Exportar resultados consolidados
-- **Descrição.** Gerar exportação única (CSV/JSON) com todos os dados de avaliação para alimentar o relato e o artigo.
-- **Justificativa.** Sem exportação, a escrita do relato fica refém de queries manuais.
-- **Dependências.** RF16, RF17, RF18, RF09.
-- **Critérios de aceite.** Arquivo único com extrações, cobertura, métricas (precisão/recall/F1/concordância) por grupo, respostas Likert (consultoria + clientes), métricas de engajamento (nº de comentários, nº de drafts) e configurações de CBAC por projeto (snapshot do que esteve visível ao cliente).
-- **Regras de negócio.** Cabeçalhos compatíveis com planilha (Excel, Google Sheets).
-- **Rastreabilidade MPO.** Infraestrutura de avaliação, sem mapeamento direto.
 
 ---
 

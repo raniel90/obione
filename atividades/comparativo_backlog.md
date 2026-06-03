@@ -83,7 +83,6 @@ Quatro entregáveis sem os quais o Sprint 1 não tem como começar com base sól
 - **US08 — Importar e validar gabarito manual** (Sprint 3). Carrega o gabarito produzido na fase preparatória.
 - **US09 — Comparar extração automática vs. gabarito (critério híbrido)** (Sprint 3). Calcula precisão, recall, F1 e Cohen's Kappa, separados por grupo `estruturado` e `texto_livre`. **É a essência da avaliação quantitativa do DSR.**
 - **US10 — Coletar feedback Likert** (Sprint 3). Formulário em 4 dimensões (utilidade, clareza, completude, confiabilidade) com ~2 stakeholders por projeto. **É a avaliação qualitativa prevista na metodologia.**
-- **US11 — Exportar resultados consolidados** (Sprint 3). Tabela exportável com extrações, cobertura, métricas e respostas Likert — alimenta o relatório e o artigo.
 
 ### Estrutura de Governança
 

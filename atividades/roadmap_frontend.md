@@ -12,7 +12,7 @@ verde e o que falta. As demais seções dão o contrato de "pronto" (seção 2),
 por milestone (seção 3), o escopo do que falta (seção 5), as pontas soltas (seção 6)
 e como rodar as evidências (seção 7).
 
-Numeração de requisitos: **canônica do `requisitos.md`** (RF01–RF19). Ver dívida em §6.
+Numeração de requisitos: **canônica do `requisitos.md`** (RF01–RF18). Ver dívida em §6.
 
 ---
 
@@ -77,14 +77,14 @@ O que resta são itens de **backlog fora dos milestones de tela**, que entram em
 futuros (spec → plano → implementação próprios): RF10 (postar comentário — hoje só
 leitura), RF11 (feed in-app), RF12 (drafts de Próximos Passos / Pontos de Atenção),
 RF15–RF18 (importar/validar gabarito, comparar extração × gabarito, Likert da
-consultoria e dos clientes), RF19 (exportar resultados consolidados). Ver também §6.
+consultoria e dos clientes). Ver também §6.
 
 ---
 
 ## 6. Dívidas & notas
 
 - **Numeração de RFs desatualizada em `telas_observatorio.md`.** Aquele doc usa um
-  esquema antigo, anterior à renumeração do `requisitos.md` (canônico, RF01–RF19).
+  esquema antigo, anterior à renumeração do `requisitos.md` (canônico, RF01–RF18).
   Mapeamento explícito do que o `telas_observatorio.md` cita → canônico:
 
   | Tela (`telas_observatorio.md`) | RF citado lá | RF canônico (`requisitos.md`) |
@@ -95,8 +95,7 @@ consultoria e dos clientes), RF19 (exportar resultados consolidados). Ver també
   | Design System | RNF02 | RNF02 (igual) |
 
   Ou seja: o "RF19" de lá = **RF13** (categorizar por temática) e o "RF20" de lá =
-  **RF14** (cockpit/comparação cross-projeto). No `requisitos.md` atual, "RF19" é
-  "Exportar resultados consolidados" e **não existe RF20**. Corrigir o
+  **RF14** (cockpit/comparação cross-projeto). Corrigir o
   `telas_observatorio.md` em si fica fora do escopo deste roadmap (dívida registrada;
   este roadmap usa sempre a numeração canônica).
 - **e2e de temática exige `LLM_PROVIDER=mock` no backend.** Com o provedor padrão de
@@ -120,7 +119,7 @@ consultoria e dos clientes), RF19 (exportar resultados consolidados). Ver també
   decisão acadêmica a definir à parte. O backend `likert` permanece como está (pode
   exportar o agregado pro relato via CLI/script). Sem UI no frontend.
 - **RFs ainda não cobertos por tela no frontend** (fora dos milestones de tela
-  atuais): RF11 (feed in-app de novidades), RF19 (exportar resultados consolidados).
+  atuais): RF11 (feed in-app de novidades).
   RF15–RF16 (gabarito / comparação) já aparecem no `EvaluationPanel` do detalhe quando
   presentes; importação de gabarito é escopo de backend/CLI. Entram em ciclos futuros
   (spec → plano → implementação) se/quando priorizados.

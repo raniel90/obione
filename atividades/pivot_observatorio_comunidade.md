@@ -131,8 +131,8 @@ O papel "Conectora" (padrões entre projetos) **não entra** no MVP — risco de
 | 10 | 29/05-04/06 | Detalhe + comentários (B+R). Pipeline LLM (R). Finalizar gabarito + matriz semente (C+M). | — |
 | 11 | 05-11/06 | Portfólio + cobertura (B+R). Extração nos 5 + perfis (R). Estrutura do relato (C). Refino Likert (M). | **M2 (pipeline operacional)** |
 | 12 | 12-18/06 | UI Resumo Cliente + UI Drafts (B). Prompts (R). Aplicar rubrica nos 3 projetos (C+M). | — |
-| 13 | 19-25/06 | Likert UI + polish (B). Exportação + suporte (R). Iterar relato (C). Lançar Likert + SR2 (M). | **M3 (dashboard+IA) + SR2** |
-| 14 | 26/06-02/07 | Polish final. Métricas e Likert consolidados. Exportação completa. | **M4 (avaliação concluída)** |
+| 13 | 19-25/06 | Likert UI + polish (B). Suporte (R). Iterar relato (C). Lançar Likert + SR2 (M). | **M3 (dashboard+IA) + SR2** |
+| 14 | 26/06-02/07 | Polish final. Métricas e Likert consolidados. | **M4 (avaliação concluída)** |
 | 15 | 03-09/07 | Bruno: screencast. Raniel: deploy local. Cynthia: escrita final. Moisés: slides. | — |
 | 16 | 10/07 | **Apresentação final + entrega do artigo** | **Entrega** |
 
@@ -162,10 +162,6 @@ O papel "Conectora" (padrões entre projetos) **não entra** no MVP — risco de
 |---|---|
 | **Consultoria** (~4 respondentes) | Utilidade dos drafts; Redução de fricção; Qualidade do resumo gerado; Manutenibilidade do papel de mediador |
 | **Clientes** (~5-10 respondentes) | Clareza do resumo; Utilidade do espaço; Qualidade do diálogo; Sentido de inclusão (participante, não só observador) |
-
-### 6.3 Exportação
-
-Adiciona métricas de engajamento por projeto: número de comentários, taxa de resposta, dimensões Likert.
 
 ---
 

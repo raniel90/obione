@@ -51,7 +51,6 @@ flowchart TB
         drafts["drafts<br/>+ generator port"]
         likert["likert<br/>(US16 + US17)"]
         feed["feed<br/>(chronological merge)"]
-        exports["exports<br/>(JSON + CSV)"]
     end
 
     documents -->|by project| projects
@@ -67,14 +66,13 @@ flowchart TB
     feed -->|merges events from| documents
     feed -->|merges events from| extractions
     feed -->|merges events from| comments
-    exports -->|bundles| projects
     auth -.->|valida JWT em todos| BC
 ```
 
 **Princípios:**
 - **Projects** é a raiz de visibilidade — `get_project_for_user(uow, user, project_id)` é o ponto único de check de acesso, reusado por todos os contextos.
 - **Resumos** e **Drafts** seguem o mesmo shape (port + adapter + lifecycle draft→published) porque são variações do mesmo padrão "IA propõe, consultor revisa, cliente vê só o publicado".
-- **Feed** e **exports** são read-only — não definem tabelas próprias, só consolidam dados dos outros contextos.
+- **Feed** é read-only — não define tabelas próprias, só consolida eventos dos outros contextos.
 
 ---
 

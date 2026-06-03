@@ -521,10 +521,6 @@ def fix_slide_5c_avaliacao(slide) -> None:
                 "RF17 · Likert Clientes",
                 "4 dimensões: clareza, utilidade do espaço, diálogo, sentido de inclusão.",
             ),
-            (
-                "RF18 · Exportação",
-                "JSON (research) + CSV long-format (rubrica). Subsidia o relato.",
-            ),
         ],
     )
 
@@ -615,7 +611,7 @@ def fix_slide_6_marcos(slide) -> None:
     replace_run_text(slide, "4–6 meses", "26 jun - 2 jul")
     replace_run_text(slide, "Redação Cap. 3-7", "Precisão · Recall · F1 · Kappa")
     replace_run_text(slide, "Revisão por orientador", "+ Likert × 2 audiências")
-    replace_run_text(slide, "Defesa pública", "+ Exportação consolidada")
+    replace_run_text(slide, "Defesa pública", "Relato + Artigo")
     replace_run_text(
         slide,
         "Buffer para correções e ajustes pós-banca.",
@@ -824,7 +820,6 @@ CARD por CARD — Avaliação DSR:
 - RF15 COMPARAÇÃO: critério híbrido — comparação exata em estruturados + rubrica humana 0/0,5/1 em texto livre + Cohen's Kappa entre avaliadores.
 - RF16 LIKERT CONSULTORIA: 4 dimensões — utilidade dos drafts, fricção, qualidade do resumo, manutenibilidade.
 - RF17 LIKERT CLIENTES: 4 dimensões — clareza, utilidade do espaço, qualidade do diálogo, sentido de inclusão.
-- RF18 EXPORTAÇÃO: JSON bundle (research) + CSV long-format (rubrica).
 
 DESTAQUE: "Todo o backend de avaliação está pronto. Sprint 5 vira coleta humana — não código."
 """,

@@ -81,7 +81,7 @@ A célula-projeto (extração dos 44 atributos) **não muda**. O refino adiciona
 
 ### 4.2 Reúso direto (sem padrão novo)
 
-- `auth` (papéis consultor/cliente/admin), `projects`, `documents`, `extractions` (a célula), `unit_of_work`, `exports`.
+- `auth` (papéis consultor/cliente/admin), `projects`, `documents`, `extractions` (a célula), `unit_of_work`.
 - **LLM port:** a Conectora vira um `SynthesisGenerator` com adapters `Mock` + `Instructor`, **espelhando exatamente** `resumos`/`drafts`.
 - **Lifecycle consultor-no-loop:** o ciclo `draft → review → published` da síntese é o **mesmo** já implementado em `resumos`/`drafts` — zero padrão novo.
 - `feed` notifica conhecimento novo publicado.
