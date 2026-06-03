@@ -181,3 +181,19 @@ export interface Draft {
   created_at: string;
   updated_at: string;
 }
+
+export type FeedEventKind = "new_comment" | "new_extraction";
+
+export interface FeedEvent {
+  kind: FeedEventKind;
+  project_id: string;
+  project_name: string;
+  actor_id: string | null;
+  target_id: string;
+  created_at: string;
+  summary: string;
+}
+
+export interface FeedResponse {
+  events: FeedEvent[];
+}
