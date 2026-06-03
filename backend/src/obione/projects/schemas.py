@@ -86,9 +86,9 @@ class EvaluationSummary(BaseModel):
 class ProjectDetailResponse(BaseModel):
     """Consolidated read-only view for the project detail screen (US08).
 
-    Distinct from /export: keeps only the latest of each extraction kind
-    and a configurable slice of recent comments. Designed to fit in one
-    UI render without a heavy network payload.
+    Keeps only the latest of each extraction kind and a configurable slice of
+    recent comments. Designed to fit in one UI render without a heavy network
+    payload.
     """
 
     project: "ProjectResponse"

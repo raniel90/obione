@@ -6,7 +6,7 @@
 
 Após a entrega original em 21/05/2026 (18/18 US do MVP-comunidade) o projeto passou por duas rodadas de refino:
 
-- **28/05/2026 — Refino para observatório PARA consultorias** (`refinamento_observatorio_consultorias.md`): adiciona RF19-RF22 (temática, cockpit cross-cliente, Conectora, conhecimento comum) e RNF10 (isolamento/anonimização).
+- **28/05/2026 — Refino para observatório PARA consultorias** (`refinamento_observatorio_consultorias.md`): adiciona RF13-RF14 (temática, cockpit cross-cliente) e RNF10 (isolamento/anonimização).
 - **29/05/2026 — Revisão CBAC + no-upload** (apêndice §12 do refino): substitui Conectora por **Content-Based Access Control** e remove o upload de `.docx` (vira campo `description` no projeto).
 
 **Backend reexecutado em 4 PRs entre 29 e 30/05/2026 — todos mergeados em `main`:**
@@ -41,14 +41,14 @@ Após a entrega original em 21/05/2026 (18/18 US do MVP-comunidade) o projeto pa
 | US15 Comparar vs gabarito | ✅ Mantida | Sem mudança |
 | US16 Likert consultoria | ✅ Mantida + reescrita | 5 dimensões: utilidade_drafts, reducao_friccao, manutenibilidade_mediador, **valor_cockpit (RF14)**, **usabilidade_cbac (RF04)** |
 | US17 Likert clientes | ✅ Mantida + reescrita | 5 dimensões: **clareza_atributos_liberados**, **sentido_controle**, **utilidade_liberado**, qualidade_dialogo, sentido_inclusao |
-| US18 Exportar resultados | ✅ Mantida + estendida | Bundle inclui snapshot do CBAC do projeto |
+| US18 Exportar resultados | ❌ **Removida (02/06/2026)** | RF19 cortado do escopo |
 | **US19 Sugestão de temática (novo)** | ✅ Entregue | IA propõe `project.domain`; consultor aceita/ignora; log alimenta protocolo de acurácia |
 | **US20 Cockpit cross-cliente (novo)** | ✅ Entregue | Read-model agregando por temática; cliente recebe 403 |
 | US21 Conectora (síntese) | ❌ **Removida (29/05)** | Era do refino 28/05; CBAC substitui o gate de revisão |
 | US22 Conhecimento comum publicado | ❌ **Removida (29/05)** | Idem |
 | **US23 CBAC (novo)** | ✅ Entregue | Configura visibilidade por categoria + override por atributo (privacy by default) |
 
-**Total de US ativas pós-refino:** 19 (US01, US02, US03, US05-US11, US13-US20, US23). Removidas: US04, US12, US21, US22.
+**Total de US ativas pós-refino:** 18 (US01, US02, US03, US05-US11, US13-US17, US19-US20, US23). Removidas: US04, US12, US18, US21, US22.
 
 ### Pendências (não-bloqueantes do código)
 
@@ -85,7 +85,7 @@ Após a entrega original em 21/05/2026 (18/18 US do MVP-comunidade) o projeto pa
 | 5 | US15 Comparar extração vs gabarito | ✅ | #1 |
 | 5 | US16 Likert consultoria | ✅ | #4 |
 | 5 | US17 Likert clientes | ✅ | #4 |
-| 5 | US18 Exportar resultados | ✅ | #1 (JSON) + #3 (CSV) |
+| 5 | US18 Exportar resultados | ❌ Removida (02/06) | RF19 cortado do escopo |
 
 **Pendentes externos (fora do backend):**
 - Frontend (Bruno) — protótipos + implementação React/Vite/Lovable.
@@ -358,13 +358,6 @@ Critérios:
 
 ---
 
-### US18 — Exportar resultados consolidados ✅
-**Como** pesquisador, **quero** exportar todos os resultados **para** alimentar o relato e o artigo.
-
-Critérios:
-- CSV/JSON com: extrações, cobertura, precisão/recall/F1 por grupo, Kappa, respostas Likert (consultoria + clientes), métricas de engajamento por projeto (#comentários, #drafts publicados).
-- Cabeçalhos compatíveis com planilha.
-
 ---
 
 # Marcos do Estudo de Caso
@@ -374,7 +367,7 @@ Critérios:
 | **M1** — Preparação conceitual concluída | Fim da semana 9 (28/05, após SR1) | Entregáveis preparatórios versionados; gabarito dos 3 projetos iniciado; protótipos aprovados. |
 | **M2** — Pipeline operacional nos 5 casos | Fim da semana 11 (11/06) | Extração rodada nos 5 projetos sem erro fatal; JSONs persistidos; auth + perfis funcionais. **Atingido parcialmente em 21/05** — backend pronto + Valença smokeado; faltam os outros 4 docs (depende de re-instalar Ollama). |
 | **M3** — Dashboard + IA-Assistente operacionais | Fim da semana 13 (25/06, após SR2) | Cobertura visualizável; comentários funcionando; Resumo do Cliente e Drafts gerando saída revisável. **Atingido no backend em 21/05** — Resumo + Drafts com mock generator publicáveis; frontend pendente. |
-| **M4** — Avaliação concluída | Fim da semana 14 (02/07) | Precisão/recall/F1/Kappa calculados nos 3 com gabarito; Likert consultoria + clientes consolidados; exportação pronta. Endpoints prontos; falta executar a coleta humana. |
+| **M4** — Avaliação concluída | Fim da semana 14 (02/07) | Precisão/recall/F1/Kappa calculados nos 3 com gabarito; Likert consultoria + clientes consolidados. Endpoints prontos; falta executar a coleta humana. |
 
 ---
 
@@ -447,9 +440,9 @@ Critérios:
 
 # Definição do MVP
 
-> Cadastro + Upload + Extração LLM (Quadro 37) + Auth + Perfis semi-abertos + Comentários + Feed in-app + Resumo automático para o Cliente + Drafts assistidos para o Consultor + Cobertura do MPO + Avaliação (precisão/recall/F1/Kappa em 3 projetos + Likert consultoria + Likert clientes) + Exportação.
+> Cadastro + Extração LLM (Quadro 37) + Auth + Perfis semi-abertos + Comentários + Feed in-app + Drafts assistidos para o Consultor + Cobertura do MPO + Avaliação (precisão/recall/F1/Kappa em 3 projetos + Likert consultoria + Likert clientes).
 
-O MVP **não é produto comercial**. É um artefato de pesquisa funcional o suficiente para que: (i) os 5 projetos sejam processados de ponta a ponta; (ii) a equipe da consultoria utilize o observatório como espaço de mediação; (iii) os clientes acessem seu próprio projeto, comentem e recebam resumos automáticos; (iv) a avaliação quantitativa e qualitativa seja exportável para o relato.
+O MVP **não é produto comercial**. É um artefato de pesquisa funcional o suficiente para que: (i) os 5 projetos sejam processados de ponta a ponta; (ii) a equipe da consultoria utilize o observatório como espaço de mediação; (iii) os clientes acessem seu próprio projeto e comentem; (iv) a avaliação quantitativa e qualitativa seja consolidada para o relato.
 
 ---
 

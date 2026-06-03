@@ -119,7 +119,7 @@ Alinhado ao calendário da disciplina TAES (entrega final em 10/07/2026).
 | 11 | 05-11/06 | Dashboard + cobertura + perfis (semi-aberto); extração nos 5 projetos | M2 |
 | 12 | 12-18/06 | IA-Assistente (Resumo Cliente + Drafts); aplicação da rubrica nos 3 projetos | — |
 | 13 | 19-25/06 | Likert lançado; *polish*; consolidação parcial | M3 + Status Report 2 |
-| 14 | 26/06-02/07 | Métricas e Likert consolidados; exportação completa | M4 |
+| 14 | 26/06-02/07 | Métricas e Likert consolidados | M4 |
 | 15 | 03-09/07 | Escrita do relato + estrutura da apresentação + *screencast* | — |
 | 16 | 10/07 | **Apresentação final + entrega do artigo** | Entrega |
 

@@ -6,7 +6,7 @@ Período: semana 8 (15-21/05/2026, em curso) a semana 16 (10/07/2026) — **9 se
 
 **Última atualização:** 21/05/2026 — backend MVP completo (18/18 USs); pendências restritas a frontend, gabarito manual, coleta humana de Likert e re-ativação do Ollama para Sprint 5.
 
-### Progresso (12/22 tarefas concluídas; 5 parcialmente)
+### Progresso (11/21 tarefas concluídas; 5 parcialmente)
 
 | Bloco | Tarefas totais | Concluídas | Notas |
 |---|---|---|---|
@@ -14,7 +14,7 @@ Período: semana 8 (15-21/05/2026, em curso) a semana 16 (10/07/2026) — **9 se
 | 1 — Pipeline + Cadastro + Auth | 4 | 3 (T1.1, T1.2, T1.3) — backend completo | T1.4 (gabarito manual de 3 projetos) pendente — depende de Cynthia+Moisés |
 | 2 — Dashboard + Perfis | 3 | 2 (T2.1, T2.2 backend) | T2.3 (matriz semente) pendente |
 | 3 — Comunidade + IA-Assistente | 4 | 3 (T3.1, T3.2, T3.3 backend; mock generators) | T3.4 (contato de stakeholders) é trabalho do Bruno |
-| 4 — Avaliação | 5 | 1 (T4.5 export) + T4.1/T4.2 implementação pronta | T4.3/T4.4 (Likert) dependem de coleta humana |
+| 4 — Avaliação | 4 | T4.1/T4.2 implementação pronta | T4.3/T4.4 (Likert) dependem de coleta humana |
 | 5 — Documentação acadêmica | 1 | 0 | Sprint 5+ |
 
 ---
@@ -235,12 +235,6 @@ Cada tarefa: **Responsável** | **Prazo** | **O que fazer** | **Entregável** | 
 - **Entregável:** Formulário Google Forms com 4 dimensões dos clientes; respostas importadas; relatório agregado.
 - **Aceitação:** Endpoint interno `POST /likert/client` exige `project_id` + 4 dimensões (clareza_resumo, utilidade_espaco, qualidade_dialogo, sentido_inclusao). Visibilidade ligada ao projeto (cliente só responde sobre projetos aos quais foi assinado). **Coleta pendente:** N ≥ 5 (1-2 por projeto). Plano B: declarar limitação.
 
-#### T4.5 — RF18 (Exportação consolidada) ✅ Concluído (21/05/2026 — PR #1 + PR #3)
-- **Responsável:** Raniel
-- **Prazo:** sem 14 (02/07) — entregue 6 semanas antes
-- **Entregável:** Arquivo único (CSV ou JSON) com extrações, cobertura, métricas, Likert × 2, engajamento.
-- **Aceitação:** `GET /projects/{id}/export?format=json` retorna bundle completo (project + documents + extractions + comments + coverage). `?format=csv` retorna long-format spreadsheet (1 row por extração × atributo) — formato direto para a rubrica humana da Sprint 5. **Likert × 2 e engajamento** acessíveis via `/likert/summary` + `/feed` (formato livre para post-processing no relato). **M4 backend atingido** — dados completos exportáveis.
-
 ---
 
 ### Bloco 5 — Documentação Acadêmica (semanas 15-16: 03-10/07)
@@ -319,7 +313,7 @@ A matriz da T2.3 e T5.1 segue este formato:
 | RF09 | US09 | — | (todos) | cobertura agregada (%) | (preencher após T3.2 = RF09 implementada) |
 | RF15 | US15 | (todos do MPO) | (todos) | precisão/recall/F1/Kappa | (preencher após T4.2) |
 | RF16 | US16 | — | — | médias Likert consultoria | (preencher após T4.3) |
-| RF10 | US10 | Interatividade (Vieira p. 191) | Característica | engajamento (#comentários) | (preencher após T4.5) |
+| RF10 | US10 | Interatividade (Vieira p. 191) | Característica | engajamento (#comentários) | (preencher após coleta humana) |
 | RF12 | US12 | Comunicar (Vieira p. 197) | Processo | Likert dimensão "clareza" | (preencher após T4.4) |
 | RF17 | US17 | — | — | médias Likert clientes | (preencher após T4.4) |
 

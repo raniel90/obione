@@ -67,7 +67,7 @@ A organização do código favorece a **manutenibilidade** (RNF03).
 | Padrão | Papel |
 |---|---|
 | Clean architecture pragmática | Cada contexto separa `models`, `repository`, `service`, `schemas`, `router`, `dependencies` e `exceptions` |
-| Bounded contexts | `auth`, `projects`, `documents`, `extractions`, `comments`, `resumos`, `drafts`, `likert`, `feed`, `exports` e os novos `themes`, `portfolio`, `synthesis` |
+| Bounded contexts | `auth`, `projects`, `documents`, `extractions`, `comments`, `resumos`, `drafts`, `likert`, `feed` e os novos `themes`, `portfolio`, `synthesis` |
 | Ports & adapters | Integrações externas plugáveis: LLM (mock, Ollama, Instructor) e armazenamento de arquivos (filesystem) |
 | Unit of Work | Serviços manipulam uma unidade de trabalho transacional, não a sessão do banco diretamente |
 
