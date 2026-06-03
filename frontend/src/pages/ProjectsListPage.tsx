@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { format, parseISO } from "date-fns";
+import { FolderOpen } from "lucide-react";
 import { useProjects } from "@/lib/queries/use-projects";
 import { DomainBadge } from "@/components/domain-badge";
+import { EmptyState } from "@/components/empty-state";
 import { DOMAIN_LABELS } from "@/lib/mpo/catalog";
 import { Input } from "@/components/ui/input";
 import {
@@ -90,7 +92,19 @@ export function ProjectsListPage() {
       )}
 
       {!isLoading && !isError && filtered.length === 0 && (
-        <p className="text-muted-foreground">Nenhum projeto ainda.</p>
+        <EmptyState
+          icon={FolderOpen}
+          message={
+            (data ?? []).length === 0
+              ? "Nenhum projeto ainda."
+              : "Nenhum projeto encontrado."
+          }
+          description={
+            (data ?? []).length === 0
+              ? undefined
+              : "Ajuste a busca ou o filtro de domínio."
+          }
+        />
       )}
 
       {!isLoading && !isError && filtered.length > 0 && (

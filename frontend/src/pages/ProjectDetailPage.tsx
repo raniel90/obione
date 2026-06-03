@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
 import { format, parseISO } from "date-fns";
+import { FileText, SlidersHorizontal } from "lucide-react";
 import { useProjectDetail } from "@/lib/queries/use-project-detail";
 import { useExtractions } from "@/lib/queries/use-extractions";
 import { useUser } from "@/lib/auth-context";
@@ -14,6 +15,7 @@ import { EvaluationPanel } from "@/components/evaluation-panel";
 import { DomainBadge } from "@/components/domain-badge";
 import { ThemeSection } from "@/components/theme-section";
 import { DraftsSection } from "@/components/drafts-section";
+import { EmptyState } from "@/components/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -99,7 +101,10 @@ export function ProjectDetailPage() {
 
       {isStaff && (
         <Button asChild variant="outline" size="sm">
-          <Link to={`/projects/${id}/visibility`}>Configurar visibilidade</Link>
+          <Link to={`/projects/${id}/visibility`}>
+            <SlidersHorizontal className="size-4" />
+            Configurar visibilidade
+          </Link>
         </Button>
       )}
 
@@ -115,7 +120,11 @@ export function ProjectDetailPage() {
             </Button>
           </div>
         ) : grouped.length === 0 ? (
-          <p className="text-muted-foreground">Extração ainda não executada.</p>
+          <EmptyState
+            icon={FileText}
+            message="Extração ainda não executada."
+            description="Os 44 atributos do MPO aparecem aqui após a extração via IA."
+          />
         ) : (
           <AttributeAccordion categories={grouped} coverageByCategory={catCoverage} />
         )}

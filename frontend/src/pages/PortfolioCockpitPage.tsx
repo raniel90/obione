@@ -1,6 +1,8 @@
+import { LayoutDashboard } from "lucide-react";
 import { useCockpit } from "@/lib/queries/use-cockpit";
 import { CockpitKpis } from "@/components/cockpit-kpis";
 import { ThemeBreakdownTable } from "@/components/theme-breakdown-table";
+import { EmptyState } from "@/components/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 
@@ -33,7 +35,11 @@ export function PortfolioCockpitPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Cockpit do Portfólio</h1>
       {cockpit.total_projects === 0 ? (
-        <p className="text-muted-foreground">Nenhum projeto no portfólio ainda.</p>
+        <EmptyState
+          icon={LayoutDashboard}
+          message="Nenhum projeto no portfólio ainda."
+          description="Os indicadores aparecem assim que houver projetos observados."
+        />
       ) : (
         <>
           <CockpitKpis

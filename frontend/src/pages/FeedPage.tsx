@@ -1,5 +1,7 @@
+import { Bell } from "lucide-react";
 import { useFeed } from "@/lib/queries/use-feed";
 import { FeedEventItem } from "@/components/feed-event-item";
+import { EmptyState } from "@/components/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 
@@ -28,7 +30,11 @@ export function FeedPage() {
               </Button>
             </div>
           ) : events.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhuma novidade ainda.</p>
+            <EmptyState
+              icon={Bell}
+              message="Nenhuma novidade ainda."
+              description="Novos comentários e extrações dos seus projetos aparecem aqui."
+            />
           ) : (
             <ul className="space-y-2">
               {events.map((event) => (
