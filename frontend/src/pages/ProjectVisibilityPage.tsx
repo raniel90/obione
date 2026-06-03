@@ -68,12 +68,24 @@ export function ProjectVisibilityPage() {
   return (
     <div className="space-y-6">
       <header className="space-y-2">
-        <Link
-          to={`/projects/${id}`}
-          className="text-sm text-muted-foreground hover:underline"
-        >
-          ← Detalhe do projeto
-        </Link>
+        <nav className="text-sm text-muted-foreground" aria-label="Trilha">
+          <Link to="/projects" className="hover:text-foreground hover:underline">
+            Projetos
+          </Link>
+          <span className="px-1.5" aria-hidden>
+            /
+          </span>
+          <Link
+            to={`/projects/${id}`}
+            className="hover:text-foreground hover:underline"
+          >
+            Projeto
+          </Link>
+          <span className="px-1.5" aria-hidden>
+            /
+          </span>
+          <span className="text-foreground">Visibilidade</span>
+        </nav>
         <h1 className="text-2xl font-bold">Visibilidade do cliente</h1>
         <p className="text-sm text-muted-foreground">
           Cliente vê {visibleCount} de {TOTAL} atributos.

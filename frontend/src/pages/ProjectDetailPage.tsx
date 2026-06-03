@@ -82,6 +82,15 @@ export function ProjectDetailPage() {
   return (
     <div className="space-y-8">
       <header className="space-y-2">
+        <nav className="text-sm text-muted-foreground" aria-label="Trilha">
+          <Link to="/projects" className="hover:text-foreground hover:underline">
+            Projetos
+          </Link>
+          <span className="px-1.5" aria-hidden>
+            /
+          </span>
+          <span className="text-foreground">{project.name}</span>
+        </nav>
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-2xl font-bold">{project.name}</h1>
           <DomainBadge domain={project.domain} />
