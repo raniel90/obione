@@ -37,7 +37,7 @@ export function FeedPage() {
           ) : (
             <ul className="space-y-2">
               {events.map((event) => (
-                <FeedEventItem key={event.target_id} event={event} />
+                <FeedEventItem key={`${event.kind}:${event.target_id}`} event={event} />
               ))}
             </ul>
           )}
