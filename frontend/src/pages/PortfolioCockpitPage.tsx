@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useCockpit } from "@/lib/queries/use-cockpit";
 import { CockpitKpis } from "@/components/cockpit-kpis";
 import { ThemeBreakdownTable } from "@/components/theme-breakdown-table";
@@ -31,7 +32,12 @@ export function PortfolioCockpitPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-6 py-12">
-      <h1 className="text-2xl font-bold">Cockpit do Portfólio</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Cockpit do Portfólio</h1>
+        <Link to="/feed" className="text-sm text-primary hover:underline">
+          Novidades
+        </Link>
+      </div>
       {cockpit.total_projects === 0 ? (
         <p className="text-muted-foreground">Nenhum projeto no portfólio ainda.</p>
       ) : (

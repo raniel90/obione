@@ -8,6 +8,7 @@ import { PortfolioCockpitPage } from "@/pages/PortfolioCockpitPage";
 import { ProjectDetailPage } from "@/pages/ProjectDetailPage";
 import { ProjectVisibilityPage } from "@/pages/ProjectVisibilityPage";
 import { ProjectsListPage } from "@/pages/ProjectsListPage";
+import { FeedPage } from "@/pages/FeedPage";
 
 export function AppRoutes() {
   return (
@@ -55,6 +56,14 @@ export function AppRoutes() {
               <RequireRole role={["consultant", "admin"]}>
                 <ProjectVisibilityPage />
               </RequireRole>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/feed"
+          element={
+            <RequireAuth>
+              <FeedPage />
             </RequireAuth>
           }
         />

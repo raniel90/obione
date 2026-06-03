@@ -71,4 +71,11 @@ describe("ProjectsListPage", () => {
     await waitFor(() => expect(screen.getByText("Freire Batista ADV")).toBeInTheDocument());
     expect(screen.queryByText("Valença Odontologia")).not.toBeInTheDocument();
   });
+
+  it("has a link to the feed", async () => {
+    vi.spyOn(projectsApi, "listProjects").mockResolvedValue(PROJECTS);
+    setup();
+    await waitFor(() => expect(screen.getByText("Freire Batista ADV")).toBeInTheDocument());
+    expect(screen.getByRole("link", { name: "Novidades" })).toHaveAttribute("href", "/feed");
+  });
 });
