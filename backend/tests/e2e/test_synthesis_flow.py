@@ -115,8 +115,11 @@ def test_synthesis_lifecycle_and_client_read(client, actors):
     # Client now reads the published synthesis of its project's temática.
     r = client.get(f"/projects/{p1}/syntheses", headers=cli_h)
     assert r.status_code == 200
-    published = {s["id"] for s in r.json()}
+    body = r.json()
+    published = {s["id"] for s in body}
     assert syn["id"] in published
+    # LGPD/isolation: the client must NOT receive sibling project UUIDs.
+    assert all(s["source_project_ids"] == [] for s in body)
 
     # Immutability after publish.
     assert client.post(f"/syntheses/{syn['id']}/publish", headers=h).status_code == 409

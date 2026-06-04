@@ -50,7 +50,13 @@ export function LinkClientDialog({ projectId }: { projectId: string }) {
   const clients = clientsQ.data ?? [];
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) setUserId(""); // reset stale selection on close (overlay/Esc)
+      }}
+    >
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <UserPlus className="size-4" />

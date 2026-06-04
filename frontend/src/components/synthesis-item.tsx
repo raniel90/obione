@@ -74,6 +74,7 @@ export function SynthesisItem({
         <DraftForm
           defaultTitle={synthesis.title ?? ""}
           defaultBody={synthesis.body}
+          maxBody={8000}
           pending={pending}
           onSubmit={(patch) => {
             const result = onEdit(patch);

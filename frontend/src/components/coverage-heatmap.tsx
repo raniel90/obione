@@ -48,7 +48,7 @@ export function CoverageHeatmap({ data }: { data: CoverageMatrix }) {
           </div>
 
           {/* Data rows */}
-          <div className="space-y-px">
+          <div className="space-y-px" role="rowgroup">
             {rows.map((row) => (
               <div
                 key={row.project_id}
@@ -71,6 +71,7 @@ export function CoverageHeatmap({ data }: { data: CoverageMatrix }) {
                       key={key}
                       to={`/projects/${row.project_id}`}
                       role="cell"
+                      aria-label={`${row.project_name} · ${CATEGORY_LABELS[key] ?? key}: ${pct}%`}
                       title={`${row.project_name} · ${CATEGORY_LABELS[key] ?? key}: ${pct}%`}
                       className={cn(
                         "flex items-center justify-center rounded-sm py-2 text-xs font-medium tabular-nums transition-opacity hover:opacity-80",
