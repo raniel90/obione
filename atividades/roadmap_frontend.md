@@ -47,10 +47,14 @@ placeholder ou código parcial.
 Camada de e2e (Playwright) introduzida no M3 e aplicada retroativamente a M1/M2.
 
 | Pós-M5 | **UI polish (impeccable) + app shell** — passe de craft em todas as telas | (transversal) | ✅ mergeado | #33 |
+| Pós-M5 | **Ciclo de vida do projeto pela UI** — cadastro + extração + vínculo de cliente | Novo projeto (`/projects/new`) + ações no detalhe | 🟡 em PR | #34 |
 
 O passe de polish (PR #33) é **transversal** — não acrescenta tela nova; refina as 6
 existentes e adiciona a casca de navegação (ver §6). Sem mudança de comportamento,
 escopo ou role-aware.
+
+O ciclo de vida (PR #34) adiciona a 7ª tela (cadastro) e operacionaliza RF03/RF05
+na UI — ver §6.
 
 ---
 
@@ -64,14 +68,16 @@ escopo ou role-aware.
 | **Temática (IA)** | seção no detalhe (só-staff) | RF13 (categorizar por temática/segmento) | M3 | ✅ | `theme-*.test.tsx` + `e2e/themes.spec.ts` |
 | **Config CBAC** | `/projects/:id/visibility` | RF04 (configurar visibilidade via CBAC) | M4 | ✅ | `visibility-*.test.tsx` + `ProjectVisibilityPage.test.tsx` + `e2e/visibility.spec.ts` |
 | **Cockpit do portfólio** | `/portfolio/cockpit` | RF14 (cockpit cross-cliente) | M5 | ✅ | `cockpit-kpis.test.tsx` + `theme-breakdown-table.test.tsx` + `PortfolioCockpitPage.test.tsx` + `e2e/cockpit.spec.ts` |
+| **Novo projeto (cadastro)** | `/projects/new` | RF03 (registrar projeto), RF05 (extração via IA) | Pós-M5 | 🟡 em PR #34 | `ProjectCreatePage.test.tsx` + `link-client-dialog.test.tsx` + `e2e/project-lifecycle.spec.ts` |
 
-Legenda: ✅ pronto (todos os critérios da §2) · 🔜 falta (não atende a §2 ainda).
+Legenda: ✅ pronto (todos os critérios da §2) · 🟡 em PR · 🔜 falta (não atende a §2 ainda).
 
-Snapshot de verificação (após UI polish, PR #33): **Vitest 168/168** (46 arquivos) ·
-**Playwright 23/23** (login, lista, detalhe/CBAC, temática, visibilidade, cockpit, comentários, drafts, feed) · build + lint limpos.
+Snapshot de verificação (após ciclo de vida, PR #34): **Vitest 182/182** (49 arquivos) ·
+**Playwright 25/25** (as 23 + `project-lifecycle`) · **backend 278** (auth `GET /auth/users`) · build + lint limpos.
 
-**Roadmap de telas COMPLETO (M0–M5).** As 6 telas atendem à Definição de Pronto (§2),
-agora com o **passe de UI polish + app shell** aplicado (PR #33 — ver §3 e §6).
+**Roadmap de telas COMPLETO (M0–M5)** + polish (PR #33) + ciclo de vida (PR #34): o
+consultor opera o observatório **fim-a-fim pela UI** (cadastro → extração → vínculo de
+cliente → CBAC), sem CLI.
 
 ---
 
@@ -145,6 +151,27 @@ features de tela foi entregue: **RF10** (comentários), **RF12** (drafts/IA) e *
     em card; `FeedEventItem` com ícone tintado por tipo; breadcrumb no detalhe/visibilidade.
   - **Role-aware preservado**: cliente não vê Cockpit na nav nem seções staff; guards intactos.
     Verde: Vitest 168/168 · e2e 23/23 · tour headless 2 perfis (11/11 checks role-aware).
+- **Ciclo de vida do projeto pela UI (RF03/RF05) — 🟡 EM PR (#34).** Fecha o gap "só dava
+  pra criar projeto via CLI". O consultor agora opera o observatório **fim-a-fim pela
+  interface**:
+  - **Cadastro** (`/projects/new`, staff-only): form nome/domínio/descrição (≥200 chars —
+    a descrição é a fonte da extração; mantém a decisão "sem upload"). Botão "Novo projeto"
+    na lista (staff). Ao criar, redireciona ao detalhe.
+  - **Extração** no detalhe: sem extração LLM, o empty state de atributos ganha ação staff
+    "Executar extração" (RF05) → os 44 atributos do MPO renderizam.
+  - **Vínculo de cliente**: `LinkClientDialog` (ao lado de "Configurar visibilidade")
+    vincula um cliente; depois o consultor libera categorias no CBAC (tela existente).
+  - **Backend**: única adição foi `GET /auth/users?role=` (staff-only) para o seletor de
+    clientes; o restante (`POST /projects`, `POST /projects/{id}/extractions`,
+    `POST /projects/{id}/clients`) já existia.
+  - Verde: Vitest 182/182 · e2e 25/25 (`project-lifecycle`) · backend 278 · role-aware
+    (cliente não vê "Novo projeto" nem as ações de ciclo).
+- **Backlog de "profundidade de observatório" (não iniciado).** O cruzamento das telas
+  com o MPO mostrou que os 5 diferenciais de observatório já estão visíveis, mas há
+  aprofundamentos de valor ainda fora de escopo: **heatmap de cobertura** projetos×dimensões
+  (RF09 cross-portfólio, hoje só um % por projeto); **síntese cross-projeto / Conectora**
+  (lições aprendidas por temática — cortada do MVP por risco/tempo); **trilha temporal /
+  tendências** no feed. Candidatos a próximos ciclos.
 
 ---
 

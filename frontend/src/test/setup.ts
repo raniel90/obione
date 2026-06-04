@@ -6,6 +6,19 @@ afterEach(() => {
   cleanup();
 });
 
+// Radix UI primitives (Select, Dialog) rely on pointer-capture and
+// scrollIntoView, which jsdom does not implement. Polyfill as no-ops so
+// component tests can open and drive them.
+const proto = Element.prototype as unknown as Record<string, unknown>;
+if (typeof proto.hasPointerCapture !== "function") {
+  proto.hasPointerCapture = () => false;
+  proto.setPointerCapture = () => {};
+  proto.releasePointerCapture = () => {};
+}
+if (typeof proto.scrollIntoView !== "function") {
+  proto.scrollIntoView = () => {};
+}
+
 // Node 25 ships a built-in Web Storage API behind the `--localstorage-file`
 // flag that Vitest workers pass without a value. The resulting native
 // `localStorage`/`sessionStorage` globals are unusable (no `getItem`,

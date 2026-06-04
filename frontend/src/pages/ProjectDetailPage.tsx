@@ -1,9 +1,11 @@
 import { useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
 import { format, parseISO } from "date-fns";
-import { FileText, SlidersHorizontal } from "lucide-react";
+import { toast } from "sonner";
+import { FileText, Sparkles, SlidersHorizontal } from "lucide-react";
 import { useProjectDetail } from "@/lib/queries/use-project-detail";
 import { useExtractions } from "@/lib/queries/use-extractions";
+import { useRunExtraction } from "@/lib/queries/use-run-extraction";
 import { useUser } from "@/lib/auth-context";
 import { groupAttributes } from "@/lib/mpo/group-attributes";
 import { categoryCoverage } from "@/lib/mpo/coverage";
@@ -16,6 +18,7 @@ import { DomainBadge } from "@/components/domain-badge";
 import { ThemeSection } from "@/components/theme-section";
 import { DraftsSection } from "@/components/drafts-section";
 import { EmptyState } from "@/components/empty-state";
+import { LinkClientDialog } from "@/components/link-client-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -27,6 +30,14 @@ export function ProjectDetailPage() {
 
   const detailQ = useProjectDetail(id);
   const extractionsQ = useExtractions(id);
+  const runExtraction = useRunExtraction(id);
+
+  function handleRunExtraction() {
+    runExtraction.mutate(undefined, {
+      onSuccess: () => toast.success("Extração concluída"),
+      onError: () => toast.error("Não foi possível executar a extração."),
+    });
+  }
 
   const llmContent = useMemo(() => {
     const runs = extractionsQ.data ?? [];
@@ -109,12 +120,15 @@ export function ProjectDetailPage() {
       )}
 
       {isStaff && (
-        <Button asChild variant="outline" size="sm">
-          <Link to={`/projects/${id}/visibility`}>
-            <SlidersHorizontal className="size-4" />
-            Configurar visibilidade
-          </Link>
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link to={`/projects/${id}/visibility`}>
+              <SlidersHorizontal className="size-4" />
+              Configurar visibilidade
+            </Link>
+          </Button>
+          <LinkClientDialog projectId={id} />
+        </div>
       )}
 
       {isStaff && <ThemeSection projectId={id} currentDomain={project.domain} />}
@@ -133,6 +147,14 @@ export function ProjectDetailPage() {
             icon={FileText}
             message="Extração ainda não executada."
             description="Os 44 atributos do MPO aparecem aqui após a extração via IA."
+            action={
+              isStaff ? (
+                <Button onClick={handleRunExtraction} disabled={runExtraction.isPending}>
+                  <Sparkles className="size-4" />
+                  {runExtraction.isPending ? "Extraindo…" : "Executar extração"}
+                </Button>
+              ) : undefined
+            }
           />
         ) : (
           <AttributeAccordion categories={grouped} coverageByCategory={catCoverage} />

@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { Route, Routes } from "react-router-dom";
 import { renderWithProviders } from "@/test/render";
 import { RequireAuth } from "@/components/require-auth";
@@ -9,6 +10,7 @@ import * as extractionsApi from "@/lib/api/extractions";
 import * as themesApi from "@/lib/api/themes";
 import * as commentsApi from "@/lib/api/comments";
 import * as draftsApi from "@/lib/api/drafts";
+import * as usersApi from "@/lib/api/users";
 import { TOKEN_STORAGE_KEY } from "@/lib/api/token";
 import { ApiError } from "@/lib/api/error";
 import { ProjectDetailPage } from "./ProjectDetailPage";
@@ -44,6 +46,7 @@ function setup(user: User) {
   vi.spyOn(themesApi, "listThemeSuggestions").mockResolvedValue([]);
   vi.spyOn(commentsApi, "listComments").mockResolvedValue([]);
   vi.spyOn(draftsApi, "listDrafts").mockResolvedValue([]);
+  vi.spyOn(usersApi, "listClients").mockResolvedValue([]);
   return renderWithProviders(
     <Routes>
       <Route
@@ -109,6 +112,27 @@ describe("ProjectDetailPage", () => {
     vi.spyOn(extractionsApi, "listExtractions").mockResolvedValue([]);
     setup(CONSULTANT);
     await waitFor(() => expect(screen.getByText(/extração ainda não executada/i)).toBeInTheDocument());
+  });
+
+  it("lets a consultant run the extraction from the empty state", async () => {
+    vi.spyOn(projectsApi, "getProjectDetail").mockResolvedValue(detail({ latest_llm_extraction: null }));
+    vi.spyOn(extractionsApi, "listExtractions").mockResolvedValue([]);
+    const runSpy = vi
+      .spyOn(extractionsApi, "runExtraction")
+      .mockResolvedValue(run({ _meta: META, nome_projeto: "Projeto X" }));
+    setup(CONSULTANT);
+    const user = userEvent.setup();
+    const btn = await screen.findByRole("button", { name: /executar extração/i });
+    await user.click(btn);
+    await waitFor(() => expect(runSpy).toHaveBeenCalledWith("p1"));
+  });
+
+  it("does not offer 'Executar extração' to a client", async () => {
+    vi.spyOn(projectsApi, "getProjectDetail").mockResolvedValue(detail({ latest_llm_extraction: null }));
+    vi.spyOn(extractionsApi, "listExtractions").mockResolvedValue([]);
+    setup(CLIENT);
+    await waitFor(() => expect(screen.getByText(/extração ainda não executada/i)).toBeInTheDocument());
+    expect(screen.queryByRole("button", { name: /executar extração/i })).not.toBeInTheDocument();
   });
 
   it("shows an attributes error (not the empty state) when extractions fail but detail succeeds", async () => {

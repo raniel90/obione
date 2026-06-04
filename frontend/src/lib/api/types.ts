@@ -45,6 +45,12 @@ export interface Project {
   updated_at: string;
 }
 
+export interface ProjectCreate {
+  name: string;
+  domain: Domain;
+  description: string;
+}
+
 export interface ExtractionBrief {
   id: string;
   source: string;
