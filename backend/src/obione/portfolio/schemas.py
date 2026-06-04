@@ -29,3 +29,21 @@ class CockpitResponse(BaseModel):
     avg_coverage_overall: float
     status_distribution: StatusDistribution
     themes: list[ThemeBreakdown]
+
+
+class CoverageMatrixRow(BaseModel):
+    """One project's coverage (0-100) per MPO category, for the heatmap."""
+
+    project_id: str
+    project_name: str
+    domain: str
+    coverages: dict[str, float] = Field(
+        description="Map of category_key → coverage % (0-100). All 8 keys present."
+    )
+
+
+class CoverageMatrixResponse(BaseModel):
+    """RF09 cross-portfólio — projects × MPO categories coverage matrix."""
+
+    categories: list[str] = Field(description="Ordered 8 Quadro-37 category keys (columns).")
+    rows: list[CoverageMatrixRow]

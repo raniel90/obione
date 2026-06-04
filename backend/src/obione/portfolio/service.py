@@ -11,7 +11,7 @@ from collections import defaultdict
 from statistics import mean
 
 from obione.auth.models import User
-from obione.extractions.coverage import compute_coverage
+from obione.extractions.coverage import all_categories, compute_coverage
 from obione.portfolio.exceptions import ThemeNotInPortfolioError
 from obione.projects.access_control import list_visible_projects
 from obione.projects.service import _derive_status, _is_gabarito
@@ -88,6 +88,34 @@ def cockpit(uow: AbstractUnitOfWork, user: User) -> dict:
         "status_distribution": overall_status,
         "themes": themes,
     }
+
+
+def coverage_matrix(uow: AbstractUnitOfWork, user: User) -> dict:
+    """RF09 cross-portfólio — coverage of each MPO category per visible project.
+
+    A rectangular matrix (projects × 8 Quadro-37 categories) so the consultant
+    can scan which dimensions are systematically under-captured across the
+    portfolio. Staff-only (same scope as the cockpit); projects without an
+    extraction yield an all-zero row.
+    """
+    _require_consultant_or_admin(user)
+    categories = all_categories()
+    with uow:
+        projects = list_visible_projects(uow, user)
+        rows = []
+        for project in projects:
+            extractions = uow.extractions.list_by_project(project.id)
+            content = extractions[0].content if extractions else {}
+            per_cat = {c.category: c.percentage for c in compute_coverage(content).by_category}
+            rows.append(
+                {
+                    "project_id": str(project.id),
+                    "project_name": project.name,
+                    "domain": project.domain,
+                    "coverages": {cat: per_cat.get(cat, 0.0) for cat in categories},
+                }
+            )
+    return {"categories": categories, "rows": rows}
 
 
 def cockpit_by_theme(uow: AbstractUnitOfWork, user: User, domain: str) -> dict:

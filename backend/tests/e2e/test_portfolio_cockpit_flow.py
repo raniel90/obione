@@ -85,6 +85,49 @@ def test_client_blocked_from_cockpit(client, cockpit_actors):
 
 
 @pytest.mark.e2e
+def test_coverage_matrix_rows_and_categories(client, cockpit_actors):
+    h = {"Authorization": f"Bearer {cockpit_actors['cons_token']}"}
+    # One project with an extraction, one without.
+    with_ext = client.post(
+        "/projects",
+        json={"name": "ComExtracao", "domain": "legal", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    ).json()
+    client.post(f"/projects/{with_ext['id']}/extractions", headers=h)
+    client.post(
+        "/projects",
+        json={"name": "SemExtracao", "domain": "health", "description": SAMPLE_DESCRIPTION},
+        headers=h,
+    )
+
+    r = client.get("/portfolio/coverage-matrix", headers=h)
+    assert r.status_code == 200, r.text
+    body = r.json()
+
+    # 8 canonical Quadro-37 categories as columns.
+    assert len(body["categories"]) == 8
+    assert {"conteudo_geral", "riscos", "licoes_aprendidas"} <= set(body["categories"])
+
+    rows = {row["project_name"]: row for row in body["rows"]}
+    assert {"ComExtracao", "SemExtracao"} <= set(rows)
+
+    # Every row is rectangular: exactly the 8 category keys.
+    for row in body["rows"]:
+        assert set(row["coverages"]) == set(body["categories"])
+
+    # Extracted project has some coverage; the un-extracted one is all zero.
+    assert sum(rows["ComExtracao"]["coverages"].values()) > 0
+    assert all(v == 0.0 for v in rows["SemExtracao"]["coverages"].values())
+
+
+@pytest.mark.e2e
+def test_coverage_matrix_blocked_for_client(client, cockpit_actors):
+    h = {"Authorization": f"Bearer {cockpit_actors['cli_token']}"}
+    r = client.get("/portfolio/coverage-matrix", headers=h)
+    assert r.status_code == 403
+
+
+@pytest.mark.e2e
 def test_cockpit_by_theme_endpoint(client, cockpit_actors):
     h = {"Authorization": f"Bearer {cockpit_actors['cons_token']}"}
     client.post(

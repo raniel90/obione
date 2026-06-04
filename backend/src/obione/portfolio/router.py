@@ -4,7 +4,13 @@ from fastapi import APIRouter
 
 from obione.auth.dependencies import CurrentUser, get_uow
 from obione.portfolio import service
-from obione.portfolio.schemas import CockpitResponse, StatusDistribution, ThemeBreakdown
+from obione.portfolio.schemas import (
+    CockpitResponse,
+    CoverageMatrixResponse,
+    CoverageMatrixRow,
+    StatusDistribution,
+    ThemeBreakdown,
+)
 
 router = APIRouter(prefix="/portfolio", tags=["portfolio"])
 
@@ -38,3 +44,12 @@ def get_cockpit(user: CurrentUser) -> CockpitResponse:
 def get_theme(domain: str, user: CurrentUser) -> ThemeBreakdown:
     raw = service.cockpit_by_theme(get_uow(), user, domain)
     return _to_theme_breakdown(raw)
+
+
+@router.get("/coverage-matrix", response_model=CoverageMatrixResponse)
+def get_coverage_matrix(user: CurrentUser) -> CoverageMatrixResponse:
+    raw = service.coverage_matrix(get_uow(), user)
+    return CoverageMatrixResponse(
+        categories=raw["categories"],
+        rows=[CoverageMatrixRow(**row) for row in raw["rows"]],
+    )
