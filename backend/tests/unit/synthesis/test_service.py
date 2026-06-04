@@ -60,7 +60,9 @@ def test_generate_creates_draft_from_theme_projects():
 def test_generated_body_is_anonymized_no_project_names():
     uow = FakeUnitOfWork()
     cons = _user("consultant")
-    _legal_project(uow, cons, "Escritorio Secreto XPTO", pontos_fortes="forte", riscos_identificados="risco")
+    _legal_project(
+        uow, cons, "Escritorio Secreto XPTO", pontos_fortes="forte", riscos_identificados="risco"
+    )
 
     synthesis = generate_synthesis(uow, MockSynthesisGenerator(), cons, "legal")
 

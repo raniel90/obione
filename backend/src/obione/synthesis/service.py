@@ -53,9 +53,7 @@ def generate_synthesis(
     with uow:
         projects = [p for p in list_visible_projects(uow, user) if p.domain == domain]
         if not projects:
-            raise SynthesisNoProjectsError(
-                f"Nenhum projeto visível na temática '{domain}'."
-            )
+            raise SynthesisNoProjectsError(f"Nenhum projeto visível na temática '{domain}'.")
         digests: list[dict] = []
         source_ids: list[str] = []
         for project in projects:
@@ -86,9 +84,7 @@ def generate_synthesis(
         return synthesis
 
 
-def list_syntheses_by_domain(
-    uow: AbstractUnitOfWork, user: User, domain: str
-) -> list[Synthesis]:
+def list_syntheses_by_domain(uow: AbstractUnitOfWork, user: User, domain: str) -> list[Synthesis]:
     """Staff-only: the full draft + published history for a temática."""
     _require_consultor_or_admin(user)
     with uow:

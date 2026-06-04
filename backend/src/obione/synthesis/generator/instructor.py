@@ -27,8 +27,8 @@ _SYSTEM_PROMPT = (
 )
 
 _OUTPUT_INSTRUCTIONS = (
-    "Retorne um objeto JSON: {\"title\": \"<curto>\", \"body\": \"<markdown com os "
-    "três blocos>\"}. Não inclua texto fora do JSON."
+    'Retorne um objeto JSON: {"title": "<curto>", "body": "<markdown com os '
+    'três blocos>"}. Não inclua texto fora do JSON.'
 )
 
 

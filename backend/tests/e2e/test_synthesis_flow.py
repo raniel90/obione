@@ -9,7 +9,12 @@ from obione.shared.database import SessionLocal
 from obione.synthesis.models import Synthesis
 from tests._helpers import SAMPLE_DESCRIPTION
 
-_META = {"projeto_nome": "p", "documento_fonte": "d.docx", "data_extracao": "2026-05-21T00:00:00Z", "origem": "llm"}
+_META = {
+    "projeto_nome": "p",
+    "documento_fonte": "d.docx",
+    "data_extracao": "2026-05-21T00:00:00Z",
+    "origem": "llm",
+}
 
 
 def _purge(s, emails: list[str]) -> None:
@@ -20,9 +25,7 @@ def _purge(s, emails: list[str]) -> None:
     s.query(Synthesis).filter(Synthesis.generated_by.in_(user_ids)).delete(
         synchronize_session=False
     )
-    project_ids = [
-        p.id for p in s.query(Project).filter(Project.consultant_id.in_(user_ids)).all()
-    ]
+    project_ids = [p.id for p in s.query(Project).filter(Project.consultant_id.in_(user_ids)).all()]
     if project_ids:
         s.query(ProjectClient).filter(ProjectClient.project_id.in_(project_ids)).delete(
             synchronize_session=False
@@ -38,16 +41,23 @@ def actors(client):
     emails = ["e2e-syn-cons@x.com", "e2e-syn-cli@x.com"]
     try:
         _purge(s, emails)
-        cons = User(email=emails[0], password_hash=hash_password("pwd12345678"), name="Cons", role="consultant")
-        cli = User(email=emails[1], password_hash=hash_password("pwd12345678"), name="Cli", role="client")
+        cons = User(
+            email=emails[0],
+            password_hash=hash_password("pwd12345678"),
+            name="Cons",
+            role="consultant",
+        )
+        cli = User(
+            email=emails[1], password_hash=hash_password("pwd12345678"), name="Cli", role="client"
+        )
         s.add_all([cons, cli])
         s.commit()
         s.refresh(cli)
 
         def _login(email):
-            return client.post("/auth/login", json={"email": email, "password": "pwd12345678"}).json()[
-                "access_token"
-            ]
+            return client.post(
+                "/auth/login", json={"email": email, "password": "pwd12345678"}
+            ).json()["access_token"]
 
         yield {"cons": _login(emails[0]), "cli": _login(emails[1]), "cli_id": str(cli.id)}
         _purge(s, emails)
@@ -87,7 +97,9 @@ def test_synthesis_lifecycle_and_client_read(client, actors):
     assert "XPTO" not in syn["body"]
 
     # Edit while draft.
-    r = client.patch(f"/syntheses/{syn['id']}", json={"body": "Síntese revisada pelo consultor."}, headers=h)
+    r = client.patch(
+        f"/syntheses/{syn['id']}", json={"body": "Síntese revisada pelo consultor."}, headers=h
+    )
     assert r.status_code == 200
 
     # Client does not see drafts.
@@ -108,7 +120,10 @@ def test_synthesis_lifecycle_and_client_read(client, actors):
 
     # Immutability after publish.
     assert client.post(f"/syntheses/{syn['id']}/publish", headers=h).status_code == 409
-    assert client.patch(f"/syntheses/{syn['id']}", json={"body": "tarde"}, headers=h).status_code == 409
+    assert (
+        client.patch(f"/syntheses/{syn['id']}", json={"body": "tarde"}, headers=h).status_code
+        == 409
+    )
     assert client.delete(f"/syntheses/{syn['id']}", headers=h).status_code == 409
 
 
