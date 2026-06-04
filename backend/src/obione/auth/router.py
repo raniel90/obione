@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 
 from obione.auth import service
 from obione.auth.dependencies import CurrentUser, get_uow, require_role
-from obione.auth.schemas import LoginRequest, TokenResponse, UserCreate, UserResponse
+from obione.auth.schemas import LoginRequest, Role, TokenResponse, UserCreate, UserResponse
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -20,6 +20,16 @@ def login(payload: LoginRequest) -> TokenResponse:
 @router.get("/me", response_model=UserResponse)
 def me(user: CurrentUser) -> UserResponse:
     return UserResponse.model_validate(user)
+
+
+@router.get(
+    "/users",
+    response_model=list[UserResponse],
+    dependencies=[Depends(require_role("consultant", "admin"))],
+)
+def list_users(role: Role | None = None) -> list[UserResponse]:
+    users = service.list_users(get_uow(), role=role)
+    return [UserResponse.model_validate(u) for u in users]
 
 
 @router.post(

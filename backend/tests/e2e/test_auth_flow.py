@@ -95,3 +95,72 @@ def test_create_user_requires_admin(client, admin_user):
         s.commit()
     finally:
         s.close()
+
+
+@pytest.fixture
+def consultant_and_client():
+    """Create a consultant + a client directly (outside the rollback fixture)."""
+    emails = ["e2e-consult@x.com", "e2e-cli@x.com"]
+    s = SessionLocal()
+    try:
+        s.query(User).filter(User.email.in_(emails)).delete(synchronize_session=False)
+        s.commit()
+        consultant = User(
+            email="e2e-consult@x.com",
+            password_hash=hash_password("consultpwd1234"),
+            name="Zeta Consultant",
+            role="consultant",
+        )
+        client_user = User(
+            email="e2e-cli@x.com",
+            password_hash=hash_password("clientpwd1234"),
+            name="Alfa Client",
+            role="client",
+        )
+        s.add_all([consultant, client_user])
+        s.commit()
+        yield {"consultant": "e2e-consult@x.com", "client": "e2e-cli@x.com"}
+        s.query(User).filter(User.email.in_(emails)).delete(synchronize_session=False)
+        s.commit()
+    finally:
+        s.close()
+
+
+def _token(client, email, password):
+    return client.post("/auth/login", json={"email": email, "password": password}).json()[
+        "access_token"
+    ]
+
+
+@pytest.mark.e2e
+def test_list_users_filtered_by_role_returns_only_clients(client, consultant_and_client):
+    token = _token(client, "e2e-consult@x.com", "consultpwd1234")
+    r = client.get(
+        "/auth/users", params={"role": "client"}, headers={"Authorization": f"Bearer {token}"}
+    )
+    assert r.status_code == 200, r.text
+    roles = {u["role"] for u in r.json()}
+    assert roles == {"client"}
+    emails = {u["email"] for u in r.json()}
+    assert "e2e-cli@x.com" in emails
+    assert "e2e-consult@x.com" not in emails
+    # UserResponse shape (no password leak)
+    sample = r.json()[0]
+    assert set(sample) >= {"id", "email", "name", "role", "created_at"}
+    assert "password_hash" not in sample
+
+
+@pytest.mark.e2e
+def test_list_users_without_role_returns_all(client, consultant_and_client):
+    token = _token(client, "e2e-consult@x.com", "consultpwd1234")
+    r = client.get("/auth/users", headers={"Authorization": f"Bearer {token}"})
+    assert r.status_code == 200, r.text
+    emails = {u["email"] for u in r.json()}
+    assert {"e2e-consult@x.com", "e2e-cli@x.com"} <= emails
+
+
+@pytest.mark.e2e
+def test_list_users_forbidden_for_client(client, consultant_and_client):
+    token = _token(client, "e2e-cli@x.com", "clientpwd1234")
+    r = client.get("/auth/users", headers={"Authorization": f"Bearer {token}"})
+    assert r.status_code == 403

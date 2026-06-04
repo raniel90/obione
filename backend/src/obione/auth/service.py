@@ -6,7 +6,7 @@ from obione.auth.exceptions import (
     RoleNotAllowedError,
 )
 from obione.auth.models import USER_ROLES, User
-from obione.auth.schemas import UserCreate
+from obione.auth.schemas import Role, UserCreate
 from obione.auth.security import encode_token, hash_password, verify_password
 from obione.unit_of_work import AbstractUnitOfWork
 
@@ -18,6 +18,18 @@ def authenticate(uow: AbstractUnitOfWork, *, email: str, password: str) -> tuple
             raise InvalidCredentialsError("Invalid email or password.")
         token, expires_in = encode_token(sub=str(user.id), extra={"role": user.role})
         return token, expires_in, user
+
+
+def list_users(uow: AbstractUnitOfWork, *, role: Role | None = None) -> list[User]:
+    """List users, optionally filtered by role, ordered by name.
+
+    Used by staff to pick a client when linking one to a project.
+    """
+    with uow:
+        users = uow.users.list()
+        if role is not None:
+            users = [u for u in users if u.role == role]
+        return sorted(users, key=lambda u: u.name.lower())
 
 
 def create_user(uow: AbstractUnitOfWork, data: UserCreate) -> User:
