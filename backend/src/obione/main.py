@@ -19,6 +19,9 @@ from obione.settings import settings
 from obione.shared.exceptions import register_exception_handlers
 from obione.shared.logging import configure_logging
 from obione.shared.middleware import register_middleware
+from obione.synthesis.router import project_router as synthesis_project_router
+from obione.synthesis.router import synthesis_router
+from obione.synthesis.router import theme_router as synthesis_theme_router
 from obione.themes.router import project_router as themes_project_router
 from obione.themes.router import suggestion_router as themes_suggestion_router
 from obione.visibility.router import router as visibility_router
@@ -57,6 +60,9 @@ def create_app() -> FastAPI:
     app.include_router(themes_project_router)
     app.include_router(themes_suggestion_router)
     app.include_router(portfolio_router)
+    app.include_router(synthesis_theme_router)
+    app.include_router(synthesis_project_router)
+    app.include_router(synthesis_router)
 
     @app.get("/", include_in_schema=False)
     def root():
