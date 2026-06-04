@@ -72,8 +72,8 @@ na UI — ver §6.
 
 Legenda: ✅ pronto (todos os critérios da §2) · 🟡 em PR · 🔜 falta (não atende a §2 ainda).
 
-Snapshot de verificação (após ciclo de vida, PR #34): **Vitest 182/182** (49 arquivos) ·
-**Playwright 25/25** (as 23 + `project-lifecycle`) · **backend 278** (auth `GET /auth/users`) · build + lint limpos.
+Snapshot de verificação (após heatmap de cobertura, PR #35): **Vitest 186/186** (50 arquivos) ·
+**Playwright 26/26** (as 25 + heatmap no cockpit) · **backend 280** (`GET /portfolio/coverage-matrix`) · build + lint limpos.
 
 **Roadmap de telas COMPLETO (M0–M5)** + polish (PR #33) + ciclo de vida (PR #34): o
 consultor opera o observatório **fim-a-fim pela UI** (cadastro → extração → vínculo de
@@ -166,12 +166,18 @@ features de tela foi entregue: **RF10** (comentários), **RF12** (drafts/IA) e *
     `POST /projects/{id}/clients`) já existia.
   - Verde: Vitest 182/182 · e2e 25/25 (`project-lifecycle`) · backend 278 · role-aware
     (cliente não vê "Novo projeto" nem as ações de ciclo).
-- **Backlog de "profundidade de observatório" (não iniciado).** O cruzamento das telas
-  com o MPO mostrou que os 5 diferenciais de observatório já estão visíveis, mas há
-  aprofundamentos de valor ainda fora de escopo: **heatmap de cobertura** projetos×dimensões
-  (RF09 cross-portfólio, hoje só um % por projeto); **síntese cross-projeto / Conectora**
-  (lições aprendidas por temática — cortada do MVP por risco/tempo); **trilha temporal /
-  tendências** no feed. Candidatos a próximos ciclos.
+- **Heatmap de cobertura (RF09 cross-portfólio) — 🟡 EM PR (#35).** O "maior salto de cara
+  de observatório": nova seção "Cobertura por categoria" no cockpit com uma matriz
+  **projetos × 8 dimensões do MPO**, células coloridas por faixa de cobertura (verde ≥80% /
+  âmbar 40–79% / cinza <40%), `%` na célula e drill por célula → detalhe do projeto. Revela
+  de relance dimensões sistematicamente sub-capturadas no portfólio (ex.: Escopo, Riscos,
+  Mudanças e Lições aprendidas a 0% em todos os projetos do seed). Staff-only (cockpit já é
+  restrito). **Backend**: endpoint dedicado `GET /portfolio/coverage-matrix` reusando
+  `compute_coverage().by_category` + `list_visible_projects()`; **frontend**: `CoverageHeatmap`
+  em CSS-grid com tokens semânticos (sem recharts). Verde: Vitest 186 · e2e 26 · backend 280.
+- **Backlog de "profundidade de observatório" (restante).** Ainda fora de escopo, candidatos
+  a próximos ciclos: **síntese cross-projeto / Conectora** (lições aprendidas por temática —
+  cortada do MVP por risco/tempo) e **trilha temporal / tendências** no feed.
 
 ---
 
