@@ -23,6 +23,25 @@ test.describe("Portfolio cockpit (M5)", () => {
     await expect(page.getByText("Valença Odontologia")).toHaveCount(0);
   });
 
+  test("consultant sees the coverage heatmap and drills a cell to a project", async ({
+    page,
+  }) => {
+    await login(page, ACCOUNTS.consultor);
+    await expect(page).toHaveURL(/\/portfolio\/cockpit$/);
+
+    // The heatmap section + an MPO dimension column header are present.
+    await expect(
+      page.getByRole("heading", { name: "Cobertura por categoria" }),
+    ).toBeVisible();
+    await expect(page.getByText("Riscos", { exact: true })).toBeVisible();
+
+    // A project row header links to that project's detail.
+    const firstRow = page.getByRole("rowheader").first();
+    await expect(firstRow).toBeVisible();
+    await firstRow.click();
+    await expect(page).toHaveURL(/\/projects\/[0-9a-f-]+$/);
+  });
+
   test("a client cannot reach the cockpit", async ({ page }) => {
     await login(page, ACCOUNTS.cliente3);
     await page.goto("/portfolio/cockpit");

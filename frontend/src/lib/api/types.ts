@@ -159,6 +159,18 @@ export interface Cockpit {
   themes: ThemeBreakdown[];
 }
 
+export interface CoverageMatrixRow {
+  project_id: string;
+  project_name: string;
+  domain: Domain;
+  coverages: Record<string, number>;
+}
+
+export interface CoverageMatrix {
+  categories: string[];
+  rows: CoverageMatrixRow[];
+}
+
 export interface Comment {
   id: string;
   project_id: string;
