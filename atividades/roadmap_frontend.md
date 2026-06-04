@@ -72,8 +72,8 @@ na UI — ver §6.
 
 Legenda: ✅ pronto (todos os critérios da §2) · 🟡 em PR · 🔜 falta (não atende a §2 ainda).
 
-Snapshot de verificação (após Conectora, PR #36): **Vitest 197/197** (52 arquivos) ·
-**Playwright 27/27** (as 26 + síntese cross-projeto) · **backend 292** (contexto `synthesis/`) · build + lint limpos.
+Snapshot de verificação (após feed timeline, PR #37): **Vitest 202/202** (53 arquivos) ·
+**Playwright 27/27** · **backend 292** · build + lint limpos.
 
 **Roadmap de telas COMPLETO (M0–M5)** + polish (PR #33) + ciclo de vida (PR #34): o
 consultor opera o observatório **fim-a-fim pela UI** (cadastro → extração → vínculo de
@@ -189,8 +189,16 @@ features de tela foi entregue: **RF10** (comentários), **RF12** (drafts/IA) e *
   `PATCH/DELETE/publish /syntheses/{id}`); **frontend**: `SynthesisSection` (staff no cockpit
   via "Sínteses por temática"; cliente read-only no detalhe). Verde: Vitest 197 · e2e 27 ·
   backend 292.
-- **Backlog de "profundidade de observatório" (restante).** Resta apenas **trilha temporal /
-  tendências** no feed (agrupar por data; provável paginação no backend).
+- **Feed como linha do tempo / tendências temporais (RF11) — 🟡 EM PR (#37).** O feed deixa
+  de ser lista plana e vira **timeline**: eventos **agrupados por dia** (cabeçalhos Hoje /
+  Ontem / data + contagem), **tempo relativo** nos itens ("há 2 horas", com o absoluto no
+  tooltip) e uma **sparkline de atividade/dia** no topo (a tendência: subindo/caindo).
+  **Puro frontend** (`lib/feed/group-by-day` + date-fns ptBR + reuso do `Sparkline`); o seed
+  passou a **espalhar as extrações no tempo** (dados de demo) p/ a timeline não ser
+  degenerada. Verde: Vitest 202 · e2e 27.
+- **Backlog de "profundidade de observatório": ENCERRADO.** Os três aprofundamentos foram
+  entregues — heatmap de cobertura (#35), Conectora/síntese cross-projeto (#36) e a linha do
+  tempo do feed (#37). Não há mais itens de profundidade pendentes.
 
 ---
 
