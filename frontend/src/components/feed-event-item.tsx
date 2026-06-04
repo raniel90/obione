@@ -1,11 +1,14 @@
 import { Link } from "react-router-dom";
-import { format, parseISO } from "date-fns";
+import { format, formatDistanceToNow, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { FileText, MessageSquare } from "lucide-react";
 import type { FeedEvent } from "@/lib/api/types";
 
 export function FeedEventItem({ event }: { event: FeedEvent }) {
   const isComment = event.kind === "new_comment";
   const Icon = isComment ? MessageSquare : FileText;
+  const at = parseISO(event.created_at);
+  const relative = formatDistanceToNow(at, { addSuffix: true, locale: ptBR });
   return (
     <li>
       <Link
@@ -25,8 +28,11 @@ export function FeedEventItem({ event }: { event: FeedEvent }) {
             <span className="font-medium">{event.project_name}</span>{" "}
             <span className="text-muted-foreground">{event.summary}</span>
           </p>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            {format(parseISO(event.created_at), "dd/MM/yyyy HH:mm")}
+          <p
+            className="mt-0.5 text-xs text-muted-foreground"
+            title={format(at, "dd/MM/yyyy HH:mm")}
+          >
+            {relative}
           </p>
         </div>
       </Link>
