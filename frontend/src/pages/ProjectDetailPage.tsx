@@ -1,11 +1,12 @@
 import { useMemo } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
-import { FileText, Sparkles, SlidersHorizontal } from "lucide-react";
+import { FileText, Sparkles, SlidersHorizontal, Trash2 } from "lucide-react";
 import { useProjectDetail } from "@/lib/queries/use-project-detail";
 import { useExtractions } from "@/lib/queries/use-extractions";
 import { useRunExtraction } from "@/lib/queries/use-run-extraction";
+import { useDeleteProject } from "@/lib/queries/use-delete-project";
 import { useUser } from "@/lib/auth-context";
 import { groupAttributes } from "@/lib/mpo/group-attributes";
 import { categoryCoverage } from "@/lib/mpo/coverage";
@@ -20,18 +21,42 @@ import { DraftsSection } from "@/components/drafts-section";
 import { SynthesisSection } from "@/components/synthesis-section";
 import { EmptyState } from "@/components/empty-state";
 import { LinkClientDialog } from "@/components/link-client-dialog";
+import { EditProjectDialog } from "@/components/edit-project-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export function ProjectDetailPage() {
   const { id = "" } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const user = useUser();
   const isStaff = user.role !== "client";
 
   const detailQ = useProjectDetail(id);
   const extractionsQ = useExtractions(id);
   const runExtraction = useRunExtraction(id);
+  const deleteProject = useDeleteProject();
+
+  function handleDelete() {
+    deleteProject.mutate(id, {
+      onSuccess: () => {
+        toast.success("Projeto excluído");
+        navigate("/projects");
+      },
+      onError: () => toast.error("Não foi possível excluir o projeto."),
+    });
+  }
 
   function handleRunExtraction() {
     runExtraction.mutate(undefined, {
@@ -129,6 +154,28 @@ export function ProjectDetailPage() {
             </Link>
           </Button>
           <LinkClientDialog projectId={id} />
+          <EditProjectDialog project={project} />
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                <Trash2 className="size-4" />
+                Excluir
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Excluir projeto?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Remove o projeto e tudo o que está vinculado a ele (extrações, comentários,
+                  drafts). Essa ação não pode ser desfeita.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete}>Excluir</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       )}
 

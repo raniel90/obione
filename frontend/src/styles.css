@@ -22,6 +22,8 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-success: var(--success);
@@ -67,8 +69,13 @@
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
 
-  --accent: oklch(0.6 0.18 255);              /* electric blue accent */
-  --accent-foreground: oklch(0.985 0 0);
+  /* shadcn convention: accent is the subtle hover/selected surface (gray). */
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+
+  /* brand electric blue — used intentionally (focus ring, sparkline), not for hovers */
+  --brand: oklch(0.6 0.18 255);
+  --brand-foreground: oklch(0.985 0 0);
 
   --destructive: oklch(0.58 0.22 27);
   --destructive-foreground: oklch(0.985 0 0);
@@ -116,8 +123,11 @@
   --muted: oklch(0.18 0 0);
   --muted-foreground: oklch(0.65 0 0);
 
-  --accent: oklch(0.68 0.19 255);
+  --accent: oklch(0.2 0 0);
   --accent-foreground: oklch(0.985 0 0);
+
+  --brand: oklch(0.68 0.19 255);
+  --brand-foreground: oklch(0.985 0 0);
 
   --destructive: oklch(0.65 0.23 27);
   --destructive-foreground: oklch(0.985 0 0);

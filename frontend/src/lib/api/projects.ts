@@ -22,3 +22,17 @@ export function addProjectClient(projectId: string, userId: string): Promise<voi
     body: JSON.stringify({ user_id: userId }),
   });
 }
+
+export function updateProject(
+  id: string,
+  patch: Partial<ProjectCreate>,
+): Promise<Project> {
+  return api<Project>(`/projects/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(patch),
+  });
+}
+
+export function deleteProject(id: string): Promise<void> {
+  return api<void>(`/projects/${id}`, { method: "DELETE" });
+}

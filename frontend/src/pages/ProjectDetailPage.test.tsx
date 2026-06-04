@@ -154,6 +154,25 @@ describe("ProjectDetailPage", () => {
     );
   });
 
+  it("offers Editar and Excluir to a consultant", async () => {
+    vi.spyOn(projectsApi, "getProjectDetail").mockResolvedValue(detail());
+    vi.spyOn(extractionsApi, "listExtractions").mockResolvedValue([run({ _meta: META, nome_projeto: "Projeto X" })]);
+    setup(CONSULTANT);
+    await waitFor(() => expect(screen.getByRole("button", { name: /editar/i })).toBeInTheDocument());
+    expect(screen.getByRole("button", { name: /excluir/i })).toBeInTheDocument();
+  });
+
+  it("hides Editar and Excluir from a client", async () => {
+    vi.spyOn(projectsApi, "getProjectDetail").mockResolvedValue(detail());
+    vi.spyOn(extractionsApi, "listExtractions").mockResolvedValue([run({ _meta: META, nome_projeto: "Projeto X" })]);
+    setup(CLIENT);
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "Freire Batista ADV" })).toBeInTheDocument(),
+    );
+    expect(screen.queryByRole("button", { name: /editar/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /excluir/i })).not.toBeInTheDocument();
+  });
+
   it("hides the theme section for a client", async () => {
     vi.spyOn(projectsApi, "getProjectDetail").mockResolvedValue(detail());
     vi.spyOn(extractionsApi, "listExtractions").mockResolvedValue([run({ _meta: META, nome_projeto: "Projeto X" })]);
