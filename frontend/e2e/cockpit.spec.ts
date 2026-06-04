@@ -11,7 +11,7 @@ test.describe("Portfolio cockpit (M5)", () => {
     await expect(page.getByRole("heading", { name: "Cockpit do Portfólio" })).toBeVisible();
 
     // KPIs + theme table are present (seed has a "legal" project → "Jurídico" row).
-    await expect(page.getByText("Por temática")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Por temática", exact: true })).toBeVisible();
     const legalLink = page.getByRole("link", { name: "Jurídico" });
     await expect(legalLink).toBeVisible();
 

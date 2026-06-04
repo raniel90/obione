@@ -11,6 +11,7 @@ import * as themesApi from "@/lib/api/themes";
 import * as commentsApi from "@/lib/api/comments";
 import * as draftsApi from "@/lib/api/drafts";
 import * as usersApi from "@/lib/api/users";
+import * as synthesisApi from "@/lib/api/synthesis";
 import { TOKEN_STORAGE_KEY } from "@/lib/api/token";
 import { ApiError } from "@/lib/api/error";
 import { ProjectDetailPage } from "./ProjectDetailPage";
@@ -47,6 +48,7 @@ function setup(user: User) {
   vi.spyOn(commentsApi, "listComments").mockResolvedValue([]);
   vi.spyOn(draftsApi, "listDrafts").mockResolvedValue([]);
   vi.spyOn(usersApi, "listClients").mockResolvedValue([]);
+  vi.spyOn(synthesisApi, "listProjectSyntheses").mockResolvedValue([]);
   return renderWithProviders(
     <Routes>
       <Route
