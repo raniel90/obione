@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { getCockpit } from "./portfolio";
+import { getCockpit, getCoverageMatrix } from "./portfolio";
 
 function ok(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -37,5 +37,20 @@ describe("portfolio API module", () => {
     const [url, init] = spy.mock.calls[0]!;
     expect(String(url)).toMatch(/\/portfolio\/cockpit$/);
     expect((init as RequestInit).method).toBeUndefined();
+  });
+
+  it("getCoverageMatrix GETs /portfolio/coverage-matrix and returns it", async () => {
+    const matrix = {
+      categories: ["conteudo_geral", "riscos"],
+      rows: [
+        { project_id: "p1", project_name: "P1", domain: "legal", coverages: { conteudo_geral: 80, riscos: 20 } },
+      ],
+    };
+    const spy = vi.spyOn(globalThis, "fetch").mockResolvedValue(ok(matrix));
+    const out = await getCoverageMatrix();
+    expect(out.rows).toHaveLength(1);
+    expect(out.categories).toContain("riscos");
+    const [url] = spy.mock.calls[0]!;
+    expect(String(url)).toMatch(/\/portfolio\/coverage-matrix$/);
   });
 });
