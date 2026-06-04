@@ -22,6 +22,12 @@ test.describe("Login screen (M1)", () => {
     await expect(page).toHaveURL(/\/projects$/);
   });
 
+  test("a demo-account button logs in with one click (dev)", async ({ page }) => {
+    await page.goto("/login");
+    await page.getByRole("button", { name: /consultor consultor@obione\.dev/i }).click();
+    await expect(page).toHaveURL(/\/portfolio\/cockpit$/);
+  });
+
   test("redirects to /login when the stored token is invalid", async ({ page }) => {
     await login(page, ACCOUNTS.consultor);
     await expect(page).toHaveURL(/\/portfolio\/cockpit$/);

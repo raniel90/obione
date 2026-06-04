@@ -16,6 +16,16 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
+// Demo seed accounts — only shown in dev to switch roles in one click.
+const DEMO_PASSWORD = "demo12345678";
+const DEMO_ACCOUNTS = [
+  { label: "Consultor", email: "consultor@obione.dev" },
+  { label: "Admin", email: "admin@obione.dev" },
+  { label: "Cliente 1", email: "cliente1@obione.dev" },
+  { label: "Cliente 2", email: "cliente2@obione.dev" },
+  { label: "Cliente 3", email: "cliente3@obione.dev" },
+];
+
 export function LoginPage() {
   const auth = useAuth();
   const navigate = useNavigate();
@@ -24,6 +34,7 @@ export function LoginPage() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -38,6 +49,12 @@ export function LoginPage() {
     } catch {
       setServerError("Credenciais inválidas. Confira email e senha.");
     }
+  }
+
+  function quickLogin(email: string) {
+    setValue("email", email);
+    setValue("password", DEMO_PASSWORD);
+    onSubmit({ email, password: DEMO_PASSWORD });
   }
 
   return (
@@ -94,6 +111,36 @@ export function LoginPage() {
             {isSubmitting ? "Entrando…" : "Entrar"}
           </Button>
         </form>
+
+        {import.meta.env.DEV && (
+          <div className="mt-4 rounded-xl border bg-card p-4">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-sm font-medium">Contas de demonstração</span>
+              <span className="font-mono text-xs text-muted-foreground">
+                senha: {DEMO_PASSWORD}
+              </span>
+            </div>
+            <div className="space-y-1.5">
+              {DEMO_ACCOUNTS.map((acc) => (
+                <Button
+                  key={acc.email}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-between font-normal"
+                  disabled={isSubmitting}
+                  onClick={() => quickLogin(acc.email)}
+                >
+                  <span className="font-medium">{acc.label}</span>
+                  <span className="text-xs text-muted-foreground">{acc.email}</span>
+                </Button>
+              ))}
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">
+              Clique para entrar direto com aquele papel.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
