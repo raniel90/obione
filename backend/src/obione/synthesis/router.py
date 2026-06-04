@@ -37,7 +37,13 @@ project_router = APIRouter(prefix="/projects/{project_id}/syntheses", tags=["syn
 @project_router.get("", response_model=list[SynthesisResponse])
 def list_project_syntheses(project_id: uuid.UUID, user: CurrentUser) -> list[SynthesisResponse]:
     items = service.list_published_for_project(get_uow(), user, project_id)
-    return [SynthesisResponse.model_validate(s) for s in items]
+    responses = [SynthesisResponse.model_validate(s) for s in items]
+    # LGPD/isolation: clients must not learn the UUIDs of sibling projects of
+    # the temática (they can't access them). Strip provenance for non-staff.
+    if user.role == "client":
+        for response in responses:
+            response.source_project_ids = []
+    return responses
 
 
 # Item operations (staff).

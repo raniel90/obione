@@ -27,9 +27,13 @@ function dayLabel(d: Date): string {
  * with a human label (Hoje / Ontem / "4 de junho de 2026"). Order is preserved.
  */
 export function groupEventsByDay(events: FeedEvent[]): DayGroup[] {
+  // Defensive: the API returns events newest-first, but grouping by consecutive
+  // runs would split a day into two groups if the order ever changed. Sort to
+  // make the grouping order-independent.
+  const sorted = [...events].sort((a, b) => b.created_at.localeCompare(a.created_at));
   const groups: DayGroup[] = [];
   let current: DayGroup | null = null;
-  for (const event of events) {
+  for (const event of sorted) {
     const d = parseISO(event.created_at);
     const key = format(d, "yyyy-MM-dd");
     if (!current || current.key !== key) {

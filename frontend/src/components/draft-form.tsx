@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -5,12 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-const schema = z.object({
-  title: z.string().max(255, "Máximo de 255 caracteres").optional(),
-  body: z.string().min(1, "Corpo não pode ser vazio").max(4000, "Máximo de 4000 caracteres"),
-});
+function makeSchema(maxBody: number) {
+  return z.object({
+    title: z.string().max(255, "Máximo de 255 caracteres").optional(),
+    body: z
+      .string()
+      .min(1, "Corpo não pode ser vazio")
+      .max(maxBody, `Máximo de ${maxBody} caracteres`),
+  });
+}
 
-type FormValues = z.infer<typeof schema>;
+type FormValues = z.infer<ReturnType<typeof makeSchema>>;
 
 interface Props {
   defaultBody: string;
@@ -18,9 +24,19 @@ interface Props {
   onSubmit: (v: { title: string; body: string }) => void | Promise<unknown>;
   onCancel: () => void;
   pending?: boolean;
+  /** Max body length — synthesis bodies allow more than drafts (8000 vs 4000). */
+  maxBody?: number;
 }
 
-export function DraftForm({ defaultBody, defaultTitle = "", onSubmit, onCancel, pending }: Props) {
+export function DraftForm({
+  defaultBody,
+  defaultTitle = "",
+  onSubmit,
+  onCancel,
+  pending,
+  maxBody = 4000,
+}: Props) {
+  const schema = useMemo(() => makeSchema(maxBody), [maxBody]);
   const {
     register,
     handleSubmit,
