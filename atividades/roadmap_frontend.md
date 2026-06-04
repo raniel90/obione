@@ -72,8 +72,8 @@ na UI — ver §6.
 
 Legenda: ✅ pronto (todos os critérios da §2) · 🟡 em PR · 🔜 falta (não atende a §2 ainda).
 
-Snapshot de verificação (após heatmap de cobertura, PR #35): **Vitest 186/186** (50 arquivos) ·
-**Playwright 26/26** (as 25 + heatmap no cockpit) · **backend 280** (`GET /portfolio/coverage-matrix`) · build + lint limpos.
+Snapshot de verificação (após Conectora, PR #36): **Vitest 197/197** (52 arquivos) ·
+**Playwright 27/27** (as 26 + síntese cross-projeto) · **backend 292** (contexto `synthesis/`) · build + lint limpos.
 
 **Roadmap de telas COMPLETO (M0–M5)** + polish (PR #33) + ciclo de vida (PR #34): o
 consultor opera o observatório **fim-a-fim pela UI** (cadastro → extração → vínculo de
@@ -175,9 +175,22 @@ features de tela foi entregue: **RF10** (comentários), **RF12** (drafts/IA) e *
   restrito). **Backend**: endpoint dedicado `GET /portfolio/coverage-matrix` reusando
   `compute_coverage().by_category` + `list_visible_projects()`; **frontend**: `CoverageHeatmap`
   em CSS-grid com tokens semânticos (sem recharts). Verde: Vitest 186 · e2e 26 · backend 280.
-- **Backlog de "profundidade de observatório" (restante).** Ainda fora de escopo, candidatos
-  a próximos ciclos: **síntese cross-projeto / Conectora** (lições aprendidas por temática —
-  cortada do MVP por risco/tempo) e **trilha temporal / tendências** no feed.
+- **Conectora — síntese cross-projeto por temática (MPO "Combinar") — 🟡 EM PR (#36).**
+  A peça mais ambiciosa, **reintroduzida com mitigações** (tinha sido cortada do MVP por
+  risco). A IA destila **padrões recorrentes, riscos comuns e boas práticas** das lições
+  aprendidas + riscos dos projetos de uma temática; o consultor **revisa/edita e publica**
+  (ciclo `draft→published`, imutável); o **cliente lê a versão publicada e anonimizada** no
+  detalhe do seu projeto. **Mitigações LGPD**: digests anonimizados (sem nomes de cliente/
+  projeto), prompt de anonimização no adaptador LLM, **gate de publicação** (consultor-no-
+  loop) como controle. Limitação amostral registrada (R15): o seed ganhou um 2º projeto
+  jurídico (Dinoah ADV, N=2) para a síntese não ser degenerada; demais temas têm N=1.
+  **Backend**: novo bounded context `synthesis/` espelhando os Drafts (mock determinístico,
+  endpoints `POST/GET /themes/{domain}/syntheses`, `GET /projects/{id}/syntheses`,
+  `PATCH/DELETE/publish /syntheses/{id}`); **frontend**: `SynthesisSection` (staff no cockpit
+  via "Sínteses por temática"; cliente read-only no detalhe). Verde: Vitest 197 · e2e 27 ·
+  backend 292.
+- **Backlog de "profundidade de observatório" (restante).** Resta apenas **trilha temporal /
+  tendências** no feed (agrupar por data; provável paginação no backend).
 
 ---
 

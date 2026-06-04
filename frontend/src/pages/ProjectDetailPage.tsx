@@ -17,6 +17,7 @@ import { EvaluationPanel } from "@/components/evaluation-panel";
 import { DomainBadge } from "@/components/domain-badge";
 import { ThemeSection } from "@/components/theme-section";
 import { DraftsSection } from "@/components/drafts-section";
+import { SynthesisSection } from "@/components/synthesis-section";
 import { EmptyState } from "@/components/empty-state";
 import { LinkClientDialog } from "@/components/link-client-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -172,6 +173,15 @@ export function ProjectDetailPage() {
       <section>
         <Separator className="mb-4" />
         <DraftsSection projectId={id} canAuthor={isStaff} />
+      </section>
+
+      <section>
+        <Separator className="mb-4" />
+        <h2 className="mb-1 text-lg font-semibold">Síntese da temática</h2>
+        <p className="mb-3 text-sm text-muted-foreground">
+          Conhecimento agregado e anonimizado dos projetos desta temática (Conectora).
+        </p>
+        <SynthesisSection projectId={id} canAuthor={false} />
       </section>
 
       <section>

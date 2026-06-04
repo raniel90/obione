@@ -4,6 +4,7 @@ import { useCoverageMatrix } from "@/lib/queries/use-coverage-matrix";
 import { CockpitKpis } from "@/components/cockpit-kpis";
 import { ThemeBreakdownTable } from "@/components/theme-breakdown-table";
 import { CoverageHeatmap } from "@/components/coverage-heatmap";
+import { CockpitSynthesisPanel } from "@/components/cockpit-synthesis-panel";
 import { EmptyState } from "@/components/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -73,6 +74,14 @@ export function PortfolioCockpitPage() {
             ) : (
               <p className="text-sm text-muted-foreground">Sem dados de cobertura ainda.</p>
             )}
+          </section>
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold">Sínteses por temática</h2>
+            <p className="text-sm text-muted-foreground">
+              A Conectora destila padrões, riscos e boas práticas dos projetos de cada
+              temática. Você revisa e publica; o cliente vê a versão publicada e anonimizada.
+            </p>
+            <CockpitSynthesisPanel domains={cockpit.themes.map((t) => t.domain)} />
           </section>
         </>
       )}

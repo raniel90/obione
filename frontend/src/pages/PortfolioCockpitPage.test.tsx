@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
 import { renderWithProviders } from "@/test/render";
 import * as portfolioApi from "@/lib/api/portfolio";
+import * as synthesisApi from "@/lib/api/synthesis";
 import { PortfolioCockpitPage } from "./PortfolioCockpitPage";
 import type { Cockpit } from "@/lib/api/types";
 
@@ -39,6 +40,9 @@ function setup() {
   if (!vi.isMockFunction(portfolioApi.getCoverageMatrix)) {
     vi.spyOn(portfolioApi, "getCoverageMatrix").mockResolvedValue({ categories: [], rows: [] });
   }
+  if (!vi.isMockFunction(synthesisApi.listSyntheses)) {
+    vi.spyOn(synthesisApi, "listSyntheses").mockResolvedValue([]);
+  }
   return renderWithProviders(<PortfolioCockpitPage />);
 }
 
@@ -53,8 +57,17 @@ describe("PortfolioCockpitPage", () => {
     setup();
     await waitFor(() => expect(screen.getByText("Cockpit do Portfólio")).toBeInTheDocument());
     expect(screen.getByText("4")).toBeInTheDocument();
-    expect(screen.getByText("Jurídico")).toBeInTheDocument();
-    expect(screen.getByText("Saúde")).toBeInTheDocument();
+    // Theme-table drill links (the synthesis Select also renders a domain label).
+    expect(screen.getByRole("link", { name: "Jurídico" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Saúde" })).toBeInTheDocument();
+  });
+
+  it("renders the syntheses-by-theme section (Conectora)", async () => {
+    vi.spyOn(portfolioApi, "getCockpit").mockResolvedValue(COCKPIT);
+    setup();
+    await waitFor(() =>
+      expect(screen.getByText("Sínteses por temática")).toBeInTheDocument(),
+    );
   });
 
   it("shows an empty state when there are no projects", async () => {

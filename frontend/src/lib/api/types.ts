@@ -200,6 +200,23 @@ export interface Draft {
   updated_at: string;
 }
 
+export type SynthesisStatus = "draft" | "published";
+
+export interface Synthesis {
+  id: string;
+  domain: Domain;
+  title: string | null;
+  body: string;
+  status: SynthesisStatus;
+  source_project_ids: string[];
+  llm_model: string | null;
+  generated_by: string | null;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export type FeedEventKind = "new_comment" | "new_extraction";
 
 export interface FeedEvent {

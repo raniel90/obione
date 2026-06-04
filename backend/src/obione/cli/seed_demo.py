@@ -23,15 +23,18 @@ import sys
 import traceback
 
 from sqlalchemy import select
+from sqlalchemy.orm.attributes import flag_modified
 
 from obione.auth.models import User
 from obione.auth.security import hash_password
 from obione.extractions.llm.mock import MockExtractor
+from obione.extractions.models import Extraction
 from obione.extractions.service import extract_for_project
 from obione.projects.models import Project, ProjectClient
 from obione.projects.schemas import ProjectCreate
 from obione.projects.service import add_client_to_project, create_project
 from obione.shared.database import SessionLocal
+from obione.synthesis.models import Synthesis
 from obione.themes.generator.mock import MockThemeClassifier
 from obione.themes.service import accept_suggestion, suggest_theme
 from obione.unit_of_work import SqlAlchemyUnitOfWork
@@ -92,7 +95,37 @@ PROJECT_BLUEPRINTS = [
         "parcerias com restaurantes locais. Indicadores: ticket médio, número "
         "de pedidos por semana e taxa de recompra dos clientes.",
     ),
+    (
+        # 2º projeto jurídico → a temática 'legal' tem N=2, para a Conectora
+        # produzir uma síntese cross-projeto de fato (e não degenerada).
+        "Dinoah ADV",
+        "legal",
+        "Assessoria jurídica para o escritório Dinoah Advocacia em Caruaru, "
+        "cobrindo contencioso cível, gestão de contratos e compliance de "
+        "clientes corporativos. O escopo inclui padronização de petições, "
+        "controle de prazos de audiências e diagnóstico de marca do escritório. "
+        "Stakeholders: sócios, advogados associados e equipe de estágio.",
+    ),
 ]
+
+# Lessons/risks injected post-extraction on the legal projects so the
+# Conectora (synthesis) has real cross-project material to aggregate — the
+# mock extractor doesn't populate the lições/riscos attributes from the
+# description alone.
+LEGAL_ENRICHMENT = {
+    "Freire Batista ADV": {
+        "pontos_fortes": "Comunicação próxima com o cliente e domínio do rito processual.",
+        "pontos_fracos": "Documentação dispersa entre planilhas e e-mails.",
+        "riscos_identificados": "Prazos processuais apertados e dependência de terceiros.",
+        "providencias_tomadas": "Adotado checklist de prazos e repositório único de documentos.",
+    },
+    "Dinoah ADV": {
+        "pontos_fortes": "Equipe enxuta e ágil na resposta às demandas dos clientes.",
+        "dificuldades_encontradas": "Alta rotatividade da equipe de estágio.",
+        "riscos_identificados": "Prazos curtos em audiências e grande volume de contratos.",
+        "providencias_tomadas": "Padronização de modelos de petição e onboarding documentado.",
+    },
+}
 
 
 def _purge_demo_entities(session) -> None:
@@ -103,6 +136,11 @@ def _purge_demo_entities(session) -> None:
     ]
     if not user_ids:
         return
+    # Syntheses are domain-keyed (no project FK) — purge the demo consultor's
+    # so re-seeding stays idempotent and the cockpit starts clean.
+    session.query(Synthesis).filter(Synthesis.generated_by.in_(user_ids)).delete(
+        synchronize_session=False
+    )
     session.query(ProjectClient).filter(ProjectClient.user_id.in_(user_ids)).delete(
         synchronize_session=False
     )
@@ -158,6 +196,26 @@ def seed_demo() -> int:
             projects.append(project)
             print(f"   ✓ {name} ({domain})")
 
+        print("→ Enriquecendo extrações jurídicas com lições/riscos (p/ a Conectora)...")
+        for project in projects:
+            enrich = LEGAL_ENRICHMENT.get(project.name)
+            if not enrich:
+                continue
+            ext = (
+                session.execute(
+                    select(Extraction)
+                    .where(Extraction.project_id == project.id)
+                    .order_by(Extraction.created_at.desc())
+                )
+                .scalars()
+                .first()
+            )
+            if ext is None:
+                continue
+            ext.content = {**ext.content, **enrich}
+            flag_modified(ext, "content")
+        session.commit()
+
         print("→ Linking the first 3 projects to clients 1-3...")
         for cli, project in zip(clientes, projects[:3], strict=False):
             add_client_to_project(uow, consultor, project.id, cli.id)
@@ -179,9 +237,9 @@ def seed_demo() -> int:
         print("Projects (consultor → all; clientes → only their linked one):")
         for cli, project in zip(clientes, projects[:3], strict=False):
             print(f"  - {project.name} [{project.domain}] vinculado a {cli.email}")
-        # Project 4 unlinked (only consultor + admin see it).
-        unlinked = projects[3]
-        print(f"  - {unlinked.name} [{unlinked.domain}] (sem cliente vinculado)")
+        # Remaining projects unlinked (only consultor + admin see them).
+        for unlinked in projects[3:]:
+            print(f"  - {unlinked.name} [{unlinked.domain}] (sem cliente vinculado)")
         return 0
     except Exception as exc:
         print(f"Error: {exc}", file=sys.stderr)
