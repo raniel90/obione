@@ -9,6 +9,7 @@ import { PortfolioCockpitPage } from "@/pages/PortfolioCockpitPage";
 import { ProjectDetailPage } from "@/pages/ProjectDetailPage";
 import { ProjectVisibilityPage } from "@/pages/ProjectVisibilityPage";
 import { ProjectsListPage } from "@/pages/ProjectsListPage";
+import { ProjectCreatePage } from "@/pages/ProjectCreatePage";
 import { FeedPage } from "@/pages/FeedPage";
 
 const STAFF: Array<"consultant" | "admin"> = ["consultant", "admin"];
@@ -38,6 +39,14 @@ export function AppRoutes() {
           }
         >
           <Route path="/projects" element={<ProjectsListPage />} />
+          <Route
+            path="/projects/new"
+            element={
+              <RequireRole role={STAFF}>
+                <ProjectCreatePage />
+              </RequireRole>
+            }
+          />
           <Route path="/projects/:id" element={<ProjectDetailPage />} />
           <Route
             path="/projects/:id/visibility"

@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { format, parseISO } from "date-fns";
-import { FolderOpen } from "lucide-react";
+import { FolderOpen, Plus } from "lucide-react";
 import { useProjects } from "@/lib/queries/use-projects";
+import { useUser } from "@/lib/auth-context";
 import { DomainBadge } from "@/components/domain-badge";
 import { EmptyState } from "@/components/empty-state";
 import { DOMAIN_LABELS } from "@/lib/mpo/catalog";
@@ -30,6 +31,8 @@ const DOMAINS = Object.keys(DOMAIN_LABELS) as Domain[];
 
 export function ProjectsListPage() {
   const navigate = useNavigate();
+  const user = useUser();
+  const isStaff = user.role !== "client";
   const { data, isLoading, isError, refetch } = useProjects();
   const [search, setSearch] = useState("");
   const [searchParams] = useSearchParams();
@@ -50,7 +53,17 @@ export function ProjectsListPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold">Projetos</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Projetos</h1>
+        {isStaff && (
+          <Button asChild>
+            <Link to="/projects/new">
+              <Plus className="size-4" />
+              Novo projeto
+            </Link>
+          </Button>
+        )}
+      </div>
 
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
         <Input
