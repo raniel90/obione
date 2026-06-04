@@ -1,5 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { listProjects, getProjectDetail, createProject, addProjectClient } from "./projects";
+import {
+  listProjects,
+  getProjectDetail,
+  createProject,
+  addProjectClient,
+  updateProject,
+  deleteProject,
+} from "./projects";
 
 function ok(body: unknown, status = 200): Response {
   return new Response(body === null ? null : JSON.stringify(body), {
@@ -56,5 +63,24 @@ describe("projects API module", () => {
     expect(String(url)).toMatch(/\/projects\/p1\/clients$/);
     expect((init as RequestInit).method).toBe("POST");
     expect((init as RequestInit).body).toBe(JSON.stringify({ user_id: "u7" }));
+  });
+
+  it("updateProject PATCHes /projects/{id} with the patch", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      ok({ id: "p1", name: "Novo", domain: "legal", description: "d", consultant_id: "c1", created_at: "2026-06-01T00:00:00Z", updated_at: "2026-06-02T00:00:00Z" }),
+    );
+    await updateProject("p1", { name: "Novo" });
+    const [url, init] = fetchSpy.mock.calls[0]!;
+    expect(String(url)).toMatch(/\/projects\/p1$/);
+    expect((init as RequestInit).method).toBe("PATCH");
+    expect((init as RequestInit).body).toBe(JSON.stringify({ name: "Novo" }));
+  });
+
+  it("deleteProject DELETEs /projects/{id}", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(ok(null, 204));
+    await deleteProject("p1");
+    const [url, init] = fetchSpy.mock.calls[0]!;
+    expect(String(url)).toMatch(/\/projects\/p1$/);
+    expect((init as RequestInit).method).toBe("DELETE");
   });
 });

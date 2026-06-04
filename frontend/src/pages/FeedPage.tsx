@@ -45,7 +45,7 @@ export function FeedPage() {
             <>
               {activity.length >= 2 && (
                 <div className="mb-6 flex items-center gap-3 rounded-lg border p-3">
-                  <Sparkline data={activity} className="text-accent" width={120} height={28} />
+                  <Sparkline data={activity} className="text-brand" width={120} height={28} />
                   <p className="text-xs text-muted-foreground">
                     {events.length} {events.length === 1 ? "novidade" : "novidades"} ·{" "}
                     {last7} {last7 === 1 ? "evento" : "eventos"} nos últimos 7 dias

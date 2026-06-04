@@ -73,8 +73,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Link>
 
           <nav className="flex items-center gap-1" aria-label="Navegação principal">
-            <NavItem to="/projects">Projetos</NavItem>
             {isStaff && <NavItem to="/portfolio/cockpit">Cockpit</NavItem>}
+            <NavItem to="/projects">Projetos</NavItem>
             <NavItem to="/feed">Novidades</NavItem>
           </nav>
 

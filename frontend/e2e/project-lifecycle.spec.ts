@@ -45,6 +45,20 @@ test.describe("Project lifecycle via UI (RF03/RF05)", () => {
     await page.getByRole("option", { name: /cliente1@obione\.dev/ }).click();
     await page.getByRole("button", { name: /^vincular$/i }).click();
     await expect(page.getByText(/cliente vinculado/i)).toBeVisible();
+
+    // 5. Editar o projeto
+    await page.getByRole("button", { name: /^editar$/i }).click();
+    const nameField = page.getByLabel("Nome");
+    await nameField.fill("E2E Lifecycle Projeto (editado)");
+    await page.getByRole("button", { name: /^salvar$/i }).click();
+    await expect(
+      page.getByRole("heading", { name: "E2E Lifecycle Projeto (editado)" }),
+    ).toBeVisible();
+
+    // 6. Excluir o projeto (limpa o que o teste criou) → volta à lista
+    await page.getByRole("button", { name: /^excluir$/i }).click();
+    await page.getByRole("alertdialog").getByRole("button", { name: /^excluir$/i }).click();
+    await expect(page).toHaveURL(/\/projects$/);
   });
 
   test("a client does not see the registration or lifecycle actions", async ({ page }) => {
@@ -56,5 +70,7 @@ test.describe("Project lifecycle via UI (RF03/RF05)", () => {
     await expect(page).toHaveURL(/\/projects\/[0-9a-f-]+$/);
     await expect(page.getByRole("button", { name: /vincular cliente/i })).toHaveCount(0);
     await expect(page.getByRole("button", { name: /executar extração/i })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /^editar$/i })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /^excluir$/i })).toHaveCount(0);
   });
 });
