@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { screen } from "@testing-library/react";
 import { renderWithRouter } from "@/test/render";
 import { FeedEventItem } from "./feed-event-item";
@@ -18,11 +18,23 @@ function ev(over: Partial<FeedEvent> = {}): FeedEvent {
 }
 
 describe("FeedEventItem", () => {
-  it("renders the project name, summary and timestamp inside a link to the project", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-06-04T09:30:00Z"));
+  });
+  afterEach(() => vi.useRealTimers());
+
+  it("renders the project name, summary and a relative time, inside a project link", () => {
     renderWithRouter(<FeedEventItem event={ev()} />);
     expect(screen.getByText("Freire Batista ADV")).toBeInTheDocument();
     expect(screen.getByText("Comentário de teste")).toBeInTheDocument();
-    expect(screen.getByText("01/06/2026 09:30")).toBeInTheDocument();
+    // 2026-06-01 09:30 vs fixed now 2026-06-04 09:30 → "há 3 dias".
+    expect(screen.getByText(/há 3 dias/i)).toBeInTheDocument();
     expect(screen.getByRole("link")).toHaveAttribute("href", "/projects/p1");
+  });
+
+  it("keeps the absolute timestamp as a tooltip", () => {
+    renderWithRouter(<FeedEventItem event={ev()} />);
+    expect(screen.getByText(/há 3 dias/i)).toHaveAttribute("title", "01/06/2026 09:30");
   });
 });

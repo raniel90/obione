@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import sys
 import traceback
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import select
 from sqlalchemy.orm.attributes import flag_modified
@@ -214,6 +215,24 @@ def seed_demo() -> int:
                 continue
             ext.content = {**ext.content, **enrich}
             flag_modified(ext, "content")
+        session.commit()
+
+        print("→ Espalhando as extrações no tempo (p/ a timeline do feed)...")
+        now = datetime.now(tz=UTC)
+        for i, project in enumerate(projects):
+            ext = (
+                session.execute(
+                    select(Extraction)
+                    .where(Extraction.project_id == project.id)
+                    .order_by(Extraction.created_at.desc())
+                )
+                .scalars()
+                .first()
+            )
+            if ext is None:
+                continue
+            # project 0 → hoje, project i → i dias atrás (apenas dados de demo).
+            ext.created_at = now - timedelta(days=i, hours=i)
         session.commit()
 
         print("→ Linking the first 3 projects to clients 1-3...")

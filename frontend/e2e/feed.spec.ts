@@ -10,6 +10,10 @@ test.describe("Feed de Novidades (RF11)", () => {
     await expect(page).toHaveURL(/\/feed$/);
     await expect(page.getByRole("heading", { name: "Novidades" })).toBeVisible();
 
+    // Timeline: the seed spreads extractions across days → day-group headers.
+    await expect(page.getByRole("heading", { name: "Hoje" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Ontem" })).toBeVisible();
+
     // Seed has extractions on every project → the feed is non-empty.
     const event = page.getByRole("link", { name: /Freire Batista ADV/ }).first();
     await expect(event).toBeVisible();

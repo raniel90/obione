@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
 import { renderWithProviders } from "@/test/render";
 import * as feedApi from "@/lib/api/feed";
@@ -12,7 +12,7 @@ function ev(over: Partial<FeedEvent> = {}): FeedEvent {
     project_name: "Freire Batista ADV",
     actor_id: null,
     target_id: "e1",
-    created_at: "2026-06-01T00:00:00Z",
+    created_at: "2026-06-04T10:00:00Z",
     summary: "Nova extração via mock",
     ...over,
   };
@@ -22,17 +22,25 @@ describe("FeedPage", () => {
   beforeEach(() => {
     localStorage.clear();
     vi.restoreAllMocks();
+    // shouldAdvanceTime lets React Query promises + waitFor progress while the
+    // clock stays pinned (so "Hoje"/"Ontem" labels are deterministic).
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.setSystemTime(new Date("2026-06-04T12:00:00Z"));
   });
+  afterEach(() => vi.useRealTimers());
 
-  it("renders the feed events", async () => {
+  it("renders the events grouped by day", async () => {
     vi.spyOn(feedApi, "getFeed").mockResolvedValue([
-      ev({ target_id: "e1", project_name: "Freire Batista ADV" }),
-      ev({ target_id: "c1", kind: "new_comment", project_name: "Valença Odontologia", summary: "Olá" }),
+      ev({ target_id: "e1", project_name: "Freire Batista ADV", created_at: "2026-06-04T10:00:00Z" }),
+      ev({ target_id: "c1", kind: "new_comment", project_name: "Valença Odontologia", summary: "Olá", created_at: "2026-06-03T10:00:00Z" }),
     ]);
     renderWithProviders(<FeedPage />);
     await waitFor(() => expect(screen.getByText("Novidades")).toBeInTheDocument());
     expect(screen.getByText("Freire Batista ADV")).toBeInTheDocument();
     expect(screen.getByText("Valença Odontologia")).toBeInTheDocument();
+    // Day-group headers (timeline).
+    expect(screen.getByRole("heading", { name: "Hoje" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Ontem" })).toBeInTheDocument();
   });
 
   it("shows an empty state", async () => {

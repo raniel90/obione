@@ -2,12 +2,18 @@ import { Bell } from "lucide-react";
 import { useFeed } from "@/lib/queries/use-feed";
 import { FeedEventItem } from "@/components/feed-event-item";
 import { EmptyState } from "@/components/empty-state";
+import { Sparkline } from "@/components/sparkline";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { groupEventsByDay, dailyActivity } from "@/lib/feed/group-by-day";
 
 export function FeedPage() {
   const feedQ = useFeed();
   const events = feedQ.data ?? [];
+  const groups = groupEventsByDay(events);
+  const activity = dailyActivity(events);
+  const last7 = activity.slice(-7).reduce((a, b) => a + b, 0);
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -36,11 +42,35 @@ export function FeedPage() {
               description="Novos comentários e extrações dos seus projetos aparecem aqui."
             />
           ) : (
-            <ul className="space-y-2">
-              {events.map((event) => (
-                <FeedEventItem key={`${event.kind}:${event.target_id}`} event={event} />
-              ))}
-            </ul>
+            <>
+              {activity.length >= 2 && (
+                <div className="mb-6 flex items-center gap-3 rounded-lg border p-3">
+                  <Sparkline data={activity} className="text-accent" width={120} height={28} />
+                  <p className="text-xs text-muted-foreground">
+                    {events.length} {events.length === 1 ? "novidade" : "novidades"} ·{" "}
+                    {last7} {last7 === 1 ? "evento" : "eventos"} nos últimos 7 dias
+                  </p>
+                </div>
+              )}
+              <div className="space-y-6">
+                {groups.map((group) => (
+                  <section key={group.key} className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-sm font-semibold">{group.label}</h2>
+                      <Badge variant="secondary">{group.events.length}</Badge>
+                    </div>
+                    <ul className="space-y-2">
+                      {group.events.map((event) => (
+                        <FeedEventItem
+                          key={`${event.kind}:${event.target_id}`}
+                          event={event}
+                        />
+                      ))}
+                    </ul>
+                  </section>
+                ))}
+              </div>
+            </>
           )}
         </>
       )}
