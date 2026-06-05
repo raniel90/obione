@@ -4,12 +4,12 @@ import { groupAttributes } from "./group-attributes";
 const META = { origem: "llm", projeto_nome: "X", documento_fonte: "x.docx", data_extracao: "2026-06-01T00:00:00Z" };
 
 describe("groupAttributes", () => {
-  it("groups consultant content (all 44 keys) into 8 categories in order", () => {
+  it("groups consultant content (all in-scope keys) into 8 categories in order", () => {
     const content: Record<string, unknown> = { _meta: META };
     for (const key of [
       "nome_projeto","descricao","local_execucao","tipo","porte","objetivos","descricao_produtos_servicos",
       "licitacao","contratos","termo_encerramento","justificativas_projeto","impactos_projeto",
-      "indicadores_projeto","artefatos_produzidos","imagens_fotos","nome_stakeholders","funcao_projeto",
+      "indicadores_projeto","artefatos_produzidos","nome_stakeholders","funcao_projeto",
       "publico_alvo","detalhes_equipe","treinamentos_equipes","tarefas_projeto","requisitos","escopo_planejado",
       "escopo_executado","data_inicio","data_fim_planejada","data_fim_executada","entregas_realizadas",
       "status_cronograma","custo_estimado","custo_realizado","justificativas_gastos","riscos_identificados",
@@ -23,7 +23,7 @@ describe("groupAttributes", () => {
     expect(groups.map((g) => g.key)).toEqual([
       "conteudo_geral","stakeholders","escopo","cronograma","custos","riscos","mudancas","licoes_aprendidas",
     ]);
-    expect(groups[0].attributes.length).toBe(15);
+    expect(groups[0].attributes.length).toBe(14);
   });
 
   it("never emits _meta as an attribute", () => {

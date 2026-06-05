@@ -55,7 +55,7 @@ describe("PortfolioCockpitPage", () => {
   it("renders KPIs and the theme table", async () => {
     vi.spyOn(portfolioApi, "getCockpit").mockResolvedValue(COCKPIT);
     setup();
-    await waitFor(() => expect(screen.getByText("Cockpit do Portfólio")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("Cockpit")).toBeInTheDocument());
     expect(screen.getByText("4")).toBeInTheDocument();
     // Theme-table drill links (the synthesis Select also renders a domain label).
     expect(screen.getByRole("link", { name: "Jurídico" })).toBeInTheDocument();
@@ -66,7 +66,7 @@ describe("PortfolioCockpitPage", () => {
     vi.spyOn(portfolioApi, "getCockpit").mockResolvedValue(COCKPIT);
     setup();
     await waitFor(() =>
-      expect(screen.getByText("Sínteses por temática")).toBeInTheDocument(),
+      expect(screen.getByText("Sínteses por domínio")).toBeInTheDocument(),
     );
   });
 

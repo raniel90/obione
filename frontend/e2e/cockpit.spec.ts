@@ -2,16 +2,16 @@ import { test, expect } from "@playwright/test";
 import { ACCOUNTS, login } from "./helpers";
 
 test.describe("Portfolio cockpit (M5)", () => {
-  test("consultant lands on the cockpit and drills into a theme's filtered list", async ({
+  test("consultant lands on the cockpit and drills into a domain's filtered list", async ({
     page,
   }) => {
     await login(page, ACCOUNTS.consultor);
     // Consultant is redirected to the cockpit on login.
     await expect(page).toHaveURL(/\/portfolio\/cockpit$/);
-    await expect(page.getByRole("heading", { name: "Cockpit do Portfólio" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Cockpit", exact: true })).toBeVisible();
 
-    // KPIs + theme table are present (seed has a "legal" project → "Jurídico" row).
-    await expect(page.getByRole("heading", { name: "Por temática", exact: true })).toBeVisible();
+    // KPIs + domain table are present (seed has a "legal" project → "Jurídico" row).
+    await expect(page.getByRole("heading", { name: "Por domínio", exact: true })).toBeVisible();
     const legalLink = page.getByRole("link", { name: "Jurídico" });
     await expect(legalLink).toBeVisible();
 

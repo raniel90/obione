@@ -38,7 +38,7 @@ export function SynthesisSection({ canAuthor, domain, projectId }: Props) {
     generateMutation.mutate(undefined, {
       onSuccess: () => toast.success("Síntese gerada"),
       onError: () =>
-        toast.error("Não foi possível gerar (a temática precisa de projetos com extração)."),
+        toast.error("Não foi possível gerar (o domínio precisa de projetos com extração)."),
     });
   }
   function handleUpdate(id: string, patch: { title: string; body: string }) {
@@ -89,8 +89,8 @@ export function SynthesisSection({ canAuthor, domain, projectId }: Props) {
       ) : items.length === 0 ? (
         <p className="text-sm text-muted-foreground">
           {canAuthor
-            ? "Nenhuma síntese ainda — gere com a IA a partir dos projetos da temática."
-            : "Nenhuma síntese publicada para esta temática ainda."}
+            ? "Nenhuma síntese ainda — gere com a IA a partir dos projetos do domínio."
+            : "Nenhuma síntese publicada para este domínio ainda."}
         </p>
       ) : (
         <ul className="space-y-2">

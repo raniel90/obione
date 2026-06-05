@@ -22,7 +22,7 @@ export function CockpitSynthesisPanel({ domains }: { domains: Domain[] }) {
   return (
     <div className="space-y-3">
       <Select value={selected} onValueChange={(v) => setSelected(v as Domain)}>
-        <SelectTrigger className="sm:w-56" aria-label="Temática">
+        <SelectTrigger className="sm:w-56" aria-label="Domínio">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

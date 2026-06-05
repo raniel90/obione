@@ -10,8 +10,8 @@ export interface CategoryCoverage {
 /**
  * Per-category fill ratio computed from the extraction content.
  * Mirrors the backend rule (a value counts as "filled" when it is non-null);
- * out-of-scope attributes (imagens_fotos) are excluded from the denominator.
- * Only meaningful for consultant/admin, who receive all 44 keys.
+ * out-of-scope attributes are excluded from the denominator.
+ * Only meaningful for consultant/admin, who receive every in-scope key.
  */
 export function categoryCoverage(content: ExtractionContent): Record<string, CategoryCoverage> {
   const out: Record<string, CategoryCoverage> = {};

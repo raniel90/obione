@@ -114,7 +114,7 @@ export function SynthesisItem({
               <AlertDialogHeader>
                 <AlertDialogTitle>Publicar síntese?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Fica visível aos clientes da temática e não pode mais ser editada.
+                  Fica visível aos clientes do domínio e não pode mais ser editada.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

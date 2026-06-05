@@ -41,7 +41,6 @@ export const CATEGORIES: CategoryDef[] = [
       { key: "impactos_projeto", label: "Impactos do projeto", renderType: "text" },
       { key: "indicadores_projeto", label: "Indicadores (KPIs)", renderType: "text" },
       { key: "artefatos_produzidos", label: "Artefatos produzidos", renderType: "text" },
-      { key: "imagens_fotos", label: "Imagens/fotos", renderType: "out_of_scope", outOfScope: true },
     ],
   },
   {

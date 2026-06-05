@@ -35,23 +35,23 @@ export function ThemeSection({ projectId, currentDomain }: Props) {
     if (!current) return;
     const domain = current.suggested_domain;
     acceptMutation.mutate(current.id, {
-      onSuccess: () => toast.success(`Temática aceita: ${DOMAIN_LABELS[domain]}`),
+      onSuccess: () => toast.success(`Domínio aceito: ${DOMAIN_LABELS[domain]}`),
       onError: () => toast.error("Não foi possível aceitar a sugestão."),
     });
   }
 
   return (
-    <section aria-label="Temática do projeto">
+    <section aria-label="Domínio do projeto">
       <Separator className="mb-4" />
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-lg font-semibold">Temática (classificação IA)</h2>
+        <h2 className="text-lg font-semibold">Domínio (classificação IA)</h2>
         <Button onClick={handleSuggest} disabled={suggestMutation.isPending} size="sm">
-          {suggestMutation.isPending ? "Gerando…" : "Sugerir temática (IA)"}
+          {suggestMutation.isPending ? "Gerando…" : "Sugerir domínio (IA)"}
         </Button>
       </div>
 
       <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
-        Temática atual: <DomainBadge domain={currentDomain} />
+        Domínio atual: <DomainBadge domain={currentDomain} />
       </div>
 
       {suggestionsQ.isLoading ? (

@@ -13,11 +13,11 @@ test.describe("Conectora — síntese cross-projeto (temática)", () => {
     await expect(page).toHaveURL(/\/portfolio\/cockpit$/);
 
     await expect(
-      page.getByRole("heading", { name: "Sínteses por temática" }),
+      page.getByRole("heading", { name: "Sínteses por domínio" }),
     ).toBeVisible();
 
-    // Pick the "legal" temática (N=2) in the panel's domain select.
-    await page.getByLabel("Temática").click();
+    // Pick the "legal" domain (N=2) in the panel's domain select.
+    await page.getByLabel("Domínio").click();
     await page.getByRole("option", { name: "Jurídico" }).click();
 
     // Generate → a draft synthesis appears with the three blocks.
@@ -36,7 +36,7 @@ test.describe("Conectora — síntese cross-projeto (temática)", () => {
     await page.getByRole("row", { name: /Freire Batista ADV/ }).click();
     await expect(page.getByRole("heading", { name: "Freire Batista ADV" })).toBeVisible();
 
-    const synthesisHeading = page.getByRole("heading", { name: "Síntese da temática" });
+    const synthesisHeading = page.getByRole("heading", { name: "Síntese do domínio" });
     await synthesisHeading.scrollIntoViewIfNeeded();
     await expect(synthesisHeading).toBeVisible();
     await expect(page.getByText("Padrões recorrentes").first()).toBeVisible();

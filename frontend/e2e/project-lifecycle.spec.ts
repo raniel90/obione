@@ -34,7 +34,7 @@ test.describe("Project lifecycle via UI (RF03/RF05)", () => {
     ).toBeVisible();
     await expect(page.getByText(/extração ainda não executada/i)).toBeVisible();
 
-    // 3. Executar extração → 44 atributos aparecem
+    // 3. Executar extração → os atributos do MPO aparecem
     await page.getByRole("button", { name: /executar extração/i }).click();
     await expect(page.getByText(/Conteúdo geral/)).toBeVisible({ timeout: 15000 });
     await expect(page.getByText(/extração ainda não executada/i)).toBeHidden();

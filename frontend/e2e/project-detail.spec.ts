@@ -29,7 +29,7 @@ test.describe("Project detail — staff view (M2)", () => {
 
     // Theme section (staff only).
     await expect(
-      page.getByRole("heading", { name: /Temática \(classificação IA\)/i }),
+      page.getByRole("heading", { name: /Domínio \(classificação IA\)/i }),
     ).toBeVisible();
   });
 });
@@ -46,6 +46,6 @@ test.describe("Project detail — client CBAC (M2)", () => {
 
     // Staff-only sections must be absent for a client.
     await expect(page.getByText("Cobertura")).toHaveCount(0);
-    await expect(page.getByText(/Temática \(classificação IA\)/i)).toHaveCount(0);
+    await expect(page.getByText(/Domínio \(classificação IA\)/i)).toHaveCount(0);
   });
 });
