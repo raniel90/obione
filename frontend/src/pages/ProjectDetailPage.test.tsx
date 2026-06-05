@@ -150,7 +150,7 @@ describe("ProjectDetailPage", () => {
     vi.spyOn(extractionsApi, "listExtractions").mockResolvedValue([run({ _meta: META, nome_projeto: "Projeto X" })]);
     setup(CONSULTANT);
     await waitFor(() =>
-      expect(screen.getByText(/temática \(classificação ia\)/i)).toBeInTheDocument(),
+      expect(screen.getByText(/domínio \(classificação ia\)/i)).toBeInTheDocument(),
     );
   });
 
@@ -178,7 +178,7 @@ describe("ProjectDetailPage", () => {
     vi.spyOn(extractionsApi, "listExtractions").mockResolvedValue([run({ _meta: META, nome_projeto: "Projeto X" })]);
     setup(CLIENT);
     await waitFor(() => expect(screen.getByText("Projeto X")).toBeInTheDocument());
-    expect(screen.queryByText(/temática \(classificação ia\)/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/domínio \(classificação ia\)/i)).not.toBeInTheDocument();
   });
 
   it("shows the visibility config link for a consultant", async () => {

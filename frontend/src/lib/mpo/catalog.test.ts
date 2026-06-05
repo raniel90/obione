@@ -15,20 +15,14 @@ describe("MPO catalog", () => {
     ]);
   });
 
-  it("has exactly 44 attributes across all categories", () => {
+  it("has exactly 43 in-scope attributes across all categories", () => {
     const total = CATEGORIES.reduce((n, c) => n + c.attributes.length, 0);
-    expect(total).toBe(44);
+    expect(total).toBe(43);
   });
 
   it("has unique attribute keys", () => {
     const keys = CATEGORIES.flatMap((c) => c.attributes.map((a) => a.key));
-    expect(new Set(keys).size).toBe(44);
-  });
-
-  it("marks imagens_fotos as out of scope", () => {
-    const all = CATEGORIES.flatMap((c) => c.attributes);
-    const img = all.find((a) => a.key === "imagens_fotos");
-    expect(img?.outOfScope).toBe(true);
+    expect(new Set(keys).size).toBe(43);
   });
 
   it("maps every domain to a PT-BR label", () => {

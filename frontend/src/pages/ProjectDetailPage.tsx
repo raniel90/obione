@@ -194,7 +194,7 @@ export function ProjectDetailPage() {
           <EmptyState
             icon={FileText}
             message="Extração ainda não executada."
-            description="Os 44 atributos do MPO aparecem aqui após a extração via IA."
+            description="Os atributos do MPO aparecem aqui após a extração via IA."
             action={
               isStaff ? (
                 <Button onClick={handleRunExtraction} disabled={runExtraction.isPending}>
@@ -224,9 +224,9 @@ export function ProjectDetailPage() {
 
       <section>
         <Separator className="mb-4" />
-        <h2 className="mb-1 text-lg font-semibold">Síntese da temática</h2>
+        <h2 className="mb-1 text-lg font-semibold">Síntese do domínio</h2>
         <p className="mb-3 text-sm text-muted-foreground">
-          Conhecimento agregado e anonimizado dos projetos desta temática (Conectora).
+          Conhecimento agregado e anonimizado dos projetos deste domínio (Conectora).
         </p>
         <SynthesisSection projectId={id} canAuthor={false} />
       </section>

@@ -12,7 +12,7 @@ describe("categoryCoverage", () => {
     expect(cov.custos).toEqual({ filled: 2, total: 3, percentage: 67 });
   });
 
-  it("excludes imagens_fotos (out of scope) from conteudo_geral total", () => {
+  it("computes conteudo_geral total from in-scope attributes only", () => {
     const content: Record<string, unknown> = {};
     const cov = categoryCoverage(content);
     expect(cov.conteudo_geral.total).toBe(14);

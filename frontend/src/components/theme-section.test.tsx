@@ -31,7 +31,7 @@ describe("ThemeSection", () => {
   it("shows the generate button and empty state when there are no suggestions", async () => {
     vi.spyOn(themesApi, "listThemeSuggestions").mockResolvedValue([]);
     renderWithProviders(<ThemeSection projectId="p1" currentDomain="legal" />);
-    expect(screen.getByRole("button", { name: /sugerir temática/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /sugerir domínio/i })).toBeInTheDocument();
     await waitFor(() => expect(screen.getByText(/nenhuma sugestão ainda/i)).toBeInTheDocument());
   });
 
@@ -53,7 +53,7 @@ describe("ThemeSection", () => {
     renderWithProviders(<ThemeSection projectId="p1" currentDomain="legal" />);
     await waitFor(() => expect(screen.getByText(/nenhuma sugestão ainda/i)).toBeInTheDocument());
 
-    await user.click(screen.getByRole("button", { name: /sugerir temática/i }));
+    await user.click(screen.getByRole("button", { name: /sugerir domínio/i }));
 
     expect(themesApi.suggestTheme).toHaveBeenCalledWith("p1");
     await waitFor(() => expect(screen.getByText(/confiança 92%/i)).toBeInTheDocument());

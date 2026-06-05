@@ -32,7 +32,7 @@ describe("ProjectVisibilityPage", () => {
     vi.spyOn(visibilityApi, "getVisibilityState").mockResolvedValue(STATE);
     setup();
     await waitFor(() =>
-      expect(screen.getByText(/Cliente vê 2 de 44 atributos/i)).toBeInTheDocument(),
+      expect(screen.getByText(/Cliente vê 2 de 43 atributos/i)).toBeInTheDocument(),
     );
     expect(screen.getByText("Conteúdo geral")).toBeInTheDocument();
     expect(screen.getByText("Custos")).toBeInTheDocument();

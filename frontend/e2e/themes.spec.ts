@@ -13,7 +13,7 @@ async function openDoceria(page: Page) {
   await page.getByRole("row", { name: new RegExp(PROJECT) }).click();
   await expect(page.getByRole("heading", { name: PROJECT })).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: /Temática \(classificação IA\)/i }),
+    page.getByRole("heading", { name: /Domínio \(classificação IA\)/i }),
   ).toBeVisible();
 }
 
@@ -22,7 +22,7 @@ test.describe("Themes / RF19 — consultant flow (M3)", () => {
     await login(page, ACCOUNTS.consultor);
     await openDoceria(page);
 
-    const suggest = page.getByRole("button", { name: /sugerir temática/i });
+    const suggest = page.getByRole("button", { name: /sugerir domínio/i });
     // Each suggestion card shows exactly one "confiança N%", so this count is a
     // proxy for the number of cards. Baseline ≥ 0 so the test is re-run safe
     // (prior runs accumulate suggestions on a live backend).
@@ -63,6 +63,6 @@ test.describe("Themes / RF19 — client (M3)", () => {
     await page.goto("/projects");
     await page.getByRole("row", { name: /Freire Batista ADV/ }).click();
     await expect(page.getByRole("heading", { name: "Freire Batista ADV" })).toBeVisible();
-    await expect(page.getByText(/Temática \(classificação IA\)/i)).toHaveCount(0);
+    await expect(page.getByText(/Domínio \(classificação IA\)/i)).toHaveCount(0);
   });
 });

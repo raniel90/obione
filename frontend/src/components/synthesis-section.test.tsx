@@ -65,7 +65,7 @@ describe("SynthesisSection", () => {
     vi.spyOn(synthesisApi, "listProjectSyntheses").mockResolvedValue([]);
     renderWithProviders(<SynthesisSection projectId="p1" canAuthor={false} />);
     await waitFor(() =>
-      expect(screen.getByText(/nenhuma síntese publicada para esta temática/i)).toBeInTheDocument(),
+      expect(screen.getByText(/nenhuma síntese publicada para este domínio/i)).toBeInTheDocument(),
     );
   });
 });

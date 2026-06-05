@@ -37,7 +37,7 @@ export function PortfolioCockpitPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Cockpit do Portfólio</h1>
+      <h1 className="text-2xl font-bold">Cockpit</h1>
       {cockpit.total_projects === 0 ? (
         <EmptyState
           icon={LayoutDashboard}
@@ -52,7 +52,7 @@ export function PortfolioCockpitPage() {
             status={cockpit.status_distribution}
           />
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold">Por temática</h2>
+            <h2 className="text-lg font-semibold">Por domínio</h2>
             <ThemeBreakdownTable themes={cockpit.themes} />
           </section>
           <section className="space-y-3">
@@ -76,10 +76,10 @@ export function PortfolioCockpitPage() {
             )}
           </section>
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold">Sínteses por temática</h2>
+            <h2 className="text-lg font-semibold">Sínteses por domínio</h2>
             <p className="text-sm text-muted-foreground">
               A Conectora destila padrões, riscos e boas práticas dos projetos de cada
-              temática. Você revisa e publica; o cliente vê a versão publicada e anonimizada.
+              domínio. Você revisa e publica; o cliente vê a versão publicada e anonimizada.
             </p>
             <CockpitSynthesisPanel domains={cockpit.themes.map((t) => t.domain)} />
           </section>

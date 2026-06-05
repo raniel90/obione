@@ -40,7 +40,7 @@ export function ThemeBreakdownTable({ themes }: { themes: ThemeBreakdown[] }) {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Temática</TableHead>
+          <TableHead>Domínio</TableHead>
           <TableHead>Projetos</TableHead>
           <TableHead>Cobertura</TableHead>
           <TableHead title="Registrados · Extraídos · Revisados">Status</TableHead>
