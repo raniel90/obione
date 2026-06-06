@@ -35,7 +35,7 @@ describe("LoginPage", () => {
 
   it("renders email and password fields", async () => {
     setup();
-    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/e-mail/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/senha/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /entrar/i })).toBeInTheDocument();
   });
@@ -43,7 +43,7 @@ describe("LoginPage", () => {
   it("rejects invalid email", async () => {
     setup();
     const user = userEvent.setup();
-    await user.type(screen.getByLabelText(/email/i), "not-an-email");
+    await user.type(screen.getByLabelText(/e-mail/i), "not-an-email");
     await user.type(screen.getByLabelText(/senha/i), "pwd12345678");
     await user.click(screen.getByRole("button", { name: /entrar/i }));
     expect(await screen.findByText(/e-mail inválido/i)).toBeInTheDocument();
@@ -52,7 +52,7 @@ describe("LoginPage", () => {
   it("rejects short password", async () => {
     setup();
     const user = userEvent.setup();
-    await user.type(screen.getByLabelText(/email/i), "c@x.com");
+    await user.type(screen.getByLabelText(/e-mail/i), "c@x.com");
     await user.type(screen.getByLabelText(/senha/i), "short");
     await user.click(screen.getByRole("button", { name: /entrar/i }));
     expect(await screen.findByText(/pelo menos 8/i)).toBeInTheDocument();
@@ -68,7 +68,7 @@ describe("LoginPage", () => {
 
     setup();
     const user = userEvent.setup();
-    await user.type(screen.getByLabelText(/email/i), "c@x.com");
+    await user.type(screen.getByLabelText(/e-mail/i), "c@x.com");
     await user.type(screen.getByLabelText(/senha/i), "pwd12345678");
     await user.click(screen.getByRole("button", { name: /entrar/i }));
 
@@ -79,7 +79,7 @@ describe("LoginPage", () => {
     vi.spyOn(authApi, "login").mockRejectedValue(new Error("bad creds"));
     setup();
     const user = userEvent.setup();
-    await user.type(screen.getByLabelText(/email/i), "c@x.com");
+    await user.type(screen.getByLabelText(/e-mail/i), "c@x.com");
     await user.type(screen.getByLabelText(/senha/i), "pwd12345678");
     await user.click(screen.getByRole("button", { name: /entrar/i }));
 

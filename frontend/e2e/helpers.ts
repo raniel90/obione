@@ -20,7 +20,7 @@ export const ACCOUNTS = {
  */
 export async function login(page: Page, email: string, password = PASSWORD): Promise<void> {
   await page.goto("/login");
-  await page.getByLabel(/email/i).fill(email);
+  await page.getByLabel(/e-mail/i).fill(email);
   await page.getByLabel(/senha/i).fill(password);
   await page.getByRole("button", { name: /entrar/i }).click();
   await expect(page).not.toHaveURL(/\/login$/);
