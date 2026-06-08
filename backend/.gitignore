@@ -1,18 +1,50 @@
-__pycache__/
-*.py[cod]
-*$py.class
-.Python
-.venv/
-venv/
-env/
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# Logs
+logs/
+*.log
+
+# Environment
 .env
-.env.local
-.pytest_cache/
-.coverage
-htmlcov/
-.ruff_cache/
-*.egg-info/
-dist/
+.env.*
+!.env.example
+
+# Local Spring config
+application-local.properties
+application-local.yml
+application-local.yaml
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
 build/
-/storage/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### OS ###
 .DS_Store

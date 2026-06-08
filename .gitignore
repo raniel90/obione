@@ -7,6 +7,17 @@
 
 # Node
 node_modules/
+dist/
+dist-ssr/
+.output/
+.vinxi/
+.nitro/
+.tanstack/
+.wrangler/
+.dev.vars
+
+# Java / Maven
+target/
 
 # Python
 __pycache__/
