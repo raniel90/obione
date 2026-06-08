@@ -118,7 +118,9 @@ function toOptionalId(value: string | undefined): number | undefined {
   return Number.isFinite(parsed) ? parsed : undefined;
 }
 
-function buildCreateBody(data: Omit<Discussion, "id" | "createdAt" | "contributions" | "createdByName">) {
+function buildCreateBody(
+  data: Omit<Discussion, "id" | "createdAt" | "contributions" | "createdByName">,
+) {
   const body: Record<string, unknown> = {
     title: data.title,
     question: data.question,

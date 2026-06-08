@@ -125,7 +125,9 @@ function ObservedProjectCard({ project }: { project: LegacyProject }) {
         </div>
         <div>
           <dt className="text-muted-foreground">Status</dt>
-          <dd><StatusBadge status={project.status} /></dd>
+          <dd>
+            <StatusBadge status={project.status} />
+          </dd>
         </div>
         <div>
           <dt className="text-muted-foreground">Risco</dt>
@@ -159,7 +161,8 @@ function ObservedProjectCard({ project }: { project: LegacyProject }) {
       <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-[11px] text-muted-foreground">
         <span className="inline-flex items-center gap-1">
           <Radar className="h-3 w-3" />
-          {linked.length} fenômeno{linked.length === 1 ? "" : "s"} associado{linked.length === 1 ? "" : "s"}
+          {linked.length} fenômeno{linked.length === 1 ? "" : "s"} associado
+          {linked.length === 1 ? "" : "s"}
         </span>
         <span className="font-mono">Últ. obs · {updated}</span>
       </div>
@@ -172,7 +175,14 @@ function ObservedProjectCard({ project }: { project: LegacyProject }) {
   );
 }
 
-const STATUSES: (ProjectStatus | "all")[] = ["all", "active", "planning", "review", "paused", "completed"];
+const STATUSES: (ProjectStatus | "all")[] = [
+  "all",
+  "active",
+  "planning",
+  "review",
+  "paused",
+  "completed",
+];
 const RISKS: ("all" | Risk)[] = ["all", "Baixo", "Moderado", "Elevado"];
 
 function ProjectsCatalog() {
@@ -260,14 +270,18 @@ function ProjectsCatalog() {
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Risco</span>
+              <span className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                Risco
+              </span>
               <select
                 value={risk}
                 onChange={(e) => setRisk(e.target.value as "all" | Risk)}
                 className="rounded-md border border-border bg-card px-2.5 py-1.5 text-[12px] text-foreground outline-none focus:border-ring"
               >
                 {RISKS.map((r) => (
-                  <option key={r} value={r}>{r === "all" ? "Todos" : r}</option>
+                  <option key={r} value={r}>
+                    {r === "all" ? "Todos" : r}
+                  </option>
                 ))}
               </select>
             </div>

@@ -131,7 +131,10 @@ function DomainDetailPage() {
   if (!domain) {
     return (
       <AppShell>
-        <PageHeader title="Domínio não encontrado" description="Este contexto observacional não está disponível." />
+        <PageHeader
+          title="Domínio não encontrado"
+          description="Este contexto observacional não está disponível."
+        />
         <div className="px-6 py-6 md:px-10">
           <Button asChild variant="outline" size="sm">
             <Link to="/domains">Voltar para domínios</Link>
@@ -161,9 +164,7 @@ function DomainDetailPage() {
               {obs && (
                 <>
                   <span className="h-1 w-1 rounded-full bg-border" />
-                  <span className="uppercase tracking-wider">
-                    {domainStatusLabels[obs.status]}
-                  </span>
+                  <span className="uppercase tracking-wider">{domainStatusLabels[obs.status]}</span>
                 </>
               )}
             </div>
@@ -183,21 +184,9 @@ function DomainDetailPage() {
           <SectionTitle hint="atributos intermediários">Indicadores do domínio</SectionTitle>
           <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
             <Kpi label="Projetos vinculados" value={linked.length} icon={Activity} />
-            <Kpi
-              label="Risco médio"
-              value={obs?.risk ?? "—"}
-              icon={AlertTriangle}
-            />
-            <Kpi
-              label="Engajamento médio"
-              value={`${obs?.engagement ?? 0}%`}
-              icon={Sparkles}
-            />
-            <Kpi
-              label="Fenômenos ativos"
-              value={obs?.activePhenomena ?? 0}
-              icon={Radar}
-            />
+            <Kpi label="Risco médio" value={obs?.risk ?? "—"} icon={AlertTriangle} />
+            <Kpi label="Engajamento médio" value={`${obs?.engagement ?? 0}%`} icon={Sparkles} />
+            <Kpi label="Fenômenos ativos" value={obs?.activePhenomena ?? 0} icon={Radar} />
           </div>
         </section>
 

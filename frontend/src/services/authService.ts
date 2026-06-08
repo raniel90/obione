@@ -1,11 +1,5 @@
 import type { User } from "@/types/user";
-import {
-  ApiError,
-  clearAuthToken,
-  getAuthToken,
-  request,
-  setAuthToken,
-} from "./apiClient";
+import { ApiError, clearAuthToken, getAuthToken, request, setAuthToken } from "./apiClient";
 import { type ApiCurrentUser, type ApiLoginResponse, mapCurrentUser } from "./apiMappers";
 
 export interface LoginResult {

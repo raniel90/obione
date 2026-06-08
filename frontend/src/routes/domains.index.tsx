@@ -226,7 +226,12 @@ function DomainsPage() {
                         </span>
                         <span className="inline-flex items-center gap-1">
                           <Layers className="h-3 w-3" />
-                          {communityKnowledge.filter((k) => k.domain === d.name && k.status === "Consolidado").length} conhecimentos
+                          {
+                            communityKnowledge.filter(
+                              (k) => k.domain === d.name && k.status === "Consolidado",
+                            ).length
+                          }{" "}
+                          conhecimentos
                         </span>
                       </div>
                     </div>
@@ -259,8 +264,8 @@ function DomainsPage() {
                 Cada domínio possui uma comunidade observacional
               </h3>
               <p className="mt-1.5 max-w-3xl text-[12.5px] leading-relaxed text-muted-foreground">
-                Formada por participantes autorizados, essa comunidade ajuda a
-                interpretar fenômenos e transformar observações em conhecimento.
+                Formada por participantes autorizados, essa comunidade ajuda a interpretar fenômenos
+                e transformar observações em conhecimento.
               </p>
             </div>
             <Button asChild size="sm" variant="outline" className="text-[12px]">

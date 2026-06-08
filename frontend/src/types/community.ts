@@ -106,4 +106,3 @@ export interface CommunityOverviewResponse {
   recentDiscussions: CommunityDiscussionSummary[];
   recentKnowledge: CommunityKnowledgeSummary[];
 }
-

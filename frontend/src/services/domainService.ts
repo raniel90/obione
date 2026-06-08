@@ -52,7 +52,8 @@ export async function updateDomain(id: string, data: Partial<Domain>): Promise<D
   if (data.name !== undefined) body.name = data.name;
   if (data.description !== undefined) body.description = data.description;
   if (data.type !== undefined) body.type = data.type;
-  if (data.observationObjective !== undefined) body.observationObjective = data.observationObjective;
+  if (data.observationObjective !== undefined)
+    body.observationObjective = data.observationObjective;
   if (data.priorityIndicators !== undefined) body.priorityIndicators = data.priorityIndicators;
   if (data.expectedPhenomena !== undefined) body.expectedPhenomena = data.expectedPhenomena;
   if (data.status !== undefined) body.status = data.status;

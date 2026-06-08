@@ -71,18 +71,15 @@ function SettingsPage() {
 
   useEffect(() => {
     let alive = true;
-    Promise.all([
-      getProfiles(),
-      getPermissions(),
-      getProfilePermissions(),
-      getUsers(),
-    ]).then(([pr, perm, pp, us]) => {
-      if (!alive) return;
-      setProfiles(pr);
-      setPermissions(perm);
-      setProfilePermissions(pp);
-      setUsers(us);
-    });
+    Promise.all([getProfiles(), getPermissions(), getProfilePermissions(), getUsers()]).then(
+      ([pr, perm, pp, us]) => {
+        if (!alive) return;
+        setProfiles(pr);
+        setPermissions(perm);
+        setProfilePermissions(pp);
+        setUsers(us);
+      },
+    );
     return () => {
       alive = false;
     };
@@ -139,8 +136,10 @@ function SettingsPage() {
   const scopeFor = (u: DomainUser) => {
     const parts: string[] = [];
     if (u.profileCode === "ADMIN") return "Acesso total";
-    if (u.domainIds.length) parts.push(`${u.domainIds.length} domínio${u.domainIds.length === 1 ? "" : "s"}`);
-    if (u.projectIds.length) parts.push(`${u.projectIds.length} projeto${u.projectIds.length === 1 ? "" : "s"}`);
+    if (u.domainIds.length)
+      parts.push(`${u.domainIds.length} domínio${u.domainIds.length === 1 ? "" : "s"}`);
+    if (u.projectIds.length)
+      parts.push(`${u.projectIds.length} projeto${u.projectIds.length === 1 ? "" : "s"}`);
     return parts.join(" · ") || "Sem vínculo";
   };
 
@@ -167,12 +166,11 @@ function SettingsPage() {
                   Comunidade como camada de participação
                 </h3>
                 <p className="mt-2 max-w-3xl text-[12.5px] leading-relaxed text-muted-foreground">
-                  No ObiOne, a comunidade não é um tipo de usuário. Ela representa a
-                  camada sociotécnica do observatório, onde participantes interpretam
-                  fenômenos, discutem evidências e ajudam a transformar observações em
-                  conhecimento coletivo. Todos os perfis podem participar da comunidade,
-                  mas suas ações e visibilidade dependem do perfil e do vínculo com
-                  domínios e projetos.
+                  No ObiOne, a comunidade não é um tipo de usuário. Ela representa a camada
+                  sociotécnica do observatório, onde participantes interpretam fenômenos, discutem
+                  evidências e ajudam a transformar observações em conhecimento coletivo. Todos os
+                  perfis podem participar da comunidade, mas suas ações e visibilidade dependem do
+                  perfil e do vínculo com domínios e projetos.
                 </p>
               </div>
             </div>
@@ -224,8 +222,8 @@ function SettingsPage() {
             Permissões por perfil
           </h2>
           <p className="mt-1 max-w-2xl text-[12.5px] text-muted-foreground">
-            Ative ou desative o que cada perfil pode realizar no observatório. As alterações
-            são aplicadas em modo simulado.
+            Ative ou desative o que cada perfil pode realizar no observatório. As alterações são
+            aplicadas em modo simulado.
           </p>
 
           <div className="mt-5 overflow-hidden rounded-lg border border-border bg-card">
@@ -281,11 +279,10 @@ function SettingsPage() {
                   Perfil define o papel · contexto define o alcance
                 </h3>
                 <p className="mt-2 max-w-3xl text-[12.5px] leading-relaxed text-muted-foreground">
-                  O domínio organiza a comunidade observacional, mas o acesso real
-                  às informações depende do vínculo do usuário com cada projeto.
-                  Assim, um cliente pode participar da comunidade do domínio Branding,
-                  mas visualizar apenas discussões e dados relacionados ao projeto ao
-                  qual está vinculado.
+                  O domínio organiza a comunidade observacional, mas o acesso real às informações
+                  depende do vínculo do usuário com cada projeto. Assim, um cliente pode participar
+                  da comunidade do domínio Branding, mas visualizar apenas discussões e dados
+                  relacionados ao projeto ao qual está vinculado.
                 </p>
               </div>
             </div>

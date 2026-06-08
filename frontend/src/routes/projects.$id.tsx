@@ -98,6 +98,28 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+function ProjectRouteError({ reset }: { reset: () => void }) {
+  const router = useRouter();
+  return (
+    <AppShell>
+      <div className="px-6 py-10 md:px-10">
+        <h1 className="text-lg font-semibold">Erro ao carregar projeto</h1>
+        <Button
+          size="sm"
+          variant="outline"
+          className="mt-3"
+          onClick={() => {
+            router.invalidate();
+            reset();
+          }}
+        >
+          Tentar novamente
+        </Button>
+      </div>
+    </AppShell>
+  );
+}
+
 export const Route = createFileRoute("/projects/$id")({
   head: () => ({
     meta: [
@@ -108,27 +130,7 @@ export const Route = createFileRoute("/projects/$id")({
       },
     ],
   }),
-  errorComponent: ({ reset }) => {
-    const router = useRouter();
-    return (
-      <AppShell>
-        <div className="px-6 py-10 md:px-10">
-          <h1 className="text-lg font-semibold">Erro ao carregar projeto</h1>
-          <Button
-            size="sm"
-            variant="outline"
-            className="mt-3"
-            onClick={() => {
-              router.invalidate();
-              reset();
-            }}
-          >
-            Tentar novamente
-          </Button>
-        </div>
-      </AppShell>
-    );
-  },
+  errorComponent: ProjectRouteError,
   component: ProjectDetailPage,
 });
 
@@ -284,9 +286,7 @@ function toProjectObservation(
     date: o.createdAt,
     description: o.description,
     attribute: attrMap.get(o.attributeId) ?? o.attributeId ?? "—",
-    phenomenon: o.phenomenonId
-      ? phenMap.get(o.phenomenonId) ?? o.phenomenonId
-      : "—",
+    phenomenon: o.phenomenonId ? (phenMap.get(o.phenomenonId) ?? o.phenomenonId) : "—",
     impact: obsImpactMap[o.impact],
     risk: obsRiskMap[o.risk],
     interpretation: o.interpretation,
@@ -444,8 +444,7 @@ function ProjectDetailPage() {
     );
   }
 
-  const phenomenaList: ProjectPhenomenon[] =
-    svcPhenomena.length > 0 ? svcPhenomena : obs.phenomena;
+  const phenomenaList: ProjectPhenomenon[] = svcPhenomena.length > 0 ? svcPhenomena : obs.phenomena;
   const observationsList: ProjectObservation[] =
     svcObservations.length > 0 ? svcObservations : obs.observations;
 
@@ -477,9 +476,7 @@ function ProjectDetailPage() {
               <h1 className="mt-1.5 text-[22px] font-semibold tracking-tight text-foreground">
                 {project.name}
               </h1>
-              <p className="mt-1 max-w-3xl text-[13px] text-muted-foreground">
-                {project.summary}
-              </p>
+              <p className="mt-1 max-w-3xl text-[13px] text-muted-foreground">{project.summary}</p>
             </div>
             <div className="flex shrink-0 flex-wrap items-center gap-2">
               {domain && (
@@ -494,7 +491,9 @@ function ProjectDetailPage() {
                   projectId={id}
                   projectName={project.name}
                   project={rawProject}
-                  engagementPercent={engagementPercent ?? engagementToPercent(rawProject.clientEngagement)}
+                  engagementPercent={
+                    engagementPercent ?? engagementToPercent(rawProject.clientEngagement)
+                  }
                   onUpdated={(updated, nextEngagementPercent) => {
                     setRawProject(updated);
                     setEngagementPercent(nextEngagementPercent);
@@ -518,9 +517,7 @@ function ProjectDetailPage() {
             />
             <MetaItem
               label="Engajamento"
-              value={
-                engagementPercent !== null ? `${engagementPercent}%` : "—"
-              }
+              value={engagementPercent !== null ? `${engagementPercent}%` : "—"}
             />
             <MetaItem label="Início" value={formatDate(obs.startDate)} />
             <MetaItem label="Previsão" value={formatDate(obs.dueDate)} />
@@ -649,7 +646,11 @@ function ProjectDetailPage() {
                     <DefRow
                       label="Tendência"
                       value={
-                        ph.trend === "up" ? "Crescente" : ph.trend === "down" ? "Decrescente" : "Estável"
+                        ph.trend === "up"
+                          ? "Crescente"
+                          : ph.trend === "down"
+                            ? "Decrescente"
+                            : "Estável"
                       }
                     />
                     <DefRow label="Status" value={ph.status} />
@@ -693,7 +694,10 @@ function ProjectDetailPage() {
               </div>
               <ul className="mt-3 divide-y divide-border">
                 {obs.participants.map((p) => (
-                  <li key={p.name} className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                  <li
+                    key={p.name}
+                    className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0"
+                  >
                     <div className="min-w-0">
                       <p className="text-[13px] font-medium text-foreground">{p.name}</p>
                       <p className="text-[11.5px] text-muted-foreground">{p.responsibility}</p>
@@ -728,8 +732,8 @@ function ProjectDetailPage() {
           </div>
 
           <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/20 p-4 text-[12.5px] leading-relaxed text-muted-foreground">
-            No ObiOne, a comunidade do projeto representa a camada colaborativa de interpretação.
-            Os participantes vinculados contribuem com feedback, evidências e hipóteses para
+            No ObiOne, a comunidade do projeto representa a camada colaborativa de interpretação. Os
+            participantes vinculados contribuem com feedback, evidências e hipóteses para
             transformar observações em conhecimento.
           </div>
         </section>
@@ -744,7 +748,6 @@ function ProjectDetailPage() {
           refreshKey={discussionsRefresh}
         />
 
-
         {/* Insights */}
         <section>
           <SectionTitle
@@ -754,14 +757,19 @@ function ProjectDetailPage() {
           />
           <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-3">
             {obs.insights.map((i) => (
-              <article key={i.id} className="flex flex-col rounded-xl border border-border bg-card p-5">
+              <article
+                key={i.id}
+                className="flex flex-col rounded-xl border border-border bg-card p-5"
+              >
                 <div className="flex items-center justify-between text-[10.5px] uppercase tracking-wider text-muted-foreground">
                   <span className="inline-flex items-center gap-1.5">
                     <Sparkles className="h-3 w-3" /> {i.origin}
                   </span>
                   <span className="font-mono">confiança {i.confidence}</span>
                 </div>
-                <p className="mt-3 text-[13.5px] leading-relaxed text-foreground">“{i.narrative}”</p>
+                <p className="mt-3 text-[13.5px] leading-relaxed text-foreground">
+                  “{i.narrative}”
+                </p>
                 <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-[11px] text-muted-foreground">
                   <span className="capitalize">{i.status}</span>
                   <CircleDot
@@ -1091,9 +1099,7 @@ function ManualObservationSection({
   const applyObservationUpdate = (updated: SvcObservation) => {
     const display = toProjectObservation(updated, attrNameById, phenNameById);
     setItems((prev) => prev.map((o) => (o.id === updated.id ? display : o)));
-    onObservationsChange(
-      rawObservations.map((o) => (o.id === updated.id ? updated : o)),
-    );
+    onObservationsChange(rawObservations.map((o) => (o.id === updated.id ? updated : o)));
   };
 
   const prependObservation = (created: SvcObservation) => {
@@ -1109,9 +1115,7 @@ function ManualObservationSection({
     if (!form.title.trim() || !form.description.trim() || submitting) return;
     if (isCustomPhenomenon && !form.customPhenomenon.trim()) return;
 
-    const finalPhenomenon = isCustomPhenomenon
-      ? form.customPhenomenon.trim()
-      : form.phenomenon;
+    const finalPhenomenon = isCustomPhenomenon ? form.customPhenomenon.trim() : form.phenomenon;
 
     setSubmitting(true);
     try {
@@ -1151,7 +1155,7 @@ function ManualObservationSection({
 
     const attrLabel = attrNameById.get(raw.attributeId) ?? raw.attributeId ?? ATTRIBUTES[0];
     const phenLabel = raw.phenomenonId
-      ? phenNameById.get(raw.phenomenonId) ?? raw.phenomenonId
+      ? (phenNameById.get(raw.phenomenonId) ?? raw.phenomenonId)
       : PHENOMENA[0];
     const matchedPhen = phenomena.find(
       (p) => p.id === raw.phenomenonId || p.name === raw.phenomenonId,
@@ -1292,8 +1296,8 @@ function ManualObservationSection({
               <DialogHeader>
                 <DialogTitle>Registrar nova observação</DialogTitle>
                 <DialogDescription>
-                  Registre uma evidência observada no projeto: descrição, atributo afetado,
-                  fenômeno associado e sua interpretação inicial.
+                  Registre uma evidência observada no projeto: descrição, atributo afetado, fenômeno
+                  associado e sua interpretação inicial.
                 </DialogDescription>
               </DialogHeader>
               {success ? (
@@ -1348,10 +1352,14 @@ function ManualObservationSection({
                         value={form.attribute}
                         onValueChange={(v) => setForm((f) => ({ ...f, attribute: v }))}
                       >
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
                         <SelectContent>
                           {ATTRIBUTES.map((a) => (
-                            <SelectItem key={a} value={a}>{a}</SelectItem>
+                            <SelectItem key={a} value={a}>
+                              {a}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -1362,10 +1370,14 @@ function ManualObservationSection({
                         value={form.phenomenon}
                         onValueChange={(v) => setForm((f) => ({ ...f, phenomenon: v }))}
                       >
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
                         <SelectContent>
                           {PHENOMENA.map((p) => (
-                            <SelectItem key={p} value={p}>{p}</SelectItem>
+                            <SelectItem key={p} value={p}>
+                              {p}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -1388,10 +1400,14 @@ function ManualObservationSection({
                           setForm((f) => ({ ...f, impact: v as ProjectObservation["impact"] }))
                         }
                       >
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
                         <SelectContent>
                           {["Baixo", "Médio", "Alto"].map((v) => (
-                            <SelectItem key={v} value={v}>{v}</SelectItem>
+                            <SelectItem key={v} value={v}>
+                              {v}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -1404,10 +1420,14 @@ function ManualObservationSection({
                           setForm((f) => ({ ...f, risk: v as ProjectObservation["risk"] }))
                         }
                       >
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
                         <SelectContent>
                           {["Baixo", "Moderado", "Elevado", "Crítico"].map((v) => (
-                            <SelectItem key={v} value={v}>{v}</SelectItem>
+                            <SelectItem key={v} value={v}>
+                              {v}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -1420,9 +1440,7 @@ function ManualObservationSection({
                       rows={2}
                       placeholder="Descreva a interpretação inicial sobre essa observação."
                       value={form.interpretation}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, interpretation: e.target.value }))
-                      }
+                      onChange={(e) => setForm((f) => ({ ...f, interpretation: e.target.value }))}
                     />
                   </div>
                   <DialogFooter>
@@ -1439,10 +1457,7 @@ function ManualObservationSection({
 
       <div className="mt-4 space-y-3">
         {items.map((o) => (
-          <article
-            key={o.id}
-            className="rounded-xl border border-border bg-card p-5"
-          >
+          <article key={o.id} className="rounded-xl border border-border bg-card p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-wider text-muted-foreground">
@@ -1554,10 +1569,14 @@ function ManualObservationSection({
                   value={editForm.attribute}
                   onValueChange={(v) => setEditForm((f) => ({ ...f, attribute: v }))}
                 >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {attributeOptions.map((a) => (
-                      <SelectItem key={a} value={a}>{a}</SelectItem>
+                      <SelectItem key={a} value={a}>
+                        {a}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -1568,10 +1587,14 @@ function ManualObservationSection({
                   value={editForm.phenomenon}
                   onValueChange={(v) => setEditForm((f) => ({ ...f, phenomenon: v }))}
                 >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {phenomenonOptions.map((p) => (
-                      <SelectItem key={p} value={p}>{p}</SelectItem>
+                      <SelectItem key={p} value={p}>
+                        {p}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -1594,10 +1617,14 @@ function ManualObservationSection({
                     setEditForm((f) => ({ ...f, impact: v as ProjectObservation["impact"] }))
                   }
                 >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {["Baixo", "Médio", "Alto"].map((v) => (
-                      <SelectItem key={v} value={v}>{v}</SelectItem>
+                      <SelectItem key={v} value={v}>
+                        {v}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -1610,10 +1637,14 @@ function ManualObservationSection({
                     setEditForm((f) => ({ ...f, risk: v as ProjectObservation["risk"] }))
                   }
                 >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {["Baixo", "Moderado", "Elevado", "Crítico"].map((v) => (
-                      <SelectItem key={v} value={v}>{v}</SelectItem>
+                      <SelectItem key={v} value={v}>
+                        {v}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -1625,9 +1656,7 @@ function ManualObservationSection({
                 id="edit-obs-interp"
                 rows={2}
                 value={editForm.interpretation}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, interpretation: e.target.value }))
-                }
+                onChange={(e) => setEditForm((f) => ({ ...f, interpretation: e.target.value }))}
               />
             </div>
             <DialogFooter>
@@ -1674,10 +1703,14 @@ function ManualObservationSection({
                     setDiscussionForm((f) => ({ ...f, visibility: v as VisibilityScope }))
                   }
                 >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {DISCUSSION_VISIBILITY.map((v) => (
-                      <SelectItem key={v} value={v}>{v}</SelectItem>
+                      <SelectItem key={v} value={v}>
+                        {v}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -1690,10 +1723,14 @@ function ManualObservationSection({
                     setDiscussionForm((f) => ({ ...f, status: v as DiscussionStatus }))
                   }
                 >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {DISCUSSION_STATUS.map((s) => (
-                      <SelectItem key={s} value={s}>{s}</SelectItem>
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -1826,80 +1863,79 @@ function UpdateProjectButton({
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label>Status observacional</Label>
-                <Select
-                  value={form.status}
-                  onValueChange={(v) => setForm((f) => ({ ...f, status: v }))}
-                >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {["Em observação", "Estável", "Em risco", "Em revisão", "Encerrado"].map(
-                      (v) => (
-                        <SelectItem key={v} value={v}>{v}</SelectItem>
-                      ),
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label>Risco atual</Label>
-                <Select
-                  value={form.risk}
-                  onValueChange={(v) => setForm((f) => ({ ...f, risk: v }))}
-                >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {["Baixo", "Moderado", "Elevado", "Crítico"].map((v) => (
-                      <SelectItem key={v} value={v}>{v}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="upd-progress">Progresso (%)</Label>
-                <Input
-                  id="upd-progress"
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={form.progress}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, progress: Number(e.target.value) }))
-                  }
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="upd-eng">Engajamento atual (%)</Label>
-                <Input
-                  id="upd-eng"
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={form.engagement}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, engagement: Number(e.target.value) }))
-                  }
-                />
-              </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label>Status observacional</Label>
+              <Select
+                value={form.status}
+                onValueChange={(v) => setForm((f) => ({ ...f, status: v }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {["Em observação", "Estável", "Em risco", "Em revisão", "Encerrado"].map((v) => (
+                    <SelectItem key={v} value={v}>
+                      {v}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="upd-comment">Comentário de atualização</Label>
-              <Textarea
-                id="upd-comment"
-                rows={3}
-                placeholder="Resuma o motivo da atualização e o que mudou na observação do projeto."
-                value={form.comment}
-                onChange={(e) => setForm((f) => ({ ...f, comment: e.target.value }))}
+              <Label>Risco atual</Label>
+              <Select value={form.risk} onValueChange={(v) => setForm((f) => ({ ...f, risk: v }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {["Baixo", "Moderado", "Elevado", "Crítico"].map((v) => (
+                    <SelectItem key={v} value={v}>
+                      {v}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="upd-progress">Progresso (%)</Label>
+              <Input
+                id="upd-progress"
+                type="number"
+                min={0}
+                max={100}
+                value={form.progress}
+                onChange={(e) => setForm((f) => ({ ...f, progress: Number(e.target.value) }))}
               />
             </div>
-            <DialogFooter>
-              <Button type="submit" size="sm" disabled={submitting}>
-                {submitting ? "Salvando…" : "Salvar atualização"}
-              </Button>
-            </DialogFooter>
-          </form>
+            <div className="space-y-1.5">
+              <Label htmlFor="upd-eng">Engajamento atual (%)</Label>
+              <Input
+                id="upd-eng"
+                type="number"
+                min={0}
+                max={100}
+                value={form.engagement}
+                onChange={(e) => setForm((f) => ({ ...f, engagement: Number(e.target.value) }))}
+              />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="upd-comment">Comentário de atualização</Label>
+            <Textarea
+              id="upd-comment"
+              rows={3}
+              placeholder="Resuma o motivo da atualização e o que mudou na observação do projeto."
+              value={form.comment}
+              onChange={(e) => setForm((f) => ({ ...f, comment: e.target.value }))}
+            />
+          </div>
+          <DialogFooter>
+            <Button type="submit" size="sm" disabled={submitting}>
+              {submitting ? "Salvando…" : "Salvar atualização"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
@@ -1944,9 +1980,7 @@ function CloseObservationButton({ projectName }: { projectName: string }) {
         {success ? (
           <div className="flex flex-col items-center gap-2 py-6 text-center">
             <CheckCircle2 className="h-8 w-8 text-success" />
-            <p className="text-sm font-medium">
-              Observação do projeto encerrada com sucesso.
-            </p>
+            <p className="text-sm font-medium">Observação do projeto encerrada com sucesso.</p>
           </div>
         ) : (
           <form onSubmit={onSubmit} className="space-y-4">
@@ -1956,7 +1990,9 @@ function CloseObservationButton({ projectName }: { projectName: string }) {
                 value={form.result}
                 onValueChange={(v) => setForm((f) => ({ ...f, result: v }))}
               >
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {[
                     "Concluído com sucesso",
@@ -1965,7 +2001,9 @@ function CloseObservationButton({ projectName }: { projectName: string }) {
                     "Suspenso",
                     "Cancelado",
                   ].map((v) => (
-                    <SelectItem key={v} value={v}>{v}</SelectItem>
+                    <SelectItem key={v} value={v}>
+                      {v}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -2017,9 +2055,7 @@ function CloseObservationButton({ projectName }: { projectName: string }) {
                 rows={2}
                 placeholder="Boas práticas e alertas para casos semelhantes."
                 value={form.recommendation}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, recommendation: e.target.value }))
-                }
+                onChange={(e) => setForm((f) => ({ ...f, recommendation: e.target.value }))}
               />
             </div>
             <DialogFooter>
@@ -2033,7 +2069,6 @@ function CloseObservationButton({ projectName }: { projectName: string }) {
     </Dialog>
   );
 }
-
 
 /* --------------- Discussões e Conhecimentos do Projeto ----------------- */
 
@@ -2065,12 +2100,8 @@ function ProjectDiscussionsAndKnowledge({
           toCommunityDiscussion(d, {
             domain: domainName,
             project: projectName,
-            phenomenon: d.phenomenonId
-              ? phenNameById.get(d.phenomenonId) ?? d.phenomenonId
-              : "—",
-            originObservation: d.observationId
-              ? `Observação #${d.observationId}`
-              : undefined,
+            phenomenon: d.phenomenonId ? (phenNameById.get(d.phenomenonId) ?? d.phenomenonId) : "—",
+            originObservation: d.observationId ? `Observação #${d.observationId}` : undefined,
           }),
         ),
       );
@@ -2125,7 +2156,12 @@ function ProjectDiscussionsAndKnowledge({
                   {d.contributions} contribuições · último: {d.lastParticipant}
                 </p>
                 <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                  <Button asChild size="sm" variant="outline" className="h-7 gap-1 px-2 text-[11px]">
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="outline"
+                    className="h-7 gap-1 px-2 text-[11px]"
+                  >
                     {domainSlug ? (
                       <Link to="/community/$slug" params={{ slug: domainSlug }}>
                         <Eye className="h-3 w-3" /> Ver discussão
@@ -2137,7 +2173,12 @@ function ProjectDiscussionsAndKnowledge({
                     )}
                   </Button>
                   {d.status !== "Consolidada" && d.status !== "Arquivada" && (
-                    <Button asChild size="sm" variant="ghost" className="h-7 gap-1 px-2 text-[11px]">
+                    <Button
+                      asChild
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 gap-1 px-2 text-[11px]"
+                    >
                       {domainSlug ? (
                         <Link to="/community/$slug" params={{ slug: domainSlug }}>
                           <Sparkles className="h-3 w-3" /> Consolidar conhecimento

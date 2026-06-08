@@ -91,8 +91,8 @@ function LoginPage() {
               Observar. Organizar. Decidir.
             </h1>
             <p className="mt-3 max-w-[340px] text-[13px] leading-relaxed text-muted-foreground">
-              Observe projetos, organize conhecimento e acompanhe decisões
-              estratégicas em um só lugar.
+              Observe projetos, organize conhecimento e acompanhe decisões estratégicas em um só
+              lugar.
             </p>
           </div>
 
@@ -140,9 +140,7 @@ function LoginPage() {
                   type="button"
                   className="text-[11.5px] text-muted-foreground transition-colors hover:text-foreground"
                   onClick={() =>
-                    setError(
-                      "Solicite a redefinição ao administrador do seu domínio.",
-                    )
+                    setError("Solicite a redefinição ao administrador do seu domínio.")
                   }
                 >
                   Esqueci minha senha
@@ -170,11 +168,7 @@ function LoginPage() {
               </div>
             )}
 
-            <Button
-              type="submit"
-              className="h-10 w-full text-[13px]"
-              disabled={loading}
-            >
+            <Button type="submit" className="h-10 w-full text-[13px]" disabled={loading}>
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -194,10 +188,7 @@ function LoginPage() {
 
           <p className="mt-8 text-center text-[12.5px] text-muted-foreground">
             Ainda não tem conta?{" "}
-            <Link
-              to="/register"
-              className="text-foreground underline-offset-4 hover:underline"
-            >
+            <Link to="/register" className="text-foreground underline-offset-4 hover:underline">
               Criar conta
             </Link>
           </p>

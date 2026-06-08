@@ -27,10 +27,7 @@ import {
   visibilityCodes,
   contributionTypeCodes,
 } from "@/services/discussionService";
-import {
-  consolidateKnowledge,
-  toCommunityKnowledge,
-} from "@/services/knowledgeService";
+import { consolidateKnowledge, toCommunityKnowledge } from "@/services/knowledgeService";
 import type {
   CommunityDiscussionSummary,
   CommunityKnowledgeSummary,
@@ -107,19 +104,13 @@ const roleFromCode: Record<CommunityParticipant["role"], ParticipantRole> = {
   CLIENT: "cliente",
 };
 
-const participantStatusFromCode: Record<
-  CommunityParticipant["status"],
-  ParticipantStatus
-> = {
+const participantStatusFromCode: Record<CommunityParticipant["status"], ParticipantStatus> = {
   ACTIVE: "ativo",
   INVITED: "convidado",
   PENDING: "aguardando-validação",
 };
 
-function mapDiscussionToUi(
-  discussion: CommunityDiscussionSummary,
-  domainName: string,
-): Discussion {
+function mapDiscussionToUi(discussion: CommunityDiscussionSummary, domainName: string): Discussion {
   return {
     id: discussion.id,
     title: discussion.title,
@@ -136,10 +127,7 @@ function mapDiscussionToUi(
   };
 }
 
-function mapKnowledgeToUi(
-  item: CommunityKnowledgeSummary,
-  domainName: string,
-): CommunityKnowledge {
+function mapKnowledgeToUi(item: CommunityKnowledgeSummary, domainName: string): CommunityKnowledge {
   return {
     id: item.id,
     title: item.title,
@@ -155,10 +143,7 @@ function mapKnowledgeToUi(
   };
 }
 
-function mapParticipantToUi(
-  participant: CommunityParticipant,
-  domainName: string,
-) {
+function mapParticipantToUi(participant: CommunityParticipant, domainName: string) {
   return {
     id: participant.id,
     name: participant.name,
@@ -186,7 +171,10 @@ export const Route = createFileRoute("/community/$slug")({
   component: DomainCommunityPage,
   notFoundComponent: () => (
     <AppShell>
-      <PageHeader title="Comunidade não encontrada" description="O domínio solicitado não existe." />
+      <PageHeader
+        title="Comunidade não encontrada"
+        description="O domínio solicitado não existe."
+      />
       <div className="px-6 py-8 md:px-10">
         <Button asChild variant="outline" size="sm">
           <Link to="/community">
@@ -259,10 +247,7 @@ function DomainCommunityPage() {
     : "em-formação";
 
   const domainParticipants = useMemo(
-    () =>
-      (domainCommunity?.participantsList ?? []).map((p) =>
-        mapParticipantToUi(p, domainName),
-      ),
+    () => (domainCommunity?.participantsList ?? []).map((p) => mapParticipantToUi(p, domainName)),
     [domainCommunity?.participantsList, domainName],
   );
 
@@ -329,9 +314,7 @@ function DomainCommunityPage() {
     return {
       domain: domainName,
       project: item.projectId ? projectNameById.get(item.projectId) : undefined,
-      phenomenon: item.phenomenonId
-        ? phenomenonNameById.get(item.phenomenonId)
-        : undefined,
+      phenomenon: item.phenomenonId ? phenomenonNameById.get(item.phenomenonId) : undefined,
       originObservation: item.observationId ? `Observação #${item.observationId}` : undefined,
     };
   };
@@ -509,7 +492,12 @@ function DomainCommunityPage() {
                 Interpretações coletivas sobre fenômenos identificados nos projetos deste domínio.
               </p>
             </div>
-            <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setCreateOpen(true)}>
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5"
+              onClick={() => setCreateOpen(true)}
+            >
               <Plus className="h-3.5 w-3.5" /> Nova discussão
             </Button>
           </div>
@@ -545,7 +533,9 @@ function DomainCommunityPage() {
                         updateDiscussion(d.id, { status: "Arquivada" });
                         return;
                       }
-                      replaceDiscussion(toCommunityDiscussion(updated, mapDiscussionNames(updated)));
+                      replaceDiscussion(
+                        toCommunityDiscussion(updated, mapDiscussionNames(updated)),
+                      );
                     });
                   }}
                 />
@@ -590,10 +580,7 @@ function DomainCommunityPage() {
           ) : (
             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {phenomenaFrequency.map((p) => (
-                <div
-                  key={p.phenomenon}
-                  className="rounded-xl border border-border bg-card p-4"
-                >
+                <div key={p.phenomenon} className="rounded-xl border border-border bg-card p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <div className="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-muted/40">
@@ -603,9 +590,7 @@ function DomainCommunityPage() {
                         {p.phenomenon}
                       </p>
                     </div>
-                    <span className="font-mono text-[11px] text-muted-foreground">
-                      {p.count}×
-                    </span>
+                    <span className="font-mono text-[11px] text-muted-foreground">{p.count}×</span>
                   </div>
                 </div>
               ))}
@@ -624,7 +609,8 @@ function DomainCommunityPage() {
                 Domínio observacional
               </h3>
               <p className="mt-1 text-[12.5px] text-muted-foreground">
-                Veja o observatório completo do domínio {domainName} — atributos, fenômenos e padrões.
+                Veja o observatório completo do domínio {domainName} — atributos, fenômenos e
+                padrões.
               </p>
             </div>
             <Button asChild size="sm" variant="outline">
@@ -688,9 +674,7 @@ function DomainCommunityPage() {
                 setSelectedDiscussion({ ...selectedDiscussion, status });
                 return;
               }
-              replaceDiscussion(
-                toCommunityDiscussion(updated, mapDiscussionNames(updated)),
-              );
+              replaceDiscussion(toCommunityDiscussion(updated, mapDiscussionNames(updated)));
             },
           );
         }}
@@ -715,9 +699,7 @@ function DomainCommunityPage() {
 
             void getDiscussionById(selectedDiscussion.id).then((refreshed) => {
               if (!refreshed) return;
-              replaceDiscussion(
-                toCommunityDiscussion(refreshed, mapDiscussionNames(refreshed)),
-              );
+              replaceDiscussion(toCommunityDiscussion(refreshed, mapDiscussionNames(refreshed)));
             });
           });
         }}
@@ -745,9 +727,7 @@ function DomainCommunityPage() {
             setKnowledge((list) => [
               toCommunityKnowledge(created, {
                 domain: domainName,
-                project: created.projectId
-                  ? projectNameById.get(created.projectId)
-                  : k.project,
+                project: created.projectId ? projectNameById.get(created.projectId) : k.project,
                 phenomenon: created.phenomenonId
                   ? phenomenonNameById.get(created.phenomenonId)
                   : k.phenomenon,
@@ -758,7 +738,6 @@ function DomainCommunityPage() {
           });
         }}
       />
-
     </AppShell>
   );
 }

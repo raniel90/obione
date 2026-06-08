@@ -107,9 +107,7 @@ export function KpiCard({
         <span className="text-[11px] uppercase tracking-[0.16em]">{label}</span>
         <Icon className="h-3.5 w-3.5" />
       </div>
-      <div className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
-        {value}
-      </div>
+      <div className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{value}</div>
     </div>
   );
 }
@@ -377,10 +375,14 @@ export function CreateDiscussionDialog({
                     value={form.domain}
                     onValueChange={(v) => setForm((f) => ({ ...f, domain: v }))}
                   >
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
                       {domains.map((d) => (
-                        <SelectItem key={d.id} value={d.name}>{d.name}</SelectItem>
+                        <SelectItem key={d.id} value={d.name}>
+                          {d.name}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -392,10 +394,14 @@ export function CreateDiscussionDialog({
                   value={form.project}
                   onValueChange={(v) => setForm((f) => ({ ...f, project: v }))}
                 >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {(projectsForDomain.length ? projectsForDomain : projects).map((p) => (
-                      <SelectItem key={p.id} value={p.name}>{p.name}</SelectItem>
+                      <SelectItem key={p.id} value={p.name}>
+                        {p.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -406,10 +412,14 @@ export function CreateDiscussionDialog({
                   value={form.phenomenon}
                   onValueChange={(v) => setForm((f) => ({ ...f, phenomenon: v }))}
                 >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {PHENOMENA_OPTIONS.map((p) => (
-                      <SelectItem key={p} value={p}>{p}</SelectItem>
+                      <SelectItem key={p} value={p}>
+                        {p}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -422,10 +432,14 @@ export function CreateDiscussionDialog({
                     setForm((f) => ({ ...f, visibility: v as VisibilityScope }))
                   }
                 >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {VISIBILITY_OPTIONS.map((v) => (
-                      <SelectItem key={v} value={v}>{v}</SelectItem>
+                      <SelectItem key={v} value={v}>
+                        {v}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -434,14 +448,16 @@ export function CreateDiscussionDialog({
                 <Label>Status</Label>
                 <Select
                   value={form.status}
-                  onValueChange={(v) =>
-                    setForm((f) => ({ ...f, status: v as DiscussionStatus }))
-                  }
+                  onValueChange={(v) => setForm((f) => ({ ...f, status: v as DiscussionStatus }))}
                 >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {(["Aberta", "Em análise", "Consolidada"] as DiscussionStatus[]).map((s) => (
-                      <SelectItem key={s} value={s}>{s}</SelectItem>
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -464,9 +480,7 @@ export function CreateDiscussionDialog({
                 rows={2}
                 placeholder="Qual pergunta essa discussão pretende responder?"
                 value={form.investigativeQuestion}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, investigativeQuestion: e.target.value }))
-                }
+                onChange={(e) => setForm((f) => ({ ...f, investigativeQuestion: e.target.value }))}
               />
             </div>
             <DialogFooter>
@@ -581,11 +595,19 @@ export function DiscussionDetailDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {(["Aberta", "Em análise", "Revisada", "Consolidada", "Arquivada"] as DiscussionStatus[]).map(
-                    (s) => (
-                      <SelectItem key={s} value={s}>{s}</SelectItem>
-                    ),
-                  )}
+                  {(
+                    [
+                      "Aberta",
+                      "Em análise",
+                      "Revisada",
+                      "Consolidada",
+                      "Arquivada",
+                    ] as DiscussionStatus[]
+                  ).map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {s}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -602,7 +624,9 @@ export function DiscussionDetailDialog({
                       <span className="font-medium text-foreground">{c.participant}</span> ·{" "}
                       {roleLabels[c.role]}
                     </span>
-                    <span className="font-mono">{c.type} · {c.date}</span>
+                    <span className="font-mono">
+                      {c.type} · {c.date}
+                    </span>
                   </div>
                   <p className="mt-1.5 text-[13px] leading-relaxed text-foreground">{c.text}</p>
                 </li>
@@ -628,7 +652,9 @@ export function DiscussionDetailDialog({
                 </SelectTrigger>
                 <SelectContent>
                   {(Object.keys(roleLabels) as ParticipantRole[]).map((r) => (
-                    <SelectItem key={r} value={r}>{roleLabels[r]}</SelectItem>
+                    <SelectItem key={r} value={r}>
+                      {roleLabels[r]}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -638,7 +664,9 @@ export function DiscussionDetailDialog({
                 </SelectTrigger>
                 <SelectContent>
                   {CONTRIBUTION_TYPES.map((t) => (
-                    <SelectItem key={t} value={t}>{t}</SelectItem>
+                    <SelectItem key={t} value={t}>
+                      {t}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -724,8 +752,8 @@ export function ConsolidateKnowledgeDialog({
         <DialogHeader>
           <DialogTitle>Consolidar como conhecimento</DialogTitle>
           <DialogDescription>
-            Transforme as interpretações da discussão em aprendizado consolidado para
-            projetos futuros.
+            Transforme as interpretações da discussão em aprendizado consolidado para projetos
+            futuros.
           </DialogDescription>
         </DialogHeader>
         {success ? (
@@ -736,9 +764,18 @@ export function ConsolidateKnowledgeDialog({
         ) : (
           <form onSubmit={submit} className="space-y-4">
             <div className="grid gap-2 rounded-lg border border-border bg-muted/30 p-3 text-[11.5px] text-muted-foreground sm:grid-cols-3">
-              <span><span className="font-mono uppercase tracking-wider">Domínio: </span>{discussion.domain}</span>
-              <span><span className="font-mono uppercase tracking-wider">Projeto: </span>{discussion.project ?? "—"}</span>
-              <span><span className="font-mono uppercase tracking-wider">Fenômeno: </span>{discussion.phenomenon}</span>
+              <span>
+                <span className="font-mono uppercase tracking-wider">Domínio: </span>
+                {discussion.domain}
+              </span>
+              <span>
+                <span className="font-mono uppercase tracking-wider">Projeto: </span>
+                {discussion.project ?? "—"}
+              </span>
+              <span>
+                <span className="font-mono uppercase tracking-wider">Fenômeno: </span>
+                {discussion.phenomenon}
+              </span>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="kn-title">Título do conhecimento</Label>
@@ -788,10 +825,14 @@ export function ConsolidateKnowledgeDialog({
                     setForm((f) => ({ ...f, confidence: v as KnowledgeConfidence }))
                   }
                 >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {(["Baixo", "Médio", "Alto"] as KnowledgeConfidence[]).map((v) => (
-                      <SelectItem key={v} value={v}>{v}</SelectItem>
+                      <SelectItem key={v} value={v}>
+                        {v}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -802,10 +843,14 @@ export function ConsolidateKnowledgeDialog({
                   value={form.status}
                   onValueChange={(v) => setForm((f) => ({ ...f, status: v as KnowledgeStatus }))}
                 >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {(["Proposto", "Em revisão", "Consolidado"] as KnowledgeStatus[]).map((v) => (
-                      <SelectItem key={v} value={v}>{v}</SelectItem>
+                      <SelectItem key={v} value={v}>
+                        {v}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

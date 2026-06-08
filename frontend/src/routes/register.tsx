@@ -25,8 +25,7 @@ export const Route = createFileRoute("/register")({
       { title: "Solicitar acesso — ObiOne" },
       {
         name: "description",
-        content:
-          "Solicite acesso ao ObiOne, Observatório Inteligente de Projetos.",
+        content: "Solicite acesso ao ObiOne, Observatório Inteligente de Projetos.",
       },
     ],
   }),
@@ -173,8 +172,7 @@ function RegisterPage() {
               Observar. Organizar. Decidir.
             </h1>
             <p className="mt-3 max-w-[380px] text-[13px] leading-relaxed text-muted-foreground">
-              Participe do observatório e acompanhe projetos, domínios e
-              análises estratégicas.
+              Participe do observatório e acompanhe projetos, domínios e análises estratégicas.
             </p>
           </div>
 
@@ -195,8 +193,7 @@ function RegisterPage() {
                   Solicitar acesso ao ObiOne
                 </h2>
                 <p className="mt-1 text-[12.5px] text-muted-foreground">
-                  Preencha as informações abaixo para solicitar acesso ao
-                  observatório.
+                  Preencha as informações abaixo para solicitar acesso ao observatório.
                 </p>
               </div>
 
@@ -208,9 +205,7 @@ function RegisterPage() {
                   <Input
                     id="name"
                     value={form.name}
-                    onChange={(e) =>
-                      setForm({ ...form, name: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
                     placeholder="Seu nome"
                     autoComplete="name"
                     required
@@ -226,9 +221,7 @@ function RegisterPage() {
                     id="email"
                     type="email"
                     value={form.email}
-                    onChange={(e) =>
-                      setForm({ ...form, email: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
                     placeholder="voce@empresa.com"
                     autoComplete="email"
                     required
@@ -245,9 +238,7 @@ function RegisterPage() {
                       id="password"
                       type="password"
                       value={form.password}
-                      onChange={(e) =>
-                        setForm({ ...form, password: e.target.value })
-                      }
+                      onChange={(e) => setForm({ ...form, password: e.target.value })}
                       placeholder="••••••••"
                       autoComplete="new-password"
                       required
@@ -255,10 +246,7 @@ function RegisterPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label
-                      htmlFor="confirmPassword"
-                      className="text-[12.5px]"
-                    >
+                    <Label htmlFor="confirmPassword" className="text-[12.5px]">
                       Confirmar senha
                     </Label>
                     <Input
@@ -285,9 +273,7 @@ function RegisterPage() {
                   </Label>
                   <Select
                     value={form.role}
-                    onValueChange={(v) =>
-                      setForm({ ...form, role: v as Role })
-                    }
+                    onValueChange={(v) => setForm({ ...form, role: v as Role })}
                   >
                     <SelectTrigger id="role" className="h-10">
                       <SelectValue placeholder="Selecione o perfil…" />
@@ -301,10 +287,9 @@ function RegisterPage() {
                     </SelectContent>
                   </Select>
                   <p className="text-[11px] text-muted-foreground">
-                    O perfil define o papel inicial do usuário no observatório. A
-                    participação na comunidade e o acesso a domínios e projetos são
-                    definidos posteriormente pelas permissões configuradas pelo
-                    administrador.
+                    O perfil define o papel inicial do usuário no observatório. A participação na
+                    comunidade e o acesso a domínios e projetos são definidos posteriormente pelas
+                    permissões configuradas pelo administrador.
                   </p>
                 </div>
 
@@ -314,17 +299,13 @@ function RegisterPage() {
                   </Label>
                   <Select
                     value={form.domainId}
-                    onValueChange={(v) =>
-                      setForm({ ...form, domainId: v })
-                    }
+                    onValueChange={(v) => setForm({ ...form, domainId: v })}
                     disabled={domainsLoading || domains.length === 0}
                   >
                     <SelectTrigger id="domain" className="h-10">
                       <SelectValue
                         placeholder={
-                          domainsLoading
-                            ? "Carregando domínios…"
-                            : "Selecione o domínio…"
+                          domainsLoading ? "Carregando domínios…" : "Selecione o domínio…"
                         }
                       />
                     </SelectTrigger>
@@ -337,8 +318,7 @@ function RegisterPage() {
                     </SelectContent>
                   </Select>
                   <p className="text-[11px] text-muted-foreground">
-                    Os domínios representam áreas estratégicas e contextos
-                    analíticos.
+                    Os domínios representam áreas estratégicas e contextos analíticos.
                   </p>
                 </div>
 
@@ -349,9 +329,7 @@ function RegisterPage() {
                   <Textarea
                     id="objective"
                     value={form.objective}
-                    onChange={(e) =>
-                      setForm({ ...form, objective: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, objective: e.target.value })}
                     placeholder="Descreva resumidamente seu interesse no observatório."
                     rows={3}
                     className="resize-none"
@@ -387,21 +365,15 @@ function RegisterPage() {
                 </Button>
 
                 <p className="rounded-md border border-dashed border-border bg-muted/30 px-3 py-2 text-center text-[11px] leading-relaxed text-muted-foreground">
-                  <span className="font-mono text-foreground">
-                    governança
-                  </span>{" "}
-                  · o acesso ao observatório depende do perfil selecionado, do
-                  vínculo com domínios/projetos e das permissões configuradas pelo
-                  administrador.
+                  <span className="font-mono text-foreground">governança</span> · o acesso ao
+                  observatório depende do perfil selecionado, do vínculo com domínios/projetos e das
+                  permissões configuradas pelo administrador.
                 </p>
               </form>
 
               <p className="mt-8 text-center text-[12.5px] text-muted-foreground">
                 Já possui acesso?{" "}
-                <Link
-                  to="/login"
-                  className="text-foreground underline-offset-4 hover:underline"
-                >
+                <Link to="/login" className="text-foreground underline-offset-4 hover:underline">
                   Entrar
                 </Link>
               </p>
@@ -427,9 +399,8 @@ function SuccessState({ email }: { email: string }) {
         Tudo certo. Sua solicitação foi enviada.
       </h2>
       <p className="mt-3 max-w-[380px] text-[13px] leading-relaxed text-muted-foreground">
-        Seu acesso será analisado por um administrador do domínio. Após
-        aprovação você poderá acessar os projetos e recursos vinculados ao
-        seu contexto organizacional.
+        Seu acesso será analisado por um administrador do domínio. Após aprovação você poderá
+        acessar os projetos e recursos vinculados ao seu contexto organizacional.
       </p>
 
       {email && (
@@ -438,9 +409,7 @@ function SuccessState({ email }: { email: string }) {
             status
           </p>
           <div className="mt-1.5 flex items-center justify-between gap-3">
-            <span className="truncate text-[12.5px] text-foreground">
-              {email}
-            </span>
+            <span className="truncate text-[12.5px] text-foreground">{email}</span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
               <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
               PENDING

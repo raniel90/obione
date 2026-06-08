@@ -1,4 +1,8 @@
-import type { CommunityOverview, DomainCommunitySummary, CommunityParticipant } from "@/types/community";
+import type {
+  CommunityOverview,
+  DomainCommunitySummary,
+  CommunityParticipant,
+} from "@/types/community";
 import { communityKpis, domainCommunities, participants } from "@/lib/community-data";
 import { mockDomains } from "./mockDomains";
 import { slugifyDomain } from "@/lib/community-utils";
@@ -31,7 +35,11 @@ export const mockDomainCommunities: DomainCommunitySummary[] = domainCommunities
 }));
 
 const roleMap = { admin: "ADMIN", consultor: "CONSULTANT", cliente: "CLIENT" } as const;
-const pStatusMap = { ativo: "ACTIVE", convidado: "INVITED", "aguardando-validação": "PENDING" } as const;
+const pStatusMap = {
+  ativo: "ACTIVE",
+  convidado: "INVITED",
+  "aguardando-validação": "PENDING",
+} as const;
 
 export const mockCommunityParticipants: CommunityParticipant[] = participants.map((p) => {
   const dom = mockDomains.find((d) => p.domain?.includes(d.name));

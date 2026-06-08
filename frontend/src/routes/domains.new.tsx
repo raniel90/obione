@@ -100,8 +100,8 @@ function NewDomainPage() {
             Domínio criado com sucesso.
           </h1>
           <p className="mt-2 text-[13px] text-muted-foreground">
-            “{form.name}” foi adicionado como novo contexto observacional. O observatório começará
-            a coletar evidências assim que projetos forem vinculados.
+            “{form.name}” foi adicionado como novo contexto observacional. O observatório começará a
+            coletar evidências assim que projetos forem vinculados.
           </p>
           <div className="mt-6 flex justify-center gap-2">
             <Button variant="outline" onClick={() => navigate({ to: "/domains" })}>
@@ -170,9 +170,7 @@ function NewDomainPage() {
             <select
               id="type"
               value={form.type}
-              onChange={(e) =>
-                setForm({ ...form, type: e.target.value as FormState["type"] })
-              }
+              onChange={(e) => setForm({ ...form, type: e.target.value as FormState["type"] })}
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-ring"
             >
               {domainTypeOptions.map((t) => (

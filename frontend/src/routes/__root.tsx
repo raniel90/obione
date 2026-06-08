@@ -75,16 +75,36 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "ObiOne — Observatório Inteligente de Projetos" },
-      { name: "description", content: "Observatório inteligente para gestão estratégica, branding e acompanhamento de projetos." },
+      {
+        name: "description",
+        content:
+          "Observatório inteligente para gestão estratégica, branding e acompanhamento de projetos.",
+      },
       { name: "author", content: "ObiOne" },
       { property: "og:title", content: "ObiOne — Observatório Inteligente de Projetos" },
-      { property: "og:description", content: "Observatório inteligente para gestão estratégica, branding e acompanhamento de projetos." },
+      {
+        property: "og:description",
+        content:
+          "Observatório inteligente para gestão estratégica, branding e acompanhamento de projetos.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "ObiOne — Observatório Inteligente de Projetos" },
-      { name: "twitter:description", content: "Observatório inteligente para gestão estratégica, branding e acompanhamento de projetos." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/637eb097-09ae-4aa0-8120-68302a07ea32/id-preview-259292d6--c7613174-db80-4603-8632-be06fff61700.lovable.app-1780612423331.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/637eb097-09ae-4aa0-8120-68302a07ea32/id-preview-259292d6--c7613174-db80-4603-8632-be06fff61700.lovable.app-1780612423331.png" },
+      {
+        name: "twitter:description",
+        content:
+          "Observatório inteligente para gestão estratégica, branding e acompanhamento de projetos.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/637eb097-09ae-4aa0-8120-68302a07ea32/id-preview-259292d6--c7613174-db80-4603-8632-be06fff61700.lovable.app-1780612423331.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/637eb097-09ae-4aa0-8120-68302a07ea32/id-preview-259292d6--c7613174-db80-4603-8632-be06fff61700.lovable.app-1780612423331.png",
+      },
     ],
     links: [
       {

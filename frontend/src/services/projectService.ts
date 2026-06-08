@@ -40,7 +40,8 @@ function buildUpdateBody(data: Partial<Project>) {
   if (data.type !== undefined) body.type = data.type;
   if (data.status !== undefined) body.status = data.status;
   if (data.summary !== undefined) body.summary = data.summary;
-  if (data.observationObjective !== undefined) body.observationObjective = data.observationObjective;
+  if (data.observationObjective !== undefined)
+    body.observationObjective = data.observationObjective;
   if (data.initialAttributeIds !== undefined) body.initialAttributeIds = data.initialAttributeIds;
   if (data.expectedPhenomena !== undefined) body.expectedPhenomena = data.expectedPhenomena;
   if (data.progress !== undefined) body.progress = data.progress;

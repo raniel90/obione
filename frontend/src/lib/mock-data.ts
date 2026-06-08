@@ -23,12 +23,42 @@ export interface Project {
 }
 
 export const domains: Domain[] = [
-  { id: "d1", name: "Marketing Estratégico", description: "Posicionamento, planejamento e estratégia de marca.", projectCount: 4 },
-  { id: "d2", name: "Branding", description: "Identidade, narrativa e expressão de marca.", projectCount: 3 },
-  { id: "d3", name: "Pesquisa de Mercado", description: "Investigação de público, comportamento e tendências.", projectCount: 2 },
-  { id: "d4", name: "Comunicação Digital", description: "Conteúdo, presença digital e canais.", projectCount: 3 },
-  { id: "d5", name: "Gestão Comercial", description: "Funil, performance e expansão de receita.", projectCount: 2 },
-  { id: "d6", name: "Projetos Acadêmicos", description: "Iniciativas de pesquisa aplicada e ensino.", projectCount: 1 },
+  {
+    id: "d1",
+    name: "Marketing Estratégico",
+    description: "Posicionamento, planejamento e estratégia de marca.",
+    projectCount: 4,
+  },
+  {
+    id: "d2",
+    name: "Branding",
+    description: "Identidade, narrativa e expressão de marca.",
+    projectCount: 3,
+  },
+  {
+    id: "d3",
+    name: "Pesquisa de Mercado",
+    description: "Investigação de público, comportamento e tendências.",
+    projectCount: 2,
+  },
+  {
+    id: "d4",
+    name: "Comunicação Digital",
+    description: "Conteúdo, presença digital e canais.",
+    projectCount: 3,
+  },
+  {
+    id: "d5",
+    name: "Gestão Comercial",
+    description: "Funil, performance e expansão de receita.",
+    projectCount: 2,
+  },
+  {
+    id: "d6",
+    name: "Projetos Acadêmicos",
+    description: "Iniciativas de pesquisa aplicada e ensino.",
+    projectCount: 1,
+  },
 ];
 
 export const projects: Project[] = [
@@ -38,7 +68,8 @@ export const projects: Project[] = [
     domain: "Marketing Estratégico",
     domainId: "d1",
     status: "active",
-    summary: "Reconstrução do posicionamento institucional e narrativa de mercado para audiência B2B premium.",
+    summary:
+      "Reconstrução do posicionamento institucional e narrativa de mercado para audiência B2B premium.",
     progress: 68,
     updatedAt: "2026-05-22",
     tags: ["B2B", "Posicionamento", "Premium"],
@@ -51,7 +82,8 @@ export const projects: Project[] = [
     domain: "Branding",
     domainId: "d2",
     status: "review",
-    summary: "Sistema de identidade visual completo e diretrizes de aplicação para nova marca tech.",
+    summary:
+      "Sistema de identidade visual completo e diretrizes de aplicação para nova marca tech.",
     progress: 84,
     updatedAt: "2026-05-19",
     tags: ["Visual", "Sistema", "Tech"],
@@ -64,7 +96,8 @@ export const projects: Project[] = [
     domain: "Pesquisa de Mercado",
     domainId: "d3",
     status: "active",
-    summary: "Mapeamento competitivo e análise de comportamento de compra em SaaS na América Latina.",
+    summary:
+      "Mapeamento competitivo e análise de comportamento de compra em SaaS na América Latina.",
     progress: 42,
     updatedAt: "2026-05-24",
     tags: ["SaaS", "LATAM", "Competitivo"],
