@@ -1,0 +1,19 @@
+import type { MpoAttribute } from "@/types/mpoAttribute";
+
+export const mockMpoAttributes: MpoAttribute[] = [
+  { id: "mpo-1", name: "Tipo de projeto", category: "Geral", granularity: "GENERAL", description: "Natureza estratégica, gerencial ou híbrida." },
+  { id: "mpo-2", name: "Domínio observacional", category: "Geral", granularity: "GENERAL", description: "Contexto observacional ao qual o projeto pertence." },
+  { id: "mpo-3", name: "Mudanças de escopo", category: "Escopo", granularity: "SPECIFIC", description: "Quantidade de alterações de escopo registradas." },
+  { id: "mpo-4", name: "Atraso médio de aprovação", category: "Cronograma", granularity: "SPECIFIC", description: "Tempo médio entre solicitação e aprovação." },
+  { id: "mpo-5", name: "Taxa de resposta", category: "Engajamento", granularity: "SPECIFIC", description: "Percentual de retorno em pesquisas e validações." },
+  { id: "mpo-6", name: "Custos extras", category: "Custos", granularity: "SPECIFIC", description: "Custos adicionais derivados de retrabalho ou mudança." },
+  { id: "mpo-7", name: "Validação tardia", category: "Mudanças", granularity: "SPECIFIC", description: "Validações realizadas após o ponto ótimo do ciclo." },
+  { id: "mpo-8", name: "Participação de stakeholders", category: "Stakeholders", granularity: "SPECIFIC", description: "Frequência e qualidade da participação dos stakeholders." },
+  { id: "mpo-9", name: "Qualidade dos artefatos", category: "Artefatos", granularity: "SPECIFIC", description: "Maturidade dos artefatos entregues." },
+  { id: "mpo-10", name: "Risco de atraso", category: "Riscos", granularity: "INTERMEDIATE", description: "Indicador derivado de mudanças e cronograma." },
+  { id: "mpo-11", name: "Índice de colaboração", category: "Colaboração", granularity: "INTERMEDIATE", description: "Engajamento coletivo na produção do projeto." },
+  { id: "mpo-12", name: "Transparência", category: "Transparência", granularity: "INTERMEDIATE", description: "Visibilidade dos dados e decisões do projeto." },
+  { id: "mpo-13", name: "Maturidade observacional", category: "Lições aprendidas", granularity: "INTERMEDIATE", description: "Capacidade do projeto de gerar aprendizado consolidado." },
+  { id: "mpo-14", name: "Cadência de comunicação", category: "Comunicação", granularity: "SPECIFIC", description: "Frequência de comunicação entre as partes." },
+  { id: "mpo-15", name: "Qualidade do briefing", category: "Qualidade", granularity: "SPECIFIC", description: "Clareza e completude do briefing inicial." },
+];

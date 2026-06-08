@@ -10,15 +10,14 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
-/** Read the persisted theme — matches the pre-paint script in index.html so the
- * first render agrees with the class already on <html> (no flash). */
-function getInitialTheme(): Theme {
-  if (typeof window === "undefined") return "dark";
-  return (localStorage.getItem("obione-theme") as Theme | null) ?? "dark";
-}
-
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>(getInitialTheme);
+  const [theme, setThemeState] = useState<Theme>("dark");
+
+  useEffect(() => {
+    const stored = (typeof window !== "undefined" && localStorage.getItem("obione-theme")) as Theme | null;
+    const initial: Theme = stored ?? "dark";
+    setThemeState(initial);
+  }, []);
 
   useEffect(() => {
     const root = document.documentElement;
