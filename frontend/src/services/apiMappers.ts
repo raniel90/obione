@@ -39,11 +39,7 @@ import type {
   DomainCommunityStatusCode,
   DomainCommunitySummary,
 } from "@/types/community";
-import type {
-  Knowledge,
-  KnowledgeConfidenceCode,
-  KnowledgeStatusCode,
-} from "@/types/knowledge";
+import type { Knowledge, KnowledgeConfidenceCode, KnowledgeStatusCode } from "@/types/knowledge";
 import type { ProfileCode, User, UserStatus } from "@/types/user";
 
 /** Raw shapes returned by the Spring Boot API. */
@@ -537,7 +533,8 @@ export function mapCommunityParticipantToLegacyTable(
     name: dto.name,
     role: roleMap[dto.profileCode],
     domain: domainName,
-    participation: (participationByProfile[dto.profileCode] ?? "Acompanhamento") as import("@/lib/community-data").ParticipationType,
+    participation: (participationByProfile[dto.profileCode] ??
+      "Acompanhamento") as import("@/lib/community-data").ParticipationType,
     status: "ativo",
   };
 }

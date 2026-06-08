@@ -102,7 +102,11 @@ export interface ProjectObservatory {
   kpis: ProjectKpi[];
   generalAttrs: { label: string; value: string }[];
   specificAttrs: { label: string; value: string }[];
-  intermediateAttrs: { label: string; value: string; tone?: "warning" | "success" | "danger" | "info" }[];
+  intermediateAttrs: {
+    label: string;
+    value: string;
+    tone?: "warning" | "success" | "danger" | "info";
+  }[];
   phenomena: ProjectPhenomenon[];
   artifacts: ProjectArtifact[];
   observations: ProjectObservation[];
@@ -176,13 +180,62 @@ const base: ProjectObservatory = {
     },
   ],
   artifacts: [
-    { id: "a1", name: "Briefing inicial", type: "Briefing", uploadedAt: "2026-02-12", owner: "Cliente Athos", status: "analisado" },
-    { id: "a2", name: "Proposta comercial", type: "Proposta", uploadedAt: "2026-02-14", owner: "Lucas Martins", status: "revisado" },
-    { id: "a3", name: "Cronograma estratégico", type: "Cronograma", uploadedAt: "2026-02-20", owner: "Lucas Martins", status: "analisado" },
-    { id: "a4", name: "Ata reunião kickoff", type: "Ata", uploadedAt: "2026-02-22", owner: "Ana Coelho", status: "analisado" },
-    { id: "a5", name: "Relatório de pesquisa de mercado", type: "Relatório", uploadedAt: "2026-03-08", owner: "Marina Reis", status: "revisado" },
-    { id: "a6", name: "Plano de marketing v2", type: "Plano", uploadedAt: "2026-04-02", owner: "Lucas Martins", status: "pendente" },
-    { id: "a7", name: "Lições aprendidas — ciclo 1", type: "Aprendizado", uploadedAt: "2026-04-28", owner: "Ana Coelho", status: "pendente" },
+    {
+      id: "a1",
+      name: "Briefing inicial",
+      type: "Briefing",
+      uploadedAt: "2026-02-12",
+      owner: "Cliente Athos",
+      status: "analisado",
+    },
+    {
+      id: "a2",
+      name: "Proposta comercial",
+      type: "Proposta",
+      uploadedAt: "2026-02-14",
+      owner: "Lucas Martins",
+      status: "revisado",
+    },
+    {
+      id: "a3",
+      name: "Cronograma estratégico",
+      type: "Cronograma",
+      uploadedAt: "2026-02-20",
+      owner: "Lucas Martins",
+      status: "analisado",
+    },
+    {
+      id: "a4",
+      name: "Ata reunião kickoff",
+      type: "Ata",
+      uploadedAt: "2026-02-22",
+      owner: "Ana Coelho",
+      status: "analisado",
+    },
+    {
+      id: "a5",
+      name: "Relatório de pesquisa de mercado",
+      type: "Relatório",
+      uploadedAt: "2026-03-08",
+      owner: "Marina Reis",
+      status: "revisado",
+    },
+    {
+      id: "a6",
+      name: "Plano de marketing v2",
+      type: "Plano",
+      uploadedAt: "2026-04-02",
+      owner: "Lucas Martins",
+      status: "pendente",
+    },
+    {
+      id: "a7",
+      name: "Lições aprendidas — ciclo 1",
+      type: "Aprendizado",
+      uploadedAt: "2026-04-28",
+      owner: "Ana Coelho",
+      status: "pendente",
+    },
   ],
   observations: [
     {
@@ -232,14 +285,41 @@ const base: ProjectObservatory = {
     },
   ],
   participants: [
-    { name: "Lucas Martins", role: "Consultor", responsibility: "Responsável pela análise observacional" },
-    { name: "Cliente Athos Capital", role: "Cliente", responsibility: "Validação, feedback e contexto de negócio" },
-    { name: "Ana Coelho", role: "Administrador", responsibility: "Governança e curadoria do observatório" },
+    {
+      name: "Lucas Martins",
+      role: "Consultor",
+      responsibility: "Responsável pela análise observacional",
+    },
+    {
+      name: "Cliente Athos Capital",
+      role: "Cliente",
+      responsibility: "Validação, feedback e contexto de negócio",
+    },
+    {
+      name: "Ana Coelho",
+      role: "Administrador",
+      responsibility: "Governança e curadoria do observatório",
+    },
   ],
   discussions: [
-    { id: "d1", question: "As mudanças de escopo surgiram após validação tardia?", contributions: 6, status: "em análise" },
-    { id: "d2", question: "O cliente participou suficientemente da fase inicial?", contributions: 4, status: "aberta" },
-    { id: "d3", question: "Quais artefatos explicam o aumento de retrabalho?", contributions: 9, status: "consolidada" },
+    {
+      id: "d1",
+      question: "As mudanças de escopo surgiram após validação tardia?",
+      contributions: 6,
+      status: "em análise",
+    },
+    {
+      id: "d2",
+      question: "O cliente participou suficientemente da fase inicial?",
+      contributions: 4,
+      status: "aberta",
+    },
+    {
+      id: "d3",
+      question: "Quais artefatos explicam o aumento de retrabalho?",
+      contributions: 9,
+      status: "consolidada",
+    },
   ],
   insights: [
     {
@@ -268,13 +348,55 @@ const base: ProjectObservatory = {
     },
   ],
   timeline: [
-    { id: "t1", date: "2026-02-10", type: "cadastro", description: "Projeto cadastrado no observatório", actor: "Ana Coelho" },
-    { id: "t2", date: "2026-02-12", type: "briefing", description: "Briefing inicial enviado pelo cliente", actor: "Cliente Athos" },
-    { id: "t3", date: "2026-02-22", type: "artefato", description: "Ata de kickoff analisada pelo consultor", actor: "Lucas Martins" },
-    { id: "t4", date: "2026-03-15", type: "escopo", description: "Primeira mudança de escopo registrada", actor: "Cliente Athos" },
-    { id: "t5", date: "2026-04-02", type: "discussão", description: "Discussão sobre retrabalho criativo iniciada", actor: "Comunidade" },
-    { id: "t6", date: "2026-04-20", type: "insight", description: "Insight consolidado sobre engajamento do cliente", actor: "Observatório" },
-    { id: "t7", date: "2026-05-22", type: "risco", description: "Risco atualizado para nível moderado", actor: "Observatório" },
+    {
+      id: "t1",
+      date: "2026-02-10",
+      type: "cadastro",
+      description: "Projeto cadastrado no observatório",
+      actor: "Ana Coelho",
+    },
+    {
+      id: "t2",
+      date: "2026-02-12",
+      type: "briefing",
+      description: "Briefing inicial enviado pelo cliente",
+      actor: "Cliente Athos",
+    },
+    {
+      id: "t3",
+      date: "2026-02-22",
+      type: "artefato",
+      description: "Ata de kickoff analisada pelo consultor",
+      actor: "Lucas Martins",
+    },
+    {
+      id: "t4",
+      date: "2026-03-15",
+      type: "escopo",
+      description: "Primeira mudança de escopo registrada",
+      actor: "Cliente Athos",
+    },
+    {
+      id: "t5",
+      date: "2026-04-02",
+      type: "discussão",
+      description: "Discussão sobre retrabalho criativo iniciada",
+      actor: "Comunidade",
+    },
+    {
+      id: "t6",
+      date: "2026-04-20",
+      type: "insight",
+      description: "Insight consolidado sobre engajamento do cliente",
+      actor: "Observatório",
+    },
+    {
+      id: "t7",
+      date: "2026-05-22",
+      type: "risco",
+      description: "Risco atualizado para nível moderado",
+      actor: "Observatório",
+    },
   ],
   domainContext:
     "Este projeto pertence ao domínio Marketing Estratégico. Os fenômenos observados aqui contribuem para o entendimento de padrões em projetos de posicionamento, estratégia e planejamento de marca.",

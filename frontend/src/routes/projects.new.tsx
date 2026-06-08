@@ -32,15 +32,13 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-
 export const Route = createFileRoute("/projects/new")({
   head: () => ({
     meta: [
       { title: "Novo projeto — ObiOne" },
       {
         name: "description",
-        content:
-          "Cadastre um projeto como caso observado dentro de um domínio organizacional.",
+        content: "Cadastre um projeto como caso observado dentro de um domínio organizacional.",
       },
     ],
   }),
@@ -48,12 +46,7 @@ export const Route = createFileRoute("/projects/new")({
 });
 
 type ProjectModel = "Estratégico" | "Gerencial" | "Híbrido";
-type ProjectStatus =
-  | "em-observação"
-  | "planejado"
-  | "em-andamento"
-  | "em-risco"
-  | "concluído";
+type ProjectStatus = "em-observação" | "planejado" | "em-andamento" | "em-risco" | "concluído";
 
 const STATUS: { value: ProjectStatus; label: string }[] = [
   { value: "em-observação", label: "Em observação" },
@@ -135,22 +128,20 @@ function NewProjectPage() {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([
-      getDomains(),
-      getUsersByProfile("CLIENT"),
-      getUsersByProfile("CONSULTANT"),
-    ]).then(([domainList, clientList, consultantList]) => {
-      if (cancelled) return;
-      setDomains(domainList);
-      setClients(clientList);
-      setConsultants(consultantList);
-      setForm((f) => ({
-        ...f,
-        domainId: f.domainId || domainList[0]?.id || "",
-        clientId: f.clientId || clientList[0]?.id || "",
-        consultantId: f.consultantId || consultantList[0]?.id || "",
-      }));
-    });
+    Promise.all([getDomains(), getUsersByProfile("CLIENT"), getUsersByProfile("CONSULTANT")]).then(
+      ([domainList, clientList, consultantList]) => {
+        if (cancelled) return;
+        setDomains(domainList);
+        setClients(clientList);
+        setConsultants(consultantList);
+        setForm((f) => ({
+          ...f,
+          domainId: f.domainId || domainList[0]?.id || "",
+          clientId: f.clientId || clientList[0]?.id || "",
+          consultantId: f.consultantId || consultantList[0]?.id || "",
+        }));
+      },
+    );
     return () => {
       cancelled = true;
     };
@@ -167,22 +158,16 @@ function NewProjectPage() {
   const toggleArray = (key: "attributes" | "phenomena", value: string) =>
     setForm((f) => ({
       ...f,
-      [key]: f[key].includes(value)
-        ? f[key].filter((v) => v !== value)
-        : [...f[key], value],
+      [key]: f[key].includes(value) ? f[key].filter((v) => v !== value) : [...f[key], value],
     }));
 
   const addArtifact = () => {
     if (!artifactDraft.name.trim()) return;
-    setArtifacts((list) => [
-      ...list,
-      { id: crypto.randomUUID(), ...artifactDraft },
-    ]);
+    setArtifacts((list) => [...list, { id: crypto.randomUUID(), ...artifactDraft }]);
     setArtifactDraft({ name: "", type: ARTIFACT_TYPES[0], description: "" });
   };
 
-  const removeArtifact = (id: string) =>
-    setArtifacts((list) => list.filter((a) => a.id !== id));
+  const removeArtifact = (id: string) => setArtifacts((list) => list.filter((a) => a.id !== id));
 
   const addParticipant = () => {
     if (!newParticipant.trim()) return;
@@ -233,7 +218,6 @@ function NewProjectPage() {
     setTimeout(() => navigate({ to: "/projects/$id", params: { id: created.id } }), 1800);
   };
 
-
   if (submitted) {
     return (
       <AppShell>
@@ -280,9 +264,8 @@ function NewProjectPage() {
               <Telescope className="h-4 w-4 text-foreground" />
             </div>
             <p className="max-w-2xl text-[12.5px] leading-relaxed text-muted-foreground">
-              Cada projeto cadastrado alimenta o observatório com atributos,
-              artefatos, fenômenos e observações que serão utilizados para
-              produzir conhecimento.
+              Cada projeto cadastrado alimenta o observatório com atributos, artefatos, fenômenos e
+              observações que serão utilizados para produzir conhecimento.
             </p>
           </div>
         </div>
@@ -308,10 +291,14 @@ function NewProjectPage() {
                 value={form.domainId}
                 onValueChange={(v) => setForm({ ...form, domainId: v })}
               >
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {domains.map((d) => (
-                    <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                    <SelectItem key={d.id} value={d.id}>
+                      {d.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -321,10 +308,14 @@ function NewProjectPage() {
                 value={form.clientId}
                 onValueChange={(v) => setForm({ ...form, clientId: v })}
               >
-                <SelectTrigger><SelectValue placeholder="Selecione o cliente" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o cliente" />
+                </SelectTrigger>
                 <SelectContent>
                   {clients.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -334,10 +325,14 @@ function NewProjectPage() {
                 value={form.consultantId}
                 onValueChange={(v) => setForm({ ...form, consultantId: v })}
               >
-                <SelectTrigger><SelectValue placeholder="Selecione o consultor" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o consultor" />
+                </SelectTrigger>
                 <SelectContent>
                   {consultants.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -347,7 +342,9 @@ function NewProjectPage() {
                 value={form.model}
                 onValueChange={(v) => setForm({ ...form, model: v as ProjectModel })}
               >
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Estratégico">Estratégico</SelectItem>
                   <SelectItem value="Gerencial">Gerencial</SelectItem>
@@ -360,10 +357,14 @@ function NewProjectPage() {
                 value={form.status}
                 onValueChange={(v) => setForm({ ...form, status: v as ProjectStatus })}
               >
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {STATUS.map((s) => (
-                    <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                    <SelectItem key={s.value} value={s.value}>
+                      {s.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -554,10 +555,14 @@ function NewProjectPage() {
                   value={artifactDraft.type}
                   onValueChange={(v) => setArtifactDraft({ ...artifactDraft, type: v })}
                 >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {ARTIFACT_TYPES.map((t) => (
-                      <SelectItem key={t} value={t}>{t}</SelectItem>
+                      <SelectItem key={t} value={t}>
+                        {t}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -566,7 +571,9 @@ function NewProjectPage() {
             <Field label="Descrição curta" className="mt-3">
               <Input
                 value={artifactDraft.description}
-                onChange={(e) => setArtifactDraft({ ...artifactDraft, description: e.target.value })}
+                onChange={(e) =>
+                  setArtifactDraft({ ...artifactDraft, description: e.target.value })
+                }
                 placeholder="Resumo do conteúdo do artefato."
               />
             </Field>
@@ -617,9 +624,7 @@ function Section({
           <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
             // {eyebrow}
           </p>
-          <h2 className="mt-1 text-[15px] font-semibold tracking-tight text-foreground">
-            {title}
-          </h2>
+          <h2 className="mt-1 text-[15px] font-semibold tracking-tight text-foreground">{title}</h2>
           {description && (
             <p className="mt-1 max-w-2xl text-[12.5px] leading-relaxed text-muted-foreground">
               {description}

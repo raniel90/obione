@@ -6,7 +6,8 @@ export const mockPhenomena: Phenomenon[] = [
     domainId: "d1",
     projectId: "p1",
     name: "Instabilidade de posicionamento em projetos com baixa validação inicial",
-    description: "Projetos estratégicos sem rito de validação inicial concentram ajustes recorrentes de posicionamento.",
+    description:
+      "Projetos estratégicos sem rito de validação inicial concentram ajustes recorrentes de posicionamento.",
     evidenceCount: 7,
     relatedAttributeIds: ["mpo-3", "mpo-1"],
     impact: "HIGH",
@@ -18,7 +19,8 @@ export const mockPhenomena: Phenomenon[] = [
     domainId: "d2",
     projectId: "p2",
     name: "Mudança recorrente de escopo após validação tardia",
-    description: "Projetos de Branding apresentam alterações de escopo após validação tardia do cliente.",
+    description:
+      "Projetos de Branding apresentam alterações de escopo após validação tardia do cliente.",
     evidenceCount: 8,
     relatedAttributeIds: ["mpo-7"],
     impact: "MEDIUM",
@@ -30,7 +32,8 @@ export const mockPhenomena: Phenomenon[] = [
     domainId: "d3",
     projectId: "p3",
     name: "Baixa taxa de resposta antecipa atrasos em pesquisa",
-    description: "Pesquisas com taxa de resposta abaixo de 30% nas duas primeiras semanas atrasam consolidação.",
+    description:
+      "Pesquisas com taxa de resposta abaixo de 30% nas duas primeiras semanas atrasam consolidação.",
     evidenceCount: 4,
     relatedAttributeIds: ["mpo-5"],
     impact: "HIGH",

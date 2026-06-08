@@ -1,4 +1,9 @@
-import type { Discussion, DiscussionStatusCode, DiscussionVisibility, ContributionType } from "@/types/discussion";
+import type {
+  Discussion,
+  DiscussionStatusCode,
+  DiscussionVisibility,
+  ContributionType,
+} from "@/types/discussion";
 import { discussions as legacyDiscussions } from "@/lib/community-data";
 import { mockDomains } from "./mockDomains";
 

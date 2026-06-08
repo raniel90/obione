@@ -224,18 +224,26 @@ function CommunityPage() {
                 camada sociotécnica
               </p>
               <p className="mt-1.5 max-w-3xl text-[12.5px] leading-relaxed text-muted-foreground">
-                A comunidade no ObiOne é organizada por domínio. Cada comunidade reúne
-                participantes que interpretam fenômenos, discutem evidências e
-                transformam observações em conhecimento coletivo.
+                A comunidade no ObiOne é organizada por domínio. Cada comunidade reúne participantes
+                que interpretam fenômenos, discutem evidências e transformam observações em
+                conhecimento coletivo.
               </p>
               <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
-                <span className="rounded-md border border-border bg-background px-2 py-0.5">Comunidade geral</span>
+                <span className="rounded-md border border-border bg-background px-2 py-0.5">
+                  Comunidade geral
+                </span>
                 <ArrowRight className="h-3 w-3" />
-                <span className="rounded-md border border-border bg-background px-2 py-0.5">Comunidade por domínio</span>
+                <span className="rounded-md border border-border bg-background px-2 py-0.5">
+                  Comunidade por domínio
+                </span>
                 <ArrowRight className="h-3 w-3" />
-                <span className="rounded-md border border-border bg-background px-2 py-0.5">Discussões observacionais</span>
+                <span className="rounded-md border border-border bg-background px-2 py-0.5">
+                  Discussões observacionais
+                </span>
                 <ArrowRight className="h-3 w-3" />
-                <span className="rounded-md border border-foreground/30 bg-foreground px-2 py-0.5 text-background">Conhecimento produzido</span>
+                <span className="rounded-md border border-foreground/30 bg-foreground px-2 py-0.5 text-background">
+                  Conhecimento produzido
+                </span>
               </div>
             </div>
           </div>
@@ -246,14 +254,26 @@ function CommunityPage() {
           <SectionLabel>// indicadores globais</SectionLabel>
           <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-5">
             <KpiCard label="Comunidades ativas" value={overview.activeCommunities} icon={Layers} />
-            <KpiCard label="Participantes autorizados" value={overview.authorizedParticipants} icon={Users} />
-            <KpiCard label="Discussões observacionais" value={overview.observationalDiscussions} icon={MessageSquare} />
+            <KpiCard
+              label="Participantes autorizados"
+              value={overview.authorizedParticipants}
+              icon={Users}
+            />
+            <KpiCard
+              label="Discussões observacionais"
+              value={overview.observationalDiscussions}
+              icon={MessageSquare}
+            />
             <KpiCard
               label="Conhecimentos consolidados"
               value={consolidatedKnowledgeCount}
               icon={BookOpen}
             />
-            <KpiCard label="Contribuições recentes" value={overview.recentContributions} icon={Activity} />
+            <KpiCard
+              label="Contribuições recentes"
+              value={overview.recentContributions}
+              icon={Activity}
+            />
           </div>
         </section>
 
@@ -266,8 +286,8 @@ function CommunityPage() {
                 Comunidades por domínio
               </h2>
               <p className="mt-1 max-w-2xl text-[12.5px] text-muted-foreground">
-                Cada domínio possui sua própria comunidade observacional. Acesse para
-                ver participantes, discussões e conhecimento produzido.
+                Cada domínio possui sua própria comunidade observacional. Acesse para ver
+                participantes, discussões e conhecimento produzido.
               </p>
             </div>
             <span className="font-mono text-[11px] text-muted-foreground">

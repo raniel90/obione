@@ -8,7 +8,9 @@ function toOptionalId(value: string | undefined): number | undefined {
   return Number.isFinite(parsed) ? parsed : undefined;
 }
 
-function buildCreateBody(data: Omit<Observation, "id" | "projectId" | "createdAt" | "createdByName">) {
+function buildCreateBody(
+  data: Omit<Observation, "id" | "projectId" | "createdAt" | "createdByName">,
+) {
   const body: Record<string, unknown> = {
     title: data.title,
     description: data.description,

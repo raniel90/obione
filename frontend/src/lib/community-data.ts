@@ -34,12 +34,7 @@ export interface CommunityParticipant {
   status: ParticipantStatus;
 }
 
-export type DiscussionStatus =
-  | "Aberta"
-  | "Em análise"
-  | "Revisada"
-  | "Consolidada"
-  | "Arquivada";
+export type DiscussionStatus = "Aberta" | "Em análise" | "Revisada" | "Consolidada" | "Arquivada";
 export type VisibilityScope =
   | "Comunidade do domínio"
   | "Participantes do projeto"
@@ -132,8 +127,7 @@ export const domainCommunities: DomainCommunity[] = [
     id: "c2",
     domainId: "d2",
     domain: "Branding",
-    description:
-      "Comunidade voltada à análise de identidade, narrativa e expressão de marca.",
+    description: "Comunidade voltada à análise de identidade, narrativa e expressão de marca.",
     participants: 8,
     linkedProjects: 3,
     discussions: 6,
@@ -144,8 +138,7 @@ export const domainCommunities: DomainCommunity[] = [
     id: "c3",
     domainId: "d3",
     domain: "Pesquisa de Mercado",
-    description:
-      "Comunidade voltada à análise de público, comportamento, respostas e tendências.",
+    description: "Comunidade voltada à análise de público, comportamento, respostas e tendências.",
     participants: 5,
     linkedProjects: 2,
     discussions: 3,
@@ -156,8 +149,7 @@ export const domainCommunities: DomainCommunity[] = [
     id: "c4",
     domainId: "d4",
     domain: "Comunicação Digital",
-    description:
-      "Comunidade voltada à análise de campanhas, canais, conteúdo e presença digital.",
+    description: "Comunidade voltada à análise de campanhas, canais, conteúdo e presença digital.",
     participants: 6,
     linkedProjects: 3,
     discussions: 4,
@@ -186,12 +178,54 @@ export const communityStatusLabels: Record<CommunityStatus, string> = {
 
 export const participants: CommunityParticipant[] = [
   { id: "p1", name: "Ana Coelho", role: "admin", participation: "Governança", status: "ativo" },
-  { id: "p2", name: "Lucas Martins", role: "consultor", domain: "Marketing Estratégico · Branding", participation: "Interpretação", status: "ativo" },
-  { id: "p3", name: "Marina Reis", role: "consultor", domain: "Pesquisa de Mercado", participation: "Curadoria", status: "ativo" },
-  { id: "p4", name: "Pedro Almeida", role: "consultor", domain: "Comunicação Digital", participation: "Interpretação", status: "ativo" },
-  { id: "p5", name: "Cliente Athos Capital", role: "cliente", project: "Reposicionamento Athos Capital", participation: "Feedback", status: "ativo" },
-  { id: "p6", name: "Cliente Norvik", role: "cliente", project: "Identidade Visual Norvik", participation: "Validação", status: "convidado" },
-  { id: "p7", name: "Cliente LATAM", role: "cliente", project: "Panorama Setor SaaS LATAM", participation: "Acompanhamento", status: "aguardando-validação" },
+  {
+    id: "p2",
+    name: "Lucas Martins",
+    role: "consultor",
+    domain: "Marketing Estratégico · Branding",
+    participation: "Interpretação",
+    status: "ativo",
+  },
+  {
+    id: "p3",
+    name: "Marina Reis",
+    role: "consultor",
+    domain: "Pesquisa de Mercado",
+    participation: "Curadoria",
+    status: "ativo",
+  },
+  {
+    id: "p4",
+    name: "Pedro Almeida",
+    role: "consultor",
+    domain: "Comunicação Digital",
+    participation: "Interpretação",
+    status: "ativo",
+  },
+  {
+    id: "p5",
+    name: "Cliente Athos Capital",
+    role: "cliente",
+    project: "Reposicionamento Athos Capital",
+    participation: "Feedback",
+    status: "ativo",
+  },
+  {
+    id: "p6",
+    name: "Cliente Norvik",
+    role: "cliente",
+    project: "Identidade Visual Norvik",
+    participation: "Validação",
+    status: "convidado",
+  },
+  {
+    id: "p7",
+    name: "Cliente LATAM",
+    role: "cliente",
+    project: "Panorama Setor SaaS LATAM",
+    participation: "Acompanhamento",
+    status: "aguardando-validação",
+  },
 ];
 
 export const participantStatusLabels: Record<ParticipantStatus, string> = {
@@ -287,10 +321,8 @@ export const discussions: Discussion[] = [
     domain: "Comunicação Digital",
     project: "Campanha Lançamento Orion",
     phenomenon: "Volatilidade de requisitos",
-    originObservation:
-      "Três versões de roteiro foram solicitadas em menos de duas semanas.",
-    investigativeQuestion:
-      "Quais sinais antecipam o risco de retrabalho em campanhas multicanal?",
+    originObservation: "Três versões de roteiro foram solicitadas em menos de duas semanas.",
+    investigativeQuestion: "Quais sinais antecipam o risco de retrabalho em campanhas multicanal?",
     contributions: 6,
     lastParticipant: "Pedro Almeida",
     status: "Revisada",
@@ -314,8 +346,7 @@ export const discussions: Discussion[] = [
     phenomenon: "Atraso em validações",
     originObservation:
       "Taxa de resposta da pesquisa ficou 28% abaixo do projetado nas duas primeiras semanas.",
-    investigativeQuestion:
-      "A baixa taxa de resposta explica os atrasos em projetos de pesquisa?",
+    investigativeQuestion: "A baixa taxa de resposta explica os atrasos em projetos de pesquisa?",
     contributions: 4,
     lastParticipant: "Marina Reis",
     status: "Consolidada",
@@ -360,8 +391,7 @@ export const communityKnowledge: CommunityKnowledge[] = [
       "Projetos de Branding apresentam maior retrabalho quando o cliente valida artefatos criativos apenas no fim do ciclo.",
     evidences:
       "8 alterações de escopo após aprovação inicial em 3 projetos consecutivos do domínio.",
-    recommendation:
-      "Antecipar validações intermediárias e registrar critérios de aceite criativo.",
+    recommendation: "Antecipar validações intermediárias e registrar critérios de aceite criativo.",
     confidence: "Médio",
     status: "Em revisão",
     originDiscussion: "ds1",
@@ -374,10 +404,8 @@ export const communityKnowledge: CommunityKnowledge[] = [
     phenomenon: "Atraso em validações",
     summary:
       "Pesquisas com taxa de resposta abaixo de 30% nas duas primeiras semanas apresentam alto risco de atraso na consolidação dos resultados.",
-    evidences:
-      "Histórico de 4 projetos com defasagem média de 11 dias na entrega final.",
-    recommendation:
-      "Planejar reforços de coleta e amostras complementares já na semana 1.",
+    evidences: "Histórico de 4 projetos com defasagem média de 11 dias na entrega final.",
+    recommendation: "Planejar reforços de coleta e amostras complementares já na semana 1.",
     confidence: "Alto",
     status: "Consolidado",
     originDiscussion: "ds4",
@@ -397,8 +425,7 @@ export const collaborativeInsights: CollaborativeInsight[] = [
   },
   {
     id: "ci2",
-    narrative:
-      "Campanhas multicanal demonstraram maior volatilidade de requisitos.",
+    narrative: "Campanhas multicanal demonstraram maior volatilidade de requisitos.",
     domain: "Comunicação Digital",
     evidences: 7,
     confidence: 0.71,
@@ -407,8 +434,7 @@ export const collaborativeInsights: CollaborativeInsight[] = [
   },
   {
     id: "ci3",
-    narrative:
-      "Projetos com artefatos bem documentados apresentaram maior transparência.",
+    narrative: "Projetos com artefatos bem documentados apresentaram maior transparência.",
     domain: "Transversal",
     evidences: 11,
     confidence: 0.78,

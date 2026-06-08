@@ -5,7 +5,8 @@ export const mockObservations: Observation[] = [
     id: "obs-1",
     projectId: "p1",
     title: "Cliente postergou rito de validação inicial",
-    description: "A validação estratégica foi remarcada duas vezes, alongando o ciclo de aprovação em 7 dias.",
+    description:
+      "A validação estratégica foi remarcada duas vezes, alongando o ciclo de aprovação em 7 dias.",
     attributeId: "mpo-3",
     phenomenonId: "ph-d1-1",
     impact: "HIGH",
@@ -19,7 +20,8 @@ export const mockObservations: Observation[] = [
     id: "obs-2",
     projectId: "p2",
     title: "Nova solicitação de alteração visual após aprovação",
-    description: "Diretoria do cliente pediu revisão dos materiais já aprovados pelo time criativo.",
+    description:
+      "Diretoria do cliente pediu revisão dos materiais já aprovados pelo time criativo.",
     attributeId: "mpo-7",
     impact: "MEDIUM",
     risk: "MODERATE",

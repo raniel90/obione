@@ -85,7 +85,6 @@ export const Route = createFileRoute("/")({
   component: ObservatoryDashboard,
 });
 
-
 /* ----------------------------- Camada 1: KPIs ----------------------------- */
 
 function ObservationalKpi({
@@ -112,9 +111,7 @@ function ObservationalKpi({
           <span className="text-2xl font-semibold tracking-tight text-foreground">{value}</span>
           {hint && <span className="text-[11px] text-muted-foreground">{hint}</span>}
         </div>
-        {trend && (
-          <Sparkline data={trend} className="text-foreground/70" width={70} height={22} />
-        )}
+        {trend && <Sparkline data={trend} className="text-foreground/70" width={70} height={22} />}
       </div>
     </div>
   );
@@ -360,9 +357,6 @@ function ObservatoryDashboard() {
   const active = projects.filter((p) => p.status === "active").length;
   const completed = projects.filter((p) => p.status === "completed").length;
 
-
-
-
   return (
     <AppShell>
       <PageHeader
@@ -452,10 +446,7 @@ function ObservatoryDashboard() {
 
           {/* CAMADA 4 — Últimas Observações */}
           <aside>
-            <SectionHeader
-              eyebrow="Camada 4 · Feed"
-              title="Últimas observações"
-            />
+            <SectionHeader eyebrow="Camada 4 · Feed" title="Últimas observações" />
             <div className="mt-4 rounded-xl border border-border bg-card">
               <ul className="divide-y divide-border px-4">
                 {observations.map((o) => (
@@ -480,23 +471,27 @@ function ObservatoryDashboard() {
 
           {/* Pipeline visual */}
           <div className="mt-4 hidden items-center gap-2 rounded-xl border border-border bg-card p-3 text-[11px] text-muted-foreground md:flex">
-            {["Dados brutos", "Atributos gerais", "Atributos específicos", "Atributos intermediários", "Conhecimento coletivo"].map(
-              (step, idx, arr) => (
-                <div key={step} className="flex items-center gap-2">
-                  <span
-                    className={cn(
-                      "rounded-md border px-2 py-1 font-mono uppercase tracking-wider",
-                      idx === arr.length - 1
-                        ? "border-foreground/30 bg-foreground text-background"
-                        : "border-border bg-background",
-                    )}
-                  >
-                    {step}
-                  </span>
-                  {idx < arr.length - 1 && <ArrowRight className="h-3 w-3" />}
-                </div>
-              ),
-            )}
+            {[
+              "Dados brutos",
+              "Atributos gerais",
+              "Atributos específicos",
+              "Atributos intermediários",
+              "Conhecimento coletivo",
+            ].map((step, idx, arr) => (
+              <div key={step} className="flex items-center gap-2">
+                <span
+                  className={cn(
+                    "rounded-md border px-2 py-1 font-mono uppercase tracking-wider",
+                    idx === arr.length - 1
+                      ? "border-foreground/30 bg-foreground text-background"
+                      : "border-border bg-background",
+                  )}
+                >
+                  {step}
+                </span>
+                {idx < arr.length - 1 && <ArrowRight className="h-3 w-3" />}
+              </div>
+            ))}
           </div>
 
           <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">

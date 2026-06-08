@@ -1,4 +1,10 @@
-import type { Project, ProjectStatusCode, ProjectTypeCode, RiskLevel, EngagementLevel } from "@/types/project";
+import type {
+  Project,
+  ProjectStatusCode,
+  ProjectTypeCode,
+  RiskLevel,
+  EngagementLevel,
+} from "@/types/project";
 import { projects as legacyProjects } from "@/lib/mock-data";
 
 const statusMap: Record<string, ProjectStatusCode> = {

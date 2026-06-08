@@ -16,7 +16,12 @@ export interface Phenomenon {
 
 export interface Insight {
   id: string;
-  category: "Tendência emergente" | "Padrão identificado" | "Análise textual" | "Resumo automático" | "Comunidade";
+  category:
+    | "Tendência emergente"
+    | "Padrão identificado"
+    | "Análise textual"
+    | "Resumo automático"
+    | "Comunidade";
   narrative: string;
   signal: string;
   confidence: number; // 0..1
@@ -139,12 +144,54 @@ export const insights: Insight[] = [
 ];
 
 export const observations: Observation[] = [
-  { id: "ob1", type: "discussão", text: "Nova discussão observacional criada no domínio Branding.", actor: "Lucas Martins", domain: "Branding", timeAgo: "há 10 min" },
-  { id: "ob2", type: "descoberta", text: "Conhecimento consolidado sobre baixa participação do cliente.", actor: "Ana Coelho", domain: "Marketing Estratégico", timeAgo: "há 40 min" },
-  { id: "ob3", type: "padrão", text: "Comunidade validou padrão de retrabalho em Branding.", actor: "Comunidade · Branding", domain: "Branding", timeAgo: "há 1 h" },
-  { id: "ob4", type: "revisão", text: "Discussão sobre atraso em Pesquisa de Mercado entrou em análise.", actor: "Marina Reis", domain: "Pesquisa de Mercado", timeAgo: "há 2 h" },
-  { id: "ob5", type: "descoberta", text: "Insight colaborativo publicado em Comunicação Digital.", actor: "Pedro Almeida", domain: "Comunicação Digital", timeAgo: "há 3 h" },
-  { id: "ob6", type: "alerta", text: "Projeto Identidade Visual Norvik teve risco atualizado para Moderado.", actor: "Ana Coelho", domain: "Branding", timeAgo: "há 5 h" },
+  {
+    id: "ob1",
+    type: "discussão",
+    text: "Nova discussão observacional criada no domínio Branding.",
+    actor: "Lucas Martins",
+    domain: "Branding",
+    timeAgo: "há 10 min",
+  },
+  {
+    id: "ob2",
+    type: "descoberta",
+    text: "Conhecimento consolidado sobre baixa participação do cliente.",
+    actor: "Ana Coelho",
+    domain: "Marketing Estratégico",
+    timeAgo: "há 40 min",
+  },
+  {
+    id: "ob3",
+    type: "padrão",
+    text: "Comunidade validou padrão de retrabalho em Branding.",
+    actor: "Comunidade · Branding",
+    domain: "Branding",
+    timeAgo: "há 1 h",
+  },
+  {
+    id: "ob4",
+    type: "revisão",
+    text: "Discussão sobre atraso em Pesquisa de Mercado entrou em análise.",
+    actor: "Marina Reis",
+    domain: "Pesquisa de Mercado",
+    timeAgo: "há 2 h",
+  },
+  {
+    id: "ob5",
+    type: "descoberta",
+    text: "Insight colaborativo publicado em Comunicação Digital.",
+    actor: "Pedro Almeida",
+    domain: "Comunicação Digital",
+    timeAgo: "há 3 h",
+  },
+  {
+    id: "ob6",
+    type: "alerta",
+    text: "Projeto Identidade Visual Norvik teve risco atualizado para Moderado.",
+    actor: "Ana Coelho",
+    domain: "Branding",
+    timeAgo: "há 5 h",
+  },
 ];
 
 export const attributeMaps: AttributeMap[] = [

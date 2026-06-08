@@ -1,8 +1,4 @@
-import type {
-  Knowledge,
-  KnowledgeConfidenceCode,
-  KnowledgeStatusCode,
-} from "@/types/knowledge";
+import type { Knowledge, KnowledgeConfidenceCode, KnowledgeStatusCode } from "@/types/knowledge";
 import type {
   CommunityKnowledge,
   KnowledgeConfidence,
