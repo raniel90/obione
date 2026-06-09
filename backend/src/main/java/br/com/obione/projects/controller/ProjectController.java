@@ -2,9 +2,11 @@ package br.com.obione.projects.controller;
 
 import br.com.obione.projects.dto.CloseProjectObservationRequestDTO;
 import br.com.obione.projects.dto.CreateProjectRequestDTO;
+import br.com.obione.projects.dto.ProjectCoverageDTO;
 import br.com.obione.projects.dto.ProjectResponseDTO;
 import br.com.obione.projects.dto.UpdateProjectRequestDTO;
 import br.com.obione.projects.dto.UpdateProjectStatusRequestDTO;
+import br.com.obione.projects.service.ProjectCoverageService;
 import br.com.obione.projects.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,9 +30,11 @@ import java.util.List;
 public class ProjectController {
 
     private final ProjectService projectService;
+    private final ProjectCoverageService coverageService;
 
-    public ProjectController(ProjectService projectService) {
+    public ProjectController(ProjectService projectService, ProjectCoverageService coverageService) {
         this.projectService = projectService;
+        this.coverageService = coverageService;
     }
 
     @GetMapping
@@ -49,6 +53,12 @@ public class ProjectController {
     @Operation(summary = "Buscar projeto por ID")
     public ProjectResponseDTO getProject(@PathVariable Long id) {
         return projectService.findById(id);
+    }
+
+    @GetMapping("/{id}/coverage")
+    @Operation(summary = "Cobertura do MPO do projeto (atributos com ≥1 observação)")
+    public ProjectCoverageDTO getCoverage(@PathVariable Long id) {
+        return coverageService.coverage(id);
     }
 
     @PostMapping
