@@ -9,7 +9,9 @@ import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -61,7 +63,8 @@ import {
 } from "@/services/discussionService";
 import { getCurrentUser } from "@/services/authService";
 import { getPhenomenaByProject } from "@/services/phenomenonService";
-import { getMpoAttributes } from "@/services/mpoAttributeService";
+import { getMpoAttributes, getMpoCategories } from "@/services/mpoAttributeService";
+import type { MpoCategory } from "@/types/mpoAttribute";
 import {
   communityKnowledge as allKnowledge,
   type DiscussionStatus,
@@ -913,19 +916,6 @@ function TimelineIcon({ type }: { type: string }) {
 
 /* --------------------- Manual observation section ------------------------ */
 
-const ATTRIBUTES = [
-  "Escopo",
-  "Prazo",
-  "Risco",
-  "Engajamento",
-  "Comunicação",
-  "Colaboração",
-  "Transparência",
-  "Aprovação",
-  "Retrabalho",
-  "Lições aprendidas",
-];
-
 const PHENOMENA = [
   "Mudança recorrente de escopo",
   "Baixa participação do cliente",
@@ -1023,7 +1013,7 @@ function ManualObservationSection({
     title: "",
     date: new Date().toISOString().slice(0, 10),
     description: "",
-    attribute: ATTRIBUTES[0],
+    attribute: "",
     phenomenon: PHENOMENA[0],
     customPhenomenon: "",
     impact: "Médio" as ProjectObservation["impact"],
@@ -1034,7 +1024,7 @@ function ManualObservationSection({
   const [editForm, setEditForm] = useState({
     title: "",
     description: "",
-    attribute: ATTRIBUTES[0],
+    attribute: "",
     phenomenon: PHENOMENA[0],
     customPhenomenon: "",
     impact: "Médio" as ProjectObservation["impact"],
@@ -1048,11 +1038,10 @@ function ManualObservationSection({
     status: "Aberta" as DiscussionStatus,
   });
 
-  const attributeOptions = useMemo(() => {
-    const names = new Set<string>(ATTRIBUTES);
-    attrNameById.forEach((name) => names.add(name));
-    return Array.from(names);
-  }, [attrNameById]);
+  const [mpoCategories, setMpoCategories] = useState<MpoCategory[]>([]);
+  useEffect(() => {
+    getMpoCategories().then(setMpoCategories);
+  }, []);
 
   const phenomenonOptions = useMemo(() => {
     const names = phenomena.map((p) => p.name);
@@ -1072,13 +1061,6 @@ function ManualObservationSection({
       setForm((f) => ({ ...f, author: user.name }));
     });
   }, []);
-
-  const resolveAttributeId = (label: string) => {
-    for (const [id, name] of attrNameById) {
-      if (name === label) return id;
-    }
-    return label;
-  };
 
   const resolvePhenomenonId = (select: string, custom: string) => {
     if (select === "Outro") return custom.trim() || undefined;
@@ -1153,7 +1135,6 @@ function ManualObservationSection({
     const raw = rawObservations.find((o) => o.id === observationId);
     if (!raw) return;
 
-    const attrLabel = attrNameById.get(raw.attributeId) ?? raw.attributeId ?? ATTRIBUTES[0];
     const phenLabel = raw.phenomenonId
       ? (phenNameById.get(raw.phenomenonId) ?? raw.phenomenonId)
       : PHENOMENA[0];
@@ -1169,7 +1150,7 @@ function ManualObservationSection({
     setEditForm({
       title: raw.title,
       description: raw.description,
-      attribute: attributeOptions.includes(attrLabel) ? attrLabel : attrLabel,
+      attribute: raw.attributeId ?? "",
       phenomenon: phenSelect,
       customPhenomenon: phenSelect === "Outro" ? (raw.phenomenonId ?? "") : "",
       impact: obsImpactMap[raw.impact],
@@ -1192,7 +1173,7 @@ function ManualObservationSection({
       const updated = await updateObservation(editingId, {
         title: editForm.title.trim(),
         description: editForm.description.trim(),
-        attributeId: resolveAttributeId(editForm.attribute),
+        attributeId: editForm.attribute,
         phenomenonId: resolvePhenomenonId(editForm.phenomenon, editForm.customPhenomenon),
         impact: impactToCode[editForm.impact],
         risk: riskToCode[editForm.risk],
@@ -1353,13 +1334,20 @@ function ManualObservationSection({
                         onValueChange={(v) => setForm((f) => ({ ...f, attribute: v }))}
                       >
                         <SelectTrigger>
-                          <SelectValue />
+                          <SelectValue placeholder="Selecione um atributo do MPO" />
                         </SelectTrigger>
                         <SelectContent>
-                          {ATTRIBUTES.map((a) => (
-                            <SelectItem key={a} value={a}>
-                              {a}
-                            </SelectItem>
+                          {mpoCategories.map((cat) => (
+                            <SelectGroup key={cat.key}>
+                              <SelectLabel>{cat.label}</SelectLabel>
+                              {cat.attributes
+                                .filter((a) => a.type !== "fora_de_escopo")
+                                .map((a) => (
+                                  <SelectItem key={a.id} value={a.id}>
+                                    {a.name}
+                                  </SelectItem>
+                                ))}
+                            </SelectGroup>
                           ))}
                         </SelectContent>
                       </Select>
@@ -1570,13 +1558,20 @@ function ManualObservationSection({
                   onValueChange={(v) => setEditForm((f) => ({ ...f, attribute: v }))}
                 >
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Selecione um atributo do MPO" />
                   </SelectTrigger>
                   <SelectContent>
-                    {attributeOptions.map((a) => (
-                      <SelectItem key={a} value={a}>
-                        {a}
-                      </SelectItem>
+                    {mpoCategories.map((cat) => (
+                      <SelectGroup key={cat.key}>
+                        <SelectLabel>{cat.label}</SelectLabel>
+                        {cat.attributes
+                          .filter((a) => a.type !== "fora_de_escopo")
+                          .map((a) => (
+                            <SelectItem key={a.id} value={a.id}>
+                              {a.name}
+                            </SelectItem>
+                          ))}
+                      </SelectGroup>
                     ))}
                   </SelectContent>
                 </Select>

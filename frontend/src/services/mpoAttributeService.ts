@@ -1,22 +1,42 @@
-import type { MpoAttribute, MpoGranularity } from "@/types/mpoAttribute";
-import { mockMpoAttributes } from "@/data/mockMpoAttributes";
-import { delay } from "./apiClient";
+import { request } from "./apiClient";
+import type { MpoAttribute, MpoAttributeType, MpoCategory } from "@/types/mpoAttribute";
 
-// Future: GET /api/mpo-attributes
+interface ApiMpoAttribute {
+  key: string;
+  label: string;
+  category: string;
+  categoryLabel: string;
+  type: MpoAttributeType;
+}
+
+interface ApiMpoCategory {
+  key: string;
+  label: string;
+  order: number;
+  attributes: ApiMpoAttribute[];
+}
+
+const mapAttribute = (a: ApiMpoAttribute): MpoAttribute => ({
+  id: a.key,
+  name: a.label,
+  category: a.category,
+  categoryLabel: a.categoryLabel,
+  type: a.type,
+});
+
+/** The 44 MPO attributes (flat) — GET /api/mpo/attributes. */
 export async function getMpoAttributes(): Promise<MpoAttribute[]> {
-  return delay([...mockMpoAttributes]);
+  const data = await request<ApiMpoAttribute[]>("/mpo/attributes");
+  return data.map(mapAttribute);
 }
 
-export async function getMpoAttributesByGranularity(
-  granularity: MpoGranularity,
-): Promise<MpoAttribute[]> {
-  return delay(mockMpoAttributes.filter((m) => m.granularity === granularity));
-}
-
-export async function getMpoAttributesByCategory(category: string): Promise<MpoAttribute[]> {
-  return delay(mockMpoAttributes.filter((m) => m.category === category));
-}
-
-export async function getMpoAttributeById(id: string): Promise<MpoAttribute | null> {
-  return delay(mockMpoAttributes.find((m) => m.id === id) ?? null);
+/** The 8 MPO categories with their attributes — GET /api/mpo/categories. */
+export async function getMpoCategories(): Promise<MpoCategory[]> {
+  const data = await request<ApiMpoCategory[]>("/mpo/categories");
+  return data.map((c) => ({
+    key: c.key,
+    label: c.label,
+    order: c.order,
+    attributes: c.attributes.map(mapAttribute),
+  }));
 }
