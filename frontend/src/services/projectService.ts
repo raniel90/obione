@@ -64,6 +64,30 @@ export async function getProjects(): Promise<Project[]> {
   return data.map(mapProject);
 }
 
+export interface CategoryCoverage {
+  key: string;
+  label: string;
+  total: number;
+  covered: number;
+  percentage: number;
+}
+
+export interface ProjectCoverage {
+  totalInScope: number;
+  covered: number;
+  percentage: number;
+  categories: CategoryCoverage[];
+}
+
+/** MPO coverage: in-scope attributes with ≥1 observation — GET /api/projects/{id}/coverage. */
+export async function getProjectCoverage(id: string): Promise<ProjectCoverage | null> {
+  try {
+    return await request<ProjectCoverage>(`/projects/${id}/coverage`);
+  } catch {
+    return null;
+  }
+}
+
 export async function getProjectById(id: string): Promise<Project | null> {
   try {
     const data = await request<ApiProject>(`/projects/${id}`);

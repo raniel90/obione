@@ -45,7 +45,8 @@ import type {
   PhenomenonStatus,
 } from "@/types/phenomenon";
 import { toast } from "sonner";
-import { getProjectById, updateProject } from "@/services/projectService";
+import { getProjectById, getProjectCoverage, updateProject } from "@/services/projectService";
+import type { ProjectCoverage } from "@/services/projectService";
 import { getDomains } from "@/services/domainService";
 import {
   createObservation,
@@ -378,6 +379,7 @@ function ProjectDetailPage() {
   const [phenNameById, setPhenNameById] = useState<Map<string, string>>(new Map());
   const [discussionsRefresh, setDiscussionsRefresh] = useState(0);
   const [engagementPercent, setEngagementPercent] = useState<number | null>(null);
+  const [coverage, setCoverage] = useState<ProjectCoverage | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -389,13 +391,15 @@ function ProjectDetailPage() {
       getPhenomenaByProject(id),
       getObservationsByProject(id),
       getMpoAttributes(),
-    ]).then(([p, ds, phs, observs, attrs]) => {
+      getProjectCoverage(id),
+    ]).then(([p, ds, phs, observs, attrs, cov]) => {
       if (cancelled) return;
       if (!p) {
         setProject(null);
         setLoading(false);
         return;
       }
+      setCoverage(cov);
       const domainsById = new Map(ds.map((d) => [d.id, d] as const));
       setDomainMap(domainsById);
       setDomain(domainsById.get(p.domainId) ?? null);
@@ -577,6 +581,45 @@ function ProjectDetailPage() {
             ))}
           </div>
         </section>
+
+        {/* Cobertura do MPO */}
+        {coverage && (
+          <section>
+            <SectionTitle
+              eyebrow="MPO · Avaliação de cobertura"
+              title="Cobertura observacional"
+              description="Quanto do MPO (Quadro 37) já está coberto por ao menos uma observação."
+            />
+            <div className="mt-4 rounded-xl border border-border bg-card p-5">
+              <div className="flex items-baseline gap-3">
+                <span className="text-[28px] font-semibold tracking-tight">
+                  {coverage.percentage}%
+                </span>
+                <span className="text-[12.5px] text-muted-foreground">
+                  {coverage.covered} de {coverage.totalInScope} atributos em escopo observados
+                </span>
+              </div>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                {coverage.categories.map((c) => (
+                  <div key={c.key} className="space-y-1">
+                    <div className="flex items-center justify-between text-[12px]">
+                      <span className="text-foreground">{c.label}</span>
+                      <span className="tabular-nums text-muted-foreground">
+                        {c.covered}/{c.total}
+                      </span>
+                    </div>
+                    <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                      <div
+                        className="h-full rounded-full bg-foreground/70"
+                        style={{ width: `${c.percentage}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Atributos observados */}
         <section>
