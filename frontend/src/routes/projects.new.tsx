@@ -15,6 +15,8 @@ import {
 import { getDomains } from "@/services/domainService";
 import { createProject } from "@/services/projectService";
 import { getUsersByProfile } from "@/services/userService";
+import { getMpoCategories } from "@/services/mpoAttributeService";
+import type { MpoCategory } from "@/types/mpoAttribute";
 import type { Domain as SvcDomain } from "@/types/domain";
 import type { User } from "@/types/user";
 import type { ProjectStatusCode, ProjectTypeCode } from "@/types/project";
@@ -54,21 +56,6 @@ const STATUS: { value: ProjectStatus; label: string }[] = [
   { value: "em-andamento", label: "Em andamento" },
   { value: "em-risco", label: "Em risco" },
   { value: "concluído", label: "Concluído" },
-];
-
-const ATTRIBUTES = [
-  "Prazo",
-  "Escopo",
-  "Riscos",
-  "Mudanças de escopo",
-  "Engajamento do cliente",
-  "Transparência",
-  "Artefatos",
-  "Comunicação",
-  "Colaboração",
-  "Lições aprendidas",
-  "Retrabalho",
-  "Aprovações",
 ];
 
 const PHENOMENA = [
@@ -117,7 +104,7 @@ function NewProjectPage() {
     endDate: "",
     summary: "",
     observationalGoal: "",
-    attributes: ["Prazo", "Escopo", "Engajamento do cliente"] as string[],
+    attributes: [] as string[],
     phenomena: ["Risco de atraso"] as string[],
     participants: [
       "Lucas Martins — Consultor",
@@ -145,6 +132,11 @@ function NewProjectPage() {
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  const [mpoCategories, setMpoCategories] = useState<MpoCategory[]>([]);
+  useEffect(() => {
+    getMpoCategories().then(setMpoCategories);
   }, []);
 
   const [artifacts, setArtifacts] = useState<Artifact[]>([]);
@@ -415,27 +407,38 @@ function NewProjectPage() {
           icon={Sparkles}
           eyebrow="03 · atributos"
           title="Atributos iniciais"
-          description="Os atributos selecionados indicam quais dimensões do projeto serão observadas inicialmente."
+          description="Os atributos do MPO (Quadro 37) selecionados indicam quais dimensões do projeto serão observadas inicialmente."
         >
-          <div className="flex flex-wrap gap-2">
-            {ATTRIBUTES.map((a) => {
-              const selected = form.attributes.includes(a);
-              return (
-                <button
-                  key={a}
-                  type="button"
-                  onClick={() => toggleArray("attributes", a)}
-                  className={cn(
-                    "rounded-full border px-3 py-1 text-[12px] transition-colors",
-                    selected
-                      ? "border-foreground bg-foreground text-background"
-                      : "border-border bg-background text-muted-foreground hover:border-foreground/30 hover:text-foreground",
-                  )}
-                >
-                  {a}
-                </button>
-              );
-            })}
+          <div className="space-y-4">
+            {mpoCategories.map((cat) => (
+              <div key={cat.key} className="space-y-2">
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  {cat.label}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {cat.attributes
+                    .filter((a) => a.type !== "fora_de_escopo")
+                    .map((a) => {
+                      const selected = form.attributes.includes(a.id);
+                      return (
+                        <button
+                          key={a.id}
+                          type="button"
+                          onClick={() => toggleArray("attributes", a.id)}
+                          className={cn(
+                            "rounded-full border px-3 py-1 text-[12px] transition-colors",
+                            selected
+                              ? "border-foreground bg-foreground text-background"
+                              : "border-border bg-background text-muted-foreground hover:border-foreground/30 hover:text-foreground",
+                          )}
+                        >
+                          {a.name}
+                        </button>
+                      );
+                    })}
+                </div>
+              </div>
+            ))}
           </div>
         </Section>
 
