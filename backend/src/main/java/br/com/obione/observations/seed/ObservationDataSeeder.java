@@ -56,7 +56,7 @@ public class ObservationDataSeeder implements CommandLineRunner {
                         athos,
                         "Baixa participação do cliente nas validações iniciais",
                         "O cliente demorou vários dias para retornar sobre decisões estratégicas.",
-                        "Engajamento",
+                        "detalhes_equipe",
                         ObservationImpact.MEDIUM,
                         RiskLevel.MODERATE,
                         "A baixa participação pode gerar atraso e retrabalho."
@@ -65,7 +65,7 @@ public class ObservationDataSeeder implements CommandLineRunner {
                         athos,
                         "Mudança de escopo após validação inicial",
                         "Houve solicitação de alteração no posicionamento após aprovação da proposta inicial.",
-                        "Escopo",
+                        "escopo_executado",
                         ObservationImpact.HIGH,
                         RiskLevel.HIGH,
                         "Mudanças tardias aumentam risco de retrabalho."
@@ -74,7 +74,7 @@ public class ObservationDataSeeder implements CommandLineRunner {
                         norvik,
                         "Retrabalho criativo após aprovação visual",
                         "Peças visuais aprovadas foram reabertas após nova avaliação do cliente.",
-                        "Retrabalho",
+                        "dificuldades_encontradas",
                         ObservationImpact.HIGH,
                         RiskLevel.MODERATE,
                         "Validações tardias indicam necessidade de critérios de aceite mais claros."
@@ -83,7 +83,7 @@ public class ObservationDataSeeder implements CommandLineRunner {
                         latam,
                         "Baixa taxa de resposta dos participantes",
                         "A coleta de dados teve adesão menor que a planejada.",
-                        "Pesquisa",
+                        "indicadores_projeto",
                         ObservationImpact.MEDIUM,
                         RiskLevel.MODERATE,
                         "Baixa resposta pode afetar a representatividade dos resultados."
