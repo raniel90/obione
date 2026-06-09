@@ -3,8 +3,11 @@ import { useEffect, useState } from "react";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/status-badge";
+import { toast } from "sonner";
 import { getDomainById } from "@/services/domainService";
 import { getProjectsByDomain } from "@/services/projectService";
+import { synthesizeDomain } from "@/services/aiService";
+import type { DomainSynthesis } from "@/services/aiService";
 import type { Domain } from "@/types/domain";
 import type { Project, ProjectStatusCode, ProjectTypeCode } from "@/types/project";
 import type { ProjectStatus } from "@/lib/mock-data";
@@ -105,6 +108,19 @@ function DomainDetailPage() {
   const [domain, setDomain] = useState<Domain | null>(null);
   const [linked, setLinked] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [synthesis, setSynthesis] = useState<DomainSynthesis | null>(null);
+  const [synthLoading, setSynthLoading] = useState(false);
+
+  const handleSynthesize = async () => {
+    setSynthLoading(true);
+    try {
+      setSynthesis(await synthesizeDomain(id));
+    } catch {
+      toast.error("Não foi possível sintetizar o domínio.");
+    } finally {
+      setSynthLoading(false);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -175,10 +191,47 @@ function DomainDetailPage() {
               {obs?.objective ?? domain.description}
             </p>
           </div>
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1.5"
+            onClick={handleSynthesize}
+            disabled={synthLoading}
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            {synthLoading ? "Sintetizando…" : "Sintetizar domínio (IA)"}
+          </Button>
         </div>
       </div>
 
       <div className="px-6 py-6 md:px-10 space-y-10">
+        {synthesis && (
+          <div className="rounded-xl border border-dashed border-foreground/30 bg-foreground/[0.02] p-5">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              Conectora · síntese cross-projeto (IA)
+            </p>
+            <p className="mt-2 text-[13px] leading-relaxed text-foreground">{synthesis.summary}</p>
+            <div className="mt-3 grid gap-4 sm:grid-cols-2">
+              <div>
+                <p className="text-[11px] font-medium text-muted-foreground">Padrões</p>
+                <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[12.5px] text-foreground">
+                  {synthesis.patterns.map((p, i) => (
+                    <li key={i}>{p}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <p className="text-[11px] font-medium text-muted-foreground">Lições</p>
+                <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[12.5px] text-foreground">
+                  {synthesis.lessons.map((l, i) => (
+                    <li key={i}>{l}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* 1. KPIs */}
         <section>
           <SectionTitle hint="atributos intermediários">Indicadores do domínio</SectionTitle>
