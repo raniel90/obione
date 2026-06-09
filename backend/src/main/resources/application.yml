@@ -25,3 +25,18 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+  # Spring AI / Ollama — only used when obione.llm.provider=ollama.
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        options:
+          model: llama3.1:8b
+          temperature: 0.3
+
+# AI assistant provider: "mock" (default, deterministic, no network — CI/demo)
+# or "ollama" (real LLM via the local Ollama server above).
+obione:
+  llm:
+    provider: mock
