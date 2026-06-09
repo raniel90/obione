@@ -49,6 +49,8 @@ import { getProjectById, getProjectCoverage, updateProject } from "@/services/pr
 import type { ProjectCoverage } from "@/services/projectService";
 import { suggestDomain, suggestObservations } from "@/services/aiService";
 import type { ObservationSuggestion } from "@/services/aiService";
+import { getFeed } from "@/services/feedService";
+import type { FeedEvent } from "@/services/feedService";
 import { getDomains } from "@/services/domainService";
 import {
   createObservation,
@@ -382,6 +384,7 @@ function ProjectDetailPage() {
   const [discussionsRefresh, setDiscussionsRefresh] = useState(0);
   const [engagementPercent, setEngagementPercent] = useState<number | null>(null);
   const [coverage, setCoverage] = useState<ProjectCoverage | null>(null);
+  const [feedEvents, setFeedEvents] = useState<FeedEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -394,7 +397,8 @@ function ProjectDetailPage() {
       getObservationsByProject(id),
       getMpoAttributes(),
       getProjectCoverage(id),
-    ]).then(([p, ds, phs, observs, attrs, cov]) => {
+      getFeed({ projectId: id }).catch(() => [] as FeedEvent[]),
+    ]).then(([p, ds, phs, observs, attrs, cov, fe]) => {
       if (cancelled) return;
       if (!p) {
         setProject(null);
@@ -402,6 +406,7 @@ function ProjectDetailPage() {
         return;
       }
       setCoverage(cov);
+      setFeedEvents(fe);
       const domainsById = new Map(ds.map((d) => [d.id, d] as const));
       setDomainMap(domainsById);
       setDomain(domainsById.get(p.domainId) ?? null);
@@ -428,6 +433,20 @@ function ProjectDetailPage() {
     if (!rawProject || engagementPercent === null) return base;
     return mergeObservatoryWithProject(base, rawProject, engagementPercent);
   }, [id, rawProject, engagementPercent]);
+
+  const displayTimeline = useMemo(
+    () =>
+      feedEvents.length > 0
+        ? feedEvents.map((e) => ({
+            id: `${e.kind}-${e.id}`,
+            type: e.kind,
+            description: e.title,
+            actor: e.actorName ?? "Observatório",
+            date: e.createdAt,
+          }))
+        : obs.timeline,
+    [feedEvents, obs.timeline],
+  );
 
   if (loading) {
     return (
@@ -861,7 +880,7 @@ function ProjectDetailPage() {
             description="O observatório acompanha a evolução do projeto ao longo do tempo."
           />
           <ol className="mt-4 space-y-2">
-            {obs.timeline.map((ev) => (
+            {displayTimeline.map((ev) => (
               <li
                 key={ev.id}
                 className="flex items-start gap-3 rounded-lg border border-border bg-card p-3"
