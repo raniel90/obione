@@ -6,7 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **ObiOne** — Observatório de Projetos. PhD-level course project (TAES — Tópicos Avançados em Engenharia de Software, UPE/POLI), supervised by Prof. Ivaldir Honório de Farias Júnior.
 
-ObiOne is an **observatório-de-portfólio para consultorias de projetos**: it observes consultancy projects through the lens of the *Modelo de Observatório de Projetos* (MPO — Vieira, 2022, Quadro 37, 44 attributes), curates a **semi-open community** (the consultancy curates; each client sees only their own project), and surfaces cross-project knowledge by domain (phenomena, lessons, governance, discussions).
+ObiOne is an **observatório-comunidade de conhecimento** for project consultancies, grounded in the *Modelo de Observatório de Projetos* (MPO — Vieira, 2022). The consultancy organizes its portfolio by **domains**; each project is observed and produces **observations** (evidence anchored to MPO attributes and phenomena); a **semi-open community** (consultancy + clients, role-scoped) debates them in typed **discussions** and consolidates them into reusable **knowledge**. GenAI is an **assistive layer** over the `observation → discussion → knowledge` pipeline (suggest observations on the MPO grammar, categorize domains, synthesize knowledge), always human-in-the-loop.
+
+> **v2 reality vs. original proposal:** the current build emphasizes the *community/knowledge* axis; the MPO 44-attribute **AI extraction**, per-attribute **CBAC**, and the **coverage** metric from the original spec (`atividades/requisitos.md`, v1) are **not yet implemented** — see `atividades/aderencia_observatorio_v2.md` for the drift analysis and roadmap (MPO catalog lens, coverage, AI via a mock/Ollama port, real role governance, temporal feed). Today auth is mock-token and `SecurityConfig` is `permitAll` (no real enforcement yet); "attributes" are still opaque strings.
 
 Repository: `raniel90/obione` (this repo). The application is a **v2 rewrite**:
 
