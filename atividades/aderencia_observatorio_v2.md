@@ -129,8 +129,8 @@ Os 5 reforços do §7 foram implementados e mergeados em `dev` (PRs #49–#54). 
 
 ### Limitações declaradas (pós-roadmap)
 
-1. **RNF04/RNF05 não atendidos** — as saídas de IA não registram metadados de reprodutibilidade (versão de prompt, modelo, timestamp, hash da fonte) e as observações aceitas não carregam trecho-fonte. É a lacuna mais sensível para o rigor DSR das Frentes 1–2 do protocolo; declarar como limitação ou fechar com um PR pequeno (persistir `provider`/`model`/`timestamp` na sugestão).
-2. **RNF09 (custo de LLM) não implementado** — mitigado pelo default Ollama local (custo zero).
+1. ~~**RNF04/RNF05 não atendidos**~~ — **atendidos em 10/06/2026** (PRs #56–#60, ciclo IA): toda sugestão de IA é registrada em `ai_suggestion_logs` com provider/modelo/timestamp/payload (RNF04); a Observadora cita trecho-fonte (`sourceExcerpt`) e a observação aceita carrega `origin`/`sourceExcerpt`/`suggestionId` (RNF05); a **taxa de aceitação** por papel é derivada do log (`GET /ai/stats`). A IA ganhou provider real — **OpenAI** (`gpt-4o-mini` via Spring AI; Ollama removido; mock segue como default sem chave) — e um 5º papel: **setup assistido de projeto** (`POST /ai/project-setup`), que alimenta o novo wizard IA-first de criação (`/projects/new`, 2 etapas: descrever → revisar sugestões). Resta para o rigor pleno: versão de prompt e hash da fonte no log.
+2. **RNF09 (custo de LLM) não implementado** — agora relevante com OpenAI real (era mitigado pelo Ollama local); o log de sugestões é o lugar natural para tokens/latência.
 3. **Governança é por papel, não CBAC por atributo (RF04)** — mutação deliberada (§6.4); nota correspondente adicionada ao `protocolo_avaliacao.md` (10/06/2026).
 4. **`/register` ficou efetivamente bloqueado** — a página chama `POST /users`, que após o enforcement por papel exige `CONSULTANT`/`ADMIN`; um cadastro anônimo falha com 401/403. Isso resolve o conflito com o RF01 ("sem cadastro público") no nível da API, mas deixa a rota `register.tsx` quebrada na UI — decidir entre remover a página ou implementar o signup-com-aprovação do §6.3.
 
