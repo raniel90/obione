@@ -12,20 +12,20 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * Real LLM adapter via Spring AI + Ollama (enabled with obione.llm.provider=ollama).
- * Uses structured output ({@code .entity(...)}) to map the model's JSON straight
- * into the suggestion records.
+ * Real LLM adapter via Spring AI + OpenAI (enabled with obione.llm.provider=openai
+ * and an OPENAI_API_KEY). Uses structured output ({@code .entity(...)}) to map the
+ * model's JSON straight into the suggestion records.
  */
 @Component
-@ConditionalOnProperty(name = "obione.llm.provider", havingValue = "ollama")
-public class OllamaLlmClient implements LlmClient {
+@ConditionalOnProperty(name = "obione.llm.provider", havingValue = "openai")
+public class OpenAiLlmClient implements LlmClient {
 
     private final ChatClient chat;
     private final String model;
 
-    public OllamaLlmClient(
+    public OpenAiLlmClient(
             ChatClient.Builder builder,
-            @Value("${spring.ai.ollama.chat.options.model:llama3.1:8b}") String model
+            @Value("${spring.ai.openai.chat.options.model:gpt-4o-mini}") String model
     ) {
         this.chat = builder.build();
         this.model = model;
@@ -33,7 +33,7 @@ public class OllamaLlmClient implements LlmClient {
 
     @Override
     public String provider() {
-        return "ollama";
+        return "openai";
     }
 
     @Override

@@ -25,6 +25,10 @@ __pycache__/
 .venv/
 venv/
 
+# Secrets / local environment (never commit)
+.env
+.env.local
+
 # impeccable critique snapshots (arquivo local, não versionar)
 .impeccable/
 

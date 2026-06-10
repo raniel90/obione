@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * Port for the generative-AI assistant. Two adapters: {@code MockLlmClient}
- * (default, deterministic) and {@code OllamaLlmClient} (real LLM), selected by
+ * (default, deterministic) and {@code OpenAiLlmClient} (real LLM), selected by
  * {@code obione.llm.provider}. All outputs are suggestions — human-in-the-loop.
  */
 public interface LlmClient {

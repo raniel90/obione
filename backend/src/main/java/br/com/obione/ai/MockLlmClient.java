@@ -12,8 +12,8 @@ import java.util.List;
 
 /**
  * Deterministic adapter (default). No network/LLM — keeps CI and the demo working
- * without Ollama. Suggested observations reference real MPO attribute keys so the
- * consultant can accept them straight into the lens.
+ * without an API key. Suggested observations reference real MPO attribute keys so
+ * the consultant can accept them straight into the lens.
  */
 @Component
 @ConditionalOnProperty(name = "obione.llm.provider", havingValue = "mock", matchIfMissing = true)
@@ -34,7 +34,7 @@ public class MockLlmClient implements LlmClient {
         String slug = availableDomainSlugs.isEmpty() ? "outros" : availableDomainSlugs.get(0);
         return new DomainSuggestionDTO(slug, 0.72,
                 "Sugestão determinística (mock) a partir do resumo do projeto. "
-                        + "Ative obione.llm.provider=ollama para classificação por IA real.");
+                        + "Ative obione.llm.provider=openai para classificação por IA real.");
     }
 
     @Override
