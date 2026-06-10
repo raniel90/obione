@@ -10,13 +10,10 @@ import type { Project as SvcProject, ProjectStatusCode, ProjectTypeCode } from "
 import type { Domain as SvcDomain } from "@/types/domain";
 import { getProjects } from "@/services/projectService";
 import { getDomains } from "@/services/domainService";
-import {
-  phenomena,
-  insights,
-  observations,
-  attributeMaps,
-  observatoryKpis,
-} from "@/lib/observatory-data";
+import { getKnowledge } from "@/services/knowledgeService";
+import { getFeed, type FeedEvent } from "@/services/feedService";
+import type { Knowledge, KnowledgeConfidenceCode } from "@/types/knowledge";
+import { phenomena, attributeMaps, observatoryKpis } from "@/lib/observatory-data";
 import {
   Plus,
   LayoutGrid,
@@ -28,10 +25,7 @@ import {
   Minus,
   Sparkles,
   Radar,
-  AlertTriangle,
   MessageSquare,
-  GitBranch,
-  FileText,
   Eye,
   ArrowRight,
   Network,
@@ -166,27 +160,42 @@ function PhenomenonCard({ p }: { p: (typeof phenomena)[number] }) {
 
 /* ------------------- Camada 3: Insights do Observatório ------------------- */
 
-function InsightCard({ i }: { i: (typeof insights)[number] }) {
+const confidencePercent: Record<KnowledgeConfidenceCode, number> = {
+  LOW: 35,
+  MEDIUM: 65,
+  HIGH: 90,
+};
+
+const confidenceLabel: Record<KnowledgeConfidenceCode, string> = {
+  LOW: "baixa",
+  MEDIUM: "média",
+  HIGH: "alta",
+};
+
+function InsightCard({ k, domainName }: { k: Knowledge; domainName: string }) {
   return (
     <article className="flex flex-col gap-3 rounded-xl border border-border bg-card p-5">
       <div className="flex items-center justify-between">
         <span className="inline-flex items-center gap-1.5 text-[10.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
           <Sparkles className="h-3 w-3" />
-          {i.category}
+          Conhecimento consolidado
         </span>
         <span className="font-mono text-[10.5px] text-muted-foreground">
-          confiança {(i.confidence * 100).toFixed(0)}%
+          confiança {confidenceLabel[k.confidence]}
         </span>
       </div>
 
-      <p className="text-[13.5px] leading-relaxed text-foreground">{i.narrative}</p>
+      <div>
+        <h3 className="text-[13.5px] font-semibold leading-snug text-foreground">{k.title}</h3>
+        <p className="mt-1 text-[13px] leading-relaxed text-foreground/90">{k.summary}</p>
+      </div>
 
       <div className="mt-auto flex items-center justify-between border-t border-border pt-3 text-[11px] text-muted-foreground">
-        <span className="font-mono">{i.signal}</span>
+        <span className="font-mono uppercase tracking-wider">{domainName}</span>
         <div className="h-1 w-24 overflow-hidden rounded-full bg-muted">
           <div
             className="h-full rounded-full bg-foreground/80"
-            style={{ width: `${i.confidence * 100}%` }}
+            style={{ width: `${confidencePercent[k.confidence]}%` }}
           />
         </div>
       </div>
@@ -196,30 +205,42 @@ function InsightCard({ i }: { i: (typeof insights)[number] }) {
 
 /* ----------------------- Camada 4: Últimas Observações -------------------- */
 
-const observationIcon = {
-  padrão: Radar,
-  discussão: MessageSquare,
-  revisão: GitBranch,
-  artefato: FileText,
-  alerta: AlertTriangle,
-  descoberta: Eye,
-} as const;
+const feedIcon: Record<string, React.ComponentType<{ className?: string }>> = {
+  observation: Radar,
+  discussion: MessageSquare,
+  knowledge: Sparkles,
+};
 
-function ObservationItem({ o }: { o: (typeof observations)[number] }) {
-  const Icon = observationIcon[o.type];
+function relativeTime(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const minutes = Math.floor(diffMs / 60_000);
+  if (minutes < 1) return "agora";
+  if (minutes < 60) return `${minutes} min atrás`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} h atrás`;
+  const days = Math.floor(hours / 24);
+  return days === 1 ? "ontem" : `${days} dias atrás`;
+}
+
+function FeedEventItem({ e }: { e: FeedEvent }) {
+  const Icon = feedIcon[e.kind] ?? Eye;
   return (
     <li className="flex gap-3 py-3">
       <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border bg-background text-muted-foreground">
         <Icon className="h-3.5 w-3.5" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-[13px] leading-snug text-foreground">{o.text}</p>
+        <p className="text-[13px] leading-snug text-foreground">{e.title}</p>
         <div className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground">
-          <span className="truncate">{o.actor}</span>
+          <span className="truncate">{e.actorName ?? "Observatório"}</span>
+          {e.projectName && (
+            <>
+              <span className="h-1 w-1 rounded-full bg-border" />
+              <span className="truncate font-mono uppercase tracking-wider">{e.projectName}</span>
+            </>
+          )}
           <span className="h-1 w-1 rounded-full bg-border" />
-          <span className="font-mono uppercase tracking-wider">{o.domain}</span>
-          <span className="h-1 w-1 rounded-full bg-border" />
-          <span>{o.timeAgo}</span>
+          <span className="whitespace-nowrap">{relativeTime(e.createdAt)}</span>
         </div>
       </div>
     </li>
@@ -340,19 +361,30 @@ function SectionHeader({
 function ObservatoryDashboard() {
   const [projects, setProjects] = useState<LegacyProject[]>([]);
   const [domains, setDomains] = useState<SvcDomain[]>([]);
+  const [knowledge, setKnowledge] = useState<Knowledge[]>([]);
+  const [feedEvents, setFeedEvents] = useState<FeedEvent[]>([]);
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([getProjects(), getDomains()]).then(([svcProjects, svcDomains]) => {
+    Promise.all([
+      getProjects(),
+      getDomains(),
+      getKnowledge().catch(() => [] as Knowledge[]),
+      getFeed({ limit: 6 }).catch(() => [] as FeedEvent[]),
+    ]).then(([svcProjects, svcDomains, knowledgeList, feed]) => {
       if (cancelled) return;
       const domainMap = new Map(svcDomains.map((d) => [d.id, d.name] as const));
       setProjects(svcProjects.map((p) => toLegacyProject(p, domainMap)));
       setDomains(svcDomains);
+      setKnowledge(knowledgeList.slice(0, 4));
+      setFeedEvents(feed);
     });
     return () => {
       cancelled = true;
     };
   }, []);
+
+  const domainNameById = new Map(domains.map((d) => [d.id, d.name] as const));
 
   const active = projects.filter((p) => p.status === "active").length;
   const completed = projects.filter((p) => p.status === "completed").length;
@@ -434,29 +466,43 @@ function ObservatoryDashboard() {
           <div className="lg:col-span-2">
             <SectionHeader
               eyebrow="Camada 3 · Insights do observatório"
-              title="Inteligência analítica colaborativa"
-              description="Narrativas interpretativas geradas pelo observatório a partir dos atributos intermediários."
+              title="Conhecimento consolidado pela comunidade"
+              description="Aprendizados reais que nasceram do ciclo observação → discussão → conhecimento."
             />
-            <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
-              {insights.map((i) => (
-                <InsightCard key={i.id} i={i} />
-              ))}
-            </div>
+            {knowledge.length === 0 ? (
+              <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/20 p-5 text-[12.5px] leading-relaxed text-muted-foreground">
+                Nenhum conhecimento consolidado ainda — consolide discussões nas comunidades de
+                domínio (ou use a Sintetizadora) para que os aprendizados apareçam aqui.
+              </div>
+            ) : (
+              <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+                {knowledge.map((k) => (
+                  <InsightCard
+                    key={k.id}
+                    k={k}
+                    domainName={domainNameById.get(k.domainId) ?? "—"}
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
           {/* CAMADA 4 — Últimas Observações */}
           <aside>
-            <SectionHeader eyebrow="Camada 4 · Feed" title="Últimas observações" />
+            <SectionHeader eyebrow="Camada 4 · Feed" title="Atividade recente" />
             <div className="mt-4 rounded-xl border border-border bg-card">
-              <ul className="divide-y divide-border px-4">
-                {observations.map((o) => (
-                  <ObservationItem key={o.id} o={o} />
-                ))}
-              </ul>
-              <button className="flex w-full items-center justify-center gap-1.5 border-t border-border px-4 py-2.5 text-[11.5px] font-medium text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground">
-                Ver todas as observações
-                <ArrowRight className="h-3 w-3" />
-              </button>
+              {feedEvents.length === 0 ? (
+                <p className="p-4 text-[12.5px] leading-relaxed text-muted-foreground">
+                  Sem atividade registrada ainda — observações, discussões e conhecimentos
+                  aparecerão aqui.
+                </p>
+              ) : (
+                <ul className="divide-y divide-border px-4">
+                  {feedEvents.map((e) => (
+                    <FeedEventItem key={`${e.kind}-${e.id}`} e={e} />
+                  ))}
+                </ul>
+              )}
             </div>
           </aside>
         </section>
