@@ -7,6 +7,12 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && git rev-parse --show-toplevel)"
 BACKEND_LOG="/tmp/obione-backend.log"
 FRONTEND_LOG="/tmp/obione-frontend.log"
 
+# --- Local secrets (.env: OPENAI_API_KEY, OBIONE_LLM_PROVIDER, ...) ----------
+if [ -f "$ROOT/.env" ]; then
+  set -a; . "$ROOT/.env"; set +a
+  echo "• loaded $ROOT/.env (provider: ${OBIONE_LLM_PROVIDER:-mock})"
+fi
+
 # --- JDK 21 (the backend requires Java 21) ---------------------------------
 JAVA_HOME="$(/usr/libexec/java_home -v 21 2>/dev/null || true)"
 if [ -z "$JAVA_HOME" ] && command -v brew >/dev/null 2>&1; then
