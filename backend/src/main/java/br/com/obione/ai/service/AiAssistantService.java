@@ -1,6 +1,7 @@
 package br.com.obione.ai.service;
 
 import br.com.obione.ai.LlmClient;
+import br.com.obione.ai.dto.AiStatsDTO;
 import br.com.obione.ai.dto.DomainSuggestionDTO;
 import br.com.obione.ai.dto.DomainSuggestionResponseDTO;
 import br.com.obione.ai.dto.DomainSynthesisDTO;
@@ -105,6 +106,22 @@ public class AiAssistantService {
         DomainSynthesisDTO synthesis = llm.synthesize(domain.name(), summaries);
         AiSuggestionLog log = journal(AiSuggestionType.SYNTHESIS, synthesis, null, null, domainId);
         return DomainSynthesisResponseDTO.of(synthesis, log.getId(), llm.provider(), llm.model(), log.getCreatedAt());
+    }
+
+    /** Acceptance metrics per assistant role, derived on the fly from the log. */
+    @Transactional(readOnly = true)
+    public AiStatsDTO stats() {
+        List<AiStatsDTO.AiTypeStatsDTO> byType = java.util.Arrays.stream(AiSuggestionType.values())
+                .map(type -> {
+                    long total = logRepository.countByType(type);
+                    long accepted = logRepository.countByTypeAndAcceptedTrue(type);
+                    int rate = total == 0 ? 0 : (int) Math.round(accepted * 100.0 / total);
+                    return new AiStatsDTO.AiTypeStatsDTO(type, total, accepted, rate);
+                })
+                .toList();
+        long total = byType.stream().mapToLong(AiStatsDTO.AiTypeStatsDTO::total).sum();
+        long accepted = byType.stream().mapToLong(AiStatsDTO.AiTypeStatsDTO::accepted).sum();
+        return new AiStatsDTO(total, accepted, byType);
     }
 
     private AiSuggestionLog journal(

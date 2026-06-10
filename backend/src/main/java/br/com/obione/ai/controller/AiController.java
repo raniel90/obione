@@ -1,5 +1,6 @@
 package br.com.obione.ai.controller;
 
+import br.com.obione.ai.dto.AiStatsDTO;
 import br.com.obione.ai.dto.DomainSuggestionResponseDTO;
 import br.com.obione.ai.dto.DomainSynthesisResponseDTO;
 import br.com.obione.ai.dto.KnowledgeDraftResponseDTO;
@@ -7,6 +8,7 @@ import br.com.obione.ai.dto.ObservationSuggestionsResponseDTO;
 import br.com.obione.ai.service.AiAssistantService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -49,5 +51,11 @@ public class AiController {
     @Operation(summary = "IA: síntese cross-projeto do domínio (Conectora)")
     public DomainSynthesisResponseDTO synthesize(@PathVariable Long id) {
         return ai.synthesize(id);
+    }
+
+    @GetMapping("/ai/stats")
+    @Operation(summary = "IA: métricas de sugestão × aceite por papel (derivadas do log)")
+    public AiStatsDTO stats() {
+        return ai.stats();
     }
 }

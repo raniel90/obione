@@ -63,3 +63,28 @@ export function suggestKnowledge(discussionId: string): Promise<KnowledgeDraft> 
 export function synthesizeDomain(domainId: string): Promise<DomainSynthesis> {
   return request<DomainSynthesis>(`/domains/${domainId}/ai/synthesize`, { method: "POST" });
 }
+
+export type AiSuggestionType =
+  | "DOMAIN"
+  | "OBSERVATIONS"
+  | "KNOWLEDGE"
+  | "SYNTHESIS"
+  | "PROJECT_SETUP";
+
+export interface AiTypeStats {
+  type: AiSuggestionType;
+  total: number;
+  accepted: number;
+  acceptanceRatePercent: number;
+}
+
+export interface AiStats {
+  totalSuggestions: number;
+  totalAccepted: number;
+  byType: AiTypeStats[];
+}
+
+/** Suggestion × acceptance metrics derived from the AI suggestion log. */
+export function getAiStats(): Promise<AiStats> {
+  return request<AiStats>("/ai/stats");
+}

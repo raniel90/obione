@@ -300,6 +300,8 @@ function toProjectObservation(
     interpretation: o.interpretation,
     author: o.createdByName ?? authorIdLabel(o.createdBy),
     status: obsStatusMap[o.status],
+    aiSuggested: o.origin === "AI_SUGGESTED",
+    sourceExcerpt: o.sourceExcerpt,
   };
 }
 
@@ -1207,6 +1209,9 @@ function ManualObservationSection({
         risk: "MODERATE" as SvcObsRisk,
         interpretation: "",
         status: "REGISTERED",
+        origin: "AI_SUGGESTED",
+        sourceExcerpt: s.sourceExcerpt || undefined,
+        suggestionId: aiMeta?.suggestionId,
         createdBy: currentUserId,
       });
       prependObservation(created);
@@ -1635,7 +1640,15 @@ function ManualObservationSection({
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-wider text-muted-foreground">
-                  <ClipboardList className="h-3 w-3" /> Observação manual
+                  {o.aiSuggested ? (
+                    <>
+                      <Sparkles className="h-3 w-3" /> Sugerida pela IA · aceita
+                    </>
+                  ) : (
+                    <>
+                      <ClipboardList className="h-3 w-3" /> Observação manual
+                    </>
+                  )}
                   <span className="h-1 w-1 rounded-full bg-border" />
                   <span className="font-mono">{o.date}</span>
                 </div>
