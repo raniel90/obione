@@ -10,6 +10,9 @@ import br.com.obione.ai.dto.KnowledgeDraftDTO;
 import br.com.obione.ai.dto.KnowledgeDraftResponseDTO;
 import br.com.obione.ai.dto.ObservationSuggestionsDTO;
 import br.com.obione.ai.dto.ObservationSuggestionsResponseDTO;
+import br.com.obione.ai.dto.ProjectSetupRequestDTO;
+import br.com.obione.ai.dto.ProjectSetupSuggestionDTO;
+import br.com.obione.ai.dto.ProjectSetupSuggestionResponseDTO;
 import br.com.obione.ai.entity.AiSuggestionLog;
 import br.com.obione.ai.enums.AiSuggestionType;
 import br.com.obione.ai.repository.AiSuggestionLogRepository;
@@ -106,6 +109,42 @@ public class AiAssistantService {
         DomainSynthesisDTO synthesis = llm.synthesize(domain.name(), summaries);
         AiSuggestionLog log = journal(AiSuggestionType.SYNTHESIS, synthesis, null, null, domainId);
         return DomainSynthesisResponseDTO.of(synthesis, log.getId(), llm.provider(), llm.model(), log.getCreatedAt());
+    }
+
+    /**
+     * Suggests the initial setup of a project being created (wizard step 2):
+     * domain + MPO attributes + expected phenomena from the description alone.
+     * Hallucinated domain slugs / attribute ids are dropped before returning.
+     */
+    @Transactional
+    public ProjectSetupSuggestionResponseDTO suggestProjectSetup(ProjectSetupRequestDTO request) {
+        List<DomainResponseDTO> domains = domainService.findAll();
+        List<String> slugs = domains.stream().map(DomainResponseDTO::slug).toList();
+        String lens = catalog.inScopeAttributes().stream()
+                .map(this::lensLine)
+                .collect(Collectors.joining("\n"));
+
+        ProjectSetupSuggestionDTO raw = llm.suggestProjectSetup(
+                request.name(), request.description(), request.observationObjective(), slugs, lens);
+
+        var validKeys = catalog.inScopeAttributes().stream().map(MpoAttributeDTO::key).collect(Collectors.toSet());
+        List<String> attributeIds = raw.attributeIds() == null ? List.of()
+                : raw.attributeIds().stream().filter(validKeys::contains).distinct().toList();
+        Long domainId = domains.stream()
+                .filter(d -> d.slug().equals(raw.suggestedDomainSlug()))
+                .map(DomainResponseDTO::id)
+                .findFirst()
+                .orElse(null);
+        ProjectSetupSuggestionDTO validated = new ProjectSetupSuggestionDTO(
+                domainId != null ? raw.suggestedDomainSlug() : null,
+                raw.confidence(),
+                attributeIds,
+                raw.expectedPhenomena() == null ? List.of() : raw.expectedPhenomena(),
+                raw.rationale());
+
+        AiSuggestionLog log = journal(AiSuggestionType.PROJECT_SETUP, validated, null, null, domainId);
+        return ProjectSetupSuggestionResponseDTO.of(
+                validated, domainId, log.getId(), llm.provider(), llm.model(), log.getCreatedAt());
     }
 
     /** Acceptance metrics per assistant role, derived on the fly from the log. */

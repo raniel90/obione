@@ -1,5 +1,6 @@
 package br.com.obione.projects.service;
 
+import br.com.obione.ai.service.AiSuggestionAcceptanceService;
 import br.com.obione.common.exception.BadRequestException;
 import br.com.obione.common.exception.ResourceNotFoundException;
 import br.com.obione.domains.entity.Domain;
@@ -28,15 +29,18 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final DomainRepository domainRepository;
     private final UserRepository userRepository;
+    private final AiSuggestionAcceptanceService acceptanceService;
 
     public ProjectService(
             ProjectRepository projectRepository,
             DomainRepository domainRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            AiSuggestionAcceptanceService acceptanceService
     ) {
         this.projectRepository = projectRepository;
         this.domainRepository = domainRepository;
         this.userRepository = userRepository;
+        this.acceptanceService = acceptanceService;
     }
 
     @Transactional(readOnly = true)
@@ -88,7 +92,9 @@ public class ProjectService {
                 .expectedEndDate(request.expectedEndDate())
                 .build();
 
-        return ProjectMapper.toResponseDTO(projectRepository.save(project));
+        Project saved = projectRepository.save(project);
+        acceptanceService.markAccepted(request.suggestionId());
+        return ProjectMapper.toResponseDTO(saved);
     }
 
     @Transactional

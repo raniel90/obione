@@ -4,6 +4,7 @@ import br.com.obione.ai.dto.DomainSuggestionDTO;
 import br.com.obione.ai.dto.DomainSynthesisDTO;
 import br.com.obione.ai.dto.KnowledgeDraftDTO;
 import br.com.obione.ai.dto.ObservationSuggestionsDTO;
+import br.com.obione.ai.dto.ProjectSetupSuggestionDTO;
 
 import java.util.List;
 
@@ -27,4 +28,8 @@ public interface LlmClient {
     KnowledgeDraftDTO suggestKnowledge(String discussionTitle, String question, List<String> contributions);
 
     DomainSynthesisDTO synthesize(String domainName, List<String> projectSummaries);
+
+    ProjectSetupSuggestionDTO suggestProjectSetup(
+            String name, String description, String objective,
+            List<String> availableDomainSlugs, String mpoLens);
 }
