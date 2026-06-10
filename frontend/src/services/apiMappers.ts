@@ -1,6 +1,7 @@
 import type {
   Observation,
   ObservationImpact,
+  ObservationOrigin,
   ObservationRisk,
   ObservationStatus,
 } from "@/types/observation";

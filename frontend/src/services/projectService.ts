@@ -8,7 +8,9 @@ function toOptionalId(value: string | undefined): number | undefined {
   return Number.isFinite(parsed) ? parsed : undefined;
 }
 
-function buildCreateBody(data: Omit<Project, "id" | "createdAt" | "updatedAt">) {
+function buildCreateBody(
+  data: Omit<Project, "id" | "createdAt" | "updatedAt"> & { suggestionId?: number },
+) {
   const body: Record<string, unknown> = {
     name: data.name,
     domainId: Number(data.domainId),
@@ -29,6 +31,7 @@ function buildCreateBody(data: Omit<Project, "id" | "createdAt" | "updatedAt">) 
   if (consultantId !== undefined) body.consultantId = consultantId;
   if (data.startDate) body.startDate = data.startDate;
   if (data.expectedEndDate) body.expectedEndDate = data.expectedEndDate;
+  if (data.suggestionId !== undefined) body.suggestionId = data.suggestionId;
 
   return body;
 }
@@ -103,7 +106,7 @@ export async function getProjectsByDomain(domainId: string): Promise<Project[]> 
 }
 
 export async function createProject(
-  data: Omit<Project, "id" | "createdAt" | "updatedAt">,
+  data: Omit<Project, "id" | "createdAt" | "updatedAt"> & { suggestionId?: number },
 ): Promise<Project> {
   const created = await request<ApiProject>("/projects", {
     method: "POST",

@@ -64,6 +64,27 @@ export function synthesizeDomain(domainId: string): Promise<DomainSynthesis> {
   return request<DomainSynthesis>(`/domains/${domainId}/ai/synthesize`, { method: "POST" });
 }
 
+export interface ProjectSetupSuggestion extends AiSuggestionMeta {
+  suggestedDomainSlug: string | null;
+  suggestedDomainId: number | null;
+  confidence: number;
+  attributeIds: string[];
+  expectedPhenomena: string[];
+  rationale: string;
+}
+
+/** Setup assistido — suggest domain, MPO attributes and phenomena for a project being created. */
+export function suggestProjectSetup(input: {
+  name: string;
+  description: string;
+  observationObjective?: string;
+}): Promise<ProjectSetupSuggestion> {
+  return request<ProjectSetupSuggestion>("/ai/project-setup", {
+    method: "POST",
+    json: input,
+  });
+}
+
 export type AiSuggestionType =
   | "DOMAIN"
   | "OBSERVATIONS"
