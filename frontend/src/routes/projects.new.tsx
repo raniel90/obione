@@ -148,7 +148,7 @@ function NewProjectPage() {
       setReview((r) => ({
         ...r,
         domainId: r.domainId || domainList[0]?.id || "",
-        clientId: r.clientId || clientList[0]?.id || "",
+        // Client intentionally has no default — linking a client is an explicit decision.
         consultantId: r.consultantId || consultantList[0]?.id || "",
       }));
     });
