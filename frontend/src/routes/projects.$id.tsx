@@ -70,17 +70,11 @@ import { getCurrentUser } from "@/services/authService";
 import { getPhenomenaByProject } from "@/services/phenomenonService";
 import { getMpoAttributes, getMpoCategories } from "@/services/mpoAttributeService";
 import type { MpoCategory } from "@/types/mpoAttribute";
-import {
-  communityKnowledge as allKnowledge,
-  type DiscussionStatus,
-  type VisibilityScope,
-} from "@/lib/community-data";
+import { type DiscussionStatus, type VisibilityScope } from "@/lib/community-data";
+import { getKnowledgeByProject, toCommunityKnowledge } from "@/services/knowledgeService";
+import type { CommunityKnowledge } from "@/lib/community-data";
 import { BookOpen } from "lucide-react";
-import {
-  getProjectObservatory,
-  type ProjectObservation,
-  type ProjectPhenomenon,
-} from "@/lib/project-observatory";
+import type { ProjectObservation, ProjectPhenomenon } from "@/lib/project-observatory";
 import {
   ArrowLeft,
   ArrowRight,
@@ -88,17 +82,13 @@ import {
   Layers,
   Radar,
   Sparkles,
-  FileText,
   MessageSquare,
-  GitBranch,
-  AlertTriangle,
   TrendingUp,
   TrendingDown,
   Minus,
   Users,
   CheckCircle2,
   Eye,
-  CircleDot,
   RefreshCw,
   Lock,
   Plus,
@@ -212,35 +202,6 @@ function engagementLevelTone(level: EngagementLevel): "warning" | "success" | "i
   if (level === "HIGH") return "success";
   if (level === "MEDIUM") return "info";
   return "warning";
-}
-
-function mergeObservatoryWithProject(
-  base: ReturnType<typeof getProjectObservatory>,
-  svc: SvcProject,
-  engagementPercent: number,
-) {
-  const riskLabel = riskCodeToLabel[svc.riskLevel];
-  const engagementPct = `${engagementPercent}%`;
-  const riskTone = riskLevelTone(svc.riskLevel);
-  const engagementTone = engagementLevelTone(svc.clientEngagement);
-
-  return {
-    ...base,
-    kpis: base.kpis.map((k) => {
-      if (k.label === "Risco observado") return { ...k, value: riskLabel, tone: riskTone };
-      if (k.label === "Engajamento do cliente") {
-        return { ...k, value: engagementPct, tone: engagementTone };
-      }
-      return k;
-    }),
-    intermediateAttrs: base.intermediateAttrs.map((a) => {
-      if (a.label === "Nível de risco") return { ...a, value: riskLabel, tone: riskTone };
-      if (a.label === "Grau de engajamento") {
-        return { ...a, value: engagementPct, tone: engagementTone };
-      }
-      return a;
-    }),
-  };
 }
 
 function authorIdLabel(id: string) {
@@ -400,54 +361,88 @@ function ProjectDetailPage() {
       getMpoAttributes(),
       getProjectCoverage(id),
       getFeed({ projectId: id }).catch(() => [] as FeedEvent[]),
-    ]).then(([p, ds, phs, observs, attrs, cov, fe]) => {
-      if (cancelled) return;
-      if (!p) {
+    ])
+      .then(([p, ds, phs, observs, attrs, cov, fe]) => {
+        if (cancelled) return;
+        if (!p) {
+          setProject(null);
+          setLoading(false);
+          return;
+        }
+        setCoverage(cov);
+        setFeedEvents(fe);
+        const domainsById = new Map(ds.map((d) => [d.id, d] as const));
+        setDomainMap(domainsById);
+        setDomain(domainsById.get(p.domainId) ?? null);
+        setRawProject(p);
+        setEngagementPercent(engagementToPercent(p.clientEngagement));
+        setProject(toLegacyProject(p, domainsById));
+        setRawPhenomena(phs);
+        setSvcPhenomena(phs.map(toProjectPhenomenon));
+        const attrMap = new Map(attrs.map((a) => [a.id, a.name] as const));
+        const phenMap = new Map(phs.map((ph) => [ph.id, ph.name] as const));
+        setAttrNameById(attrMap);
+        setPhenNameById(phenMap);
+        setRawObservations(observs);
+        setSvcObservations(observs.map((o) => toProjectObservation(o, attrMap, phenMap)));
+        setLoading(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
         setProject(null);
         setLoading(false);
-        return;
-      }
-      setCoverage(cov);
-      setFeedEvents(fe);
-      const domainsById = new Map(ds.map((d) => [d.id, d] as const));
-      setDomainMap(domainsById);
-      setDomain(domainsById.get(p.domainId) ?? null);
-      setRawProject(p);
-      setEngagementPercent(engagementToPercent(p.clientEngagement));
-      setProject(toLegacyProject(p, domainsById));
-      setRawPhenomena(phs);
-      setSvcPhenomena(phs.map(toProjectPhenomenon));
-      const attrMap = new Map(attrs.map((a) => [a.id, a.name] as const));
-      const phenMap = new Map(phs.map((ph) => [ph.id, ph.name] as const));
-      setAttrNameById(attrMap);
-      setPhenNameById(phenMap);
-      setRawObservations(observs);
-      setSvcObservations(observs.map((o) => toProjectObservation(o, attrMap, phenMap)));
-      setLoading(false);
-    });
+      });
     return () => {
       cancelled = true;
     };
   }, [id]);
 
-  const obs = useMemo(() => {
-    const base = getProjectObservatory(id);
-    if (!rawProject || engagementPercent === null) return base;
-    return mergeObservatoryWithProject(base, rawProject, engagementPercent);
-  }, [id, rawProject, engagementPercent]);
+  const kpis = useMemo((): { label: string; value: string; tone?: string; hint?: string }[] => {
+    if (!rawProject) return [];
+    const aiAccepted = rawObservations.filter((o) => o.origin === "AI_SUGGESTED").length;
+    return [
+      {
+        label: "Risco observado",
+        value: riskCodeToLabel[rawProject.riskLevel],
+        tone: riskLevelTone(rawProject.riskLevel),
+      },
+      {
+        label: "Engajamento do cliente",
+        value: engagementPercent !== null ? `${engagementPercent}%` : "—",
+        tone: engagementLevelTone(rawProject.clientEngagement),
+      },
+      {
+        label: "Cobertura do MPO",
+        value: coverage ? `${coverage.percentage}%` : "—",
+        tone: "info",
+      },
+      { label: "Observações", value: String(rawObservations.length) },
+      { label: "Fenômenos", value: String(rawPhenomena.length) },
+      { label: "Aceitas da IA", value: String(aiAccepted) },
+    ];
+  }, [rawProject, engagementPercent, coverage, rawObservations, rawPhenomena]);
+
+  const observatorySummary = useMemo(() => {
+    if (!rawProject) return "";
+    const risk = riskCodeToLabel[rawProject.riskLevel].toLowerCase();
+    if (rawObservations.length === 0) {
+      return `Projeto com risco ${risk} e ainda sem observações registradas — registre a primeira observação (ou aceite uma sugestão da IA) para o observatório começar a interpretar este caso.`;
+    }
+    const attrCount = new Set(rawObservations.map((o) => o.attributeId).filter(Boolean)).size;
+    const coverageNote = coverage ? `, cobrindo ${coverage.percentage}% da lente MPO` : "";
+    return `Projeto com risco ${risk} e ${rawObservations.length} observação(ões) registradas sobre ${attrCount} atributo(s) do MPO${coverageNote}. ${rawPhenomena.length > 0 ? `Há ${rawPhenomena.length} fenômeno(s) em acompanhamento.` : "Nenhum fenômeno consolidado até aqui."}`;
+  }, [rawProject, rawObservations, rawPhenomena, coverage]);
 
   const displayTimeline = useMemo(
     () =>
-      feedEvents.length > 0
-        ? feedEvents.map((e) => ({
-            id: `${e.kind}-${e.id}`,
-            type: e.kind,
-            description: e.title,
-            actor: e.actorName ?? "Observatório",
-            date: e.createdAt,
-          }))
-        : obs.timeline,
-    [feedEvents, obs.timeline],
+      feedEvents.map((e) => ({
+        id: `${e.kind}-${e.id}`,
+        type: e.kind,
+        description: e.title,
+        actor: e.actorName ?? "Observatório",
+        date: e.createdAt,
+      })),
+    [feedEvents],
   );
 
   if (loading) {
@@ -474,9 +469,8 @@ function ProjectDetailPage() {
     );
   }
 
-  const phenomenaList: ProjectPhenomenon[] = svcPhenomena.length > 0 ? svcPhenomena : obs.phenomena;
-  const observationsList: ProjectObservation[] =
-    svcObservations.length > 0 ? svcObservations : obs.observations;
+  const phenomenaList: ProjectPhenomenon[] = svcPhenomena;
+  const observationsList: ProjectObservation[] = svcObservations;
 
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
@@ -559,7 +553,7 @@ function ProjectDetailPage() {
             <MetaItem label="Domínio" value={domain?.name ?? project.domain} />
             <MetaItem label="Tipo" value={project.model} />
             <MetaItem label="Consultor" value={project.owner} />
-            <MetaItem label="Cliente" value={project.clientName ?? obs.client} />
+            <MetaItem label="Cliente" value={project.clientName ?? "—"} />
             <MetaItem
               label="Risco"
               value={rawProject ? riskCodeToLabel[rawProject.riskLevel] : "—"}
@@ -568,8 +562,14 @@ function ProjectDetailPage() {
               label="Engajamento"
               value={engagementPercent !== null ? `${engagementPercent}%` : "—"}
             />
-            <MetaItem label="Início" value={formatDate(obs.startDate)} />
-            <MetaItem label="Previsão" value={formatDate(obs.dueDate)} />
+            <MetaItem
+              label="Início"
+              value={rawProject?.startDate ? formatDate(rawProject.startDate) : "—"}
+            />
+            <MetaItem
+              label="Previsão"
+              value={rawProject?.expectedEndDate ? formatDate(rawProject.expectedEndDate) : "—"}
+            />
             <div className="col-span-2 md:col-span-6">
               <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                 <span>Progresso observacional</span>
@@ -597,7 +597,7 @@ function ProjectDetailPage() {
           <div className="mt-3 rounded-xl border border-foreground/20 bg-foreground/[0.025] p-5">
             <div className="flex items-start gap-3">
               <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-foreground/70" />
-              <p className="text-[14px] leading-relaxed text-foreground">{obs.summary}</p>
+              <p className="text-[14px] leading-relaxed text-foreground">{observatorySummary}</p>
             </div>
           </div>
         </section>
@@ -610,7 +610,7 @@ function ProjectDetailPage() {
             description="Medidas interpretativas geradas pelo observatório."
           />
           <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-            {obs.kpis.map((k) => (
+            {kpis.map((k) => (
               <div key={k.label} className="rounded-xl border border-border bg-card p-4">
                 <span className="text-[10.5px] uppercase tracking-[0.16em] text-muted-foreground">
                   {k.label}
@@ -678,23 +678,60 @@ function ProjectDetailPage() {
                 { label: "Nome", value: project.name },
                 { label: "Domínio", value: domain?.name ?? project.domain },
                 { label: "Status", value: project.status },
-                { label: "Cliente", value: project.clientName ?? obs.client },
-                ...obs.generalAttrs,
+                { label: "Cliente", value: project.clientName ?? "—" },
+                { label: "Consultor", value: project.owner },
+                { label: "Tipo", value: project.model },
+                ...(rawProject?.observationObjective
+                  ? [{ label: "Objetivo observacional", value: rawProject.observationObjective }]
+                  : []),
               ]}
             />
             <AttrBlock
               title="Atributos específicos"
               description="Eventos, ocorrências e evidências concretas."
-              items={obs.specificAttrs}
+              items={[
+                { label: "Observações registradas", value: String(rawObservations.length) },
+                {
+                  label: "Observações de impacto alto",
+                  value: String(rawObservations.filter((o) => o.impact === "HIGH").length),
+                },
+                {
+                  label: "Atributos MPO observados",
+                  value: String(
+                    new Set(rawObservations.map((o) => o.attributeId).filter(Boolean)).size,
+                  ),
+                },
+                {
+                  label: "Sugestões da IA aceitas",
+                  value: String(rawObservations.filter((o) => o.origin === "AI_SUGGESTED").length),
+                },
+              ]}
             />
             <AttrBlock
               title="Atributos intermediários"
               description="Interpretações derivadas pelo observatório."
-              items={obs.intermediateAttrs.map((a) => ({
-                label: a.label,
-                value: a.value,
-                className: a.tone ? toneClass[a.tone] : undefined,
-              }))}
+              items={[
+                {
+                  label: "Nível de risco",
+                  value: rawProject ? riskCodeToLabel[rawProject.riskLevel] : "—",
+                  className: rawProject
+                    ? toneClass[riskLevelTone(rawProject.riskLevel)]
+                    : undefined,
+                },
+                {
+                  label: "Grau de engajamento",
+                  value: engagementPercent !== null ? `${engagementPercent}%` : "—",
+                  className: rawProject
+                    ? toneClass[engagementLevelTone(rawProject.clientEngagement)]
+                    : undefined,
+                },
+                {
+                  label: "Cobertura do MPO",
+                  value: coverage ? `${coverage.percentage}%` : "—",
+                  className: toneClass.info,
+                },
+                { label: "Progresso observacional", value: `${project.progress}%` },
+              ]}
               highlight
             />
           </div>
@@ -707,6 +744,12 @@ function ProjectDetailPage() {
             title="Fenômenos Associados"
             description="Sinais identificados a partir do cruzamento dos atributos observados."
           />
+          {phenomenaList.length === 0 && (
+            <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/20 p-5 text-[12.5px] leading-relaxed text-muted-foreground">
+              Nenhum fenômeno em acompanhamento ainda — fenômenos surgem do cruzamento das
+              observações registradas neste projeto.
+            </div>
+          )}
           <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
             {phenomenaList.map((ph) => {
               const TrendIcon = trendIcon[ph.trend];
@@ -775,48 +818,36 @@ function ProjectDetailPage() {
             description="Participantes vinculados que interpretam os fenômenos e produzem conhecimento."
           />
 
-          <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
-            <div className="rounded-xl border border-border bg-card p-5">
-              <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
-                <Users className="h-3 w-3" /> Participantes
-              </div>
-              <ul className="mt-3 divide-y divide-border">
-                {obs.participants.map((p) => (
-                  <li
-                    key={p.name}
-                    className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0"
-                  >
-                    <div className="min-w-0">
-                      <p className="text-[13px] font-medium text-foreground">{p.name}</p>
-                      <p className="text-[11.5px] text-muted-foreground">{p.responsibility}</p>
-                    </div>
-                    <span className="shrink-0 rounded-md border border-border bg-muted/40 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                      {p.role}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+          <div className="mt-4 rounded-xl border border-border bg-card p-5">
+            <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+              <Users className="h-3 w-3" /> Participantes
             </div>
-
-            <div className="rounded-xl border border-border bg-card p-5">
-              <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
-                <MessageSquare className="h-3 w-3" /> Discussões observacionais
-              </div>
-              <ul className="mt-3 space-y-3">
-                {obs.discussions.map((d) => (
-                  <li key={d.id} className="rounded-lg border border-border bg-background p-3">
-                    <p className="text-[13px] leading-snug text-foreground">“{d.question}”</p>
-                    <div className="mt-1.5 flex items-center gap-2 text-[11px] text-muted-foreground">
-                      <span>{d.contributions} contribuições</span>
-                      <span className="h-1 w-1 rounded-full bg-border" />
-                      <span className="capitalize">{d.status}</span>
-                      <span className="h-1 w-1 rounded-full bg-border" />
-                      <span className="font-mono uppercase tracking-wider">projeto vinculado</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <ul className="mt-3 divide-y divide-border">
+              <li className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                <div className="min-w-0">
+                  <p className="text-[13px] font-medium text-foreground">{project.owner}</p>
+                  <p className="text-[11.5px] text-muted-foreground">
+                    Responsável pela análise observacional
+                  </p>
+                </div>
+                <span className="shrink-0 rounded-md border border-border bg-muted/40 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                  Consultor
+                </span>
+              </li>
+              {project.clientName && (
+                <li className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-medium text-foreground">{project.clientName}</p>
+                    <p className="text-[11.5px] text-muted-foreground">
+                      Validação, feedback e contexto de negócio
+                    </p>
+                  </div>
+                  <span className="shrink-0 rounded-md border border-border bg-muted/40 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                    Cliente
+                  </span>
+                </li>
+              )}
+            </ul>
           </div>
 
           <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/20 p-4 text-[12.5px] leading-relaxed text-muted-foreground">
@@ -836,44 +867,6 @@ function ProjectDetailPage() {
           refreshKey={discussionsRefresh}
         />
 
-        {/* Insights */}
-        <section>
-          <SectionTitle
-            eyebrow="Inteligência interpretativa"
-            title="Insights do Projeto"
-            description="Narrativas geradas a partir do cruzamento de atributos, artefatos e discussões."
-          />
-          <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-3">
-            {obs.insights.map((i) => (
-              <article
-                key={i.id}
-                className="flex flex-col rounded-xl border border-border bg-card p-5"
-              >
-                <div className="flex items-center justify-between text-[10.5px] uppercase tracking-wider text-muted-foreground">
-                  <span className="inline-flex items-center gap-1.5">
-                    <Sparkles className="h-3 w-3" /> {i.origin}
-                  </span>
-                  <span className="font-mono">confiança {i.confidence}</span>
-                </div>
-                <p className="mt-3 text-[13.5px] leading-relaxed text-foreground">
-                  “{i.narrative}”
-                </p>
-                <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-[11px] text-muted-foreground">
-                  <span className="capitalize">{i.status}</span>
-                  <CircleDot
-                    className={cn(
-                      "h-3 w-3",
-                      i.status === "consolidado" && "text-success",
-                      i.status === "em revisão" && "text-warning",
-                      i.status === "proposto" && "text-muted-foreground",
-                    )}
-                  />
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-
         {/* Timeline */}
         <section>
           <SectionTitle
@@ -881,6 +874,12 @@ function ProjectDetailPage() {
             title="Linha do Tempo Observacional"
             description="O observatório acompanha a evolução do projeto ao longo do tempo."
           />
+          {displayTimeline.length === 0 && (
+            <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/20 p-5 text-[12.5px] leading-relaxed text-muted-foreground">
+              Ainda não há eventos registrados — observações, discussões e conhecimentos deste
+              projeto aparecerão aqui conforme forem criados.
+            </div>
+          )}
           <ol className="mt-4 space-y-2">
             {displayTimeline.map((ev) => (
               <li
@@ -912,7 +911,9 @@ function ProjectDetailPage() {
             <div className="flex items-start gap-3">
               <Layers className="mt-0.5 h-4 w-4 text-muted-foreground" />
               <p className="max-w-3xl text-[13px] leading-relaxed text-foreground/90">
-                {obs.domainContext}
+                {domain
+                  ? `Este projeto pertence ao domínio ${domain.name}. ${domain.description ?? "Os fenômenos observados aqui contribuem para o entendimento de padrões nos demais projetos do domínio."}`
+                  : "Este projeto ainda não está vinculado a um domínio do observatório."}
               </p>
             </div>
             {domain && (
@@ -987,13 +988,9 @@ function AttrBlock({
 
 function TimelineIcon({ type }: { type: string }) {
   const map: Record<string, React.ComponentType<{ className?: string }>> = {
-    cadastro: CheckCircle2,
-    briefing: FileText,
-    artefato: FileText,
-    escopo: GitBranch,
-    discussão: MessageSquare,
-    insight: Sparkles,
-    risco: AlertTriangle,
+    observation: ClipboardList,
+    discussion: MessageSquare,
+    knowledge: BookOpen,
   };
   const Icon = map[type] ?? Eye;
   return <Icon className="h-3.5 w-3.5" />;
@@ -1634,6 +1631,12 @@ function ManualObservationSection({
         </div>
       )}
 
+      {items.length === 0 && (
+        <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/20 p-5 text-[12.5px] leading-relaxed text-muted-foreground">
+          Nenhuma observação registrada ainda. Registre a primeira manualmente ou peça sugestões à
+          IA — é a partir das observações que o observatório mede a cobertura do MPO.
+        </div>
+      )}
       <div className="mt-4 space-y-3">
         {items.map((o) => (
           <article key={o.id} className="rounded-xl border border-border bg-card p-5">
@@ -2284,6 +2287,7 @@ function ProjectDiscussionsAndKnowledge({
   const [projectDiscussions, setProjectDiscussions] = useState<
     ReturnType<typeof toCommunityDiscussion>[]
   >([]);
+  const [projectKnowledge, setProjectKnowledge] = useState<CommunityKnowledge[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -2300,12 +2304,26 @@ function ProjectDiscussionsAndKnowledge({
         ),
       );
     });
+    getKnowledgeByProject(projectId)
+      .then((knowledge) => {
+        if (cancelled) return;
+        setProjectKnowledge(
+          knowledge.map((k) =>
+            toCommunityKnowledge(k, {
+              domain: domainName,
+              project: projectName,
+              phenomenon: k.phenomenonId
+                ? (phenNameById.get(k.phenomenonId) ?? k.phenomenonId)
+                : undefined,
+            }),
+          ),
+        );
+      })
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
   }, [projectId, projectName, domainName, phenNameById, refreshKey]);
-
-  const projectKnowledge = allKnowledge.filter((k) => k.project === projectName);
   const communityLink = domainSlug ? (
     <Link to="/community/$slug" params={{ slug: domainSlug }}>
       Ir para a comunidade <ArrowRight className="h-3 w-3" />
