@@ -27,6 +27,7 @@ public record CreateProjectRequestDTO(
         RiskLevel riskLevel,
         ClientEngagement clientEngagement,
         LocalDate startDate,
-        LocalDate expectedEndDate
+        LocalDate expectedEndDate,
+        Long suggestionId
 ) {
 }

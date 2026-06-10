@@ -4,6 +4,7 @@ import br.com.obione.ai.dto.DomainSuggestionDTO;
 import br.com.obione.ai.dto.DomainSynthesisDTO;
 import br.com.obione.ai.dto.KnowledgeDraftDTO;
 import br.com.obione.ai.dto.ObservationSuggestionsDTO;
+import br.com.obione.ai.dto.ProjectSetupSuggestionDTO;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -77,6 +78,25 @@ public class OpenAiLlmClient implements LlmClient {
                         + "\nContribuições:\n" + String.join("\n", contributions))
                 .call()
                 .entity(KnowledgeDraftDTO.class);
+    }
+
+    @Override
+    public ProjectSetupSuggestionDTO suggestProjectSetup(
+            String name, String description, String objective,
+            List<String> availableDomainSlugs, String mpoLens) {
+        return chat.prompt()
+                .system("Você ajuda a configurar um novo projeto em um observatório de projetos baseado no MPO. "
+                        + "A partir da descrição, sugira: o domínio (exatamente um dos slugs disponíveis, com confiança 0-1), "
+                        + "de 3 a 8 attributeIds da lente fornecida que valem acompanhar (não invente ids fora da lista), "
+                        + "de 2 a 4 fenômenos esperados (frases curtas em pt-BR, ex.: 'Risco de atraso') "
+                        + "e um rationale breve.")
+                .user("Nome do projeto: " + name
+                        + "\nDescrição: " + description
+                        + "\nObjetivo observacional: " + (objective == null ? "" : objective)
+                        + "\nSlugs de domínio disponíveis: " + String.join(", ", availableDomainSlugs)
+                        + "\nLente MPO (attributeId — rótulo (categoria)):\n" + mpoLens)
+                .call()
+                .entity(ProjectSetupSuggestionDTO.class);
     }
 
     @Override

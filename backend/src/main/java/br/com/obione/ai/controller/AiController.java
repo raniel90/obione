@@ -5,12 +5,16 @@ import br.com.obione.ai.dto.DomainSuggestionResponseDTO;
 import br.com.obione.ai.dto.DomainSynthesisResponseDTO;
 import br.com.obione.ai.dto.KnowledgeDraftResponseDTO;
 import br.com.obione.ai.dto.ObservationSuggestionsResponseDTO;
+import br.com.obione.ai.dto.ProjectSetupRequestDTO;
+import br.com.obione.ai.dto.ProjectSetupSuggestionResponseDTO;
 import br.com.obione.ai.service.AiAssistantService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -51,6 +55,13 @@ public class AiController {
     @Operation(summary = "IA: síntese cross-projeto do domínio (Conectora)")
     public DomainSynthesisResponseDTO synthesize(@PathVariable Long id) {
         return ai.synthesize(id);
+    }
+
+    @PostMapping("/ai/project-setup")
+    @Operation(summary = "IA: sugerir setup inicial de um projeto em criação (domínio + atributos + fenômenos)")
+    public ProjectSetupSuggestionResponseDTO suggestProjectSetup(
+            @Valid @RequestBody ProjectSetupRequestDTO request) {
+        return ai.suggestProjectSetup(request);
     }
 
     @GetMapping("/ai/stats")

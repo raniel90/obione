@@ -5,6 +5,7 @@ import br.com.obione.ai.dto.DomainSynthesisDTO;
 import br.com.obione.ai.dto.KnowledgeDraftDTO;
 import br.com.obione.ai.dto.ObservationSuggestionDTO;
 import br.com.obione.ai.dto.ObservationSuggestionsDTO;
+import br.com.obione.ai.dto.ProjectSetupSuggestionDTO;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -50,6 +51,19 @@ public class MockLlmClient implements LlmClient {
                         "Há indícios de escopo amplo; vale registrar o escopo planejado observado.",
                         "escopo_planejado", "LOW", excerpt)
         ));
+    }
+
+    @Override
+    public ProjectSetupSuggestionDTO suggestProjectSetup(
+            String name, String description, String objective,
+            List<String> availableDomainSlugs, String mpoLens) {
+        String slug = availableDomainSlugs.isEmpty() ? "outros" : availableDomainSlugs.get(0);
+        return new ProjectSetupSuggestionDTO(
+                slug, 0.7,
+                List.of("objetivos", "escopo_planejado", "riscos_identificados", "data_inicio"),
+                List.of("Risco de atraso", "Mudanças recorrentes de escopo"),
+                "Setup determinístico (mock) a partir da descrição do projeto. "
+                        + "Ative obione.llm.provider=openai para sugestão por IA real.");
     }
 
     /** Deterministic stand-in for the literal source passage a real LLM would cite. */
