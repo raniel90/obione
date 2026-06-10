@@ -8,7 +8,8 @@ import type { Project as SvcProject, ProjectStatusCode, ProjectTypeCode } from "
 import type { Domain as SvcDomain } from "@/types/domain";
 import { getProjects } from "@/services/projectService";
 import { getDomains } from "@/services/domainService";
-import { phenomena } from "@/lib/observatory-data";
+import { getPhenomena } from "@/services/phenomenonService";
+import type { Phenomenon } from "@/types/phenomenon";
 import { Plus, Filter, Search, ArrowUpRight, AlertTriangle, Radar } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -76,13 +77,14 @@ const riskTone: Record<Risk, string> = {
   Elevado: "border-destructive/30 text-destructive bg-destructive/5",
 };
 
-function phenomenaForDomain(domainName: string) {
-  return phenomena.filter((ph) => ph.domain === domainName);
-}
-
-function ObservedProjectCard({ project }: { project: LegacyProject }) {
+function ObservedProjectCard({
+  project,
+  phenomenaCount,
+}: {
+  project: LegacyProject;
+  phenomenaCount: number;
+}) {
   const risk = deriveRisk(project);
-  const linked = phenomenaForDomain(project.domain);
   const updated = new Date(project.updatedAt).toLocaleDateString("pt-BR", {
     day: "2-digit",
     month: "short",
@@ -161,8 +163,8 @@ function ObservedProjectCard({ project }: { project: LegacyProject }) {
       <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-[11px] text-muted-foreground">
         <span className="inline-flex items-center gap-1">
           <Radar className="h-3 w-3" />
-          {linked.length} fenômeno{linked.length === 1 ? "" : "s"} associado
-          {linked.length === 1 ? "" : "s"}
+          {phenomenaCount} fenômeno{phenomenaCount === 1 ? "" : "s"} associado
+          {phenomenaCount === 1 ? "" : "s"}
         </span>
         <span className="font-mono">Últ. obs · {updated}</span>
       </div>
@@ -193,17 +195,34 @@ function ProjectsCatalog() {
   const [domains, setDomains] = useState<SvcDomain[]>([]);
   const [svcProjects, setSvcProjects] = useState<SvcProject[]>([]);
 
+  const [phenomena, setPhenomena] = useState<Phenomenon[]>([]);
+
   useEffect(() => {
     let cancelled = false;
-    Promise.all([getDomains(), getProjects()]).then(([d, p]) => {
-      if (cancelled) return;
-      setDomains(d);
-      setSvcProjects(p);
-    });
+    Promise.all([getDomains(), getProjects(), getPhenomena().catch(() => [] as Phenomenon[])]).then(
+      ([d, p, phs]) => {
+        if (cancelled) return;
+        setDomains(d);
+        setSvcProjects(p);
+        setPhenomena(phs);
+      },
+    );
     return () => {
       cancelled = true;
     };
   }, []);
+
+  // Phenomena linked per project: direct project link or same-domain (portfolio lens).
+  const phenomenaCountByProject = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const p of svcProjects) {
+      counts.set(
+        p.id,
+        phenomena.filter((ph) => ph.projectId === p.id || ph.domainId === p.domainId).length,
+      );
+    }
+    return counts;
+  }, [svcProjects, phenomena]);
 
   const projects = useMemo(() => {
     const map = new Map(domains.map((d) => [d.id, d.name]));
@@ -317,7 +336,11 @@ function ProjectsCatalog() {
         ) : (
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {filtered.map((p) => (
-              <ObservedProjectCard key={p.id} project={p} />
+              <ObservedProjectCard
+                key={p.id}
+                project={p}
+                phenomenaCount={phenomenaCountByProject.get(p.id) ?? 0}
+              />
             ))}
           </div>
         )}
