@@ -143,6 +143,9 @@ export interface ApiObservation {
   risk: ObservationRisk;
   interpretation: string | null;
   status: ObservationStatus;
+  origin: ObservationOrigin | null;
+  sourceExcerpt: string | null;
+  suggestionId: number | null;
   createdById: number | null;
   createdByName: string | null;
   createdAt: string;
@@ -347,6 +350,9 @@ export function mapObservation(dto: ApiObservation): Observation {
     risk: dto.risk,
     interpretation: dto.interpretation ?? "",
     status: dto.status,
+    origin: dto.origin ?? "MANUAL",
+    sourceExcerpt: dto.sourceExcerpt ?? undefined,
+    suggestionId: dto.suggestionId ?? undefined,
     createdBy: dto.createdById != null ? String(dto.createdById) : "",
     createdByName: dto.createdByName ?? undefined,
     createdAt: formatCreatedAt(dto.createdAt),

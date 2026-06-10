@@ -22,6 +22,10 @@ function buildCreateBody(
     status: data.status,
   };
 
+  if (data.origin !== undefined) body.origin = data.origin;
+  if (data.sourceExcerpt) body.sourceExcerpt = data.sourceExcerpt;
+  if (data.suggestionId !== undefined) body.suggestionId = data.suggestionId;
+
   const createdById = toOptionalId(data.createdBy);
   if (createdById !== undefined) body.createdById = createdById;
 

@@ -62,6 +62,8 @@ export interface ProjectObservation {
   interpretation: string;
   author: string;
   status: ObservationStatus;
+  aiSuggested?: boolean;
+  sourceExcerpt?: string;
 }
 
 export interface ProjectParticipant {

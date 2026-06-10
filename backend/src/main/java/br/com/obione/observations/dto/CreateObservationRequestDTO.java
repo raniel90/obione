@@ -1,6 +1,7 @@
 package br.com.obione.observations.dto;
 
 import br.com.obione.observations.enums.ObservationImpact;
+import br.com.obione.observations.enums.ObservationOrigin;
 import br.com.obione.observations.enums.ObservationStatus;
 import br.com.obione.projects.enums.RiskLevel;
 import jakarta.validation.constraints.NotBlank;
@@ -14,6 +15,9 @@ public record CreateObservationRequestDTO(
         RiskLevel risk,
         String interpretation,
         ObservationStatus status,
-        Long createdById
+        Long createdById,
+        ObservationOrigin origin,
+        String sourceExcerpt,
+        Long suggestionId
 ) {
 }
