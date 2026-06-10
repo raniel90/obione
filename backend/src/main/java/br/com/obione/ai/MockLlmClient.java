@@ -20,6 +20,16 @@ import java.util.List;
 public class MockLlmClient implements LlmClient {
 
     @Override
+    public String provider() {
+        return "mock";
+    }
+
+    @Override
+    public String model() {
+        return "deterministic-v1";
+    }
+
+    @Override
     public DomainSuggestionDTO suggestDomain(String projectSummary, String objective, List<String> availableDomainSlugs) {
         String slug = availableDomainSlugs.isEmpty() ? "outros" : availableDomainSlugs.get(0);
         return new DomainSuggestionDTO(slug, 0.72,
@@ -29,16 +39,26 @@ public class MockLlmClient implements LlmClient {
 
     @Override
     public ObservationSuggestionsDTO suggestObservations(String projectSummary, String objective, String mpoLens) {
+        String excerpt = excerptOf(projectSummary);
         return new ObservationSuggestionsDTO(List.of(
                 new ObservationSuggestionDTO(
                         "Possível risco de prazo a observar",
                         "O resumo sugere pressão de cronograma que merece registro observacional.",
-                        "riscos_identificados", "MEDIUM"),
+                        "riscos_identificados", "MEDIUM", excerpt),
                 new ObservationSuggestionDTO(
                         "Escopo planejado a confirmar",
                         "Há indícios de escopo amplo; vale registrar o escopo planejado observado.",
-                        "escopo_planejado", "LOW")
+                        "escopo_planejado", "LOW", excerpt)
         ));
+    }
+
+    /** Deterministic stand-in for the literal source passage a real LLM would cite. */
+    private String excerptOf(String projectSummary) {
+        if (projectSummary == null || projectSummary.isBlank()) {
+            return "";
+        }
+        String trimmed = projectSummary.strip();
+        return trimmed.length() <= 120 ? trimmed : trimmed.substring(0, 117) + "...";
     }
 
     @Override

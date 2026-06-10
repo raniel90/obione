@@ -48,7 +48,7 @@ import { toast } from "sonner";
 import { getProjectById, getProjectCoverage, updateProject } from "@/services/projectService";
 import type { ProjectCoverage } from "@/services/projectService";
 import { suggestDomain, suggestObservations } from "@/services/aiService";
-import type { ObservationSuggestion } from "@/services/aiService";
+import type { AiSuggestionMeta, ObservationSuggestion } from "@/services/aiService";
 import { getFeed } from "@/services/feedService";
 import type { FeedEvent } from "@/services/feedService";
 import { getDomains } from "@/services/domainService";
@@ -1087,6 +1087,7 @@ function ManualObservationSection({
   const [analyzingId, setAnalyzingId] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState("");
   const [aiSuggestions, setAiSuggestions] = useState<ObservationSuggestion[]>([]);
+  const [aiMeta, setAiMeta] = useState<AiSuggestionMeta | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -1179,6 +1180,12 @@ function ManualObservationSection({
     try {
       const res = await suggestObservations(projectId);
       setAiSuggestions(res.suggestions);
+      setAiMeta({
+        suggestionId: res.suggestionId,
+        provider: res.provider,
+        model: res.model,
+        generatedAt: res.generatedAt,
+      });
       if (res.suggestions.length === 0) toast.info("A IA não sugeriu observações.");
     } catch {
       toast.error("Não foi possível obter sugestões da IA.");
@@ -1578,9 +1585,16 @@ function ManualObservationSection({
 
       {aiSuggestions.length > 0 && (
         <div className="mt-4 space-y-2 rounded-xl border border-dashed border-foreground/30 bg-foreground/[0.02] p-4">
-          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-            Sugestões da IA · revise antes de aceitar
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              Sugestões da IA · revise antes de aceitar
+            </p>
+            {aiMeta && (
+              <span className="rounded-full border border-border bg-background px-2 py-0.5 font-mono text-[10px] text-muted-foreground">
+                {aiMeta.provider} · {aiMeta.model}
+              </span>
+            )}
+          </div>
           {aiSuggestions.map((s, i) => (
             <div
               key={i}
@@ -1589,6 +1603,11 @@ function ManualObservationSection({
               <div className="min-w-0">
                 <p className="text-[13px] font-medium">{s.title}</p>
                 <p className="text-[12px] text-muted-foreground">{s.description}</p>
+                {s.sourceExcerpt && (
+                  <p className="mt-1 border-l-2 border-border pl-2 text-[11px] italic text-muted-foreground">
+                    “{s.sourceExcerpt}”
+                  </p>
+                )}
                 <p className="mt-1 text-[11px] text-muted-foreground">
                   atributo: <span className="font-mono">{s.attributeId}</span> · impacto: {s.impact}
                 </p>

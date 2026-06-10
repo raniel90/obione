@@ -1,6 +1,14 @@
 import { request } from "./apiClient";
 
-export interface DomainSuggestion {
+/** Reproducibility metadata attached to every AI suggestion (RNF04). */
+export interface AiSuggestionMeta {
+  suggestionId: number;
+  provider: string;
+  model: string;
+  generatedAt: string;
+}
+
+export interface DomainSuggestion extends AiSuggestionMeta {
   suggestedDomainSlug: string;
   confidence: number;
   rationale: string;
@@ -11,13 +19,14 @@ export interface ObservationSuggestion {
   description: string;
   attributeId: string;
   impact: string;
+  sourceExcerpt: string;
 }
 
-export interface ObservationSuggestions {
+export interface ObservationSuggestions extends AiSuggestionMeta {
   suggestions: ObservationSuggestion[];
 }
 
-export interface KnowledgeDraft {
+export interface KnowledgeDraft extends AiSuggestionMeta {
   title: string;
   summary: string;
   evidence: string;
@@ -25,7 +34,7 @@ export interface KnowledgeDraft {
   confidence: string;
 }
 
-export interface DomainSynthesis {
+export interface DomainSynthesis extends AiSuggestionMeta {
   summary: string;
   patterns: string[];
   lessons: string[];

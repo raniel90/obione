@@ -3,11 +3,14 @@ package br.com.obione.ai.dto;
 /**
  * AI-suggested observation, mapped to the MPO lens (the "observadora assistida").
  * {@code attributeId} is a canonical MPO attribute key; {@code impact} is LOW/MEDIUM/HIGH.
+ * {@code sourceExcerpt} is the literal passage of the project text that motivated
+ * the suggestion (RNF05 — origin traceability).
  */
 public record ObservationSuggestionDTO(
         String title,
         String description,
         String attributeId,
-        String impact
+        String impact,
+        String sourceExcerpt
 ) {
 }

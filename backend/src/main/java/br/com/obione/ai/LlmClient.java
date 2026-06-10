@@ -14,6 +14,12 @@ import java.util.List;
  */
 public interface LlmClient {
 
+    /** Provider name recorded on every suggestion log (RNF04), e.g. "mock". */
+    String provider();
+
+    /** Model identifier recorded on every suggestion log (RNF04). */
+    String model();
+
     DomainSuggestionDTO suggestDomain(String projectSummary, String objective, List<String> availableDomainSlugs);
 
     ObservationSuggestionsDTO suggestObservations(String projectSummary, String objective, String mpoLens);
