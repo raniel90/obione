@@ -397,6 +397,12 @@ function ProjectDetailPage() {
     };
   }, [id]);
 
+  // MPO coverage is the consultant's measurement instrument — hidden from clients.
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    getCurrentUser().then((user) => setIsClient(user?.profileCode === "CLIENT"));
+  }, []);
+
   const kpis = useMemo((): { label: string; value: string; tone?: string; hint?: string }[] => {
     if (!rawProject) return [];
     const aiAccepted = rawObservations.filter((o) => o.origin === "AI_SUGGESTED").length;
@@ -411,16 +417,20 @@ function ProjectDetailPage() {
         value: engagementPercent !== null ? `${engagementPercent}%` : "—",
         tone: engagementLevelTone(rawProject.clientEngagement),
       },
-      {
-        label: "Cobertura do MPO",
-        value: coverage ? `${coverage.percentage}%` : "—",
-        tone: "info",
-      },
+      ...(isClient
+        ? []
+        : [
+            {
+              label: "Cobertura do MPO",
+              value: coverage ? `${coverage.percentage}%` : "—",
+              tone: "info",
+            },
+          ]),
       { label: "Observações", value: String(rawObservations.length) },
       { label: "Fenômenos", value: String(rawPhenomena.length) },
       { label: "Aceitas da IA", value: String(aiAccepted) },
     ];
-  }, [rawProject, engagementPercent, coverage, rawObservations, rawPhenomena]);
+  }, [rawProject, engagementPercent, coverage, rawObservations, rawPhenomena, isClient]);
 
   const observatorySummary = useMemo(() => {
     if (!rawProject) return "";
@@ -429,9 +439,10 @@ function ProjectDetailPage() {
       return `Projeto com risco ${risk} e ainda sem observações registradas — registre a primeira observação (ou aceite uma sugestão da IA) para o observatório começar a interpretar este caso.`;
     }
     const attrCount = new Set(rawObservations.map((o) => o.attributeId).filter(Boolean)).size;
-    const coverageNote = coverage ? `, cobrindo ${coverage.percentage}% da lente MPO` : "";
+    const coverageNote =
+      coverage && !isClient ? `, cobrindo ${coverage.percentage}% da lente MPO` : "";
     return `Projeto com risco ${risk} e ${rawObservations.length} observação(ões) registradas sobre ${attrCount} atributo(s) do MPO${coverageNote}. ${rawPhenomena.length > 0 ? `Há ${rawPhenomena.length} fenômeno(s) em acompanhamento.` : "Nenhum fenômeno consolidado até aqui."}`;
-  }, [rawProject, rawObservations, rawPhenomena, coverage]);
+  }, [rawProject, rawObservations, rawPhenomena, coverage, isClient]);
 
   const displayTimeline = useMemo(
     () =>
@@ -624,8 +635,8 @@ function ProjectDetailPage() {
           </div>
         </section>
 
-        {/* Cobertura do MPO */}
-        {coverage && (
+        {/* Cobertura do MPO — instrumento do consultor; oculto para o cliente */}
+        {coverage && !isClient && (
           <section>
             <SectionTitle
               eyebrow="MPO · Avaliação de cobertura"
@@ -677,7 +688,10 @@ function ProjectDetailPage() {
               items={[
                 { label: "Nome", value: project.name },
                 { label: "Domínio", value: domain?.name ?? project.domain },
-                { label: "Status", value: project.status },
+                {
+                  label: "Status",
+                  value: rawProject ? updateStatusToLabel[rawProject.status] : "—",
+                },
                 { label: "Cliente", value: project.clientName ?? "—" },
                 { label: "Consultor", value: project.owner },
                 { label: "Tipo", value: project.model },
@@ -725,11 +739,15 @@ function ProjectDetailPage() {
                     ? toneClass[engagementLevelTone(rawProject.clientEngagement)]
                     : undefined,
                 },
-                {
-                  label: "Cobertura do MPO",
-                  value: coverage ? `${coverage.percentage}%` : "—",
-                  className: toneClass.info,
-                },
+                ...(isClient
+                  ? []
+                  : [
+                      {
+                        label: "Cobertura do MPO",
+                        value: coverage ? `${coverage.percentage}%` : "—",
+                        className: toneClass.info,
+                      },
+                    ]),
                 { label: "Progresso observacional", value: `${project.progress}%` },
               ]}
               highlight
