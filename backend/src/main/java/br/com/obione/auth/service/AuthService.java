@@ -58,6 +58,11 @@ public class AuthService {
         );
     }
 
+    /** Invalidates the session for this token. Unknown tokens are a no-op. */
+    public void logout(String authorizationHeader) {
+        sessionStore.remove(extractBearerToken(authorizationHeader));
+    }
+
     @Transactional(readOnly = true)
     public CurrentUserDTO getCurrentUser(String authorizationHeader) {
         String token = extractBearerToken(authorizationHeader);

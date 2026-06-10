@@ -29,6 +29,8 @@ export async function login(email: string, password: string): Promise<LoginResul
 }
 
 export async function logout(): Promise<void> {
+  // Best-effort server-side invalidation; never blocks the local logout.
+  await request("/auth/logout", { method: "POST" }).catch(() => {});
   clearAuthToken();
 }
 

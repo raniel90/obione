@@ -404,11 +404,14 @@ function ProjectDetailPage() {
   }, []);
 
   // Coverage depends on which attributes are observed — refresh it whenever
-  // observations change (manual record or accepted AI suggestion).
+  // observations change (manual record or accepted AI suggestion). `loading`
+  // is read but intentionally not a dependency: the initial load already
+  // fetched coverage, so the loading→false transition must not refetch.
   useEffect(() => {
     if (loading) return;
     getProjectCoverage(id).then(setCoverage);
-  }, [id, loading, rawObservations.length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, rawObservations.length]);
 
   const kpis = useMemo((): { label: string; value: string; tone?: string; hint?: string }[] => {
     if (!rawProject) return [];

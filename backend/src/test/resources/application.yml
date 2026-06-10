@@ -1,8 +1,48 @@
-# Tests always run on a throwaway in-memory H2 — the file-based dev database
-# (backend/data/) must never leak state into the suite.
+# Test configuration. NOTE: a test-classpath application.yml REPLACES the main
+# one (no merging), so this mirrors src/main/resources/application.yml with a
+# throwaway in-memory datasource — the file-based dev DB (backend/data/) must
+# never leak state into the suite.
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
 spring:
+  application:
+    name: obione-backend
+
   datasource:
     url: jdbc:h2:mem:obione_test;DB_CLOSE_DELAY=-1
     driver-class-name: org.h2.Driver
     username: sa
     password:
+
+  h2:
+    console:
+      enabled: false
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+  ai:
+    model:
+      chat: ${obione.llm.provider:mock}
+      embedding: none
+      image: none
+      moderation: none
+      audio:
+        speech: none
+        transcription: none
+    openai:
+      api-key: ${OPENAI_API_KEY:}
+      chat:
+        options:
+          model: gpt-4o-mini
+          temperature: 0.3
+
+# Tests always run with the deterministic mock provider (no network/key).
+obione:
+  llm:
+    provider: mock

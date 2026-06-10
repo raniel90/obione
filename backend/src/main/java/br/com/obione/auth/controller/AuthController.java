@@ -31,6 +31,14 @@ public class AuthController {
         return authService.login(request);
     }
 
+    @PostMapping("/logout")
+    @Operation(summary = "Encerrar a sessão do token atual")
+    public void logout(
+            @RequestHeader(value = "Authorization", required = false) String authorization
+    ) {
+        authService.logout(authorization);
+    }
+
     @GetMapping("/me")
     @Operation(summary = "Obter usuário autenticado da sessão mock")
     public CurrentUserDTO getCurrentUser(
