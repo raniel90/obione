@@ -5,6 +5,7 @@ import br.com.obione.ai.dto.DomainSynthesisDTO;
 import br.com.obione.ai.dto.KnowledgeDraftDTO;
 import br.com.obione.ai.dto.ObservationSuggestionsDTO;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -20,9 +21,24 @@ import java.util.List;
 public class OllamaLlmClient implements LlmClient {
 
     private final ChatClient chat;
+    private final String model;
 
-    public OllamaLlmClient(ChatClient.Builder builder) {
+    public OllamaLlmClient(
+            ChatClient.Builder builder,
+            @Value("${spring.ai.ollama.chat.options.model:llama3.1:8b}") String model
+    ) {
         this.chat = builder.build();
+        this.model = model;
+    }
+
+    @Override
+    public String provider() {
+        return "ollama";
+    }
+
+    @Override
+    public String model() {
+        return model;
     }
 
     @Override
@@ -42,7 +58,8 @@ public class OllamaLlmClient implements LlmClient {
         return chat.prompt()
                 .system("Você é um observador de projetos baseado no MPO (Quadro 37). "
                         + "Proponha observações relevantes, cada uma mapeada a UM attributeId da lente fornecida. "
-                        + "impact deve ser LOW, MEDIUM ou HIGH. Não invente attributeId fora da lista.")
+                        + "impact deve ser LOW, MEDIUM ou HIGH. Não invente attributeId fora da lista. "
+                        + "Em sourceExcerpt, cite o trecho LITERAL do resumo que motivou a observação.")
                 .user("Resumo do projeto: " + projectSummary
                         + "\nObjetivo observacional: " + objective
                         + "\nLente MPO (attributeId — rótulo (categoria)):\n" + mpoLens)
