@@ -349,9 +349,6 @@ function NewProjectPage() {
                   <p className="text-[13px] font-medium text-foreground">
                     Sugestão da IA — revise antes de confirmar
                   </p>
-                  <span className="ml-auto rounded-full border border-border bg-background px-2 py-0.5 font-mono text-[10px] text-muted-foreground">
-                    {suggestion.provider} · {suggestion.model}
-                  </span>
                 </div>
                 <p className="mt-2 text-[12.5px] leading-relaxed text-muted-foreground">
                   {suggestion.rationale}

@@ -5,7 +5,7 @@ description: Use when asked to start, run, boot, serve, or "subir" the ObiOne ap
 
 # Run the ObiOne app (backend + frontend)
 
-Brings up the full local stack: **Spring Boot backend** (dev mode, `:8080/api`, H2 in-memory) and the **TanStack frontend** (Vite dev, `:5173`). No external database — the backend seeds demo data into H2 on startup.
+Brings up the full local stack: **Spring Boot backend** (dev mode, `:8080/api`, H2 file-based em `backend/data/`) and the **TanStack frontend** (Vite dev, `:5173`). No external database — demo data is seeded on the first boot and survives restarts (delete `backend/data/` to reseed).
 
 ## Quick start
 
@@ -28,7 +28,7 @@ Stop everything:
 | Frontend | http://localhost:5173 |
 | Backend API | http://localhost:8080/api (health: `/api/health`) |
 | Swagger UI | http://localhost:8080/api/swagger-ui.html |
-| H2 console | http://localhost:8080/api/h2-console (`jdbc:h2:mem:obione_dev`, user `sa`, empty password) |
+| H2 console | http://localhost:8080/api/h2-console (`jdbc:h2:file:./data/obione_dev`, user `sa`, empty password) |
 
 **Seeded logins:** `admin@obione.dev` / `admin123` · `consultor@obione.dev` / `consultor123` · `cliente@obione.dev` / `cliente123`
 
@@ -51,5 +51,5 @@ bun run dev                       # → http://localhost:5173
 - **`UnsupportedClassVersionError` / build fails** → wrong JDK. The backend requires **Java 21**: `brew install openjdk@21`, then re-run (the script auto-detects it). Don't `java -jar` with an older JDK; use `./mvnw spring-boot:run`.
 - **`Port 5173/8080 is already in use`** → a stale dev server. `run.sh` frees those ports automatically; otherwise run `stop.sh`.
 - **`./mvnw: permission denied`** → `chmod +x backend/mvnw` (the script also does this).
-- **Login fails** → the backend reseeds H2 on every boot; sessions are in-memory, so restarting the backend logs everyone out. Use a seeded login above.
+- **Login fails** → sessions are in-memory, so restarting the backend logs everyone out (data persists in `backend/data/`). Use a seeded login above.
 - **Backend didn't come up** → `tail -f /tmp/obione-backend.log`. Frontend → `tail -f /tmp/obione-frontend.log`.

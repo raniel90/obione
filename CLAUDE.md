@@ -63,7 +63,7 @@ Repository: `raniel90/obione` (this repo). The application is a **v2 rewrite**:
 | Framework | Spring Boot | 3.5.x (web, data-jpa, security, validation, devtools) |
 | Build | Maven via `./mvnw` | `mvn` need not be on PATH |
 | ORM | Spring Data JPA / Hibernate | `ddl-auto: update` |
-| DB (dev/test) | **H2 in-memory** (`jdbc:h2:mem:obione_dev`) | no external DB needed; console at `/api/h2-console` |
+| DB (dev) | **H2 file-based** (`jdbc:h2:file:./data/obione_dev`, gitignored) | survives restarts; seeded on first boot (delete `backend/data/` to reseed); console at `/api/h2-console`. Tests use in-memory H2 (`src/test/resources/application.yml`) |
 | DB (prod) | PostgreSQL | driver present, not wired into the active config |
 | Security | Spring Security + BCrypt | CORS, CSRF off; **mock-token** auth (no JWT yet) |
 | API docs | springdoc-openapi | Swagger UI at `/api/swagger-ui.html` |
@@ -127,8 +127,8 @@ bun run format   # Prettier --write
 - CORS allows the frontend origins `http://localhost:5173`, `:3000`, `:8081` (see `config/SecurityConfig.java`).
 - Frontend talks to the backend via `frontend/src/services/apiClient.ts` → `API_BASE_URL = "http://localhost:8080/api"` (hardcoded; no `.env` needed). Auth token is stored in `localStorage["obione-auth"]`.
 - **Auth is a mock token**: `AuthService` validates email + BCrypt password against the `users` table and returns a fixed token whose session is held **in memory** (`ConcurrentHashMap`). Restarting the backend invalidates all sessions. `SecurityConfig` enforces **role-based governance**: reads require authentication, mutations require CONSULTANT/ADMIN (clients may POST discussion contributions); only health/auth/swagger/h2-console stay `permitAll`.
-- **Demo data is seeded on startup**: each context ships a `*DataSeeder` (e.g. `users/seed/UserDataSeeder`, `projects/seed/ProjectDataSeeder`) that populates the in-memory H2 on boot. There is no separate seed/migration step — just start the backend.
-- `backend/docker-compose.yml` is **broken** (its contents are a copy of `application.yml`, not a Compose file). Ignore it; dev needs no DB container because H2 is in-memory.
+- **Demo data is seeded on first boot**: each context ships a `*DataSeeder` (e.g. `users/seed/UserDataSeeder`, `projects/seed/ProjectDataSeeder`), guarded by `count() > 0` — the file-based H2 keeps data across restarts; delete `backend/data/` for a fresh seed. There is no separate seed/migration step.
+- `backend/docker-compose.yml` is **broken** (its contents are a copy of `application.yml`, not a Compose file). Ignore it; dev needs no DB container because H2 is embedded (file-based).
 
 ## Architecture
 
@@ -172,7 +172,7 @@ bun run format   # Prettier --write
 - Don't modify `backend/v1/` or `frontend/v1/` — they are the archived previous stack.
 - Don't hand-edit `frontend/src/routeTree.gen.ts` (generated).
 - Don't run `java -jar` with a JDK < 21; prefer `./mvnw spring-boot:run`.
-- Don't rely on `backend/docker-compose.yml` (broken) or expect an external DB in dev (H2 is in-memory).
+- Don't rely on `backend/docker-compose.yml` (broken) or expect an external DB in dev (H2 is embedded; data in gitignored `backend/data/`).
 - Don't add documentation files (`*.md`) outside `atividades/` unless explicitly asked.
 - Don't name the consultancy that provided the `.docx` projects — refer to it only as "consultoria" or "organização executora".
 - Confirm the current date with the user before crystallizing absolute dates in academic docs (history of slipping dates).

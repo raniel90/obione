@@ -19,6 +19,9 @@ dist-ssr/
 # Java / Maven
 target/
 
+# H2 dev database (file-based, recreated from seeders)
+backend/data/
+
 # Python
 __pycache__/
 *.pyc

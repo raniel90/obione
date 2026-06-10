@@ -14,8 +14,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Mock-token authentication (no JWT). Each login issues a random opaque token
+ * mapped to the user in memory — concurrent users/tabs never clobber each
+ * other's session. Restarting the backend invalidates every session.
+ */
 @Service
 public class AuthService {
 
@@ -41,11 +47,12 @@ public class AuthService {
             throw new UnauthorizedException("E-mail ou senha incorretos");
         }
 
-        sessionStore.put(MockTokenConstants.MOCK_ACCESS_TOKEN, user.getId());
+        String token = UUID.randomUUID().toString();
+        sessionStore.put(token, user.getId());
 
         CurrentUserDTO currentUser = UserMapper.toCurrentUserDTO(user);
         return new LoginResponseDTO(
-                MockTokenConstants.MOCK_ACCESS_TOKEN,
+                token,
                 MockTokenConstants.TOKEN_TYPE,
                 currentUser
         );
@@ -77,7 +84,7 @@ public class AuthService {
 
         String token = authorizationHeader.substring((MockTokenConstants.TOKEN_TYPE + " ").length()).trim();
 
-        if (!MockTokenConstants.MOCK_ACCESS_TOKEN.equals(token)) {
+        if (token.isEmpty()) {
             throw new UnauthorizedException("Token inválido");
         }
 

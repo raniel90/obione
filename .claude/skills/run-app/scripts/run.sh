@@ -68,7 +68,7 @@ ObiOne is up:
   Frontend     http://localhost:5173
   Backend API  http://localhost:8080/api   (health: /api/health)
   Swagger UI   http://localhost:8080/api/swagger-ui.html
-  H2 console   http://localhost:8080/api/h2-console   (jdbc:h2:mem:obione_dev, user sa)
+  H2 console   http://localhost:8080/api/h2-console   (jdbc:h2:file:./data/obione_dev, user sa)
 
 Seeded logins (password in parentheses):
   admin@obione.dev (admin123) · consultor@obione.dev (consultor123) · cliente@obione.dev (cliente123)

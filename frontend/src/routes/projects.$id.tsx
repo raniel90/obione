@@ -48,7 +48,7 @@ import { toast } from "sonner";
 import { getProjectById, getProjectCoverage, updateProject } from "@/services/projectService";
 import type { ProjectCoverage } from "@/services/projectService";
 import { suggestDomain, suggestObservations } from "@/services/aiService";
-import type { AiSuggestionMeta, ObservationSuggestion } from "@/services/aiService";
+import type { ObservationSuggestion } from "@/services/aiService";
 import { getFeed } from "@/services/feedService";
 import type { FeedEvent } from "@/services/feedService";
 import { getDomains } from "@/services/domainService";
@@ -403,6 +403,13 @@ function ProjectDetailPage() {
     getCurrentUser().then((user) => setIsClient(user?.profileCode === "CLIENT"));
   }, []);
 
+  // Coverage depends on which attributes are observed — refresh it whenever
+  // observations change (manual record or accepted AI suggestion).
+  useEffect(() => {
+    if (loading) return;
+    getProjectCoverage(id).then(setCoverage);
+  }, [id, loading, rawObservations.length]);
+
   const kpis = useMemo((): { label: string; value: string; tone?: string; hint?: string }[] => {
     if (!rawProject) return [];
     const aiAccepted = rawObservations.filter((o) => o.origin === "AI_SUGGESTED").length;
@@ -433,11 +440,8 @@ function ProjectDetailPage() {
   }, [rawProject, engagementPercent, coverage, rawObservations, rawPhenomena, isClient]);
 
   const observatorySummary = useMemo(() => {
-    if (!rawProject) return "";
+    if (!rawProject || rawObservations.length === 0) return "";
     const risk = riskCodeToLabel[rawProject.riskLevel].toLowerCase();
-    if (rawObservations.length === 0) {
-      return `Projeto com risco ${risk} e ainda sem observações registradas — registre a primeira observação (ou aceite uma sugestão da IA) para o observatório começar a interpretar este caso.`;
-    }
     const attrCount = new Set(rawObservations.map((o) => o.attributeId).filter(Boolean)).size;
     const coverageNote =
       coverage && !isClient ? `, cobrindo ${coverage.percentage}% da lente MPO` : "";
@@ -603,14 +607,22 @@ function ProjectDetailPage() {
           <SectionTitle
             eyebrow="Interpretação narrativa"
             title="Resumo Observacional"
-            description="Síntese analítica gerada pelo observatório a partir dos atributos cruzados."
+            description="Síntese do que o observatório já registrou sobre este projeto."
           />
-          <div className="mt-3 rounded-xl border border-foreground/20 bg-foreground/[0.025] p-5">
-            <div className="flex items-start gap-3">
-              <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-foreground/70" />
-              <p className="text-[14px] leading-relaxed text-foreground">{observatorySummary}</p>
+          {observatorySummary ? (
+            <div className="mt-3 rounded-xl border border-foreground/20 bg-foreground/[0.025] p-5">
+              <div className="flex items-start gap-3">
+                <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-foreground/70" />
+                <p className="text-[14px] leading-relaxed text-foreground">{observatorySummary}</p>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="mt-3 rounded-xl border border-dashed border-border bg-muted/20 p-5 text-[12.5px] leading-relaxed text-muted-foreground">
+              O observatório ainda não tem o que interpretar aqui. Registre a primeira observação —
+              manualmente ou aceitando uma sugestão da IA na seção de observações — e a síntese
+              deste projeto aparece neste espaço.
+            </div>
+          )}
         </section>
 
         {/* Indicadores */}
@@ -1104,7 +1116,7 @@ function ManualObservationSection({
   const [analyzingId, setAnalyzingId] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState("");
   const [aiSuggestions, setAiSuggestions] = useState<ObservationSuggestion[]>([]);
-  const [aiMeta, setAiMeta] = useState<AiSuggestionMeta | null>(null);
+  const [aiSuggestionId, setAiSuggestionId] = useState<number | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -1197,12 +1209,7 @@ function ManualObservationSection({
     try {
       const res = await suggestObservations(projectId);
       setAiSuggestions(res.suggestions);
-      setAiMeta({
-        suggestionId: res.suggestionId,
-        provider: res.provider,
-        model: res.model,
-        generatedAt: res.generatedAt,
-      });
+      setAiSuggestionId(res.suggestionId);
       if (res.suggestions.length === 0) toast.info("A IA não sugeriu observações.");
     } catch {
       toast.error("Não foi possível obter sugestões da IA.");
@@ -1226,7 +1233,7 @@ function ManualObservationSection({
         status: "REGISTERED",
         origin: "AI_SUGGESTED",
         sourceExcerpt: s.sourceExcerpt || undefined,
-        suggestionId: aiMeta?.suggestionId,
+        suggestionId: aiSuggestionId ?? undefined,
         createdBy: currentUserId,
       });
       prependObservation(created);
@@ -1605,16 +1612,9 @@ function ManualObservationSection({
 
       {aiSuggestions.length > 0 && (
         <div className="mt-4 space-y-2 rounded-xl border border-dashed border-foreground/30 bg-foreground/[0.02] p-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-              Sugestões da IA · revise antes de aceitar
-            </p>
-            {aiMeta && (
-              <span className="rounded-full border border-border bg-background px-2 py-0.5 font-mono text-[10px] text-muted-foreground">
-                {aiMeta.provider} · {aiMeta.model}
-              </span>
-            )}
-          </div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            Sugestões da IA · revise antes de aceitar
+          </p>
           {aiSuggestions.map((s, i) => (
             <div
               key={i}
@@ -1629,7 +1629,8 @@ function ManualObservationSection({
                   </p>
                 )}
                 <p className="mt-1 text-[11px] text-muted-foreground">
-                  atributo: <span className="font-mono">{s.attributeId}</span> · impacto: {s.impact}
+                  atributo: {attrNameById.get(s.attributeId) ?? s.attributeId} · impacto:{" "}
+                  {obsImpactMap[s.impact as SvcObsImpact] ?? "Médio"}
                 </p>
               </div>
               <div className="flex shrink-0 gap-1.5">

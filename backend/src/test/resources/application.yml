@@ -1,0 +1,8 @@
+# Tests always run on a throwaway in-memory H2 — the file-based dev database
+# (backend/data/) must never leak state into the suite.
+spring:
+  datasource:
+    url: jdbc:h2:mem:obione_test;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:

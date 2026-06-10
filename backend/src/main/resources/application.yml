@@ -7,8 +7,11 @@ spring:
   application:
     name: obione-backend
 
+  # File-based H2 so dev data survives backend restarts (devtools hot-restart
+  # included). Seeders are guarded (count > 0 → skip), so demo data is created
+  # only on the first boot. Delete backend/data/ to reset to a fresh seed.
   datasource:
-    url: jdbc:h2:mem:obione_dev
+    url: jdbc:h2:file:./data/obione_dev
     driver-class-name: org.h2.Driver
     username: sa
     password:
