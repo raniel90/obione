@@ -2,6 +2,8 @@
 
 > **Status:** documento de estratégia de produto (PM) para a v2 do ObiOne.
 > Redefine o escopo para a versão atualmente construída (Spring Boot + TanStack). O documento `requisitos.md` permanece como **registro da proposta original (v1)** e é referenciado abaixo.
+>
+> **Atualização 10/06/2026:** o roadmap do §7 foi **integralmente entregue** (PRs #49–#54 na branch `dev`). O scorecard do §2 descreve o estado *anterior*; o estado atual está no **§9 (Adendo)**.
 
 ## 1. A pergunta certa
 
@@ -106,6 +108,31 @@ Com a IA assistiva e a lente/cobertura, a contribuição volta a ter medição, 
 - **Funil observação → discussão → conhecimento** (taxas de conversão; conhecimento consolidado por domínio).
 - **Engajamento** (participantes ativos, contribuições/discussão, mix de tipos de contribuição).
 - **Likert adaptado** — consultoria (utilidade da camada de conhecimento, redução de fricção, valor de domínios/cockpit, usabilidade da governança) e clientes (clareza, inclusão/controle, utilidade do conhecimento, qualidade do diálogo).
+
+---
+
+## 9. Adendo (10/06/2026) — roadmap entregue: scorecard pós-§7
+
+Os 5 reforços do §7 foram implementados e mergeados em `dev` (PRs #49–#54). Scorecard atualizado:
+
+| Dimensão do observatório | Antes (§2) | Agora | Evidência no código |
+|---|---|---|---|
+| Lente de observação definida | ⚠️ Fraco | ✅ **Forte** | Catálogo canônico 44/8 (Quadro 37) em `backend/.../mpo/MpoCatalog.java` (1 atributo `fora_de_escopo` ⇒ **43 em escopo**, alinhado ao protocolo); `GET /mpo/categories` e `/mpo/attributes`; formulários do frontend religados ao catálogo (fim do `mockMpoAttributes.ts`) |
+| Avaliar (cobertura/qualidade) | ❌ Ausente | ✅ | `ProjectCoverageService` — % por categoria + global (observados/43); `GET /projects/{id}/coverage`; seção "Cobertura observacional" no detalhe do projeto |
+| IA Generativa (diferencial) | ❌ Ausente | ✅ | Contexto `ai/` com os 4 papéis do §5 (Categorizadora, Observadora, Sintetizadora, Conectora); Spring AI com `MockLlmClient` (default) + `OllamaLlmClient` (llama3.1:8b); **human-in-the-loop**: a IA só sugere, a observação nasce quando o consultor aceita |
+| Acesso semi-aberto/governança | ⚠️ Simulado | ✅ (por papel) | `SecurityConfig` sai do `permitAll`: leitura autenticada; mutações `CONSULTANT`/`ADMIN`; cliente contribui em discussões (`MockTokenAuthFilter`) |
+| Acompanhar/temporal | ⚠️ Fraco | ✅ | `FeedService` agrega eventos reais (observação/discussão/conhecimento), DESC por data, filtros por domínio/projeto |
+| Coletar/Transformar rastreável | ❌ Ausente | ⚠️ **Parcial** | A Observadora sugere observações já mapeadas a atributos do MPO, mas sem trecho-fonte persistido (ver limitações abaixo) |
+| Categorizar/Abrangência · Interagir · Armazenar | ✅ | ✅ | Mantidos |
+
+**Ciclo central ponta a ponta:** IA sugere observação → consultor aceita → observação criada → cobertura sobe.
+
+### Limitações declaradas (pós-roadmap)
+
+1. **RNF04/RNF05 não atendidos** — as saídas de IA não registram metadados de reprodutibilidade (versão de prompt, modelo, timestamp, hash da fonte) e as observações aceitas não carregam trecho-fonte. É a lacuna mais sensível para o rigor DSR das Frentes 1–2 do protocolo; declarar como limitação ou fechar com um PR pequeno (persistir `provider`/`model`/`timestamp` na sugestão).
+2. **RNF09 (custo de LLM) não implementado** — mitigado pelo default Ollama local (custo zero).
+3. **Governança é por papel, não CBAC por atributo (RF04)** — mutação deliberada (§6.4); nota correspondente adicionada ao `protocolo_avaliacao.md` (10/06/2026).
+4. **`/register` ficou efetivamente bloqueado** — a página chama `POST /users`, que após o enforcement por papel exige `CONSULTANT`/`ADMIN`; um cadastro anônimo falha com 401/403. Isso resolve o conflito com o RF01 ("sem cadastro público") no nível da API, mas deixa a rota `register.tsx` quebrada na UI — decidir entre remover a página ou implementar o signup-com-aprovação do §6.3.
 
 ---
 
