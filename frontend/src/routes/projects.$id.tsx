@@ -119,6 +119,82 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+// ── MpoAttributeCard ─────────────────────────────────────────────────────────
+
+function MpoAttributeCard({
+  value: v,
+  onEdit,
+}: {
+  value: ProjectAttributeValue;
+  onEdit: () => void;
+}) {
+  const hasValue = v.currentValue && v.currentValue.trim().length > 0;
+  const isUnfilled = v.status === "NOT_OBSERVED";
+
+  return (
+    <div className="group relative rounded-lg border border-border bg-background p-3 transition-colors hover:border-border/80">
+      <div className="flex items-start gap-3">
+        {/* Lado esquerdo: nome + status + valor */}
+        <div className="min-w-0 flex-1">
+          {/* Nome — informação principal */}
+          <p className="text-[13px] font-medium leading-snug text-foreground">{v.attributeName}</p>
+
+          {/* Status pill */}
+          <div className="mt-1.5 flex flex-wrap items-center gap-2">
+            <span
+              title={MPO_ATTRIBUTE_STATUS_HINT[v.status]}
+              className={cn(
+                "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset",
+                v.status === "FILLED"         && "bg-success/10 text-success ring-success/20",
+                v.status === "PARTIAL"        && "bg-warning/10 text-warning ring-warning/20",
+                v.status === "NOT_OBSERVED"   && "bg-muted text-muted-foreground ring-border",
+                v.status === "NOT_APPLICABLE" && "bg-muted/50 text-muted-foreground/60 ring-border/50",
+              )}
+            >
+              <span className={cn("h-1.5 w-1.5 rounded-full", MPO_ATTRIBUTE_STATUS_DOT[v.status])} />
+              {MPO_ATTRIBUTE_STATUS_LABEL[v.status]}
+            </span>
+            {v.lastObservationId && (
+              <span className="text-[10px] text-muted-foreground">via observação</span>
+            )}
+          </div>
+
+          {/* Valor preenchido */}
+          {hasValue && (
+            <p className="mt-2 line-clamp-2 text-[12px] leading-relaxed text-muted-foreground">
+              {v.currentValue}
+            </p>
+          )}
+
+          {/* Metadados */}
+          {v.updatedBy && (
+            <p className="mt-1.5 text-[10.5px] text-muted-foreground/70">
+              {v.updatedBy}
+              {v.updatedAt && (
+                <> · {new Date(v.updatedAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}</>
+              )}
+            </p>
+          )}
+        </div>
+
+        {/* Botão editar — aparece no hover */}
+        <button
+          type="button"
+          title={isUnfilled ? "Preencher atributo" : "Editar atributo"}
+          onClick={onEdit}
+          className={cn(
+            "mt-0.5 shrink-0 rounded-md border border-transparent p-1.5 text-muted-foreground transition-colors",
+            "opacity-0 group-hover:opacity-100 focus:opacity-100",
+            "hover:border-border hover:bg-muted hover:text-foreground",
+          )}
+        >
+          <Pencil className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── AttributeEditDialog ──────────────────────────────────────────────────────
 
 interface AttributeEditDialogProps {
@@ -128,11 +204,11 @@ interface AttributeEditDialogProps {
   onSaved: (updated: ProjectAttributeValue) => void;
 }
 
-const ATTR_STATUS_OPTIONS: { value: AttributeStatus; label: string }[] = [
-  { value: "NOT_OBSERVED", label: "Não observado" },
-  { value: "PARTIAL",      label: "Parcial" },
-  { value: "FILLED",       label: "Preenchido" },
-  { value: "NOT_APPLICABLE", label: "N/A" },
+const ATTR_STATUS_OPTIONS: { value: AttributeStatus; label: string; hint: string }[] = [
+  { value: "NOT_OBSERVED",   label: "Não observado",   hint: "Ainda sem valor ou evidência." },
+  { value: "PARTIAL",        label: "Parcial",          hint: "Há evidência, mas ainda não consolidada." },
+  { value: "FILLED",         label: "Preenchido",       hint: "Valor consolidado do atributo." },
+  { value: "NOT_APPLICABLE", label: "Não aplicável",    hint: "Atributo não se aplica ao projeto." },
 ];
 
 function AttributeEditDialog({ attr, projectId, onClose, onSaved }: AttributeEditDialogProps) {
@@ -147,11 +223,11 @@ function AttributeEditDialog({ attr, projectId, onClose, onSaved }: AttributeEdi
       const updated = await setProjectAttributeValue(
         projectId,
         attr.attributeCode,
-        value,
+        value || null,
         status,
         author || "sistema",
       );
-      toast.success("Valor do atributo atualizado com sucesso.");
+      toast.success("Atributo atualizado com sucesso.");
       onSaved(updated);
     } catch {
       toast.error("Erro ao atualizar atributo MPO.");
@@ -164,37 +240,45 @@ function AttributeEditDialog({ attr, projectId, onClose, onSaved }: AttributeEdi
     <Dialog open onOpenChange={(o) => { if (!o) onClose(); }}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-xs text-muted-foreground">{attr.attributeCode}</span>
-            <Badge variant="outline" className="text-[10px]">{attr.categoryName}</Badge>
+          {/* Metadados discretos: categoria + código */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <Badge variant="secondary" className="text-[10px]">{attr.categoryName}</Badge>
+            <span className="text-[10px] text-muted-foreground">{attr.attributeCode}</span>
           </div>
-          <DialogTitle className="mt-1 text-base leading-snug">{attr.attributeName}</DialogTitle>
+          {/* Nome em destaque */}
+          <DialogTitle className="mt-1.5 text-[16px] leading-snug">{attr.attributeName}</DialogTitle>
+          {/* Descrição conceitual */}
           {attr.attributeDescription && (
-            <DialogDescription className="text-[12px]">{attr.attributeDescription}</DialogDescription>
+            <DialogDescription className="text-[12px] leading-relaxed">
+              {attr.attributeDescription}
+            </DialogDescription>
           )}
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <Label className="text-xs">Valor / observação</Label>
+            <Label className="text-xs font-medium">Valor / evidência</Label>
             <Textarea
               rows={4}
-              placeholder="Descreva o valor ou evidência…"
+              placeholder="Descreva o valor atual, evidência observada ou informação relevante…"
               value={value}
               onChange={(e) => setValue(e.target.value)}
             />
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs">Status</Label>
+            <Label className="text-xs font-medium">Status</Label>
             <Select value={status} onValueChange={(v) => setStatus(v as AttributeStatus)}>
-              <SelectTrigger className="h-8 text-xs">
+              <SelectTrigger className="h-9 text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {ATTR_STATUS_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                    {opt.label}
+                  <SelectItem key={opt.value} value={opt.value} className="py-2">
+                    <div>
+                      <p className="text-sm font-medium">{opt.label}</p>
+                      <p className="text-[11px] text-muted-foreground">{opt.hint}</p>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -202,10 +286,10 @@ function AttributeEditDialog({ attr, projectId, onClose, onSaved }: AttributeEdi
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs">Autor / motivo</Label>
+            <Label className="text-xs font-medium">Autor / motivo</Label>
             <Input
-              className="h-8 text-xs"
-              placeholder="Ex.: consultor, revisão de escopo…"
+              className="h-9 text-sm"
+              placeholder="Ex.: consultor, revisão de escopo, entrevista com cliente…"
               value={author}
               onChange={(e) => setAuthor(e.target.value)}
             />
@@ -300,13 +384,13 @@ function ManageAttributesDialog({
           </DialogHeader>
 
           <div className="flex-1 overflow-y-auto py-2 pr-1">
-            <div className="space-y-4">
+            <div className="space-y-5">
               {mpoCategories.map((cat) => (
                 <div key={cat.code}>
-                  <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                    {cat.code} — {cat.name}
+                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                    {cat.name}
                   </p>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="space-y-1.5">
                     {cat.attributes.map((attr) => {
                       const isSelected = selected.has(attr.code);
                       const hasData = existingCodes.has(attr.code) && (() => {
@@ -317,19 +401,35 @@ function ManageAttributesDialog({
                         <button
                           key={attr.code}
                           type="button"
-                          title={hasData ? "Possui dados — remoção requer confirmação" : attr.name}
+                          title={hasData && !isSelected ? "Possui dados — remoção requer confirmação" : attr.description ?? attr.name}
                           onClick={() => toggle(attr.code)}
                           className={cn(
-                            "inline-flex max-w-[240px] items-center gap-1 truncate rounded-full border px-2.5 py-0.5 text-[11px] transition-colors",
+                            "flex w-full items-center gap-3 rounded-lg border px-3 py-2 text-left transition-colors",
                             isSelected
-                              ? "border-foreground bg-foreground text-background"
-                              : "border-border bg-background text-muted-foreground hover:border-foreground/30 hover:text-foreground",
-                            hasData && !isSelected && "border-warning/50 text-warning",
+                              ? "border-foreground/30 bg-foreground/5 text-foreground"
+                              : "border-border bg-background text-muted-foreground hover:border-border/80 hover:text-foreground",
+                            hasData && !isSelected && "border-warning/30 text-warning/80",
                           )}
                         >
-                          <span className="shrink-0 font-mono">{attr.code}</span>
-                          <span className="mx-0.5 opacity-40">—</span>
-                          <span className="truncate">{attr.name}</span>
+                          {/* Checkbox visual */}
+                          <span className={cn(
+                            "flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors",
+                            isSelected ? "border-foreground bg-foreground" : "border-border",
+                          )}>
+                            {isSelected && (
+                              <svg viewBox="0 0 10 8" className="h-2.5 w-2.5 fill-none stroke-background stroke-2">
+                                <polyline points="1,4 4,7 9,1" />
+                              </svg>
+                            )}
+                          </span>
+                          {/* Nome principal */}
+                          <span className="flex-1 text-[12.5px] font-medium leading-snug">
+                            {attr.name}
+                          </span>
+                          {/* Código discreto */}
+                          <span className="shrink-0 font-mono text-[10px] text-muted-foreground/60">
+                            {attr.code}
+                          </span>
                         </button>
                       );
                     })}
@@ -364,7 +464,12 @@ function ManageAttributesDialog({
               <ul className="mt-2 list-disc pl-4 text-xs text-foreground">
                 {blockedRemove.map((code) => {
                   const attr = projectAttributeMap.find((a) => a.attributeCode === code);
-                  return <li key={code}><strong>{code}</strong> — {attr?.attributeName}</li>;
+                  return (
+                    <li key={code}>
+                      {attr?.attributeName ?? code}
+                      <span className="ml-1 font-mono text-[10px] text-muted-foreground">({code})</span>
+                    </li>
+                  );
                 })}
               </ul>
             </AlertDialogDescription>
@@ -877,12 +982,12 @@ function ProjectDetailPage() {
 
         {/* Mapa de Atributos MPO */}
         <section>
-          {/* Cabeçalho da seção */}
+          {/* Cabeçalho */}
           <div className="flex flex-wrap items-start justify-between gap-3">
             <SectionTitle
               eyebrow="MPO · Cobertura de atributos"
               title="Mapa de Atributos MPO"
-              description="Cobertura do projeto segundo o Modelo de Observatório de Projetos (Vieira, 2022)."
+              description="Atributos selecionados para acompanhamento segundo o Modelo de Observatório de Projetos (Vieira, 2022)."
             />
             <Button
               size="sm"
@@ -895,14 +1000,29 @@ function ProjectDetailPage() {
             </Button>
           </div>
 
+          {/* Estado vazio */}
+          {projectAttributeMap.length === 0 && mpoCategories.length > 0 && (
+            <div className="mt-6 flex flex-col items-center gap-3 rounded-xl border border-dashed border-border py-10 text-center">
+              <ClipboardList className="h-8 w-8 text-muted-foreground/40" />
+              <p className="text-[13px] font-medium text-foreground">Nenhum atributo associado</p>
+              <p className="max-w-xs text-[12px] text-muted-foreground">
+                Use o botão "Gerenciar atributos" para selecionar quais dimensões do MPO este projeto irá acompanhar.
+              </p>
+              <Button size="sm" variant="outline" className="mt-1 gap-1.5 text-xs" onClick={() => setManageAttrsOpen(true)}>
+                <Settings2 className="h-3.5 w-3.5" /> Gerenciar atributos
+              </Button>
+            </div>
+          )}
+
           {/* Cards de métricas de cobertura */}
           {projectAttributeMap.length > 0 && (() => {
             const total   = projectAttributeMap.length;
             const filled  = projectAttributeMap.filter((a) => a.status === "FILLED").length;
             const partial = projectAttributeMap.filter((a) => a.status === "PARTIAL").length;
             const notObs  = projectAttributeMap.filter((a) => a.status === "NOT_OBSERVED").length;
+            const na      = projectAttributeMap.filter((a) => a.status === "NOT_APPLICABLE").length;
             return (
-              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
                 <div className="rounded-xl border border-border bg-card p-4 text-center">
                   <p className="text-2xl font-bold text-foreground">{total}</p>
                   <p className="mt-1 text-[11px] text-muted-foreground">Acompanhados</p>
@@ -919,66 +1039,36 @@ function ProjectDetailPage() {
                   <p className="text-2xl font-bold text-muted-foreground">{notObs}</p>
                   <p className="mt-1 text-[11px] text-muted-foreground">Não observados</p>
                 </div>
+                <div className="rounded-xl border border-border bg-card p-4 text-center">
+                  <p className="text-2xl font-bold text-muted-foreground/50">{na}</p>
+                  <p className="mt-1 text-[11px] text-muted-foreground">Não aplicáveis</p>
+                </div>
               </div>
             );
           })()}
 
-          {mpoCategories.length === 0 ? (
-            <p className="mt-4 text-[12.5px] text-muted-foreground">
-              Carregando catálogo MPO…
-            </p>
-          ) : (
+          {/* Lista de atributos agrupados por categoria */}
+          {projectAttributeMap.length > 0 && (
             <div className="mt-4 space-y-4">
               {mpoCategories.map((cat) => {
-                const catValues = projectAttributeMap.filter(
-                  (v) => v.categoryCode === cat.code,
-                );
+                const catValues = projectAttributeMap.filter((v) => v.categoryCode === cat.code);
                 if (catValues.length === 0) return null;
+                const catFilled = catValues.filter((v) => v.status !== "NOT_OBSERVED" && v.status !== "NOT_APPLICABLE").length;
                 return (
                   <div key={cat.code} className="rounded-xl border border-border bg-card p-4">
                     <div className="mb-3 flex items-center gap-2">
-                      <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                        {cat.code}
-                      </span>
-                      <span className="text-[13px] font-semibold text-foreground">
-                        {cat.name}
-                      </span>
-                      <span className="ml-auto font-mono text-[10px] text-muted-foreground">
-                        {catValues.filter((v) => v.status !== "NOT_OBSERVED").length}/{catValues.length}
+                      <span className="text-[13px] font-semibold text-foreground">{cat.name}</span>
+                      <span className="ml-auto text-[11px] text-muted-foreground">
+                        {catFilled}/{catValues.length} com registro
                       </span>
                     </div>
-                    <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
+                    <div className="space-y-2">
                       {catValues.map((v) => (
-                        <div
+                        <MpoAttributeCard
                           key={v.attributeCode}
-                          className="flex items-center justify-between rounded-md border border-border bg-background px-2.5 py-1.5"
-                          title={v.attributeDescription ?? ""}
-                        >
-                          <div className="min-w-0">
-                            <span className="font-mono text-[10px] text-muted-foreground">
-                              {v.attributeCode}
-                            </span>
-                            <p className="truncate text-[11.5px] text-foreground">{v.attributeName}</p>
-                          </div>
-                          <div className="ml-2 flex shrink-0 items-center gap-1.5">
-                            <span
-                              className={cn(
-                                "text-[10px] font-medium",
-                                MPO_ATTRIBUTE_STATUS_TONE[v.status],
-                              )}
-                            >
-                              {MPO_ATTRIBUTE_STATUS_LABEL[v.status] ?? v.status}
-                            </span>
-                            <button
-                              type="button"
-                              title={v.status === "NOT_OBSERVED" ? "Preencher atributo" : "Editar atributo"}
-                              onClick={() => setEditingAttr(v)}
-                              className="rounded p-0.5 text-muted-foreground hover:text-foreground focus:outline-none"
-                            >
-                              <Pencil className="h-3 w-3" />
-                            </button>
-                          </div>
-                        </div>
+                          value={v}
+                          onEdit={() => setEditingAttr(v)}
+                        />
                       ))}
                     </div>
                   </div>
@@ -996,9 +1086,7 @@ function ProjectDetailPage() {
             onClose={() => setEditingAttr(null)}
             onSaved={(updated) => {
               setProjectAttributeMap((prev) =>
-                prev.map((a) =>
-                  a.attributeCode === updated.attributeCode ? updated : a,
-                ),
+                prev.map((a) => a.attributeCode === updated.attributeCode ? updated : a),
               );
               setEditingAttr(null);
             }}
@@ -1324,7 +1412,14 @@ const MPO_ATTRIBUTE_STATUS_LABEL: Record<string, string> = {
   NOT_OBSERVED: "Não observado",
   PARTIAL: "Parcial",
   FILLED: "Preenchido",
-  NOT_APPLICABLE: "N/A",
+  NOT_APPLICABLE: "Não aplicável",
+};
+
+const MPO_ATTRIBUTE_STATUS_HINT: Record<string, string> = {
+  NOT_OBSERVED: "Ainda sem valor ou evidência.",
+  PARTIAL: "Há evidência, mas ainda não consolidada.",
+  FILLED: "Valor consolidado do atributo.",
+  NOT_APPLICABLE: "Atributo não se aplica ao projeto.",
 };
 
 const MPO_ATTRIBUTE_STATUS_TONE: Record<string, string> = {
@@ -1332,6 +1427,13 @@ const MPO_ATTRIBUTE_STATUS_TONE: Record<string, string> = {
   PARTIAL: "text-warning",
   FILLED: "text-success",
   NOT_APPLICABLE: "text-muted-foreground/50",
+};
+
+const MPO_ATTRIBUTE_STATUS_DOT: Record<string, string> = {
+  NOT_OBSERVED: "bg-muted-foreground/40",
+  PARTIAL: "bg-warning",
+  FILLED: "bg-success",
+  NOT_APPLICABLE: "bg-muted-foreground/20",
 };
 
 const PHENOMENA = [

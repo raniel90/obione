@@ -55,23 +55,19 @@ public class ProjectAttributeService {
     }
 
     /**
-     * Retorna o mapa completo de cobertura MPO do projeto.
-     * Para cada um dos 45 atributos, retorna o estado atual (NOT_OBSERVED se ainda não registrado).
+     * Retorna apenas os atributos MPO efetivamente associados ao projeto
+     * (ou seja, que possuem um ProjectAttributeValue registrado).
+     * Atributos do catálogo sem associação ao projeto não são retornados aqui;
+     * ficam disponíveis apenas no modal "Gerenciar Atributos".
      */
     @Transactional(readOnly = true)
     public List<ProjectAttributeValueDTO> getAttributeMap(Long projectId) {
         ensureProjectExists(projectId);
 
-        List<MpoAttribute> allAttrs = mpoAttributeRepo.findAll();
-        Map<String, ProjectAttributeValue> existing = valueRepo.findByProject_Id(projectId)
-                .stream().collect(Collectors.toMap(v -> v.getMpoAttribute().getCode(), v -> v));
-
-        return allAttrs.stream()
-                .sorted(Comparator.comparingInt(a -> a.getCategory().getOrderIndex()))
-                .map(attr -> {
-                    ProjectAttributeValue value = existing.get(attr.getCode());
-                    return toDTO(attr, value);
-                })
+        return valueRepo.findByProject_Id(projectId)
+                .stream()
+                .sorted(Comparator.comparingInt(v -> v.getMpoAttribute().getCategory().getOrderIndex()))
+                .map(v -> toDTO(v.getMpoAttribute(), v))
                 .toList();
     }
 
