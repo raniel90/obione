@@ -61,7 +61,11 @@ import {
 } from "@/services/discussionService";
 import { getCurrentUser } from "@/services/authService";
 import { getPhenomenaByProject } from "@/services/phenomenonService";
-import { getMpoAttributes } from "@/services/mpoAttributeService";
+import {
+  getMpoCategories,
+  getProjectAttributeMap,
+} from "@/services/mpoAttributeService";
+import type { MpoCategory, ProjectAttributeValue } from "@/types/mpoAttribute";
 import {
   communityKnowledge as allKnowledge,
   type DiscussionStatus,
@@ -373,6 +377,8 @@ function ProjectDetailPage() {
   const [rawObservations, setRawObservations] = useState<SvcObservation[]>([]);
   const [attrNameById, setAttrNameById] = useState<Map<string, string>>(new Map());
   const [phenNameById, setPhenNameById] = useState<Map<string, string>>(new Map());
+  const [mpoCategories, setMpoCategories] = useState<MpoCategory[]>([]);
+  const [projectAttributeMap, setProjectAttributeMap] = useState<ProjectAttributeValue[]>([]);
   const [discussionsRefresh, setDiscussionsRefresh] = useState(0);
   const [engagementPercent, setEngagementPercent] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -385,8 +391,9 @@ function ProjectDetailPage() {
       getDomains(),
       getPhenomenaByProject(id),
       getObservationsByProject(id),
-      getMpoAttributes(),
-    ]).then(([p, ds, phs, observs, attrs]) => {
+      getMpoCategories(),
+      getProjectAttributeMap(id),
+    ]).then(([p, ds, phs, observs, categories, attrMap]) => {
       if (cancelled) return;
       if (!p) {
         setProject(null);
@@ -401,12 +408,16 @@ function ProjectDetailPage() {
       setProject(toLegacyProject(p, domainsById));
       setRawPhenomena(phs);
       setSvcPhenomena(phs.map(toProjectPhenomenon));
-      const attrMap = new Map(attrs.map((a) => [a.id, a.name] as const));
+      setMpoCategories(categories);
+      setProjectAttributeMap(attrMap);
+      const mpoAttrMap = new Map(
+        categories.flatMap((cat) => cat.attributes.map((a) => [a.code, a.name] as const)),
+      );
       const phenMap = new Map(phs.map((ph) => [ph.id, ph.name] as const));
-      setAttrNameById(attrMap);
+      setAttrNameById(mpoAttrMap);
       setPhenNameById(phenMap);
       setRawObservations(observs);
-      setSvcObservations(observs.map((o) => toProjectObservation(o, attrMap, phenMap)));
+      setSvcObservations(observs.map((o) => toProjectObservation(o, mpoAttrMap, phenMap)));
       setLoading(false);
     });
     return () => {
@@ -575,41 +586,65 @@ function ProjectDetailPage() {
           </div>
         </section>
 
-        {/* Atributos observados */}
+        {/* Mapa de Atributos MPO */}
         <section>
           <SectionTitle
-            eyebrow="MPO · Mapa de atributos observados"
-            title="Atributos Observados"
-            description="Como o ObiOne decompõe e interpreta este projeto."
+            eyebrow="MPO · Cobertura de atributos"
+            title="Mapa de Atributos MPO"
+            description={`Cobertura do projeto segundo o Modelo de Observatório de Projetos (Vieira, 2022). ${projectAttributeMap.filter((a) => a.status !== "NOT_OBSERVED").length} de ${projectAttributeMap.length} atributos com registro.`}
           />
-          <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
-            <AttrBlock
-              title="Atributos gerais"
-              description="Descrevem o projeto em nível macro."
-              items={[
-                { label: "Nome", value: project.name },
-                { label: "Domínio", value: domain?.name ?? project.domain },
-                { label: "Status", value: project.status },
-                { label: "Cliente", value: project.clientName ?? obs.client },
-                ...obs.generalAttrs,
-              ]}
-            />
-            <AttrBlock
-              title="Atributos específicos"
-              description="Eventos, ocorrências e evidências concretas."
-              items={obs.specificAttrs}
-            />
-            <AttrBlock
-              title="Atributos intermediários"
-              description="Interpretações derivadas pelo observatório."
-              items={obs.intermediateAttrs.map((a) => ({
-                label: a.label,
-                value: a.value,
-                className: a.tone ? toneClass[a.tone] : undefined,
-              }))}
-              highlight
-            />
-          </div>
+          {mpoCategories.length === 0 ? (
+            <p className="mt-4 text-[12.5px] text-muted-foreground">
+              Carregando catálogo MPO…
+            </p>
+          ) : (
+            <div className="mt-4 space-y-4">
+              {mpoCategories.map((cat) => {
+                const catValues = projectAttributeMap.filter(
+                  (v) => v.categoryCode === cat.code,
+                );
+                return (
+                  <div key={cat.code} className="rounded-xl border border-border bg-card p-4">
+                    <div className="mb-3 flex items-center gap-2">
+                      <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                        {cat.code}
+                      </span>
+                      <span className="text-[13px] font-semibold text-foreground">
+                        {cat.name}
+                      </span>
+                      <span className="ml-auto font-mono text-[10px] text-muted-foreground">
+                        {catValues.filter((v) => v.status !== "NOT_OBSERVED").length}/{catValues.length}
+                      </span>
+                    </div>
+                    <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
+                      {catValues.map((v) => (
+                        <div
+                          key={v.attributeCode}
+                          className="flex items-center justify-between rounded-md border border-border bg-background px-2.5 py-1.5"
+                          title={v.attributeDescription ?? ""}
+                        >
+                          <div className="min-w-0">
+                            <span className="font-mono text-[10px] text-muted-foreground">
+                              {v.attributeCode}
+                            </span>
+                            <p className="truncate text-[11.5px] text-foreground">{v.attributeName}</p>
+                          </div>
+                          <span
+                            className={cn(
+                              "ml-2 shrink-0 text-[10px] font-medium",
+                              MPO_ATTRIBUTE_STATUS_TONE[v.status],
+                            )}
+                          >
+                            {MPO_ATTRIBUTE_STATUS_LABEL[v.status] ?? v.status}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </section>
 
         {/* Fenômenos */}
@@ -670,6 +705,7 @@ function ProjectDetailPage() {
           phenomena={rawPhenomena}
           attrNameById={attrNameById}
           phenNameById={phenNameById}
+          mpoCategories={mpoCategories}
           onObservationsChange={(observs) => {
             setRawObservations(observs);
             setSvcObservations(
@@ -913,18 +949,19 @@ function TimelineIcon({ type }: { type: string }) {
 
 /* --------------------- Manual observation section ------------------------ */
 
-const ATTRIBUTES = [
-  "Escopo",
-  "Prazo",
-  "Risco",
-  "Engajamento",
-  "Comunicação",
-  "Colaboração",
-  "Transparência",
-  "Aprovação",
-  "Retrabalho",
-  "Lições aprendidas",
-];
+const MPO_ATTRIBUTE_STATUS_LABEL: Record<string, string> = {
+  NOT_OBSERVED: "Não observado",
+  PARTIAL: "Parcial",
+  FILLED: "Preenchido",
+  NOT_APPLICABLE: "N/A",
+};
+
+const MPO_ATTRIBUTE_STATUS_TONE: Record<string, string> = {
+  NOT_OBSERVED: "text-muted-foreground",
+  PARTIAL: "text-warning",
+  FILLED: "text-success",
+  NOT_APPLICABLE: "text-muted-foreground/50",
+};
 
 const PHENOMENA = [
   "Mudança recorrente de escopo",
@@ -994,6 +1031,7 @@ function ManualObservationSection({
   phenomena,
   attrNameById,
   phenNameById,
+  mpoCategories,
   onObservationsChange,
   onDiscussionCreated,
 }: {
@@ -1004,6 +1042,7 @@ function ManualObservationSection({
   phenomena: SvcPhenomenon[];
   attrNameById: Map<string, string>;
   phenNameById: Map<string, string>;
+  mpoCategories: MpoCategory[];
   onObservationsChange: (observs: SvcObservation[]) => void;
   onDiscussionCreated: () => void;
 }) {
@@ -1019,11 +1058,12 @@ function ManualObservationSection({
   const [discussionOpen, setDiscussionOpen] = useState(false);
   const [discussionObsId, setDiscussionObsId] = useState<string | null>(null);
   const [discussionSubmitting, setDiscussionSubmitting] = useState(false);
+  const firstAttrCode = mpoCategories[0]?.attributes[0]?.code ?? "";
   const [form, setForm] = useState({
     title: "",
     date: new Date().toISOString().slice(0, 10),
     description: "",
-    attribute: ATTRIBUTES[0],
+    attribute: firstAttrCode,
     phenomenon: PHENOMENA[0],
     customPhenomenon: "",
     impact: "Médio" as ProjectObservation["impact"],
@@ -1034,7 +1074,7 @@ function ManualObservationSection({
   const [editForm, setEditForm] = useState({
     title: "",
     description: "",
-    attribute: ATTRIBUTES[0],
+    attribute: firstAttrCode,
     phenomenon: PHENOMENA[0],
     customPhenomenon: "",
     impact: "Médio" as ProjectObservation["impact"],
@@ -1049,10 +1089,8 @@ function ManualObservationSection({
   });
 
   const attributeOptions = useMemo(() => {
-    const names = new Set<string>(ATTRIBUTES);
-    attrNameById.forEach((name) => names.add(name));
-    return Array.from(names);
-  }, [attrNameById]);
+    return mpoCategories.flatMap((cat) => cat.attributes.map((a) => a.code));
+  }, [mpoCategories]);
 
   const phenomenonOptions = useMemo(() => {
     const names = phenomena.map((p) => p.name);
@@ -1072,13 +1110,6 @@ function ManualObservationSection({
       setForm((f) => ({ ...f, author: user.name }));
     });
   }, []);
-
-  const resolveAttributeId = (label: string) => {
-    for (const [id, name] of attrNameById) {
-      if (name === label) return id;
-    }
-    return label;
-  };
 
   const resolvePhenomenonId = (select: string, custom: string) => {
     if (select === "Outro") return custom.trim() || undefined;
@@ -1119,9 +1150,13 @@ function ManualObservationSection({
 
     setSubmitting(true);
     try {
+      const mpoAttr = mpoCategories
+        .flatMap((c) => c.attributes)
+        .find((a) => a.code === form.attribute);
       const created = await createObservation(projectId, {
         title: form.title.trim(),
         description: form.description.trim(),
+        mpoAttributeId: mpoAttr?.id,
         attributeId: form.attribute,
         phenomenonId: finalPhenomenon,
         impact: impactToCode[form.impact],
@@ -1153,7 +1188,7 @@ function ManualObservationSection({
     const raw = rawObservations.find((o) => o.id === observationId);
     if (!raw) return;
 
-    const attrLabel = attrNameById.get(raw.attributeId) ?? raw.attributeId ?? ATTRIBUTES[0];
+    const attrCode = raw.mpoAttributeCode ?? raw.attributeId ?? firstAttrCode;
     const phenLabel = raw.phenomenonId
       ? (phenNameById.get(raw.phenomenonId) ?? raw.phenomenonId)
       : PHENOMENA[0];
@@ -1169,7 +1204,7 @@ function ManualObservationSection({
     setEditForm({
       title: raw.title,
       description: raw.description,
-      attribute: attributeOptions.includes(attrLabel) ? attrLabel : attrLabel,
+      attribute: attributeOptions.includes(attrCode) ? attrCode : firstAttrCode,
       phenomenon: phenSelect,
       customPhenomenon: phenSelect === "Outro" ? (raw.phenomenonId ?? "") : "",
       impact: obsImpactMap[raw.impact],
@@ -1189,10 +1224,14 @@ function ManualObservationSection({
 
     setEditSubmitting(true);
     try {
+      const editMpoAttr = mpoCategories
+        .flatMap((c) => c.attributes)
+        .find((a) => a.code === editForm.attribute);
       const updated = await updateObservation(editingId, {
         title: editForm.title.trim(),
         description: editForm.description.trim(),
-        attributeId: resolveAttributeId(editForm.attribute),
+        mpoAttributeId: editMpoAttr?.id,
+        attributeId: editForm.attribute,
         phenomenonId: resolvePhenomenonId(editForm.phenomenon, editForm.customPhenomenon),
         impact: impactToCode[editForm.impact],
         risk: riskToCode[editForm.risk],
@@ -1347,19 +1386,23 @@ function ManualObservationSection({
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="space-y-1.5">
-                      <Label>Atributo relacionado</Label>
+                      <Label>Atributo MPO relacionado</Label>
                       <Select
                         value={form.attribute}
                         onValueChange={(v) => setForm((f) => ({ ...f, attribute: v }))}
                       >
                         <SelectTrigger>
-                          <SelectValue />
+                          <SelectValue placeholder="Selecione o atributo" />
                         </SelectTrigger>
                         <SelectContent>
-                          {ATTRIBUTES.map((a) => (
-                            <SelectItem key={a} value={a}>
-                              {a}
-                            </SelectItem>
+                          {mpoCategories.map((cat) => (
+                            <optgroup key={cat.code} label={`${cat.code} — ${cat.name}`}>
+                              {cat.attributes.map((a) => (
+                                <SelectItem key={a.code} value={a.code}>
+                                  {a.code} — {a.name}
+                                </SelectItem>
+                              ))}
+                            </optgroup>
                           ))}
                         </SelectContent>
                       </Select>

@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotBlank;
 public record CreateObservationRequestDTO(
         @NotBlank String title,
         @NotBlank String description,
+        Long mpoAttributeId,
         String attributeId,
         String phenomenonId,
         ObservationImpact impact,

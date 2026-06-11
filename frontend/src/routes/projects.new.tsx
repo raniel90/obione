@@ -15,8 +15,10 @@ import {
 import { getDomains } from "@/services/domainService";
 import { createProject } from "@/services/projectService";
 import { getUsersByProfile } from "@/services/userService";
+import { getMpoCategories } from "@/services/mpoAttributeService";
 import type { Domain as SvcDomain } from "@/types/domain";
 import type { User } from "@/types/user";
+import type { MpoCategory } from "@/types/mpoAttribute";
 import type { ProjectStatusCode, ProjectTypeCode } from "@/types/project";
 import {
   Telescope,
@@ -56,20 +58,11 @@ const STATUS: { value: ProjectStatus; label: string }[] = [
   { value: "concluído", label: "Concluído" },
 ];
 
-const ATTRIBUTES = [
-  "Prazo",
-  "Escopo",
-  "Riscos",
-  "Mudanças de escopo",
-  "Engajamento do cliente",
-  "Transparência",
-  "Artefatos",
-  "Comunicação",
-  "Colaboração",
-  "Lições aprendidas",
-  "Retrabalho",
-  "Aprovações",
-];
+const PHASE_LABELS: Record<string, string> = {
+  INITIAL: "Inicial",
+  TRACKING: "Acompanhamento",
+  CLOSURE: "Encerramento",
+};
 
 const PHENOMENA = [
   "Mudanças recorrentes de escopo",
@@ -106,6 +99,7 @@ function NewProjectPage() {
   const [domains, setDomains] = useState<SvcDomain[]>([]);
   const [clients, setClients] = useState<User[]>([]);
   const [consultants, setConsultants] = useState<User[]>([]);
+  const [mpoCategories, setMpoCategories] = useState<MpoCategory[]>([]);
   const [form, setForm] = useState({
     name: "",
     domainId: "",
@@ -117,7 +111,7 @@ function NewProjectPage() {
     endDate: "",
     summary: "",
     observationalGoal: "",
-    attributes: ["Prazo", "Escopo", "Engajamento do cliente"] as string[],
+    attributes: ["GERAL-01", "ESCO-03", "STAK-01"] as string[],
     phenomena: ["Risco de atraso"] as string[],
     participants: [
       "Lucas Martins — Consultor",
@@ -128,20 +122,24 @@ function NewProjectPage() {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([getDomains(), getUsersByProfile("CLIENT"), getUsersByProfile("CONSULTANT")]).then(
-      ([domainList, clientList, consultantList]) => {
-        if (cancelled) return;
-        setDomains(domainList);
-        setClients(clientList);
-        setConsultants(consultantList);
-        setForm((f) => ({
-          ...f,
-          domainId: f.domainId || domainList[0]?.id || "",
-          clientId: f.clientId || clientList[0]?.id || "",
-          consultantId: f.consultantId || consultantList[0]?.id || "",
-        }));
-      },
-    );
+    Promise.all([
+      getDomains(),
+      getUsersByProfile("CLIENT"),
+      getUsersByProfile("CONSULTANT"),
+      getMpoCategories(),
+    ]).then(([domainList, clientList, consultantList, categories]) => {
+      if (cancelled) return;
+      setDomains(domainList);
+      setClients(clientList);
+      setConsultants(consultantList);
+      setMpoCategories(categories);
+      setForm((f) => ({
+        ...f,
+        domainId: f.domainId || domainList[0]?.id || "",
+        clientId: f.clientId || clientList[0]?.id || "",
+        consultantId: f.consultantId || consultantList[0]?.id || "",
+      }));
+    });
     return () => {
       cancelled = true;
     };
@@ -410,33 +408,50 @@ function NewProjectPage() {
           />
         </Section>
 
-        {/* SEÇÃO 3 — Atributos iniciais */}
+        {/* SEÇÃO 3 — Atributos iniciais MPO */}
         <Section
           icon={Sparkles}
-          eyebrow="03 · atributos"
+          eyebrow="03 · atributos mpo"
           title="Atributos iniciais"
-          description="Os atributos selecionados indicam quais dimensões do projeto serão observadas inicialmente."
+          description={`Selecione os atributos do Modelo de Observatório de Projetos (MPO) que serão acompanhados desde o início. Selecionados: ${form.attributes.length}/45`}
         >
-          <div className="flex flex-wrap gap-2">
-            {ATTRIBUTES.map((a) => {
-              const selected = form.attributes.includes(a);
-              return (
-                <button
-                  key={a}
-                  type="button"
-                  onClick={() => toggleArray("attributes", a)}
-                  className={cn(
-                    "rounded-full border px-3 py-1 text-[12px] transition-colors",
-                    selected
-                      ? "border-foreground bg-foreground text-background"
-                      : "border-border bg-background text-muted-foreground hover:border-foreground/30 hover:text-foreground",
-                  )}
-                >
-                  {a}
-                </button>
-              );
-            })}
-          </div>
+          {mpoCategories.length === 0 ? (
+            <p className="text-[12.5px] text-muted-foreground">Carregando catálogo MPO…</p>
+          ) : (
+            <div className="space-y-5">
+              {mpoCategories.map((cat) => (
+                <div key={cat.code}>
+                  <div className="mb-2 flex items-center gap-2">
+                    <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                      {cat.code}
+                    </span>
+                    <span className="text-[12px] font-medium text-foreground">{cat.name}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {cat.attributes.map((attr) => {
+                      const selected = form.attributes.includes(attr.code);
+                      return (
+                        <button
+                          key={attr.code}
+                          type="button"
+                          title={`${attr.code} — ${attr.description ?? ""} [${PHASE_LABELS[attr.phase]}]`}
+                          onClick={() => toggleArray("attributes", attr.code)}
+                          className={cn(
+                            "rounded-full border px-2.5 py-0.5 text-[11px] transition-colors",
+                            selected
+                              ? "border-foreground bg-foreground text-background"
+                              : "border-border bg-background text-muted-foreground hover:border-foreground/30 hover:text-foreground",
+                          )}
+                        >
+                          {attr.code}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </Section>
 
         {/* SEÇÃO 4 — Fenômenos esperados */}

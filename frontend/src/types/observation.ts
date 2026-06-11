@@ -12,6 +12,9 @@ export interface Observation {
   title: string;
   description: string;
   attributeId: string;
+  mpoAttributeId?: number;
+  mpoAttributeCode?: string;
+  mpoAttributeName?: string;
   phenomenonId?: string;
   impact: ObservationImpact;
   risk: ObservationRisk;

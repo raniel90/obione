@@ -1,5 +1,6 @@
 package br.com.obione.observations.entity;
 
+import br.com.obione.mpo.entity.MpoAttribute;
 import br.com.obione.observations.enums.ObservationImpact;
 import br.com.obione.observations.enums.ObservationStatus;
 import br.com.obione.projects.entity.Project;
@@ -49,6 +50,12 @@ public class Observation {
     @Column(nullable = false, length = 5000)
     private String description;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mpo_attribute_id")
+    private MpoAttribute mpoAttribute;
+
+    /** @deprecated Use mpoAttribute (FK). Mantido para compatibilidade com dados legados. */
+    @Deprecated
     @Column(length = 100)
     private String attributeId;
 

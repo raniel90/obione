@@ -138,6 +138,9 @@ export interface ApiObservation {
   title: string;
   description: string;
   attributeId: string | null;
+  mpoAttributeId: number | null;
+  mpoAttributeCode: string | null;
+  mpoAttributeName: string | null;
   phenomenonId: string | null;
   impact: ObservationImpact;
   risk: ObservationRisk;
@@ -342,6 +345,9 @@ export function mapObservation(dto: ApiObservation): Observation {
     title: dto.title,
     description: dto.description,
     attributeId: dto.attributeId ?? "",
+    mpoAttributeId: dto.mpoAttributeId ?? undefined,
+    mpoAttributeCode: dto.mpoAttributeCode ?? undefined,
+    mpoAttributeName: dto.mpoAttributeName ?? undefined,
     phenomenonId: dto.phenomenonId ?? undefined,
     impact: dto.impact,
     risk: dto.risk,

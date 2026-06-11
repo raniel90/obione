@@ -2,6 +2,9 @@ package br.com.obione.observations.service;
 
 import br.com.obione.common.exception.BadRequestException;
 import br.com.obione.common.exception.ResourceNotFoundException;
+import br.com.obione.mpo.entity.MpoAttribute;
+import br.com.obione.mpo.repository.MpoAttributeRepository;
+import br.com.obione.mpo.service.ProjectAttributeService;
 import br.com.obione.observations.dto.CreateObservationRequestDTO;
 import br.com.obione.observations.dto.ObservationResponseDTO;
 import br.com.obione.observations.dto.UpdateObservationRequestDTO;
@@ -28,15 +31,21 @@ public class ObservationService {
     private final ObservationRepository observationRepository;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
+    private final MpoAttributeRepository mpoAttributeRepository;
+    private final ProjectAttributeService projectAttributeService;
 
     public ObservationService(
             ObservationRepository observationRepository,
             ProjectRepository projectRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            MpoAttributeRepository mpoAttributeRepository,
+            ProjectAttributeService projectAttributeService
     ) {
         this.observationRepository = observationRepository;
         this.projectRepository = projectRepository;
         this.userRepository = userRepository;
+        this.mpoAttributeRepository = mpoAttributeRepository;
+        this.projectAttributeService = projectAttributeService;
     }
 
     @Transactional(readOnly = true)
@@ -62,10 +71,13 @@ public class ObservationService {
             throw new BadRequestException("Não é possível registrar observação em projeto encerrado");
         }
 
+        MpoAttribute mpoAttribute = resolveMpoAttribute(request.mpoAttributeId());
+
         Observation observation = Observation.builder()
                 .project(project)
                 .title(request.title().trim())
                 .description(request.description().trim())
+                .mpoAttribute(mpoAttribute)
                 .attributeId(request.attributeId())
                 .phenomenonId(request.phenomenonId())
                 .impact(request.impact() != null ? request.impact() : ObservationImpact.MEDIUM)
@@ -78,6 +90,8 @@ public class ObservationService {
         Observation saved = observationRepository.save(observation);
         ProjectObservationEffects.apply(project, saved.getRisk());
         projectRepository.save(project);
+
+        projectAttributeService.applyObservationEffect(project, mpoAttribute, saved);
 
         return ObservationMapper.toResponseDTO(saved);
     }
@@ -99,6 +113,10 @@ public class ObservationService {
                 throw new BadRequestException("Descrição não pode ser vazia");
             }
             observation.setDescription(request.description().trim());
+        }
+
+        if (request.mpoAttributeId() != null) {
+            observation.setMpoAttribute(resolveMpoAttribute(request.mpoAttributeId()));
         }
 
         if (request.attributeId() != null) {
@@ -140,6 +158,8 @@ public class ObservationService {
         }
         projectRepository.save(project);
 
+        projectAttributeService.applyObservationEffect(project, saved.getMpoAttribute(), saved);
+
         return ObservationMapper.toResponseDTO(saved);
     }
 
@@ -155,6 +175,12 @@ public class ObservationService {
         projectRepository.save(project);
 
         return ObservationMapper.toResponseDTO(saved);
+    }
+
+    private MpoAttribute resolveMpoAttribute(Long mpoAttributeId) {
+        if (mpoAttributeId == null) return null;
+        return mpoAttributeRepository.findById(mpoAttributeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Atributo MPO não encontrado: " + mpoAttributeId));
     }
 
     private void ensureProjectExists(Long projectId) {
