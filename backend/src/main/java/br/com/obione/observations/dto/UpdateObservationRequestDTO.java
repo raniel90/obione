@@ -7,6 +7,7 @@ import br.com.obione.projects.enums.RiskLevel;
 public record UpdateObservationRequestDTO(
         String title,
         String description,
+        Long mpoAttributeId,
         String attributeId,
         String phenomenonId,
         ObservationImpact impact,

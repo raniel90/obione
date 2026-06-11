@@ -14,6 +14,7 @@ function buildCreateBody(
   const body: Record<string, unknown> = {
     title: data.title,
     description: data.description,
+    mpoAttributeId: data.mpoAttributeId ?? undefined,
     attributeId: data.attributeId || undefined,
     phenomenonId: data.phenomenonId,
     impact: data.impact,
@@ -32,6 +33,7 @@ function buildUpdateBody(data: Partial<Observation>) {
   const body: Record<string, unknown> = {};
   if (data.title !== undefined) body.title = data.title;
   if (data.description !== undefined) body.description = data.description;
+  if (data.mpoAttributeId !== undefined) body.mpoAttributeId = data.mpoAttributeId ?? null;
   if (data.attributeId !== undefined) body.attributeId = data.attributeId || null;
   if (data.phenomenonId !== undefined) body.phenomenonId = data.phenomenonId || null;
   if (data.impact !== undefined) body.impact = data.impact;
