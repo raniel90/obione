@@ -3,6 +3,7 @@ package br.com.obione.mpo.seed;
 import br.com.obione.mpo.entity.MpoAttribute;
 import br.com.obione.mpo.entity.MpoCategory;
 import br.com.obione.mpo.enums.AttributePhase;
+import br.com.obione.mpo.enums.FillMode;
 import br.com.obione.mpo.repository.MpoAttributeRepository;
 import br.com.obione.mpo.repository.MpoCategoryRepository;
 import org.springframework.boot.CommandLineRunner;
@@ -36,121 +37,126 @@ public class MpoCatalogSeeder implements CommandLineRunner {
             return;
         }
 
-        MpoCategory geral   = save(cat("GERAL",  "Conteúdo de caráter geral",                    1));
-        MpoCategory stak    = save(cat("STAK",   "Conteúdo relacionado a stakeholders",           2));
-        MpoCategory esco    = save(cat("ESCO",   "Conteúdo relacionado a escopo",                 3));
-        MpoCategory cron    = save(cat("CRON",   "Conteúdo relacionado a cronograma",             4));
-        MpoCategory cust    = save(cat("CUST",   "Conteúdo relacionado a custos",                 5));
-        MpoCategory risc    = save(cat("RISC",   "Conteúdo relacionado a riscos",                 6));
-        MpoCategory muda    = save(cat("MUDA",   "Conteúdo relacionado a mudanças",               7));
-        MpoCategory lic     = save(cat("LIC",    "Conteúdo relacionado a lições aprendidas",      8));
+        MpoCategory geral = save(cat("GERAL", "Conteúdo de caráter geral",                    1));
+        MpoCategory stak  = save(cat("STAK",  "Conteúdo relacionado a stakeholders",           2));
+        MpoCategory esco  = save(cat("ESCO",  "Conteúdo relacionado a escopo",                 3));
+        MpoCategory cron  = save(cat("CRON",  "Conteúdo relacionado a cronograma",             4));
+        MpoCategory cust  = save(cat("CUST",  "Conteúdo relacionado a custos",                 5));
+        MpoCategory risc  = save(cat("RISC",  "Conteúdo relacionado a riscos",                 6));
+        MpoCategory muda  = save(cat("MUDA",  "Conteúdo relacionado a mudanças",               7));
+        MpoCategory lic   = save(cat("LIC",   "Conteúdo relacionado a lições aprendidas",      8));
+
+        // FillMode shorthand aliases
+        final FillMode D = FillMode.DIRECT_VALUE;
+        final FillMode O = FillMode.OBSERVATION_BASED;
+        final FillMode H = FillMode.HYBRID;
 
         List<MpoAttribute> attributes = List.of(
-            // ── GERAL (INITIAL)
+            // ── GERAL
             attr("GERAL-01", "Nome do projeto",
-                 "Denominação oficial do projeto observado.", AttributePhase.INITIAL, geral),
+                 "Denominação oficial do projeto observado.", AttributePhase.INITIAL, geral, D),
             attr("GERAL-02", "Descrição",
-                 "Descrição geral do propósito e contexto do projeto.", AttributePhase.INITIAL, geral),
+                 "Descrição geral do propósito e contexto do projeto.", AttributePhase.INITIAL, geral, D),
             attr("GERAL-03", "Local de execução",
-                 "Localização geográfica ou organizacional onde o projeto é executado.", AttributePhase.INITIAL, geral),
+                 "Localização geográfica ou organizacional onde o projeto é executado.", AttributePhase.INITIAL, geral, D),
             attr("GERAL-04", "Tipo",
-                 "Classificação do projeto (ex: estratégico, gerencial, híbrido).", AttributePhase.INITIAL, geral),
+                 "Classificação do projeto (ex: estratégico, gerencial, híbrido).", AttributePhase.INITIAL, geral, D),
             attr("GERAL-05", "Porte",
-                 "Dimensão do projeto em termos de complexidade, equipe ou investimento.", AttributePhase.INITIAL, geral),
+                 "Dimensão do projeto em termos de complexidade, equipe ou investimento.", AttributePhase.INITIAL, geral, D),
             attr("GERAL-06", "Objetivos",
-                 "Resultados esperados e metas do projeto.", AttributePhase.INITIAL, geral),
+                 "Resultados esperados e metas do projeto.", AttributePhase.INITIAL, geral, D),
             attr("GERAL-07", "Descrição dos produtos e serviços gerados",
-                 "Entregáveis e resultados tangíveis do projeto.", AttributePhase.INITIAL, geral),
+                 "Entregáveis e resultados tangíveis do projeto.", AttributePhase.INITIAL, geral, D),
             attr("GERAL-08", "Licitação",
-                 "Informações sobre processo licitatório (para projetos públicos).", AttributePhase.INITIAL, geral),
+                 "Informações sobre processo licitatório (para projetos públicos).", AttributePhase.INITIAL, geral, D),
             attr("GERAL-09", "Contratos",
-                 "Documentos contratuais que regem o projeto.", AttributePhase.INITIAL, geral),
+                 "Documentos contratuais que regem o projeto.", AttributePhase.INITIAL, geral, D),
             attr("GERAL-10", "Termo de encerramento",
-                 "Documento formal que registra a conclusão do projeto.", AttributePhase.CLOSURE, geral),
+                 "Documento formal que registra a conclusão do projeto.", AttributePhase.CLOSURE, geral, H),
             attr("GERAL-11", "Justificativas do projeto",
-                 "Motivações e razões que originaram o projeto.", AttributePhase.INITIAL, geral),
+                 "Motivações e razões que originaram o projeto.", AttributePhase.INITIAL, geral, D),
             attr("GERAL-12", "Impactos do projeto a curto e longo prazo",
-                 "Efeitos esperados e observados no curto e longo prazo.", AttributePhase.TRACKING, geral),
+                 "Efeitos esperados e observados no curto e longo prazo.", AttributePhase.TRACKING, geral, H),
             attr("GERAL-13", "Indicadores do projeto",
-                 "Métricas e KPIs utilizados para acompanhar o projeto.", AttributePhase.TRACKING, geral),
+                 "Métricas e KPIs utilizados para acompanhar o projeto.", AttributePhase.TRACKING, geral, H),
             attr("GERAL-14", "Artefatos produzidos no projeto",
-                 "Documentos, entregáveis e produtos gerados ao longo do projeto.", AttributePhase.TRACKING, geral),
+                 "Documentos, entregáveis e produtos gerados ao longo do projeto.", AttributePhase.TRACKING, geral, H),
             attr("GERAL-15", "Imagens e fotos do projeto",
-                 "Registros visuais do projeto e seus entregáveis.", AttributePhase.TRACKING, geral),
+                 "Registros visuais do projeto e seus entregáveis.", AttributePhase.TRACKING, geral, H),
 
-            // ── STAKEHOLDERS (INITIAL)
+            // ── STAKEHOLDERS
             attr("STAK-01", "Nome dos stakeholders",
-                 "Identificação das partes interessadas no projeto.", AttributePhase.INITIAL, stak),
+                 "Identificação das partes interessadas no projeto.", AttributePhase.INITIAL, stak, D),
             attr("STAK-02", "Função no projeto",
-                 "Papel exercido por cada stakeholder (ex: cliente, patrocinador, gestor).", AttributePhase.INITIAL, stak),
+                 "Papel exercido por cada stakeholder (ex: cliente, patrocinador, gestor).", AttributePhase.INITIAL, stak, D),
             attr("STAK-03", "Público-alvo do projeto",
-                 "Beneficiários diretos ou indiretos do projeto.", AttributePhase.INITIAL, stak),
+                 "Beneficiários diretos ou indiretos do projeto.", AttributePhase.INITIAL, stak, D),
             attr("STAK-04", "Detalhes da equipe do projeto",
-                 "Composição, papéis e responsabilidades da equipe executora.", AttributePhase.INITIAL, stak),
+                 "Composição, papéis e responsabilidades da equipe executora.", AttributePhase.INITIAL, stak, D),
             attr("STAK-05", "Treinamentos realizados pelas equipes",
-                 "Capacitações conduzidas durante o ciclo do projeto.", AttributePhase.TRACKING, stak),
+                 "Capacitações conduzidas durante o ciclo do projeto.", AttributePhase.TRACKING, stak, H),
 
             // ── ESCOPO
             attr("ESCO-01", "Tarefas do projeto",
-                 "Atividades e entregas que compõem o escopo do projeto.", AttributePhase.TRACKING, esco),
+                 "Atividades e entregas que compõem o escopo do projeto.", AttributePhase.TRACKING, esco, H),
             attr("ESCO-02", "Requisitos",
-                 "Necessidades e restrições que o projeto deve atender.", AttributePhase.INITIAL, esco),
+                 "Necessidades e restrições que o projeto deve atender.", AttributePhase.INITIAL, esco, D),
             attr("ESCO-03", "Escopo planejado",
-                 "Definição formal do escopo acordada no início do projeto.", AttributePhase.INITIAL, esco),
+                 "Definição formal do escopo acordada no início do projeto.", AttributePhase.INITIAL, esco, D),
             attr("ESCO-04", "Escopo executado",
-                 "Escopo efetivamente realizado ao longo ou ao final do projeto.", AttributePhase.TRACKING, esco),
+                 "Escopo efetivamente realizado ao longo ou ao final do projeto.", AttributePhase.TRACKING, esco, H),
 
             // ── CRONOGRAMA
             attr("CRON-01", "Data de início do projeto",
-                 "Data oficial de início das atividades do projeto.", AttributePhase.INITIAL, cron),
+                 "Data oficial de início das atividades do projeto.", AttributePhase.INITIAL, cron, D),
             attr("CRON-02", "Data de fim planejada",
-                 "Data prevista para a conclusão do projeto.", AttributePhase.INITIAL, cron),
+                 "Data prevista para a conclusão do projeto.", AttributePhase.INITIAL, cron, D),
             attr("CRON-03", "Data de fim executada",
-                 "Data real de conclusão do projeto.", AttributePhase.CLOSURE, cron),
+                 "Data real de conclusão do projeto.", AttributePhase.CLOSURE, cron, H),
             attr("CRON-04", "Entregas a serem realizadas",
-                 "Marcos e entregáveis previstos no cronograma.", AttributePhase.INITIAL, cron),
+                 "Marcos e entregáveis previstos no cronograma.", AttributePhase.INITIAL, cron, D),
             attr("CRON-05", "Status do cronograma",
-                 "Situação atual do cronograma em relação ao planejado.", AttributePhase.TRACKING, cron),
+                 "Situação atual do cronograma em relação ao planejado.", AttributePhase.TRACKING, cron, O),
 
             // ── CUSTOS
             attr("CUST-01", "Custo estimado",
-                 "Orçamento planejado para a execução do projeto.", AttributePhase.INITIAL, cust),
+                 "Orçamento planejado para a execução do projeto.", AttributePhase.INITIAL, cust, D),
             attr("CUST-02", "Custo realizado",
-                 "Valor efetivamente gasto ao longo ou ao final do projeto.", AttributePhase.CLOSURE, cust),
+                 "Valor efetivamente gasto ao longo ou ao final do projeto.", AttributePhase.CLOSURE, cust, H),
             attr("CUST-03", "Justificativas dos gastos",
-                 "Explicações para desvios ou alocações de custos.", AttributePhase.TRACKING, cust),
+                 "Explicações para desvios ou alocações de custos.", AttributePhase.TRACKING, cust, H),
 
             // ── RISCOS
             attr("RISC-01", "Riscos identificados",
-                 "Relação de riscos mapeados no início ou durante o projeto.", AttributePhase.INITIAL, risc),
+                 "Relação de riscos mapeados no início ou durante o projeto.", AttributePhase.INITIAL, risc, D),
             attr("RISC-02", "Análise qualitativa de riscos",
-                 "Avaliação da probabilidade e impacto dos riscos por categoria.", AttributePhase.TRACKING, risc),
+                 "Avaliação da probabilidade e impacto dos riscos por categoria.", AttributePhase.TRACKING, risc, O),
             attr("RISC-03", "Análise quantitativa de riscos",
-                 "Mensuração numérica dos riscos identificados.", AttributePhase.TRACKING, risc),
+                 "Mensuração numérica dos riscos identificados.", AttributePhase.TRACKING, risc, O),
             attr("RISC-04", "Planejamento de respostas aos riscos",
-                 "Estratégias definidas para mitigar ou aceitar os riscos.", AttributePhase.TRACKING, risc),
+                 "Estratégias definidas para mitigar ou aceitar os riscos.", AttributePhase.TRACKING, risc, O),
             attr("RISC-05", "Monitoramento dos riscos",
-                 "Acompanhamento contínuo dos riscos ao longo do projeto.", AttributePhase.TRACKING, risc),
+                 "Acompanhamento contínuo dos riscos ao longo do projeto.", AttributePhase.TRACKING, risc, O),
 
-            // ── MUDANÇAS (TRACKING)
+            // ── MUDANÇAS
             attr("MUDA-01", "Custo de implementação da mudança",
-                 "Impacto financeiro decorrente de alterações solicitadas.", AttributePhase.TRACKING, muda),
+                 "Impacto financeiro decorrente de alterações solicitadas.", AttributePhase.TRACKING, muda, O),
             attr("MUDA-02", "Análise de custo-benefício da mudança",
-                 "Avaliação do valor gerado em relação ao custo da mudança.", AttributePhase.TRACKING, muda),
+                 "Avaliação do valor gerado em relação ao custo da mudança.", AttributePhase.TRACKING, muda, O),
             attr("MUDA-03", "Impactos da mudança no escopo",
-                 "Alterações no escopo causadas por solicitações de mudança.", AttributePhase.TRACKING, muda),
+                 "Alterações no escopo causadas por solicitações de mudança.", AttributePhase.TRACKING, muda, O),
             attr("MUDA-04", "Impactos da mudança no cronograma",
-                 "Efeitos sobre o cronograma decorrentes de mudanças aprovadas.", AttributePhase.TRACKING, muda),
+                 "Efeitos sobre o cronograma decorrentes de mudanças aprovadas.", AttributePhase.TRACKING, muda, O),
 
-            // ── LIÇÕES APRENDIDAS (CLOSURE)
+            // ── LIÇÕES APRENDIDAS
             attr("LIC-01", "Pontos fortes",
-                 "Aspectos positivos identificados ao longo do projeto.", AttributePhase.CLOSURE, lic),
+                 "Aspectos positivos identificados ao longo do projeto.", AttributePhase.CLOSURE, lic, O),
             attr("LIC-02", "Pontos fracos",
-                 "Dificuldades e deficiências observadas no projeto.", AttributePhase.CLOSURE, lic),
+                 "Dificuldades e deficiências observadas no projeto.", AttributePhase.CLOSURE, lic, O),
             attr("LIC-03", "Dificuldades encontradas",
-                 "Obstáculos e desafios enfrentados durante a execução.", AttributePhase.CLOSURE, lic),
+                 "Obstáculos e desafios enfrentados durante a execução.", AttributePhase.CLOSURE, lic, O),
             attr("LIC-04", "Providências tomadas",
-                 "Ações corretivas e preventivas adotadas diante das dificuldades.", AttributePhase.CLOSURE, lic)
+                 "Ações corretivas e preventivas adotadas diante das dificuldades.", AttributePhase.CLOSURE, lic, O)
         );
 
         attributeRepo.saveAll(attributes);
@@ -165,12 +171,13 @@ public class MpoCatalogSeeder implements CommandLineRunner {
     }
 
     private MpoAttribute attr(String code, String name, String description,
-                               AttributePhase phase, MpoCategory category) {
+                               AttributePhase phase, MpoCategory category, FillMode fillMode) {
         return MpoAttribute.builder()
                 .code(code)
                 .name(name)
                 .description(description)
                 .phase(phase)
+                .fillMode(fillMode)
                 .category(category)
                 .build();
     }

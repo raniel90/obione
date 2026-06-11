@@ -1,6 +1,8 @@
 package br.com.obione.mpo.service;
 
 import br.com.obione.common.exception.ResourceNotFoundException;
+import br.com.obione.mpo.dto.ManageAttributesRequestDTO;
+import br.com.obione.mpo.dto.ManageAttributesResponseDTO;
 import br.com.obione.mpo.dto.MpoAttributeDTO;
 import br.com.obione.mpo.dto.MpoCategoryDTO;
 import br.com.obione.mpo.dto.ProjectAttributeValueDTO;
@@ -26,6 +28,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -189,6 +192,68 @@ public class ProjectAttributeService {
                 }).toList();
     }
 
+    /**
+     * Adiciona e remove atributos MPO associados a um projeto.
+     * Atributos com dados (valor preenchido ou observação vinculada) só são removidos se force=true.
+     */
+    @Transactional
+    public ManageAttributesResponseDTO manageAttributes(Long projectId, ManageAttributesRequestDTO request) {
+        Project project = projectRepo.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Projeto não encontrado: " + projectId));
+
+        List<String> addCodes    = request.add()    != null ? request.add()    : List.of();
+        List<String> removeCodes = request.remove() != null ? request.remove() : List.of();
+
+        List<String> added   = new ArrayList<>();
+        List<String> removed = new ArrayList<>();
+        List<String> blocked = new ArrayList<>();
+
+        // ── ADD ──
+        for (String code : addCodes) {
+            MpoAttribute attr = mpoAttributeRepo.findByCode(code)
+                    .orElseThrow(() -> new ResourceNotFoundException("Atributo MPO não encontrado: " + code));
+
+            boolean exists = valueRepo.findByProject_IdAndMpoAttribute_Code(projectId, code).isPresent();
+            if (!exists) {
+                valueRepo.save(ProjectAttributeValue.builder()
+                        .project(project)
+                        .mpoAttribute(attr)
+                        .status(AttributeStatus.NOT_OBSERVED)
+                        .build());
+            }
+            added.add(code);
+        }
+
+        // atualizar initialAttributeIds do projeto
+        Set<String> currentIds = new java.util.LinkedHashSet<>(project.getInitialAttributeIds());
+        currentIds.addAll(addCodes);
+
+        // ── REMOVE ──
+        for (String code : removeCodes) {
+            Optional<ProjectAttributeValue> pavOpt =
+                    valueRepo.findByProject_IdAndMpoAttribute_Code(projectId, code);
+
+            if (pavOpt.isPresent()) {
+                ProjectAttributeValue pav = pavOpt.get();
+                boolean hasData = pav.getStatus() != AttributeStatus.NOT_OBSERVED
+                        || pav.getLastObservationId() != null;
+
+                if (hasData && !request.force()) {
+                    blocked.add(code);
+                    continue;
+                }
+                valueRepo.delete(pav);
+            }
+            currentIds.remove(code);
+            removed.add(code);
+        }
+
+        project.setInitialAttributeIds(new ArrayList<>(currentIds));
+        projectRepo.save(project);
+
+        return new ManageAttributesResponseDTO(added, removed, blocked);
+    }
+
     // ── mappers internos ────────────────────────────────────────────────────
 
     private ProjectAttributeValueDTO toDTO(MpoAttribute attr, ProjectAttributeValue value) {
@@ -211,7 +276,7 @@ public class ProjectAttributeService {
     private MpoAttributeDTO toAttributeDTO(MpoAttribute attr) {
         return new MpoAttributeDTO(
                 attr.getId(), attr.getCode(), attr.getName(),
-                attr.getDescription(), attr.getPhase(),
+                attr.getDescription(), attr.getPhase(), attr.getFillMode(),
                 attr.getCategory().getCode(), attr.getCategory().getName()
         );
     }

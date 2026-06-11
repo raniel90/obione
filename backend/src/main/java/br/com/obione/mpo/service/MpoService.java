@@ -44,7 +44,7 @@ public class MpoService {
     private MpoAttributeDTO toAttributeDTO(MpoAttribute attr) {
         return new MpoAttributeDTO(
                 attr.getId(), attr.getCode(), attr.getName(),
-                attr.getDescription(), attr.getPhase(),
+                attr.getDescription(), attr.getPhase(), attr.getFillMode(),
                 attr.getCategory().getCode(), attr.getCategory().getName()
         );
     }

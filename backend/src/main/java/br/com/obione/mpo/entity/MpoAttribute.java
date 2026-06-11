@@ -1,6 +1,7 @@
 package br.com.obione.mpo.entity;
 
 import br.com.obione.mpo.enums.AttributePhase;
+import br.com.obione.mpo.enums.FillMode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -43,6 +44,11 @@ public class MpoAttribute {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private AttributePhase phase;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private FillMode fillMode = FillMode.HYBRID;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "category_id", nullable = false)

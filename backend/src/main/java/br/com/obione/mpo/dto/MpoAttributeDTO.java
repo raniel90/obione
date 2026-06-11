@@ -1,6 +1,7 @@
 package br.com.obione.mpo.dto;
 
 import br.com.obione.mpo.enums.AttributePhase;
+import br.com.obione.mpo.enums.FillMode;
 
 public record MpoAttributeDTO(
         Long id,
@@ -8,6 +9,7 @@ public record MpoAttributeDTO(
         String name,
         String description,
         AttributePhase phase,
+        FillMode fillMode,
         String categoryCode,
         String categoryName
 ) {}

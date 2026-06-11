@@ -2,6 +2,7 @@ import { request } from "./apiClient";
 import type {
   AttributePhase,
   AttributeStatus,
+  ManageAttributesResult,
   MpoAttribute,
   MpoCategory,
   ProjectAttributeValue,
@@ -20,6 +21,18 @@ export async function getProjectAttributeMap(
   projectId: string | number,
 ): Promise<ProjectAttributeValue[]> {
   return request<ProjectAttributeValue[]>(`/projects/${projectId}/attributes`);
+}
+
+export async function manageProjectAttributes(
+  projectId: string | number,
+  add: string[],
+  remove: string[],
+  force = false,
+): Promise<ManageAttributesResult> {
+  return request<ManageAttributesResult>(`/projects/${projectId}/attributes/manage`, {
+    method: "POST",
+    json: { add, remove, force },
+  });
 }
 
 export async function setProjectAttributeValue(

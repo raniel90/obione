@@ -1,5 +1,6 @@
 export type AttributePhase = "INITIAL" | "TRACKING" | "CLOSURE";
 export type AttributeStatus = "NOT_OBSERVED" | "PARTIAL" | "FILLED" | "NOT_APPLICABLE";
+export type FillMode = "DIRECT_VALUE" | "OBSERVATION_BASED" | "HYBRID";
 
 export interface MpoAttribute {
   id: number;
@@ -7,6 +8,7 @@ export interface MpoAttribute {
   name: string;
   description: string;
   phase: AttributePhase;
+  fillMode: FillMode;
   categoryCode: string;
   categoryName: string;
 }
@@ -17,6 +19,12 @@ export interface MpoCategory {
   name: string;
   orderIndex: number;
   attributes: MpoAttribute[];
+}
+
+export interface ManageAttributesResult {
+  added: string[];
+  removed: string[];
+  blocked: string[];
 }
 
 export interface ProjectAttributeValue {

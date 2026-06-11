@@ -9,7 +9,9 @@ import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -22,6 +24,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import type { Project as LegacyProject, ProjectStatus } from "@/lib/mock-data";
 import type {
   EngagementLevel,
@@ -64,8 +77,10 @@ import { getPhenomenaByProject } from "@/services/phenomenonService";
 import {
   getMpoCategories,
   getProjectAttributeMap,
+  manageProjectAttributes,
+  setProjectAttributeValue,
 } from "@/services/mpoAttributeService";
-import type { MpoCategory, ProjectAttributeValue } from "@/types/mpoAttribute";
+import type { AttributeStatus, MpoCategory, ProjectAttributeValue } from "@/types/mpoAttribute";
 import {
   communityKnowledge as allKnowledge,
   type DiscussionStatus,
@@ -99,8 +114,280 @@ import {
   Lock,
   Plus,
   PenSquare,
+  Settings2,
+  Pencil,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+// ── AttributeEditDialog ──────────────────────────────────────────────────────
+
+interface AttributeEditDialogProps {
+  attr: ProjectAttributeValue;
+  projectId: string | number;
+  onClose: () => void;
+  onSaved: (updated: ProjectAttributeValue) => void;
+}
+
+const ATTR_STATUS_OPTIONS: { value: AttributeStatus; label: string }[] = [
+  { value: "NOT_OBSERVED", label: "Não observado" },
+  { value: "PARTIAL",      label: "Parcial" },
+  { value: "FILLED",       label: "Preenchido" },
+  { value: "NOT_APPLICABLE", label: "N/A" },
+];
+
+function AttributeEditDialog({ attr, projectId, onClose, onSaved }: AttributeEditDialogProps) {
+  const [value, setValue]   = useState(attr.currentValue ?? "");
+  const [status, setStatus] = useState<AttributeStatus>(attr.status);
+  const [author, setAuthor] = useState(attr.updatedBy ?? "");
+  const [saving, setSaving] = useState(false);
+
+  async function handleSave() {
+    try {
+      setSaving(true);
+      const updated = await setProjectAttributeValue(
+        projectId,
+        attr.attributeCode,
+        value,
+        status,
+        author || "sistema",
+      );
+      toast.success("Valor do atributo atualizado com sucesso.");
+      onSaved(updated);
+    } catch {
+      toast.error("Erro ao atualizar atributo MPO.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Dialog open onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs text-muted-foreground">{attr.attributeCode}</span>
+            <Badge variant="outline" className="text-[10px]">{attr.categoryName}</Badge>
+          </div>
+          <DialogTitle className="mt-1 text-base leading-snug">{attr.attributeName}</DialogTitle>
+          {attr.attributeDescription && (
+            <DialogDescription className="text-[12px]">{attr.attributeDescription}</DialogDescription>
+          )}
+        </DialogHeader>
+
+        <div className="space-y-4 py-2">
+          <div className="space-y-1.5">
+            <Label className="text-xs">Valor / observação</Label>
+            <Textarea
+              rows={4}
+              placeholder="Descreva o valor ou evidência…"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs">Status</Label>
+            <Select value={status} onValueChange={(v) => setStatus(v as AttributeStatus)}>
+              <SelectTrigger className="h-8 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {ATTR_STATUS_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs">Autor / motivo</Label>
+            <Input
+              className="h-8 text-xs"
+              placeholder="Ex.: consultor, revisão de escopo…"
+              value={author}
+              onChange={(e) => setAuthor(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" size="sm" onClick={onClose} disabled={saving}>
+            Cancelar
+          </Button>
+          <Button size="sm" onClick={handleSave} disabled={saving}>
+            {saving ? "Salvando…" : "Salvar"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ── ManageAttributesDialog ───────────────────────────────────────────────────
+
+interface ManageAttributesDialogProps {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  projectId: string | number;
+  mpoCategories: MpoCategory[];
+  projectAttributeMap: ProjectAttributeValue[];
+  onSaved: () => Promise<void>;
+}
+
+function ManageAttributesDialog({
+  open,
+  onOpenChange,
+  projectId,
+  mpoCategories,
+  projectAttributeMap,
+  onSaved,
+}: ManageAttributesDialogProps) {
+  const existingCodes = useMemo(
+    () => new Set(projectAttributeMap.map((a) => a.attributeCode)),
+    [projectAttributeMap],
+  );
+
+  const [selected, setSelected] = useState<Set<string>>(() => new Set(existingCodes));
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  // Atributos que serão removidos e têm dados
+  const toRemove = [...existingCodes].filter((c) => !selected.has(c));
+  const blockedRemove = toRemove.filter((c) => {
+    const pav = projectAttributeMap.find((a) => a.attributeCode === c);
+    return pav && (pav.status !== "NOT_OBSERVED" || pav.lastObservationId != null);
+  });
+
+  const toAdd = [...selected].filter((c) => !existingCodes.has(c));
+
+  function toggle(code: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(code)) next.delete(code); else next.add(code);
+      return next;
+    });
+  }
+
+  async function handleSave(force = false) {
+    if (!force && blockedRemove.length > 0) {
+      setConfirmOpen(true);
+      return;
+    }
+    try {
+      setSaving(true);
+      await manageProjectAttributes(projectId, toAdd, toRemove, force);
+      toast.success("Atributos MPO atualizados.");
+      await onSaved();
+      onOpenChange(false);
+    } catch {
+      toast.error("Erro ao gerenciar atributos MPO.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="flex max-h-[85vh] max-w-2xl flex-col overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>Gerenciar Atributos MPO</DialogTitle>
+            <DialogDescription className="text-[12px]">
+              Marque ou desmarque os atributos que este projeto irá acompanhar.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-y-auto py-2 pr-1">
+            <div className="space-y-4">
+              {mpoCategories.map((cat) => (
+                <div key={cat.code}>
+                  <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                    {cat.code} — {cat.name}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {cat.attributes.map((attr) => {
+                      const isSelected = selected.has(attr.code);
+                      const hasData = existingCodes.has(attr.code) && (() => {
+                        const pav = projectAttributeMap.find((a) => a.attributeCode === attr.code);
+                        return pav && (pav.status !== "NOT_OBSERVED" || pav.lastObservationId != null);
+                      })();
+                      return (
+                        <button
+                          key={attr.code}
+                          type="button"
+                          title={hasData ? "Possui dados — remoção requer confirmação" : attr.name}
+                          onClick={() => toggle(attr.code)}
+                          className={cn(
+                            "inline-flex max-w-[240px] items-center gap-1 truncate rounded-full border px-2.5 py-0.5 text-[11px] transition-colors",
+                            isSelected
+                              ? "border-foreground bg-foreground text-background"
+                              : "border-border bg-background text-muted-foreground hover:border-foreground/30 hover:text-foreground",
+                            hasData && !isSelected && "border-warning/50 text-warning",
+                          )}
+                        >
+                          <span className="shrink-0 font-mono">{attr.code}</span>
+                          <span className="mx-0.5 opacity-40">—</span>
+                          <span className="truncate">{attr.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <DialogFooter className="pt-2">
+            <span className="mr-auto text-[11px] text-muted-foreground">
+              {toAdd.length > 0 && `+${toAdd.length} a adicionar `}
+              {toRemove.length > 0 && `−${toRemove.length} a remover`}
+            </span>
+            <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} disabled={saving}>
+              Cancelar
+            </Button>
+            <Button size="sm" onClick={() => handleSave(false)} disabled={saving || (toAdd.length === 0 && toRemove.length === 0)}>
+              {saving ? "Salvando…" : "Salvar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* AlertDialog para confirmar remoção de atributos com dados */}
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover atributos com dados?</AlertDialogTitle>
+            <AlertDialogDescription className="text-[12.5px]">
+              Os atributos abaixo possuem valores ou observações vinculadas. Removê-los não apagará o histórico, mas eles deixarão de ser acompanhados neste projeto.
+              <ul className="mt-2 list-disc pl-4 text-xs text-foreground">
+                {blockedRemove.map((code) => {
+                  const attr = projectAttributeMap.find((a) => a.attributeCode === code);
+                  return <li key={code}><strong>{code}</strong> — {attr?.attributeName}</li>;
+                })}
+              </ul>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Voltar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setConfirmOpen(false);
+                handleSave(true);
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Confirmar remoção
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 
 function ProjectRouteError({ reset }: { reset: () => void }) {
   const router = useRouter();
@@ -379,6 +666,8 @@ function ProjectDetailPage() {
   const [phenNameById, setPhenNameById] = useState<Map<string, string>>(new Map());
   const [mpoCategories, setMpoCategories] = useState<MpoCategory[]>([]);
   const [projectAttributeMap, setProjectAttributeMap] = useState<ProjectAttributeValue[]>([]);
+  const [editingAttr, setEditingAttr] = useState<ProjectAttributeValue | null>(null);
+  const [manageAttrsOpen, setManageAttrsOpen] = useState(false);
   const [discussionsRefresh, setDiscussionsRefresh] = useState(0);
   const [engagementPercent, setEngagementPercent] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -588,11 +877,52 @@ function ProjectDetailPage() {
 
         {/* Mapa de Atributos MPO */}
         <section>
-          <SectionTitle
-            eyebrow="MPO · Cobertura de atributos"
-            title="Mapa de Atributos MPO"
-            description={`Cobertura do projeto segundo o Modelo de Observatório de Projetos (Vieira, 2022). ${projectAttributeMap.filter((a) => a.status !== "NOT_OBSERVED").length} de ${projectAttributeMap.length} atributos com registro.`}
-          />
+          {/* Cabeçalho da seção */}
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <SectionTitle
+              eyebrow="MPO · Cobertura de atributos"
+              title="Mapa de Atributos MPO"
+              description="Cobertura do projeto segundo o Modelo de Observatório de Projetos (Vieira, 2022)."
+            />
+            <Button
+              size="sm"
+              variant="outline"
+              className="shrink-0 gap-1.5 text-xs"
+              onClick={() => setManageAttrsOpen(true)}
+            >
+              <Settings2 className="h-3.5 w-3.5" />
+              Gerenciar atributos
+            </Button>
+          </div>
+
+          {/* Cards de métricas de cobertura */}
+          {projectAttributeMap.length > 0 && (() => {
+            const total   = projectAttributeMap.length;
+            const filled  = projectAttributeMap.filter((a) => a.status === "FILLED").length;
+            const partial = projectAttributeMap.filter((a) => a.status === "PARTIAL").length;
+            const notObs  = projectAttributeMap.filter((a) => a.status === "NOT_OBSERVED").length;
+            return (
+              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div className="rounded-xl border border-border bg-card p-4 text-center">
+                  <p className="text-2xl font-bold text-foreground">{total}</p>
+                  <p className="mt-1 text-[11px] text-muted-foreground">Acompanhados</p>
+                </div>
+                <div className="rounded-xl border border-border bg-card p-4 text-center">
+                  <p className="text-2xl font-bold text-success">{filled}</p>
+                  <p className="mt-1 text-[11px] text-muted-foreground">Preenchidos</p>
+                </div>
+                <div className="rounded-xl border border-border bg-card p-4 text-center">
+                  <p className="text-2xl font-bold text-warning">{partial}</p>
+                  <p className="mt-1 text-[11px] text-muted-foreground">Parciais</p>
+                </div>
+                <div className="rounded-xl border border-border bg-card p-4 text-center">
+                  <p className="text-2xl font-bold text-muted-foreground">{notObs}</p>
+                  <p className="mt-1 text-[11px] text-muted-foreground">Não observados</p>
+                </div>
+              </div>
+            );
+          })()}
+
           {mpoCategories.length === 0 ? (
             <p className="mt-4 text-[12.5px] text-muted-foreground">
               Carregando catálogo MPO…
@@ -603,6 +933,7 @@ function ProjectDetailPage() {
                 const catValues = projectAttributeMap.filter(
                   (v) => v.categoryCode === cat.code,
                 );
+                if (catValues.length === 0) return null;
                 return (
                   <div key={cat.code} className="rounded-xl border border-border bg-card p-4">
                     <div className="mb-3 flex items-center gap-2">
@@ -629,14 +960,24 @@ function ProjectDetailPage() {
                             </span>
                             <p className="truncate text-[11.5px] text-foreground">{v.attributeName}</p>
                           </div>
-                          <span
-                            className={cn(
-                              "ml-2 shrink-0 text-[10px] font-medium",
-                              MPO_ATTRIBUTE_STATUS_TONE[v.status],
-                            )}
-                          >
-                            {MPO_ATTRIBUTE_STATUS_LABEL[v.status] ?? v.status}
-                          </span>
+                          <div className="ml-2 flex shrink-0 items-center gap-1.5">
+                            <span
+                              className={cn(
+                                "text-[10px] font-medium",
+                                MPO_ATTRIBUTE_STATUS_TONE[v.status],
+                              )}
+                            >
+                              {MPO_ATTRIBUTE_STATUS_LABEL[v.status] ?? v.status}
+                            </span>
+                            <button
+                              type="button"
+                              title={v.status === "NOT_OBSERVED" ? "Preencher atributo" : "Editar atributo"}
+                              onClick={() => setEditingAttr(v)}
+                              className="rounded p-0.5 text-muted-foreground hover:text-foreground focus:outline-none"
+                            >
+                              <Pencil className="h-3 w-3" />
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -646,6 +987,36 @@ function ProjectDetailPage() {
             </div>
           )}
         </section>
+
+        {/* Modal de edição de atributo MPO */}
+        {editingAttr && (
+          <AttributeEditDialog
+            attr={editingAttr}
+            projectId={id}
+            onClose={() => setEditingAttr(null)}
+            onSaved={(updated) => {
+              setProjectAttributeMap((prev) =>
+                prev.map((a) =>
+                  a.attributeCode === updated.attributeCode ? updated : a,
+                ),
+              );
+              setEditingAttr(null);
+            }}
+          />
+        )}
+
+        {/* Modal Gerenciar Atributos MPO */}
+        <ManageAttributesDialog
+          open={manageAttrsOpen}
+          onOpenChange={setManageAttrsOpen}
+          projectId={id}
+          mpoCategories={mpoCategories}
+          projectAttributeMap={projectAttributeMap}
+          onSaved={async () => {
+            const updated = await getProjectAttributeMap(id);
+            setProjectAttributeMap(updated);
+          }}
+        />
 
         {/* Fenômenos */}
         <section>
@@ -1396,13 +1767,16 @@ function ManualObservationSection({
                         </SelectTrigger>
                         <SelectContent>
                           {mpoCategories.map((cat) => (
-                            <optgroup key={cat.code} label={`${cat.code} — ${cat.name}`}>
+                            <SelectGroup key={cat.code}>
+                              <SelectLabel className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                                {cat.code} — {cat.name}
+                              </SelectLabel>
                               {cat.attributes.map((a) => (
-                                <SelectItem key={a.code} value={a.code}>
+                                <SelectItem key={a.code} value={a.code} className="text-xs">
                                   {a.code} — {a.name}
                                 </SelectItem>
                               ))}
-                            </optgroup>
+                            </SelectGroup>
                           ))}
                         </SelectContent>
                       </Select>

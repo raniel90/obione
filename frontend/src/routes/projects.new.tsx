@@ -434,16 +434,18 @@ function NewProjectPage() {
                         <button
                           key={attr.code}
                           type="button"
-                          title={`${attr.code} — ${attr.description ?? ""} [${PHASE_LABELS[attr.phase]}]`}
+                          title={attr.description ?? attr.name}
                           onClick={() => toggleArray("attributes", attr.code)}
                           className={cn(
-                            "rounded-full border px-2.5 py-0.5 text-[11px] transition-colors",
+                            "inline-flex max-w-[260px] items-center gap-1 truncate rounded-full border px-2.5 py-0.5 text-[11px] transition-colors",
                             selected
                               ? "border-foreground bg-foreground text-background"
                               : "border-border bg-background text-muted-foreground hover:border-foreground/30 hover:text-foreground",
                           )}
                         >
-                          {attr.code}
+                          <span className="shrink-0 font-mono">{attr.code}</span>
+                          <span className="mx-0.5 opacity-40">—</span>
+                          <span className="truncate">{attr.name}</span>
                         </button>
                       );
                     })}

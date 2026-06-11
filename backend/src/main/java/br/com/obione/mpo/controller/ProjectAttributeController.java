@@ -1,5 +1,7 @@
 package br.com.obione.mpo.controller;
 
+import br.com.obione.mpo.dto.ManageAttributesRequestDTO;
+import br.com.obione.mpo.dto.ManageAttributesResponseDTO;
 import br.com.obione.mpo.dto.ProjectAttributeValueDTO;
 import br.com.obione.mpo.dto.SetAttributeValueRequestDTO;
 import br.com.obione.mpo.service.ProjectAttributeService;
@@ -8,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,5 +43,13 @@ public class ProjectAttributeController {
             @Valid @RequestBody SetAttributeValueRequestDTO request) {
         return attributeService.setDirectValue(
                 projectId, attributeCode, request.value(), request.status(), request.updatedBy());
+    }
+
+    @PostMapping("/manage")
+    @Operation(summary = "Adiciona e remove atributos MPO associados ao projeto. Atributos com dados só são removidos com force=true.")
+    public ManageAttributesResponseDTO manageAttributes(
+            @PathVariable Long projectId,
+            @RequestBody ManageAttributesRequestDTO request) {
+        return attributeService.manageAttributes(projectId, request);
     }
 }
