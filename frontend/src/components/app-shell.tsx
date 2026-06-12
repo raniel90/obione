@@ -2,7 +2,6 @@ import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   FolderKanban,
-  Layers,
   Users,
   Settings,
   Moon,
@@ -26,22 +25,18 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 const navItems = [
   { label: "Observatório", to: "/", icon: LayoutDashboard, match: (p: string) => p === "/" },
   {
+    label: "Comunidade",
+    to: "/community",
+    icon: Users,
+    // Domínios são sub-páginas da Comunidade (agregador), então /domains
+    // mantém o item Comunidade ativo.
+    match: (p: string) => p.startsWith("/community") || p.startsWith("/domains"),
+  },
+  {
     label: "Projetos",
     to: "/projects",
     icon: FolderKanban,
     match: (p: string) => p.startsWith("/projects"),
-  },
-  {
-    label: "Domínios",
-    to: "/domains",
-    icon: Layers,
-    match: (p: string) => p.startsWith("/domains"),
-  },
-  {
-    label: "Comunidade",
-    to: "/community",
-    icon: Users,
-    match: (p: string) => p.startsWith("/community"),
   },
   {
     label: "Configurações",
@@ -201,12 +196,13 @@ function useBreadcrumb(): { label: string; to?: string }[] {
       crumbs.push({ label: projectName ?? "Projeto" });
     }
   } else if (pathname.startsWith("/domains")) {
+    crumbs.push({ label: "Comunidade", to: "/community" });
     crumbs.push({ label: "Domínios", to: "/domains" });
     if (pathname === "/domains/new") crumbs.push({ label: "Novo Domínio" });
     else if (pathname.startsWith("/domains/")) crumbs.push({ label: "Detalhe" });
   } else if (pathname.startsWith("/community")) {
     crumbs.push({ label: "Comunidade", to: "/community" });
-    if (pathname.startsWith("/community/")) crumbs.push({ label: "Domínio" });
+    if (pathname.startsWith("/community/")) crumbs.push({ label: "Detalhe" });
   } else if (pathname.startsWith("/settings")) {
     crumbs.push({ label: "Configurações" });
   }

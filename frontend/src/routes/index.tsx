@@ -228,8 +228,10 @@ function ObservatoryDashboard() {
   const domainNameById = new Map(domains.map((d) => [d.id, d.name] as const));
   const domainSlugById = new Map(domains.map((d) => [d.id, d.slug] as const));
 
-  const active = projects.filter((p) => p.status === "active").length;
+  // A project is under observation until its cycle closes — the two counts
+  // must add up to the total shown on the card.
   const completed = projects.filter((p) => p.status === "completed").length;
+  const active = projects.length - completed;
 
   // Top domains by project count, for the Domínios card footer.
   const topDomains = domains

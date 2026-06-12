@@ -65,7 +65,6 @@ import {
   DiscussionDetailDialog,
   ConsolidateKnowledgeDialog,
 } from "@/components/community-pieces";
-import { findDomainCommunityBySlug } from "@/lib/community-utils";
 
 const communityStatusFromCode: Record<DomainCommunityStatusCode, CommunityStatus> = {
   ACTIVE: "ativa",
@@ -157,19 +156,16 @@ function mapParticipantToUi(participant: CommunityParticipant, domainName: strin
 }
 
 export const Route = createFileRoute("/community/$slug")({
-  head: ({ params }) => {
-    const c = findDomainCommunityBySlug(params.slug);
-    const name = c?.domain ?? "Comunidade";
-    return {
-      meta: [
-        { title: `Comunidade: ${name} — ObiOne` },
-        {
-          name: "description",
-          content: `Comunidade observacional do domínio ${name}: discussões, conhecimento produzido e fenômenos em análise.`,
-        },
-      ],
-    };
-  },
+  head: () => ({
+    meta: [
+      { title: "Comunidade — ObiOne" },
+      {
+        name: "description",
+        content:
+          "Comunidade observacional do domínio: discussões, conhecimento produzido e fenômenos em análise.",
+      },
+    ],
+  }),
   component: DomainCommunityPage,
   notFoundComponent: () => (
     <AppShell>
@@ -655,7 +651,6 @@ function DomainCommunityPage() {
             status: statusCodes[d.status],
             visibility: visibilityCodes[d.visibility],
             createdBy: "",
-            contributions: [],
           }).then((created) => {
             setDiscussions((list) => [
               toCommunityDiscussion(created, {

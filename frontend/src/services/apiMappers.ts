@@ -559,9 +559,9 @@ export function mapDomainCommunitySummary(dto: ApiDomainCommunity): DomainCommun
     domainName: dto.domainName,
     description: dto.description ?? "",
     participants: dto.participantCount,
-    linkedProjects: dto.projectCount,
-    discussions: dto.discussionCount,
-    insights: dto.knowledgeCount,
+    projectCount: dto.projectCount,
+    discussionCount: dto.discussionCount,
+    knowledgeCount: dto.knowledgeCount,
     status: mapDomainCommunityStatus(dto.status),
   };
 }
