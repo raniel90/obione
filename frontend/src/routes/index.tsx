@@ -78,18 +78,23 @@ function ObservationalKpi({
   hint,
   icon: Icon,
   trend,
+  to,
 }: {
   label: string;
   value: string | number;
   hint?: string;
   icon: React.ComponentType<{ className?: string }>;
   trend?: number[];
+  to?: string;
 }) {
-  return (
-    <div className="rounded-xl border border-border bg-card p-4">
+  const body = (
+    <>
       <div className="flex items-center justify-between text-muted-foreground">
         <span className="text-[11px] uppercase tracking-[0.16em]">{label}</span>
-        <Icon className="h-3.5 w-3.5" />
+        <Icon className="h-3.5 w-3.5 transition-opacity group-hover:opacity-0" />
+        {to && (
+          <ArrowUpRight className="absolute right-4 top-4 h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+        )}
       </div>
       <div className="mt-2 flex items-end justify-between gap-2">
         <div className="flex items-baseline gap-2">
@@ -98,8 +103,21 @@ function ObservationalKpi({
         </div>
         {trend && <Sparkline data={trend} className="text-foreground/70" width={70} height={22} />}
       </div>
-    </div>
+    </>
   );
+
+  if (to) {
+    return (
+      <Link
+        to={to}
+        className="group relative rounded-xl border border-border bg-card p-4 transition-colors hover:border-foreground/30"
+      >
+        {body}
+      </Link>
+    );
+  }
+
+  return <div className="rounded-xl border border-border bg-card p-4">{body}</div>;
 }
 
 /* ---------------------- Insights do Observatório -------------------------- */
@@ -274,6 +292,7 @@ function ObservatoryDashboard() {
               value={domains.length}
               hint="campos de estudo"
               icon={Layers}
+              to="/domains"
             />
             <ObservationalKpi
               label="Ciclos concluídos"
