@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppShell, PageHeader } from "@/components/app-shell";
-import { Sparkline } from "@/components/sparkline";
 import { Button } from "@/components/ui/button";
 import { createFileRoute } from "@tanstack/react-router";
 import type { Project as LegacyProject, ProjectStatus } from "@/lib/mock-data";
@@ -13,15 +12,7 @@ import { getKnowledge } from "@/services/knowledgeService";
 import { getFeed, type FeedEvent } from "@/services/feedService";
 import { FeedEventItem } from "@/components/feed-event-item";
 import type { Knowledge, KnowledgeConfidenceCode } from "@/types/knowledge";
-import {
-  Plus,
-  LayoutGrid,
-  Activity,
-  Layers,
-  CheckCircle2,
-  ArrowRight,
-  ArrowUpRight,
-} from "lucide-react";
+import { Plus, LayoutGrid, Layers, ArrowRight, ArrowUpRight } from "lucide-react";
 
 const statusCodeToLegacy: Record<ProjectStatusCode, ProjectStatus> = {
   OBSERVATION: "active",
@@ -70,54 +61,44 @@ export const Route = createFileRoute("/")({
   component: ObservatoryDashboard,
 });
 
-/* ----------------------------- Camada 1: KPIs ----------------------------- */
+/* ------------------------------- Panorama --------------------------------- */
 
-function ObservationalKpi({
+function PanoramaCard({
   label,
   value,
   hint,
   icon: Icon,
-  trend,
   to,
+  footer,
 }: {
   label: string;
-  value: string | number;
-  hint?: string;
+  value: number;
+  hint: string;
   icon: React.ComponentType<{ className?: string }>;
-  trend?: number[];
-  to?: string;
+  to: string;
+  footer?: React.ReactNode;
 }) {
-  const body = (
-    <>
+  return (
+    <Link
+      to={to}
+      className="group relative flex flex-col rounded-xl border border-border bg-card p-4 transition-colors hover:border-foreground/30"
+    >
       <div className="flex items-center justify-between text-muted-foreground">
         <span className="text-[11px] uppercase tracking-[0.16em]">{label}</span>
         <Icon className="h-3.5 w-3.5 transition-opacity group-hover:opacity-0" />
-        {to && (
-          <ArrowUpRight className="absolute right-4 top-4 h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-        )}
+        <ArrowUpRight className="absolute right-4 top-4 h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
       </div>
-      <div className="mt-2 flex items-end justify-between gap-2">
-        <div className="flex items-baseline gap-2">
-          <span className="text-2xl font-semibold tracking-tight text-foreground">{value}</span>
-          {hint && <span className="text-[11px] text-muted-foreground">{hint}</span>}
+      <div className="mt-2 flex items-baseline gap-2">
+        <span className="text-2xl font-semibold tracking-tight text-foreground">{value}</span>
+        <span className="text-[12px] text-muted-foreground">{hint}</span>
+      </div>
+      {footer && (
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-border pt-3 text-[11.5px] text-muted-foreground">
+          {footer}
         </div>
-        {trend && <Sparkline data={trend} className="text-foreground/70" width={70} height={22} />}
-      </div>
-    </>
+      )}
+    </Link>
   );
-
-  if (to) {
-    return (
-      <Link
-        to={to}
-        className="group relative rounded-xl border border-border bg-card p-4 transition-colors hover:border-foreground/30"
-      >
-        {body}
-      </Link>
-    );
-  }
-
-  return <div className="rounded-xl border border-border bg-card p-4">{body}</div>;
 }
 
 /* ---------------------- Insights do Observatório -------------------------- */
@@ -272,34 +253,34 @@ function ObservatoryDashboard() {
         <section>
           <SectionHeader
             title="Panorama"
-            description="Domínios são as áreas de atuação da consultoria. Cada projeto é um caso de cliente observado dentro de um domínio."
+            description="Cada projeto pertence a um domínio, a área de atuação que o agrupa."
           />
-          <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-            <ObservationalKpi
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            <PanoramaCard
               label="Domínios"
               value={domains.length}
-              hint="áreas de atuação"
+              hint="áreas de atuação da consultoria"
               icon={Layers}
               to="/domains"
             />
-            <ObservationalKpi
+            <PanoramaCard
               label="Projetos"
               value={projects.length}
-              hint="casos de clientes"
+              hint="casos de clientes observados"
               icon={LayoutGrid}
               to="/projects"
-            />
-            <ObservationalKpi
-              label="Em observação"
-              value={active}
-              hint="projetos ativos"
-              icon={Activity}
-            />
-            <ObservationalKpi
-              label="Concluídos"
-              value={completed}
-              hint="ciclos encerrados"
-              icon={CheckCircle2}
+              footer={
+                <>
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-info" />
+                    {active} em observação
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                    {completed} concluído{completed === 1 ? "" : "s"}
+                  </span>
+                </>
+              }
             />
           </div>
         </section>
