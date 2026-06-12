@@ -25,12 +25,18 @@ import type { ProjectSetupSuggestion } from "@/services/aiService";
 import type { MpoCategory } from "@/types/mpoAttribute";
 import type { Domain as SvcDomain } from "@/types/domain";
 import type { User } from "@/types/user";
-import type { ProjectStatusCode, ProjectTypeCode } from "@/types/project";
+import type {
+  EngagementLevel as EngagementCode,
+  ProjectStatusCode,
+  ProjectTypeCode,
+  RiskLevel as RiskCode,
+} from "@/types/project";
 import { toast } from "sonner";
 import {
   Telescope,
   Radar,
   Sparkles,
+  Users,
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
@@ -133,9 +139,17 @@ function NewProjectPage() {
     status: "em-observação" as ProjectStatus,
     startDate: "",
     endDate: "",
+    progress: 0,
+    engagement: "MEDIUM" as EngagementCode,
+    risk: "LOW" as RiskCode,
     attributes: [] as string[],
     phenomena: [] as string[],
   });
+  const [reviewErrors, setReviewErrors] = useState<{
+    clientId?: string;
+    startDate?: string;
+    endDate?: string;
+  }>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -207,10 +221,23 @@ function NewProjectPage() {
 
   const onCreate = async () => {
     if (submitting) return;
+
+    const errors: typeof reviewErrors = {};
+    if (!review.clientId) errors.clientId = "Selecione o cliente do projeto.";
+    if (!review.startDate) errors.startDate = "Informe a data de início.";
+    if (!review.endDate) errors.endDate = "Informe a previsão de conclusão.";
+    if (review.startDate && review.endDate && review.endDate < review.startDate) {
+      errors.endDate = "A conclusão não pode ser antes do início.";
+    }
+    if (Object.keys(errors).length > 0) {
+      setReviewErrors(errors);
+      toast.error("Preencha os campos obrigatórios para cadastrar.");
+      return;
+    }
+
     const story = getValues();
     setSubmitting(true);
     try {
-      const today = new Date().toISOString().slice(0, 10);
       const created = await createProject({
         name: story.name,
         domainId: review.domainId,
@@ -222,11 +249,11 @@ function NewProjectPage() {
         observationObjective: story.observationalGoal,
         initialAttributeIds: review.attributes,
         expectedPhenomena: review.phenomena,
-        progress: 0,
-        riskLevel: "LOW",
-        clientEngagement: "MEDIUM",
-        startDate: review.startDate || today,
-        expectedEndDate: review.endDate || today,
+        progress: review.progress,
+        riskLevel: review.risk,
+        clientEngagement: review.engagement,
+        startDate: review.startDate,
+        expectedEndDate: review.endDate,
         suggestionId: suggestion?.suggestionId,
       });
       setSubmitted(true);
@@ -457,11 +484,86 @@ function NewProjectPage() {
               </div>
             </Section>
 
+            <Section
+              icon={Users}
+              title="Cliente e prazos"
+              tooltip="Quem é o cliente deste caso e a janela de observação do projeto."
+            >
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Cliente" required>
+                  <Select
+                    value={review.clientId}
+                    onValueChange={(v) => {
+                      setReview((r) => ({ ...r, clientId: v }));
+                      setReviewErrors((e) => ({ ...e, clientId: undefined }));
+                    }}
+                  >
+                    <SelectTrigger aria-invalid={!!reviewErrors.clientId}>
+                      <SelectValue placeholder="Selecione o cliente" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {clients.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {reviewErrors.clientId && <FieldError>{reviewErrors.clientId}</FieldError>}
+                </Field>
+                <Field label="Consultor responsável">
+                  <Select
+                    value={review.consultantId}
+                    onValueChange={(v) => setReview((r) => ({ ...r, consultantId: v }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o consultor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {consultants.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+                <Field label="Data de início" required>
+                  <Input
+                    type="date"
+                    value={review.startDate}
+                    aria-invalid={!!reviewErrors.startDate}
+                    onChange={(e) => {
+                      setReview((r) => ({ ...r, startDate: e.target.value }));
+                      setReviewErrors((er) => ({
+                        ...er,
+                        startDate: undefined,
+                        endDate: undefined,
+                      }));
+                    }}
+                  />
+                  {reviewErrors.startDate && <FieldError>{reviewErrors.startDate}</FieldError>}
+                </Field>
+                <Field label="Previsão de conclusão" required>
+                  <Input
+                    type="date"
+                    value={review.endDate}
+                    aria-invalid={!!reviewErrors.endDate}
+                    onChange={(e) => {
+                      setReview((r) => ({ ...r, endDate: e.target.value }));
+                      setReviewErrors((er) => ({ ...er, endDate: undefined }));
+                    }}
+                  />
+                  {reviewErrors.endDate && <FieldError>{reviewErrors.endDate}</FieldError>}
+                </Field>
+              </div>
+            </Section>
+
             <Collapsible>
               <CollapsibleTrigger className="flex w-full items-center justify-between rounded-xl border border-border bg-card p-4 text-left">
                 <div>
                   <p className="text-[14px] font-semibold tracking-tight text-foreground">
-                    Cliente, consultor, tipo, status e datas
+                    Tipo, status e indicadores
                   </p>
                   <p className="mt-0.5 text-[12px] text-muted-foreground">
                     Opcional. Tudo pode ser ajustado depois.
@@ -471,40 +573,6 @@ function NewProjectPage() {
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <div className="mt-2 grid gap-4 rounded-xl border border-border bg-card p-6 sm:grid-cols-2">
-                  <Field label="Cliente">
-                    <Select
-                      value={review.clientId}
-                      onValueChange={(v) => setReview((r) => ({ ...r, clientId: v }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o cliente" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {clients.map((c) => (
-                          <SelectItem key={c.id} value={c.id}>
-                            {c.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </Field>
-                  <Field label="Consultor responsável">
-                    <Select
-                      value={review.consultantId}
-                      onValueChange={(v) => setReview((r) => ({ ...r, consultantId: v }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o consultor" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {consultants.map((c) => (
-                          <SelectItem key={c.id} value={c.id}>
-                            {c.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </Field>
                   <Field label="Tipo do projeto">
                     <Select
                       value={review.model}
@@ -520,7 +588,7 @@ function NewProjectPage() {
                       </SelectContent>
                     </Select>
                   </Field>
-                  <Field label="Status inicial">
+                  <Field label="Status do projeto">
                     <Select
                       value={review.status}
                       onValueChange={(v) =>
@@ -539,19 +607,52 @@ function NewProjectPage() {
                       </SelectContent>
                     </Select>
                   </Field>
-                  <Field label="Data de início">
+                  <Field label="Progresso (%)">
                     <Input
-                      type="date"
-                      value={review.startDate}
-                      onChange={(e) => setReview((r) => ({ ...r, startDate: e.target.value }))}
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={review.progress}
+                      onChange={(e) =>
+                        setReview((r) => ({
+                          ...r,
+                          progress: Math.min(100, Math.max(0, Number(e.target.value) || 0)),
+                        }))
+                      }
                     />
                   </Field>
-                  <Field label="Previsão de conclusão">
-                    <Input
-                      type="date"
-                      value={review.endDate}
-                      onChange={(e) => setReview((r) => ({ ...r, endDate: e.target.value }))}
-                    />
+                  <Field label="Engajamento do cliente">
+                    <Select
+                      value={review.engagement}
+                      onValueChange={(v) =>
+                        setReview((r) => ({ ...r, engagement: v as EngagementCode }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="LOW">Baixo</SelectItem>
+                        <SelectItem value="MEDIUM">Médio</SelectItem>
+                        <SelectItem value="HIGH">Alto</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                  <Field label="Risco atual">
+                    <Select
+                      value={review.risk}
+                      onValueChange={(v) => setReview((r) => ({ ...r, risk: v as RiskCode }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="LOW">Baixo</SelectItem>
+                        <SelectItem value="MODERATE">Moderado</SelectItem>
+                        <SelectItem value="HIGH">Elevado</SelectItem>
+                        <SelectItem value="CRITICAL">Crítico</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </Field>
                 </div>
               </CollapsibleContent>

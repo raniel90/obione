@@ -45,9 +45,9 @@ import type {
   PhenomenonStatus,
 } from "@/types/phenomenon";
 import { toast } from "sonner";
-import { getProjectById, getProjectCoverage, updateProject } from "@/services/projectService";
+import { getProjectById, getProjectCoverage } from "@/services/projectService";
 import type { ProjectCoverage } from "@/services/projectService";
-import { suggestDomain, suggestObservations } from "@/services/aiService";
+import { suggestObservations } from "@/services/aiService";
 import type { ObservationSuggestion } from "@/services/aiService";
 import { getFeed } from "@/services/feedService";
 import type { FeedEvent } from "@/services/feedService";
@@ -89,8 +89,6 @@ import {
   Users,
   CheckCircle2,
   Eye,
-  RefreshCw,
-  Lock,
   Plus,
   PenSquare,
 } from "lucide-react";
@@ -158,14 +156,6 @@ const updateStatusToLabel: Record<ProjectStatusCode, string> = {
   CLOSED: "Encerrado",
 };
 
-const updateStatusFromLabel: Record<string, ProjectStatusCode> = {
-  "Em observação": "OBSERVATION",
-  Estável: "ACTIVE",
-  "Em risco": "RISK",
-  "Em revisão": "REVIEW",
-  Encerrado: "CLOSED",
-};
-
 const riskCodeToLabel: Record<RiskLevel, string> = {
   LOW: "Baixo",
   MODERATE: "Moderado",
@@ -173,35 +163,10 @@ const riskCodeToLabel: Record<RiskLevel, string> = {
   CRITICAL: "Crítico",
 };
 
-const riskLabelToCode: Record<string, RiskLevel> = {
-  Baixo: "LOW",
-  Moderado: "MODERATE",
-  Elevado: "HIGH",
-  Crítico: "CRITICAL",
-};
-
-function engagementToPercent(level: EngagementLevel): number {
-  if (level === "HIGH") return 75;
-  if (level === "MEDIUM") return 50;
-  return 25;
-}
-
-function percentToEngagement(percent: number): EngagementLevel {
-  if (percent >= 67) return "HIGH";
-  if (percent >= 34) return "MEDIUM";
-  return "LOW";
-}
-
 function riskLevelTone(level: RiskLevel): "warning" | "success" | "danger" {
   if (level === "CRITICAL" || level === "HIGH") return "danger";
   if (level === "MODERATE") return "warning";
   return "success";
-}
-
-function engagementLevelTone(level: EngagementLevel): "warning" | "success" | "info" {
-  if (level === "HIGH") return "success";
-  if (level === "MEDIUM") return "info";
-  return "warning";
 }
 
 function authorIdLabel(id: string) {
@@ -337,7 +302,6 @@ function ProjectDetailPage() {
   const [project, setProject] = useState<LegacyProject | null>(null);
   const [rawProject, setRawProject] = useState<SvcProject | null>(null);
   const [domain, setDomain] = useState<SvcDomain | null>(null);
-  const [domainMap, setDomainMap] = useState<Map<string, SvcDomain>>(new Map());
   const [svcPhenomena, setSvcPhenomena] = useState<ProjectPhenomenon[]>([]);
   const [rawPhenomena, setRawPhenomena] = useState<SvcPhenomenon[]>([]);
   const [svcObservations, setSvcObservations] = useState<ProjectObservation[]>([]);
@@ -345,7 +309,6 @@ function ProjectDetailPage() {
   const [attrNameById, setAttrNameById] = useState<Map<string, string>>(new Map());
   const [phenNameById, setPhenNameById] = useState<Map<string, string>>(new Map());
   const [discussionsRefresh, setDiscussionsRefresh] = useState(0);
-  const [engagementPercent, setEngagementPercent] = useState<number | null>(null);
   const [coverage, setCoverage] = useState<ProjectCoverage | null>(null);
   const [feedEvents, setFeedEvents] = useState<FeedEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -372,10 +335,8 @@ function ProjectDetailPage() {
         setCoverage(cov);
         setFeedEvents(fe);
         const domainsById = new Map(ds.map((d) => [d.id, d] as const));
-        setDomainMap(domainsById);
         setDomain(domainsById.get(p.domainId) ?? null);
         setRawProject(p);
-        setEngagementPercent(engagementToPercent(p.clientEngagement));
         setProject(toLegacyProject(p, domainsById));
         setRawPhenomena(phs);
         setSvcPhenomena(phs.map(toProjectPhenomenon));
@@ -412,35 +373,6 @@ function ProjectDetailPage() {
     getProjectCoverage(id).then(setCoverage);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, rawObservations.length]);
-
-  const kpis = useMemo((): { label: string; value: string; tone?: string; hint?: string }[] => {
-    if (!rawProject) return [];
-    const aiAccepted = rawObservations.filter((o) => o.origin === "AI_SUGGESTED").length;
-    return [
-      {
-        label: "Risco observado",
-        value: riskCodeToLabel[rawProject.riskLevel],
-        tone: riskLevelTone(rawProject.riskLevel),
-      },
-      {
-        label: "Engajamento do cliente",
-        value: engagementPercent !== null ? `${engagementPercent}%` : "—",
-        tone: engagementLevelTone(rawProject.clientEngagement),
-      },
-      ...(isClient
-        ? []
-        : [
-            {
-              label: "Cobertura do MPO",
-              value: coverage ? `${coverage.percentage}%` : "—",
-              tone: "info",
-            },
-          ]),
-      { label: "Observações", value: String(rawObservations.length) },
-      { label: "Fenômenos", value: String(rawPhenomena.length) },
-      { label: "Aceitas da IA", value: String(aiAccepted) },
-    ];
-  }, [rawProject, engagementPercent, coverage, rawObservations, rawPhenomena, isClient]);
 
   const observatorySummary = useMemo(() => {
     if (!rawProject || rawObservations.length === 0) return "";
@@ -528,77 +460,62 @@ function ProjectDetailPage() {
                   </Link>
                 </Button>
               )}
-              <Button
-                size="sm"
-                variant="outline"
-                className="gap-1.5"
-                onClick={async () => {
-                  try {
-                    const s = await suggestDomain(id);
-                    toast.info(
-                      `IA sugere o domínio "${s.suggestedDomainSlug}" (${Math.round(
-                        s.confidence * 100,
-                      )}%). ${s.rationale}`,
-                    );
-                  } catch {
-                    toast.error("Não foi possível obter a sugestão de domínio.");
-                  }
-                }}
-              >
-                <Sparkles className="h-3.5 w-3.5" /> Sugerir domínio (IA)
+              <Button asChild size="sm" className="gap-1.5">
+                <Link to="/projects/$id/edit" params={{ id }}>
+                  <PenSquare className="h-3.5 w-3.5" /> Editar projeto
+                </Link>
               </Button>
-              {rawProject && (
-                <UpdateProjectButton
-                  projectId={id}
-                  projectName={project.name}
-                  project={rawProject}
-                  engagementPercent={
-                    engagementPercent ?? engagementToPercent(rawProject.clientEngagement)
-                  }
-                  onUpdated={(updated, nextEngagementPercent) => {
-                    setRawProject(updated);
-                    setEngagementPercent(nextEngagementPercent);
-                    setProject(toLegacyProject(updated, domainMap));
-                  }}
-                />
-              )}
-              <CloseObservationButton projectName={project.name} />
             </div>
           </div>
 
-          {/* Meta grid */}
-          <div className="grid grid-cols-2 gap-x-6 gap-y-3 rounded-xl border border-border bg-card p-4 md:grid-cols-6">
-            <MetaItem label="Domínio" value={domain?.name ?? project.domain} />
-            <MetaItem label="Tipo" value={project.model} />
-            <MetaItem label="Consultor" value={project.owner} />
-            <MetaItem label="Cliente" value={project.clientName ?? "—"} />
-            <MetaItem
-              label="Risco"
-              value={rawProject ? riskCodeToLabel[rawProject.riskLevel] : "—"}
-            />
-            <MetaItem
-              label="Engajamento"
-              value={engagementPercent !== null ? `${engagementPercent}%` : "—"}
-            />
-            <MetaItem
-              label="Início"
-              value={rawProject?.startDate ? formatDate(rawProject.startDate) : "—"}
-            />
-            <MetaItem
-              label="Previsão"
-              value={rawProject?.expectedEndDate ? formatDate(rawProject.expectedEndDate) : "—"}
-            />
-            <div className="col-span-2 md:col-span-6">
-              <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                <span>Progresso observacional</span>
-                <span className="font-mono text-foreground">{project.progress}%</span>
-              </div>
-              <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-foreground"
-                  style={{ width: `${project.progress}%` }}
-                />
-              </div>
+          {/* Overview + indicadores (sintetizados) */}
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="grid grid-cols-2 gap-x-6 gap-y-3 md:grid-cols-6">
+              <MetaItem label="Domínio" value={domain?.name ?? project.domain} />
+              <MetaItem label="Tipo" value={project.model} />
+              <MetaItem label="Consultor" value={project.owner} />
+              <MetaItem label="Cliente" value={project.clientName ?? "—"} />
+              <MetaItem
+                label="Início"
+                value={rawProject?.startDate ? formatDate(rawProject.startDate) : "—"}
+              />
+              <MetaItem
+                label="Previsão"
+                value={rawProject?.expectedEndDate ? formatDate(rawProject.expectedEndDate) : "—"}
+              />
+            </div>
+            <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-border pt-3 text-[12px] text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5">
+                Risco
+                <span
+                  className={cn(
+                    "font-medium",
+                    rawProject && toneClass[riskLevelTone(rawProject.riskLevel)],
+                  )}
+                >
+                  {rawProject ? riskCodeToLabel[rawProject.riskLevel] : "—"}
+                </span>
+              </span>
+              {!isClient && coverage && (
+                <span className="inline-flex items-center gap-1.5">
+                  Cobertura do MPO
+                  <span className="font-medium text-foreground">{coverage.percentage}%</span>
+                </span>
+              )}
+              <span className="inline-flex items-center gap-1.5">
+                Observações
+                <span className="font-medium text-foreground">{rawObservations.length}</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                Fenômenos
+                <span className="font-medium text-foreground">{rawPhenomena.length}</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                Aceitas da IA
+                <span className="font-medium text-foreground">
+                  {rawObservations.filter((o) => o.origin === "AI_SUGGESTED").length}
+                </span>
+              </span>
             </div>
           </div>
         </div>
@@ -628,69 +545,13 @@ function ProjectDetailPage() {
           )}
         </section>
 
-        {/* Indicadores */}
-        <section>
-          <SectionTitle
-            eyebrow="Atributos intermediários"
-            title="Indicadores do projeto"
-            description="Medidas interpretativas geradas pelo observatório."
-          />
-          <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-            {kpis.map((k) => (
-              <div key={k.label} className="rounded-xl border border-border bg-card p-4">
-                <span className="text-[10.5px] uppercase tracking-[0.16em] text-muted-foreground">
-                  {k.label}
-                </span>
-                <div className="mt-2 text-[18px] font-semibold tracking-tight">
-                  <span className={cn(toneClass[k.tone ?? "default"])}>{k.value}</span>
-                </div>
-                {k.hint && <p className="mt-1 text-[11px] text-muted-foreground">{k.hint}</p>}
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Roteiro de observação — compromissos declarados no cadastro */}
-        {rawProject && rawProject.initialAttributeIds.length > 0 && (
-          <section>
-            <SectionTitle
-              eyebrow="Compromissos do cadastro"
-              title="Roteiro de observação"
-              description="Aspectos que o consultor declarou acompanhar neste projeto. Os marcados já têm observação registrada; os demais aguardam a primeira evidência."
-            />
-            <div className="mt-4 flex flex-wrap gap-2">
-              {rawProject.initialAttributeIds.map((attrId) => {
-                const observed = rawObservations.some((o) => o.attributeId === attrId);
-                return (
-                  <span
-                    key={attrId}
-                    className={cn(
-                      "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[12px]",
-                      observed
-                        ? "border-success/30 bg-success/5 text-success"
-                        : "border-border bg-card text-muted-foreground",
-                    )}
-                  >
-                    {observed ? (
-                      <CheckCircle2 className="h-3 w-3" />
-                    ) : (
-                      <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
-                    )}
-                    {attrNameById.get(attrId) ?? attrId}
-                  </span>
-                );
-              })}
-            </div>
-          </section>
-        )}
-
         {/* Cobertura do MPO — instrumento do consultor; oculto para o cliente */}
         {coverage && !isClient && (
           <section>
             <SectionTitle
               eyebrow="MPO · Avaliação de cobertura"
               title="Cobertura observacional"
-              description="Quanto do MPO (Quadro 37) já está coberto por ao menos uma observação."
+              description="Dos 43 aspectos que a lente do observatório sabe enxergar, quantos já têm pelo menos uma observação neste projeto."
             />
             <div className="mt-4 rounded-xl border border-border bg-card p-5">
               <div className="flex items-baseline gap-3">
@@ -698,26 +559,14 @@ function ProjectDetailPage() {
                   {coverage.percentage}%
                 </span>
                 <span className="text-[12.5px] text-muted-foreground">
-                  {coverage.covered} de {coverage.totalInScope} atributos em escopo observados
+                  {coverage.covered} de {coverage.totalInScope} aspectos já observados
                 </span>
               </div>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                {coverage.categories.map((c) => (
-                  <div key={c.key} className="space-y-1">
-                    <div className="flex items-center justify-between text-[12px]">
-                      <span className="text-foreground">{c.label}</span>
-                      <span className="tabular-nums text-muted-foreground">
-                        {c.covered}/{c.total}
-                      </span>
-                    </div>
-                    <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-                      <div
-                        className="h-full rounded-full bg-foreground/70"
-                        style={{ width: `${c.percentage}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
+              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-foreground/70"
+                  style={{ width: `${coverage.percentage}%` }}
+                />
               </div>
             </div>
           </section>
@@ -781,13 +630,6 @@ function ProjectDetailPage() {
                     ? toneClass[riskLevelTone(rawProject.riskLevel)]
                     : undefined,
                 },
-                {
-                  label: "Grau de engajamento",
-                  value: engagementPercent !== null ? `${engagementPercent}%` : "—",
-                  className: rawProject
-                    ? toneClass[engagementLevelTone(rawProject.clientEngagement)]
-                    : undefined,
-                },
                 ...(isClient
                   ? []
                   : [
@@ -797,7 +639,6 @@ function ProjectDetailPage() {
                         className: toneClass.info,
                       },
                     ]),
-                { label: "Progresso observacional", value: `${project.progress}%` },
               ]}
               highlight
             />
@@ -2007,319 +1848,6 @@ function Meta({ label, value, className }: { label: string; value: string; class
       <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
       <p className={cn("mt-0.5 text-[12.5px] font-medium text-foreground", className)}>{value}</p>
     </div>
-  );
-}
-
-/* ------------------------- Update / Close project ------------------------- */
-
-function UpdateProjectButton({
-  projectId,
-  projectName,
-  project,
-  engagementPercent,
-  onUpdated,
-}: {
-  projectId: string;
-  projectName: string;
-  project: SvcProject;
-  engagementPercent: number;
-  onUpdated: (project: SvcProject, engagementPercent: number) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({
-    status: updateStatusToLabel[project.status],
-    progress: project.progress,
-    risk: riskCodeToLabel[project.riskLevel],
-    engagement: engagementPercent,
-    comment: "",
-  });
-
-  useEffect(() => {
-    if (!open) return;
-    setForm({
-      status: updateStatusToLabel[project.status],
-      progress: project.progress,
-      risk: riskCodeToLabel[project.riskLevel],
-      engagement: engagementPercent,
-      comment: "",
-    });
-  }, [open, project, engagementPercent]);
-
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (submitting) return;
-
-    const progress = Number(form.progress);
-    const engagement = Number(form.engagement);
-    if (
-      !Number.isFinite(progress) ||
-      progress < 0 ||
-      progress > 100 ||
-      !Number.isFinite(engagement) ||
-      engagement < 0 ||
-      engagement > 100
-    ) {
-      toast.error("Erro ao atualizar projeto.");
-      return;
-    }
-
-    const status = updateStatusFromLabel[form.status];
-    const riskLevel = riskLabelToCode[form.risk];
-    if (!status || !riskLevel) {
-      toast.error("Erro ao atualizar projeto.");
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      const payload: Partial<SvcProject> = {
-        status,
-        riskLevel,
-        progress,
-        clientEngagement: percentToEngagement(engagement),
-      };
-      if (form.comment.trim()) {
-        payload.summary = project.summary
-          ? `${project.summary}\n\n${form.comment.trim()}`
-          : form.comment.trim();
-      }
-
-      const updated = await updateProject(projectId, payload);
-      if (!updated) {
-        toast.error("Erro ao atualizar projeto.");
-        return;
-      }
-
-      onUpdated(updated, engagement);
-      toast.success("Projeto atualizado com sucesso.");
-      setOpen(false);
-    } catch {
-      toast.error("Erro ao atualizar projeto.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="sm" variant="outline" className="gap-1.5">
-          <RefreshCw className="h-3.5 w-3.5" /> Atualizar projeto
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Atualizar {projectName}</DialogTitle>
-          <DialogDescription>
-            Atualize o estado observacional do projeto para refletir a evolução percebida.
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label>Status observacional</Label>
-              <Select
-                value={form.status}
-                onValueChange={(v) => setForm((f) => ({ ...f, status: v }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {["Em observação", "Estável", "Em risco", "Em revisão", "Encerrado"].map((v) => (
-                    <SelectItem key={v} value={v}>
-                      {v}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label>Risco atual</Label>
-              <Select value={form.risk} onValueChange={(v) => setForm((f) => ({ ...f, risk: v }))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {["Baixo", "Moderado", "Elevado", "Crítico"].map((v) => (
-                    <SelectItem key={v} value={v}>
-                      {v}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="upd-progress">Progresso (%)</Label>
-              <Input
-                id="upd-progress"
-                type="number"
-                min={0}
-                max={100}
-                value={form.progress}
-                onChange={(e) => setForm((f) => ({ ...f, progress: Number(e.target.value) }))}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="upd-eng">Engajamento atual (%)</Label>
-              <Input
-                id="upd-eng"
-                type="number"
-                min={0}
-                max={100}
-                value={form.engagement}
-                onChange={(e) => setForm((f) => ({ ...f, engagement: Number(e.target.value) }))}
-              />
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="upd-comment">Comentário de atualização</Label>
-            <Textarea
-              id="upd-comment"
-              rows={3}
-              placeholder="Resuma o motivo da atualização e o que mudou na observação do projeto."
-              value={form.comment}
-              onChange={(e) => setForm((f) => ({ ...f, comment: e.target.value }))}
-            />
-          </div>
-          <DialogFooter>
-            <Button type="submit" size="sm" disabled={submitting}>
-              {submitting ? "Salvando…" : "Salvar atualização"}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function CloseObservationButton({ projectName }: { projectName: string }) {
-  const [open, setOpen] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [form, setForm] = useState({
-    result: "Concluído com sucesso",
-    summary: "",
-    phenomena: "",
-    lessons: "",
-    patterns: "",
-    recommendation: "",
-  });
-
-  const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSuccess(true);
-    setTimeout(() => {
-      setSuccess(false);
-      setOpen(false);
-    }, 1600);
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="sm" className="gap-1.5">
-          <Lock className="h-3.5 w-3.5" /> Encerrar observação
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[640px]">
-        <DialogHeader>
-          <DialogTitle>Encerrar observação de {projectName}</DialogTitle>
-          <DialogDescription>
-            Consolide os aprendizados deste projeto. O caso será mantido no histórico do
-            observatório para alimentar análises futuras.
-          </DialogDescription>
-        </DialogHeader>
-        {success ? (
-          <div className="flex flex-col items-center gap-2 py-6 text-center">
-            <CheckCircle2 className="h-8 w-8 text-success" />
-            <p className="text-sm font-medium">Observação do projeto encerrada com sucesso.</p>
-          </div>
-        ) : (
-          <form onSubmit={onSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label>Resultado final</Label>
-              <Select
-                value={form.result}
-                onValueChange={(v) => setForm((f) => ({ ...f, result: v }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {[
-                    "Concluído com sucesso",
-                    "Concluído com atraso",
-                    "Concluído com mudanças relevantes",
-                    "Suspenso",
-                    "Cancelado",
-                  ].map((v) => (
-                    <SelectItem key={v} value={v}>
-                      {v}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="cl-summary">Resumo final da observação</Label>
-              <Textarea
-                id="cl-summary"
-                rows={3}
-                placeholder="Síntese narrativa do que foi observado durante o ciclo do projeto."
-                value={form.summary}
-                onChange={(e) => setForm((f) => ({ ...f, summary: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="cl-phen">Principais fenômenos observados</Label>
-              <Textarea
-                id="cl-phen"
-                rows={2}
-                placeholder="Padrões, comportamentos e sinais relevantes identificados."
-                value={form.phenomena}
-                onChange={(e) => setForm((f) => ({ ...f, phenomena: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="cl-lessons">Lições aprendidas</Label>
-              <Textarea
-                id="cl-lessons"
-                rows={2}
-                placeholder="O que deve ser preservado, evitado ou replicado."
-                value={form.lessons}
-                onChange={(e) => setForm((f) => ({ ...f, lessons: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="cl-patterns">Padrões identificados</Label>
-              <Textarea
-                id="cl-patterns"
-                rows={2}
-                placeholder="Padrões que podem caracterizar projetos similares no futuro."
-                value={form.patterns}
-                onChange={(e) => setForm((f) => ({ ...f, patterns: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="cl-rec">Recomendação para projetos futuros</Label>
-              <Textarea
-                id="cl-rec"
-                rows={2}
-                placeholder="Boas práticas e alertas para casos semelhantes."
-                value={form.recommendation}
-                onChange={(e) => setForm((f) => ({ ...f, recommendation: e.target.value }))}
-              />
-            </div>
-            <DialogFooter>
-              <Button type="submit" size="sm">
-                Confirmar encerramento
-              </Button>
-            </DialogFooter>
-          </form>
-        )}
-      </DialogContent>
-    </Dialog>
   );
 }
 
