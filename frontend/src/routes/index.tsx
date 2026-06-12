@@ -12,7 +12,7 @@ import { getKnowledge } from "@/services/knowledgeService";
 import { getFeed, type FeedEvent } from "@/services/feedService";
 import { FeedEventItem } from "@/components/feed-event-item";
 import type { Knowledge, KnowledgeConfidenceCode } from "@/types/knowledge";
-import { Plus, LayoutGrid, Layers, ArrowRight, ArrowUpRight, Info } from "lucide-react";
+import { Plus, LayoutGrid, Users as UsersIcon, ArrowRight, ArrowUpRight, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const statusCodeToLegacy: Record<ProjectStatusCode, ProjectStatus> = {
@@ -262,15 +262,15 @@ function ObservatoryDashboard() {
         <section>
           <SectionHeader
             title="Panorama"
-            tooltip="Cada projeto pertence a um domínio, a área de atuação que o agrupa."
+            tooltip="Cada projeto pertence a uma comunidade, o espaço onde suas observações são discutidas e viram conhecimento. O domínio é a área de atuação que a agrupa."
           />
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             <PanoramaCard
-              label="Domínios"
+              label="Comunidades"
               value={domains.length}
-              hint="áreas de atuação da consultoria"
-              icon={Layers}
-              to="/domains"
+              hint="espaços de discussão por área de atuação"
+              icon={UsersIcon}
+              to="/community"
               footer={
                 <>
                   {topDomains.map((d) => (
