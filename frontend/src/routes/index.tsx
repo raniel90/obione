@@ -19,8 +19,8 @@ import {
   Activity,
   Layers,
   CheckCircle2,
-  Sparkles,
   ArrowRight,
+  ArrowUpRight,
 } from "lucide-react";
 
 const statusCodeToLegacy: Record<ProjectStatusCode, ProjectStatus> = {
@@ -104,46 +104,62 @@ function ObservationalKpi({
 
 /* ---------------------- Insights do Observatório -------------------------- */
 
-const confidencePercent: Record<KnowledgeConfidenceCode, number> = {
-  LOW: 35,
-  MEDIUM: 65,
-  HIGH: 90,
+const confidenceDot: Record<KnowledgeConfidenceCode, string> = {
+  LOW: "bg-muted-foreground/50",
+  MEDIUM: "bg-info",
+  HIGH: "bg-success",
 };
 
 const confidenceLabel: Record<KnowledgeConfidenceCode, string> = {
-  LOW: "baixa",
-  MEDIUM: "média",
-  HIGH: "alta",
+  LOW: "confiança baixa",
+  MEDIUM: "confiança média",
+  HIGH: "confiança alta",
 };
 
-function InsightCard({ k, domainName }: { k: Knowledge; domainName: string }) {
-  return (
-    <article className="flex flex-col gap-3 rounded-xl border border-border bg-card p-5">
-      <div className="flex items-center justify-between">
-        <span className="inline-flex items-center gap-1.5 text-[10.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-          <Sparkles className="h-3 w-3" />
-          Conhecimento consolidado
-        </span>
-        <span className="font-mono text-[10.5px] text-muted-foreground">
-          confiança {confidenceLabel[k.confidence]}
-        </span>
+function InsightCard({
+  k,
+  domainName,
+  domainSlug,
+}: {
+  k: Knowledge;
+  domainName: string;
+  domainSlug?: string;
+}) {
+  const body = (
+    <>
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="text-[14px] font-semibold leading-snug text-foreground">{k.title}</h3>
+        <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
       </div>
 
-      <div>
-        <h3 className="text-[13.5px] font-semibold leading-snug text-foreground">{k.title}</h3>
-        <p className="mt-1 text-[13px] leading-relaxed text-foreground/90">{k.summary}</p>
-      </div>
+      <p className="line-clamp-3 text-[13px] leading-relaxed text-muted-foreground">{k.summary}</p>
 
-      <div className="mt-auto flex items-center justify-between border-t border-border pt-3 text-[11px] text-muted-foreground">
+      <div className="mt-auto flex items-center justify-between pt-2 text-[11px] text-muted-foreground">
         <span className="font-mono uppercase tracking-wider">{domainName}</span>
-        <div className="h-1 w-24 overflow-hidden rounded-full bg-muted">
-          <div
-            className="h-full rounded-full bg-foreground/80"
-            style={{ width: `${confidencePercent[k.confidence]}%` }}
-          />
-        </div>
+        <span className="inline-flex items-center gap-1.5">
+          <span className={`h-1.5 w-1.5 rounded-full ${confidenceDot[k.confidence]}`} />
+          {confidenceLabel[k.confidence]}
+        </span>
       </div>
-    </article>
+    </>
+  );
+
+  if (!domainSlug) {
+    return (
+      <article className="flex flex-col gap-2.5 rounded-xl border border-border bg-card p-5">
+        {body}
+      </article>
+    );
+  }
+
+  return (
+    <Link
+      to="/community/$slug"
+      params={{ slug: domainSlug }}
+      className="group flex flex-col gap-2.5 rounded-xl border border-border bg-card p-5 transition-colors hover:border-foreground/30"
+    >
+      {body}
+    </Link>
   );
 }
 
@@ -205,6 +221,7 @@ function ObservatoryDashboard() {
   }, []);
 
   const domainNameById = new Map(domains.map((d) => [d.id, d.name] as const));
+  const domainSlugById = new Map(domains.map((d) => [d.id, d.slug] as const));
 
   const active = projects.filter((p) => p.status === "active").length;
   const completed = projects.filter((p) => p.status === "completed").length;
@@ -273,6 +290,15 @@ function ObservatoryDashboard() {
             <SectionHeader
               title="Conhecimento consolidado pela comunidade"
               description="Aprendizados reais que nasceram do ciclo observação → discussão → conhecimento."
+              action={
+                <Link
+                  to="/community"
+                  className="inline-flex items-center gap-1 text-[12px] text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  Ver todos
+                  <ArrowRight className="h-3 w-3" />
+                </Link>
+              }
             />
             {knowledge.length === 0 ? (
               <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/20 p-5 text-[12.5px] leading-relaxed text-muted-foreground">
@@ -286,6 +312,7 @@ function ObservatoryDashboard() {
                     key={k.id}
                     k={k}
                     domainName={domainNameById.get(k.domainId) ?? "—"}
+                    domainSlug={domainSlugById.get(k.domainId)}
                   />
                 ))}
               </div>

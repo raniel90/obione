@@ -3,14 +3,14 @@ import { useEffect, useMemo, useState } from "react";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/status-badge";
-import { statusLabels, type ProjectStatus, type Project as LegacyProject } from "@/lib/mock-data";
+import { type ProjectStatus, type Project as LegacyProject } from "@/lib/mock-data";
 import type { Project as SvcProject, ProjectStatusCode, ProjectTypeCode } from "@/types/project";
 import type { Domain as SvcDomain } from "@/types/domain";
 import { getProjects } from "@/services/projectService";
 import { getDomains } from "@/services/domainService";
 import { getPhenomena } from "@/services/phenomenonService";
 import type { Phenomenon } from "@/types/phenomenon";
-import { Plus, Filter, Search, ArrowUpRight, AlertTriangle, Radar } from "lucide-react";
+import { Plus, Search, ArrowUpRight, AlertTriangle, Radar } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/projects/")({
@@ -177,20 +177,7 @@ function ObservedProjectCard({
   );
 }
 
-const STATUSES: (ProjectStatus | "all")[] = [
-  "all",
-  "active",
-  "planning",
-  "review",
-  "paused",
-  "completed",
-];
-const RISKS: ("all" | Risk)[] = ["all", "Baixo", "Moderado", "Elevado"];
-
 function ProjectsCatalog() {
-  const [status, setStatus] = useState<ProjectStatus | "all">("all");
-  const [domainId, setDomainId] = useState<string>("all");
-  const [risk, setRisk] = useState<"all" | Risk>("all");
   const [query, setQuery] = useState("");
   const [domains, setDomains] = useState<SvcDomain[]>([]);
   const [svcProjects, setSvcProjects] = useState<SvcProject[]>([]);
@@ -231,14 +218,8 @@ function ProjectsCatalog() {
 
   const filtered = useMemo(
     () =>
-      projects.filter((p) => {
-        if (status !== "all" && p.status !== status) return false;
-        if (domainId !== "all" && p.domainId !== domainId) return false;
-        if (risk !== "all" && deriveRisk(p) !== risk) return false;
-        if (query.trim() && !p.name.toLowerCase().includes(query.toLowerCase())) return false;
-        return true;
-      }),
-    [projects, status, domainId, risk, query],
+      projects.filter((p) => !query.trim() || p.name.toLowerCase().includes(query.toLowerCase())),
+    [projects, query],
   );
 
   return (
@@ -257,81 +238,20 @@ function ProjectsCatalog() {
       />
 
       <div className="px-6 py-6 md:px-10">
-        {/* Filtros */}
-        <div className="flex flex-col gap-3 border-b border-border pb-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-1 items-center gap-2 rounded-md border border-border bg-card px-2.5 py-1.5 text-[12px] text-muted-foreground lg:max-w-xs">
-            <Search className="h-3.5 w-3.5" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Buscar por nome do projeto…"
-              className="flex-1 bg-transparent outline-none placeholder:text-muted-foreground/70"
-            />
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-                <Filter className="h-3 w-3" /> Domínio
-              </span>
-              <select
-                value={domainId}
-                onChange={(e) => setDomainId(e.target.value)}
-                className="rounded-md border border-border bg-card px-2.5 py-1.5 text-[12px] text-foreground outline-none focus:border-ring"
-              >
-                <option value="all">Todos</option>
-                {domains.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-                Risco
-              </span>
-              <select
-                value={risk}
-                onChange={(e) => setRisk(e.target.value as "all" | Risk)}
-                className="rounded-md border border-border bg-card px-2.5 py-1.5 text-[12px] text-foreground outline-none focus:border-ring"
-              >
-                {RISKS.map((r) => (
-                  <option key={r} value={r}>
-                    {r === "all" ? "Todos" : r}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-4 flex flex-wrap items-center gap-1.5">
-          <span className="inline-flex items-center gap-1.5 pr-2 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-            Status
-          </span>
-          {STATUSES.map((s) => (
-            <button
-              key={s}
-              onClick={() => setStatus(s)}
-              className={cn(
-                "rounded-full border px-2.5 py-1 text-[12px] transition-colors",
-                status === s
-                  ? "border-foreground bg-foreground text-background"
-                  : "border-border bg-card text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {s === "all" ? "Todos" : statusLabels[s]}
-            </button>
-          ))}
+        {/* Busca */}
+        <div className="flex items-center gap-2 rounded-md border border-border bg-card px-2.5 py-1.5 text-[12px] text-muted-foreground lg:max-w-xs">
+          <Search className="h-3.5 w-3.5" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar por nome do projeto…"
+            className="flex-1 bg-transparent outline-none placeholder:text-muted-foreground/70"
+          />
         </div>
 
         {filtered.length === 0 ? (
           <div className="mt-6 rounded-xl border border-dashed border-border p-12 text-center">
-            <p className="text-sm text-muted-foreground">
-              Nenhum projeto encontrado para os filtros aplicados.
-            </p>
+            <p className="text-sm text-muted-foreground">Nenhum projeto encontrado para a busca.</p>
           </div>
         ) : (
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">

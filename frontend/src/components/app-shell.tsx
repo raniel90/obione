@@ -8,7 +8,6 @@ import {
   Search,
   Moon,
   Sun,
-  Bell,
   Upload,
   Plus,
   LogIn,
@@ -243,9 +242,6 @@ function Header() {
 
         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={toggle}>
           {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-        </Button>
-        <Button variant="ghost" size="icon" className="h-8 w-8">
-          <Bell className="h-4 w-4" />
         </Button>
 
         {session ? (
