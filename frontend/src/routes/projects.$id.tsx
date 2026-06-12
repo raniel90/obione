@@ -310,6 +310,7 @@ function ProjectDetailPage() {
   const [attrNameById, setAttrNameById] = useState<Map<string, string>>(new Map());
   const [phenNameById, setPhenNameById] = useState<Map<string, string>>(new Map());
   const [discussionsRefresh, setDiscussionsRefresh] = useState(0);
+  const [activeTab, setActiveTab] = useState("observacoes");
   const [coverage, setCoverage] = useState<ProjectCoverage | null>(null);
   const [feedEvents, setFeedEvents] = useState<FeedEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -364,6 +365,51 @@ function ProjectDetailPage() {
   useEffect(() => {
     getCurrentUser().then((user) => setIsClient(user?.profileCode === "CLIENT"));
   }, []);
+
+  // Discussions/knowledge are fetched at page level so the funnel and the
+  // Comunidade tab share the same data.
+  const [projectDiscussions, setProjectDiscussions] = useState<
+    ReturnType<typeof toCommunityDiscussion>[]
+  >([]);
+  const [projectKnowledge, setProjectKnowledge] = useState<CommunityKnowledge[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const domainName = domain?.name ?? "—";
+    const projectName = rawProject?.name ?? "";
+    getDiscussionsByProject(id).then((discussions) => {
+      if (cancelled) return;
+      setProjectDiscussions(
+        discussions.map((d) =>
+          toCommunityDiscussion(d, {
+            domain: domainName,
+            project: projectName,
+            phenomenon: d.phenomenonId ? (phenNameById.get(d.phenomenonId) ?? d.phenomenonId) : "—",
+            originObservation: d.observationId ? `Observação #${d.observationId}` : undefined,
+          }),
+        ),
+      );
+    });
+    getKnowledgeByProject(id)
+      .then((knowledge) => {
+        if (cancelled) return;
+        setProjectKnowledge(
+          knowledge.map((k) =>
+            toCommunityKnowledge(k, {
+              domain: domainName,
+              project: projectName,
+              phenomenon: k.phenomenonId
+                ? (phenNameById.get(k.phenomenonId) ?? k.phenomenonId)
+                : undefined,
+            }),
+          ),
+        );
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [id, domain, rawProject, phenNameById, discussionsRefresh]);
 
   // Coverage depends on which attributes are observed — refresh it whenever
   // observations change (manual record or accepted AI suggestion). `loading`
@@ -495,14 +541,6 @@ function ProjectDetailPage() {
                 </span>
               )}
               <span className="inline-flex items-center gap-1.5">
-                Observações
-                <span className="font-medium text-foreground">{rawObservations.length}</span>
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                Fenômenos
-                <span className="font-medium text-foreground">{rawPhenomena.length}</span>
-              </span>
-              <span className="inline-flex items-center gap-1.5">
                 Aceitas da IA
                 <span className="font-medium text-foreground">
                   {rawObservations.filter((o) => o.origin === "AI_SUGGESTED").length}
@@ -514,7 +552,39 @@ function ProjectDetailPage() {
       </div>
 
       <div className="px-6 py-8 md:px-10">
-        <Tabs defaultValue="observacoes">
+        {/* Funil do observatório: observar → discutir → aprender */}
+        <div className="mb-6 flex flex-wrap items-center gap-1.5 rounded-xl border border-border bg-card p-2.5">
+          <FunnelStage
+            count={rawObservations.length}
+            label="observações"
+            active={activeTab === "observacoes"}
+            onClick={() => setActiveTab("observacoes")}
+          />
+          <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />
+          <FunnelStage
+            count={projectDiscussions.length}
+            label="discussões"
+            active={activeTab === "comunidade"}
+            onClick={() => setActiveTab("comunidade")}
+          />
+          <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />
+          <FunnelStage
+            count={projectKnowledge.length}
+            label="conhecimentos"
+            active={activeTab === "comunidade"}
+            onClick={() => setActiveTab("comunidade")}
+          />
+          <div className="ml-auto">
+            <FunnelStage
+              count={rawPhenomena.length}
+              label="fenômenos"
+              active={activeTab === "fenomenos"}
+              onClick={() => setActiveTab("fenomenos")}
+            />
+          </div>
+        </div>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
             <TabsTrigger value="observacoes">Observações</TabsTrigger>
             <TabsTrigger value="fenomenos">Fenômenos</TabsTrigger>
@@ -599,12 +669,9 @@ function ProjectDetailPage() {
           <TabsContent value="comunidade" className="mt-6">
             {/* Discussões e Conhecimentos do Projeto */}
             <ProjectDiscussionsAndKnowledge
-              projectId={id}
-              projectName={project.name}
-              domainName={domain?.name ?? project.domain}
+              projectDiscussions={projectDiscussions}
+              projectKnowledge={projectKnowledge}
               domainSlug={domain?.slug}
-              phenNameById={phenNameById}
-              refreshKey={discussionsRefresh}
             />
           </TabsContent>
           <TabsContent value="timeline" className="mt-6">
@@ -654,6 +721,35 @@ function ProjectDetailPage() {
 }
 
 /* --------------------------------- Helpers -------------------------------- */
+
+function FunnelStage({
+  count,
+  label,
+  active,
+  onClick,
+}: {
+  count: number;
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "inline-flex items-baseline gap-1.5 rounded-md px-2.5 py-1.5 text-[12.5px] transition-colors hover:bg-muted/60",
+        active && "bg-muted/60",
+        count === 0 ? "text-muted-foreground" : "text-foreground",
+      )}
+    >
+      <span className={cn("text-[15px] font-semibold tabular-nums", count === 0 && "font-normal")}>
+        {count}
+      </span>
+      {label}
+    </button>
+  );
+}
 
 function MetaItem({ label, value }: { label: string; value: string }) {
   return (
@@ -1668,60 +1764,14 @@ function Meta({ label, value, className }: { label: string; value: string; class
 /* --------------- Discussões e Conhecimentos do Projeto ----------------- */
 
 function ProjectDiscussionsAndKnowledge({
-  projectId,
-  projectName,
-  domainName,
+  projectDiscussions,
+  projectKnowledge,
   domainSlug,
-  phenNameById,
-  refreshKey,
 }: {
-  projectId: string;
-  projectName: string;
-  domainName: string;
+  projectDiscussions: ReturnType<typeof toCommunityDiscussion>[];
+  projectKnowledge: CommunityKnowledge[];
   domainSlug?: string;
-  phenNameById: Map<string, string>;
-  refreshKey: number;
 }) {
-  const [projectDiscussions, setProjectDiscussions] = useState<
-    ReturnType<typeof toCommunityDiscussion>[]
-  >([]);
-  const [projectKnowledge, setProjectKnowledge] = useState<CommunityKnowledge[]>([]);
-
-  useEffect(() => {
-    let cancelled = false;
-    getDiscussionsByProject(projectId).then((discussions) => {
-      if (cancelled) return;
-      setProjectDiscussions(
-        discussions.map((d) =>
-          toCommunityDiscussion(d, {
-            domain: domainName,
-            project: projectName,
-            phenomenon: d.phenomenonId ? (phenNameById.get(d.phenomenonId) ?? d.phenomenonId) : "—",
-            originObservation: d.observationId ? `Observação #${d.observationId}` : undefined,
-          }),
-        ),
-      );
-    });
-    getKnowledgeByProject(projectId)
-      .then((knowledge) => {
-        if (cancelled) return;
-        setProjectKnowledge(
-          knowledge.map((k) =>
-            toCommunityKnowledge(k, {
-              domain: domainName,
-              project: projectName,
-              phenomenon: k.phenomenonId
-                ? (phenNameById.get(k.phenomenonId) ?? k.phenomenonId)
-                : undefined,
-            }),
-          ),
-        );
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [projectId, projectName, domainName, phenNameById, refreshKey]);
   const communityLink = domainSlug ? (
     <Link to="/community/$slug" params={{ slug: domainSlug }}>
       Ir para a comunidade <ArrowRight className="h-3 w-3" />
