@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppShell, PageHeader } from "@/components/app-shell";
-import { ProjectCard } from "@/components/project-card";
 import { Sparkline } from "@/components/sparkline";
 import { Button } from "@/components/ui/button";
 import { createFileRoute } from "@tanstack/react-router";
@@ -12,28 +11,19 @@ import { getProjects } from "@/services/projectService";
 import { getDomains } from "@/services/domainService";
 import { getKnowledge } from "@/services/knowledgeService";
 import { getFeed, type FeedEvent } from "@/services/feedService";
-import { getPhenomena } from "@/services/phenomenonService";
-import { getMpoCategories } from "@/services/mpoAttributeService";
 import type { Knowledge, KnowledgeConfidenceCode } from "@/types/knowledge";
-import type { Phenomenon, PhenomenonImpact, PhenomenonTrend } from "@/types/phenomenon";
-import type { MpoCategory } from "@/types/mpoAttribute";
 import {
   Plus,
   LayoutGrid,
   Activity,
   Layers,
   CheckCircle2,
-  TrendingUp,
-  TrendingDown,
-  Minus,
   Sparkles,
   Radar,
   MessageSquare,
   Eye,
   ArrowRight,
-  Network,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 const statusCodeToLegacy: Record<ProjectStatusCode, ProjectStatus> = {
   OBSERVATION: "active",
@@ -114,62 +104,7 @@ function ObservationalKpi({
   );
 }
 
-/* ----------------------- Camada 2: Fenômenos Observados ------------------- */
-
-const impactTone: Record<PhenomenonImpact, string> = {
-  HIGH: "border-destructive/30 text-destructive bg-destructive/5",
-  MEDIUM: "border-warning/30 text-warning bg-warning/5",
-  LOW: "border-success/30 text-success bg-success/5",
-};
-
-const impactLabel: Record<PhenomenonImpact, string> = {
-  HIGH: "Risco elevado",
-  MEDIUM: "Sob observação",
-  LOW: "Padrão saudável",
-};
-
-const trendIcon: Record<PhenomenonTrend, typeof TrendingUp> = {
-  GROWING: TrendingUp,
-  DECREASING: TrendingDown,
-  STABLE: Minus,
-};
-
-function PhenomenonCard({ p, domainName }: { p: Phenomenon; domainName: string }) {
-  const TrendIcon = trendIcon[p.trend];
-  return (
-    <article className="group relative flex flex-col rounded-xl border border-border bg-card p-5 transition-colors hover:border-foreground/30">
-      <div className="flex items-start justify-between gap-3">
-        <span
-          className={cn(
-            "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider",
-            impactTone[p.impact],
-          )}
-        >
-          <span className="h-1 w-1 rounded-full bg-current" />
-          {impactLabel[p.impact]}
-        </span>
-        <TrendIcon className="h-3.5 w-3.5 text-muted-foreground" />
-      </div>
-
-      <h3 className="mt-3 text-[14px] font-semibold leading-snug tracking-tight text-foreground">
-        {p.name}
-      </h3>
-      <p className="mt-1.5 text-[12.5px] leading-relaxed text-muted-foreground">{p.description}</p>
-
-      <div className="mt-4 flex items-end justify-between border-t border-border pt-3">
-        <div className="flex flex-col gap-0.5 text-[11px] text-muted-foreground">
-          <span className="font-mono uppercase tracking-wider">{domainName}</span>
-          <span>
-            {p.evidenceCount} evidência{p.evidenceCount === 1 ? "" : "s"} observada
-            {p.evidenceCount === 1 ? "" : "s"}
-          </span>
-        </div>
-      </div>
-    </article>
-  );
-}
-
-/* ------------------- Camada 3: Insights do Observatório ------------------- */
+/* ---------------------- Insights do Observatório -------------------------- */
 
 const confidencePercent: Record<KnowledgeConfidenceCode, number> = {
   LOW: 35,
@@ -258,34 +193,6 @@ function FeedEventItem({ e }: { e: FeedEvent }) {
   );
 }
 
-/* ------------------- Mapa de Atributos Observáveis (lente MPO) ------------ */
-
-function MpoCategoryCard({ category }: { category: MpoCategory }) {
-  const inScope = category.attributes.filter((a) => a.type !== "fora_de_escopo");
-  return (
-    <article className="rounded-xl border border-border bg-card p-5">
-      <div className="flex items-center justify-between">
-        <h3 className="text-[13.5px] font-semibold tracking-tight text-foreground">
-          {category.label}
-        </h3>
-        <span className="font-mono text-[10.5px] text-muted-foreground">
-          {inScope.length} atributo{inScope.length === 1 ? "" : "s"}
-        </span>
-      </div>
-      <div className="mt-3 flex flex-wrap gap-1.5">
-        {inScope.map((a) => (
-          <span
-            key={a.id}
-            className="rounded-full border border-border bg-background px-2 py-0.5 text-[11px] text-muted-foreground"
-          >
-            {a.name}
-          </span>
-        ))}
-      </div>
-    </article>
-  );
-}
-
 /* --------------------------------- Página --------------------------------- */
 
 function SectionHeader({
@@ -320,8 +227,6 @@ function ObservatoryDashboard() {
   const [domains, setDomains] = useState<SvcDomain[]>([]);
   const [knowledge, setKnowledge] = useState<Knowledge[]>([]);
   const [feedEvents, setFeedEvents] = useState<FeedEvent[]>([]);
-  const [phenomena, setPhenomena] = useState<Phenomenon[]>([]);
-  const [mpoCategories, setMpoCategories] = useState<MpoCategory[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -330,19 +235,13 @@ function ObservatoryDashboard() {
       getDomains(),
       getKnowledge().catch(() => [] as Knowledge[]),
       getFeed({ limit: 6 }).catch(() => [] as FeedEvent[]),
-      getPhenomena().catch(() => [] as Phenomenon[]),
-      getMpoCategories().catch(() => [] as MpoCategory[]),
-    ]).then(([svcProjects, svcDomains, knowledgeList, feed, phenomenaList, categories]) => {
+    ]).then(([svcProjects, svcDomains, knowledgeList, feed]) => {
       if (cancelled) return;
       const domainMap = new Map(svcDomains.map((d) => [d.id, d.name] as const));
       setProjects(svcProjects.map((p) => toLegacyProject(p, domainMap)));
       setDomains(svcDomains);
       setKnowledge(knowledgeList.slice(0, 4));
       setFeedEvents(feed);
-      setPhenomena(
-        [...phenomenaList].sort((a, b) => b.evidenceCount - a.evidenceCount).slice(0, 4),
-      );
-      setMpoCategories(categories);
     });
     return () => {
       cancelled = true;
@@ -360,20 +259,28 @@ function ObservatoryDashboard() {
         title="Observatório de Projetos"
         description="Central viva de inteligência colaborativa: observe fenômenos, interprete padrões e acompanhe a evolução estratégica dos projetos monitorados."
         actions={
-          <Button asChild size="sm" className="gap-1.5">
-            <Link to="/projects/new">
-              <Plus className="h-3.5 w-3.5" />
-              Novo projeto
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button asChild variant="outline" size="sm" className="gap-1.5">
+              <Link to="/projects">
+                Ver todos os projetos
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </Button>
+            <Button asChild size="sm" className="gap-1.5">
+              <Link to="/projects/new">
+                <Plus className="h-3.5 w-3.5" />
+                Novo projeto
+              </Link>
+            </Button>
+          </div>
         }
       />
 
       <div className="px-6 py-6 md:px-10">
-        {/* ---------- CAMADA 1 — Visão Operacional ---------- */}
+        {/* ---------- Visão Operacional ---------- */}
         <section>
           <SectionHeader
-            eyebrow="Camada 1 · Visão operacional"
+            eyebrow="Visão operacional"
             title="Panorama do observatório"
             description="Indicadores macro do que está atualmente sob observação ativa."
           />
@@ -405,42 +312,11 @@ function ObservatoryDashboard() {
           </div>
         </section>
 
-        {/* ---------- CAMADA 2 — Fenômenos Observados ---------- */}
-        <section className="mt-12">
-          <SectionHeader
-            eyebrow="Camada 2 · Fenômenos observados"
-            title="Padrões, riscos e comportamentos emergentes"
-            description="Sinais organizacionais identificados a partir do cruzamento de atributos gerais, específicos e intermediários."
-            action={
-              <span className="hidden md:inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-[11px] text-muted-foreground">
-                <Radar className="h-3 w-3" />
-                {phenomena.length} fenômeno{phenomena.length === 1 ? "" : "s"} em acompanhamento
-              </span>
-            }
-          />
-          {phenomena.length === 0 ? (
-            <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/20 p-5 text-[12.5px] leading-relaxed text-muted-foreground">
-              Nenhum fenômeno em acompanhamento ainda — fenômenos surgem do cruzamento das
-              observações registradas nos projetos.
-            </div>
-          ) : (
-            <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
-              {phenomena.map((p) => (
-                <PhenomenonCard
-                  key={p.id}
-                  p={p}
-                  domainName={domainNameById.get(p.domainId) ?? "—"}
-                />
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* ---------- CAMADA 3 — Insights do Observatório ---------- */}
+        {/* ---------- Insights do Observatório ---------- */}
         <section className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <SectionHeader
-              eyebrow="Camada 3 · Insights do observatório"
+              eyebrow="Insights do observatório"
               title="Conhecimento consolidado pela comunidade"
               description="Aprendizados reais que nasceram do ciclo observação → discussão → conhecimento."
             />
@@ -462,9 +338,9 @@ function ObservatoryDashboard() {
             )}
           </div>
 
-          {/* CAMADA 4 — Últimas Observações */}
+          {/* Atividade recente */}
           <aside>
-            <SectionHeader eyebrow="Camada 4 · Feed" title="Atividade recente" />
+            <SectionHeader eyebrow="Feed" title="Atividade recente" />
             <div className="mt-4 rounded-xl border border-border bg-card">
               {feedEvents.length === 0 ? (
                 <p className="p-4 text-[12.5px] leading-relaxed text-muted-foreground">
@@ -480,71 +356,6 @@ function ObservatoryDashboard() {
               )}
             </div>
           </aside>
-        </section>
-
-        {/* ---------- Mapa de Atributos Observáveis (lente MPO) ---------- */}
-        <section className="mt-12">
-          <SectionHeader
-            eyebrow="MPO · Granularidade da observação"
-            title="A lente de observação (MPO · Quadro 37)"
-            description="Os atributos que o observatório sabe enxergar, organizados nas 8 categorias do Modelo de Observatório de Projetos."
-          />
-
-          {/* Pipeline visual */}
-          <div className="mt-4 hidden items-center gap-2 rounded-xl border border-border bg-card p-3 text-[11px] text-muted-foreground md:flex">
-            {[
-              "Dados brutos",
-              "Atributos gerais",
-              "Atributos específicos",
-              "Atributos intermediários",
-              "Conhecimento coletivo",
-            ].map((step, idx, arr) => (
-              <div key={step} className="flex items-center gap-2">
-                <span
-                  className={cn(
-                    "rounded-md border px-2 py-1 font-mono uppercase tracking-wider",
-                    idx === arr.length - 1
-                      ? "border-foreground/30 bg-foreground text-background"
-                      : "border-border bg-background",
-                  )}
-                >
-                  {step}
-                </span>
-                {idx < arr.length - 1 && <ArrowRight className="h-3 w-3" />}
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
-            {mpoCategories.map((category) => (
-              <MpoCategoryCard key={category.key} category={category} />
-            ))}
-          </div>
-        </section>
-
-        {/* ---------- Projetos sob observação (prévia) ---------- */}
-        <section className="mt-12">
-          <SectionHeader
-            eyebrow="Camada operacional"
-            title="Projetos sob observação"
-            description="Prévia dos projetos atualmente monitorados. Acesse o catálogo completo na página de Projetos."
-            action={
-              <Button asChild variant="outline" size="sm" className="gap-1.5">
-                <Link to="/projects">
-                  Ver todos os projetos
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </Button>
-            }
-          />
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {projects
-              .filter((p) => p.status === "active")
-              .slice(0, 3)
-              .map((p) => (
-                <ProjectCard key={p.id} project={p} />
-              ))}
-          </div>
         </section>
       </div>
     </AppShell>
