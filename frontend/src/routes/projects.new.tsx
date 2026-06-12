@@ -35,9 +35,11 @@ import {
   ArrowRight,
   CheckCircle2,
   ChevronsUpDown,
+  Info,
   Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export const Route = createFileRoute("/projects/new")({
   head: () => ({
@@ -91,7 +93,10 @@ const AI_MIN_DESCRIPTION = 40;
 
 const storySchema = z.object({
   name: z.string().trim().min(1, "Dê um nome ao projeto."),
-  summary: z.string().trim().min(1, "Descreva o projeto — é o insumo do observatório."),
+  summary: z
+    .string()
+    .trim()
+    .min(1, "Descreva o projeto: é a partir dele que o observatório trabalha."),
   observationalGoal: z.string().trim(),
 });
 type StoryForm = z.infer<typeof storySchema>;
@@ -187,7 +192,7 @@ function NewProjectPage() {
         phenomena: s.expectedPhenomena.length > 0 ? s.expectedPhenomena : r.phenomena,
       }));
     } catch {
-      toast.error("A IA não respondeu — siga revisando manualmente.");
+      toast.error("A IA não respondeu. Siga revisando manualmente.");
       setSuggestion(null);
     } finally {
       setAiLoading(false);
@@ -244,10 +249,7 @@ function NewProjectPage() {
               Projeto cadastrado com sucesso
             </h2>
             <p className="mt-2 text-[12.5px] leading-relaxed text-muted-foreground">
-              Projeto cadastrado com sucesso e adicionado ao observatório.
-            </p>
-            <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground/80">
-              redirecionando…
+              Levando você ao detalhe do projeto…
             </p>
             <div className="mt-6">
               <Button asChild size="sm" className="text-[12px]">
@@ -267,21 +269,20 @@ function NewProjectPage() {
     <AppShell>
       <PageHeader
         title="Novo Projeto"
-        description="Conte o que é o projeto; a IA propõe o que o observatório deve acompanhar — você revisa e confirma."
+        description="Conte o que é o projeto; a IA propõe o que acompanhar e você revisa antes de cadastrar."
       />
 
       <div className="mx-auto max-w-4xl px-6 py-8 md:px-10">
-        <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-          etapa {step}/2 · {step === 1 ? "conte sobre o projeto" : "revise e confirme"}
+        <p className="text-[12px] text-muted-foreground">
+          Etapa {step} de 2 · {step === 1 ? "Conte sobre o projeto" : "Revise e confirme"}
         </p>
 
         {step === 1 ? (
           <form className="mt-4 space-y-8" onSubmit={goToReviewWithAi}>
             <Section
               icon={Telescope}
-              eyebrow="01 · o projeto"
               title="Conte sobre o projeto"
-              description="A descrição é o insumo do observatório: a partir dela a IA sugere o domínio, os aspectos a observar e os fenômenos esperados."
+              tooltip="A descrição é o insumo do observatório: a partir dela a IA sugere o domínio, os aspectos a observar e os fenômenos esperados."
             >
               <div className="space-y-4">
                 <Field label="Nome do projeto" required>
@@ -347,7 +348,7 @@ function NewProjectPage() {
                 <div className="flex flex-wrap items-center gap-2">
                   <Sparkles className="h-4 w-4 text-foreground" />
                   <p className="text-[13px] font-medium text-foreground">
-                    Sugestão da IA — revise antes de confirmar
+                    Sugestão da IA: revise antes de confirmar
                   </p>
                 </div>
                 <p className="mt-2 text-[12.5px] leading-relaxed text-muted-foreground">
@@ -358,9 +359,8 @@ function NewProjectPage() {
 
             <Section
               icon={Telescope}
-              eyebrow="02 · domínio"
               title="Domínio do projeto"
-              description="Em qual área do portfólio este projeto vive."
+              tooltip="A área de atuação da consultoria que agrupa este projeto."
             >
               <div className="flex flex-wrap items-center gap-3">
                 <Select
@@ -390,9 +390,8 @@ function NewProjectPage() {
 
             <Section
               icon={Sparkles}
-              eyebrow="03 · o que observar"
               title="Aspectos a observar"
-              description="Marque o que você quer acompanhar neste projeto desde o início: riscos, escopo, prazos, custos e outros. Dá para incluir mais depois, ao registrar observações."
+              tooltip="O que acompanhar desde o início: riscos, escopo, prazos, custos. Dá para incluir mais depois, ao registrar observações."
             >
               <div className="space-y-4">
                 {mpoCategories.map((cat) => (
@@ -431,9 +430,8 @@ function NewProjectPage() {
 
             <Section
               icon={Radar}
-              eyebrow="04 · fenômenos"
               title="Fenômenos esperados"
-              description="Padrões ou comportamentos que você acha que podem surgir no projeto (ex.: atrasos, mudanças de escopo, baixa participação do cliente). Funcionam como hipóteses para o observatório acompanhar."
+              tooltip="Padrões que podem surgir no projeto (atrasos, mudanças de escopo, baixa participação do cliente). Funcionam como hipóteses para o observatório acompanhar."
             >
               <div className="flex flex-wrap gap-2">
                 {phenomenonOptions.map((p) => {
@@ -462,11 +460,11 @@ function NewProjectPage() {
             <Collapsible>
               <CollapsibleTrigger className="flex w-full items-center justify-between rounded-xl border border-border bg-card p-4 text-left">
                 <div>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-                    {"// 05 · detalhes · opcional"}
-                  </p>
-                  <p className="mt-1 text-[14px] font-semibold tracking-tight text-foreground">
+                  <p className="text-[14px] font-semibold tracking-tight text-foreground">
                     Cliente, consultor, tipo, status e datas
+                  </p>
+                  <p className="mt-0.5 text-[12px] text-muted-foreground">
+                    Opcional. Tudo pode ser ajustado depois.
                   </p>
                 </div>
                 <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
@@ -588,33 +586,37 @@ function NewProjectPage() {
 
 function Section({
   icon: Icon,
-  eyebrow,
   title,
-  description,
+  tooltip,
   children,
 }: {
   icon: React.ComponentType<{ className?: string }>;
-  eyebrow: string;
   title: string;
-  description?: string;
+  tooltip?: string;
   children: React.ReactNode;
 }) {
   return (
     <section className="rounded-xl border border-border bg-card p-6">
-      <div className="mb-4 flex items-start gap-3">
+      <div className="mb-4 flex items-center gap-3">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-muted/40">
           <Icon className="h-4 w-4 text-foreground" />
         </div>
-        <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-            {"// "}
-            {eyebrow}
-          </p>
-          <h2 className="mt-1 text-[15px] font-semibold tracking-tight text-foreground">{title}</h2>
-          {description && (
-            <p className="mt-1 max-w-2xl text-[12.5px] leading-relaxed text-muted-foreground">
-              {description}
-            </p>
+        <div className="flex items-center gap-1.5">
+          <h2 className="text-[15px] font-semibold tracking-tight text-foreground">{title}</h2>
+          {tooltip && (
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info
+                    className="h-3.5 w-3.5 cursor-help text-muted-foreground/70 transition-colors hover:text-foreground"
+                    aria-label={`Sobre ${title}`}
+                  />
+                </TooltipTrigger>
+                <TooltipContent side="right" className="max-w-xs text-[12px] leading-relaxed">
+                  {tooltip}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
         </div>
       </div>
