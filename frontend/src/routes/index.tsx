@@ -12,7 +12,8 @@ import { getKnowledge } from "@/services/knowledgeService";
 import { getFeed, type FeedEvent } from "@/services/feedService";
 import { FeedEventItem } from "@/components/feed-event-item";
 import type { Knowledge, KnowledgeConfidenceCode } from "@/types/knowledge";
-import { Plus, LayoutGrid, Layers, ArrowRight, ArrowUpRight } from "lucide-react";
+import { Plus, LayoutGrid, Layers, ArrowRight, ArrowUpRight, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const statusCodeToLegacy: Record<ProjectStatusCode, ProjectStatus> = {
   OBSERVATION: "active",
@@ -165,27 +166,32 @@ function InsightCard({
 /* --------------------------------- Página --------------------------------- */
 
 function SectionHeader({
-  eyebrow,
   title,
-  description,
+  tooltip,
   action,
 }: {
-  eyebrow?: string;
   title: string;
-  description?: string;
+  tooltip?: string;
   action?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-      <div>
-        {eyebrow && (
-          <p className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-muted-foreground">
-            {eyebrow}
-          </p>
-        )}
-        <h2 className="mt-1 text-[18px] font-semibold tracking-tight text-foreground">{title}</h2>
-        {description && (
-          <p className="mt-1 max-w-2xl text-[12.5px] text-muted-foreground">{description}</p>
+    <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center gap-1.5">
+        <h2 className="text-[18px] font-semibold tracking-tight text-foreground">{title}</h2>
+        {tooltip && (
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info
+                  className="h-3.5 w-3.5 cursor-help text-muted-foreground/70 transition-colors hover:text-foreground"
+                  aria-label={`Sobre ${title}`}
+                />
+              </TooltipTrigger>
+              <TooltipContent side="right" className="max-w-xs text-[12px] leading-relaxed">
+                {tooltip}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         )}
       </div>
       {action}
@@ -254,7 +260,7 @@ function ObservatoryDashboard() {
         <section>
           <SectionHeader
             title="Panorama"
-            description="Cada projeto pertence a um domínio, a área de atuação que o agrupa."
+            tooltip="Cada projeto pertence a um domínio, a área de atuação que o agrupa."
           />
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             <PanoramaCard
@@ -309,7 +315,7 @@ function ObservatoryDashboard() {
           <div className="lg:col-span-2">
             <SectionHeader
               title="Conhecimento consolidado"
-              description="Aprendizados que a comunidade extraiu das discussões dos projetos. Abra um card para vê-lo na comunidade do domínio."
+              tooltip="Aprendizados que a comunidade extraiu das discussões dos projetos. Abra um card para vê-lo na comunidade do domínio."
               action={
                 <Link
                   to="/community"
@@ -343,6 +349,7 @@ function ObservatoryDashboard() {
           <aside>
             <SectionHeader
               title="Atividade recente"
+              tooltip="Observações, discussões e conhecimentos registrados nos projetos, do mais recente ao mais antigo."
               action={
                 <Link
                   to="/feed"
