@@ -84,7 +84,8 @@ public class AiAssistantService {
         String lens = catalog.inScopeAttributes().stream()
                 .map(this::lensLine)
                 .collect(Collectors.joining("\n"));
-        ObservationSuggestionsDTO suggestions = llm.suggestObservations(p.summary(), p.observationObjective(), lens);
+        ObservationSuggestionsDTO suggestions =
+                llm.suggestObservations(p.summary(), p.observationObjective(), lens, p.initialAttributeIds());
         AiSuggestionLog log = journal(AiSuggestionType.OBSERVATIONS, suggestions, projectId, null, null);
         return ObservationSuggestionsResponseDTO.of(suggestions, log.getId(), llm.provider(), llm.model(), log.getCreatedAt());
     }

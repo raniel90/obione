@@ -650,6 +650,40 @@ function ProjectDetailPage() {
           </div>
         </section>
 
+        {/* Roteiro de observação — compromissos declarados no cadastro */}
+        {rawProject && rawProject.initialAttributeIds.length > 0 && (
+          <section>
+            <SectionTitle
+              eyebrow="Compromissos do cadastro"
+              title="Roteiro de observação"
+              description="Aspectos que o consultor declarou acompanhar neste projeto. Os marcados já têm observação registrada; os demais aguardam a primeira evidência."
+            />
+            <div className="mt-4 flex flex-wrap gap-2">
+              {rawProject.initialAttributeIds.map((attrId) => {
+                const observed = rawObservations.some((o) => o.attributeId === attrId);
+                return (
+                  <span
+                    key={attrId}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[12px]",
+                      observed
+                        ? "border-success/30 bg-success/5 text-success"
+                        : "border-border bg-card text-muted-foreground",
+                    )}
+                  >
+                    {observed ? (
+                      <CheckCircle2 className="h-3 w-3" />
+                    ) : (
+                      <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
+                    )}
+                    {attrNameById.get(attrId) ?? attrId}
+                  </span>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
         {/* Cobertura do MPO — instrumento do consultor; oculto para o cliente */}
         {coverage && !isClient && (
           <section>

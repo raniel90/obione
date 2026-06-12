@@ -39,17 +39,23 @@ public class MockLlmClient implements LlmClient {
     }
 
     @Override
-    public ObservationSuggestionsDTO suggestObservations(String projectSummary, String objective, String mpoLens) {
+    public ObservationSuggestionsDTO suggestObservations(
+            String projectSummary, String objective, String mpoLens, List<String> priorityAttributeIds) {
         String excerpt = excerptOf(projectSummary);
+        // Deterministic priority: suggest on the attributes the consultant declared, when present.
+        String firstAttr = priorityAttributeIds != null && !priorityAttributeIds.isEmpty()
+                ? priorityAttributeIds.get(0) : "riscos_identificados";
+        String secondAttr = priorityAttributeIds != null && priorityAttributeIds.size() > 1
+                ? priorityAttributeIds.get(1) : "escopo_planejado";
         return new ObservationSuggestionsDTO(List.of(
                 new ObservationSuggestionDTO(
                         "Possível risco de prazo a observar",
                         "O resumo sugere pressão de cronograma que merece registro observacional.",
-                        "riscos_identificados", "MEDIUM", excerpt),
+                        firstAttr, "MEDIUM", excerpt),
                 new ObservationSuggestionDTO(
                         "Escopo planejado a confirmar",
                         "Há indícios de escopo amplo; vale registrar o escopo planejado observado.",
-                        "escopo_planejado", "LOW", excerpt)
+                        secondAttr, "LOW", excerpt)
         ));
     }
 
