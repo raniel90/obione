@@ -31,7 +31,7 @@ import {
   knowledgeStatusTone,
 } from "@/components/community-pieces";
 import { getCommunityOverview } from "@/services/communityService";
-import type { CommunityOverview } from "@/types/community";
+import type { CommunityOverview, DomainCommunitySummary } from "@/types/community";
 import type { DiscussionStatusCode } from "@/types/discussion";
 import type { KnowledgeConfidenceCode, KnowledgeStatusCode } from "@/types/knowledge";
 
@@ -151,9 +151,9 @@ function CommunityPage() {
           domain: d.domainName,
           description: d.description,
           participants: d.participants,
-          linkedProjects: d.linkedProjects,
-          discussions: d.discussions,
-          insights: d.insights,
+          linkedProjects: d.projectCount,
+          discussions: d.discussionCount,
+          insights: d.knowledgeCount,
           status: communityStatusFromCode[d.status],
         })),
       );

@@ -92,9 +92,9 @@ export async function getCommunityStatsByDomain(domainId: string): Promise<{
   if (!community) return null;
   return {
     participants: community.participants,
-    linkedProjects: community.linkedProjects,
-    discussions: community.discussions,
-    insights: community.insights,
+    linkedProjects: community.projectCount,
+    discussions: community.discussionCount,
+    insights: community.knowledgeCount,
   };
 }
 

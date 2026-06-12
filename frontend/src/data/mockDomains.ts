@@ -1,8 +1,18 @@
 import type { Domain, DomainTypeCode, DomainStatusCode } from "@/types/domain";
 import { domains as legacyDomains } from "@/lib/mock-data";
 import { domainObservatory } from "@/lib/domain-observatory";
-import { domainCommunities } from "@/lib/community-data";
 import { slugifyDomain } from "@/lib/community-utils";
+
+const communityStats: Record<
+  string,
+  { participants: number; discussions: number; insights: number }
+> = {
+  d1: { participants: 7, discussions: 5, insights: 3 },
+  d2: { participants: 8, discussions: 6, insights: 4 },
+  d3: { participants: 5, discussions: 3, insights: 2 },
+  d4: { participants: 6, discussions: 4, insights: 3 },
+  d5: { participants: 4, discussions: 2, insights: 1 },
+};
 
 const typeMap: Record<string, DomainTypeCode> = {
   Estratégico: "STRATEGIC",
@@ -20,7 +30,7 @@ const statusMap: Record<string, DomainStatusCode> = {
 
 export const mockDomains: Domain[] = legacyDomains.map((d) => {
   const obs = domainObservatory[d.id];
-  const community = domainCommunities.find((c) => c.domainId === d.id);
+  const community = communityStats[d.id];
   return {
     id: d.id,
     slug: slugifyDomain(d.name),
