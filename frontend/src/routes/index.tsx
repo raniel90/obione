@@ -280,6 +280,7 @@ function ObservatoryDashboard() {
               value={projects.length}
               hint="sob observação"
               icon={LayoutGrid}
+              to="/projects"
             />
             <ObservationalKpi
               label="Em observação ativa"
