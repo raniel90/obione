@@ -55,7 +55,12 @@ public class OpenAiLlmClient implements LlmClient {
     }
 
     @Override
-    public ObservationSuggestionsDTO suggestObservations(String projectSummary, String objective, String mpoLens) {
+    public ObservationSuggestionsDTO suggestObservations(
+            String projectSummary, String objective, String mpoLens, List<String> priorityAttributeIds) {
+        String priorities = priorityAttributeIds == null || priorityAttributeIds.isEmpty()
+                ? ""
+                : "\nAtributos que o consultor declarou acompanhar neste projeto (priorize-os quando houver "
+                        + "material no resumo): " + String.join(", ", priorityAttributeIds);
         return chat.prompt()
                 .system("Você é um observador de projetos baseado no MPO (Quadro 37). "
                         + "Proponha observações relevantes, cada uma mapeada a UM attributeId da lente fornecida. "
@@ -63,6 +68,7 @@ public class OpenAiLlmClient implements LlmClient {
                         + "Em sourceExcerpt, cite o trecho LITERAL do resumo que motivou a observação.")
                 .user("Resumo do projeto: " + projectSummary
                         + "\nObjetivo observacional: " + objective
+                        + priorities
                         + "\nLente MPO (attributeId — rótulo (categoria)):\n" + mpoLens)
                 .call()
                 .entity(ObservationSuggestionsDTO.class);
