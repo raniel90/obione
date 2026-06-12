@@ -374,15 +374,6 @@ function ProjectDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, rawObservations.length]);
 
-  const observatorySummary = useMemo(() => {
-    if (!rawProject || rawObservations.length === 0) return "";
-    const risk = riskCodeToLabel[rawProject.riskLevel].toLowerCase();
-    const attrCount = new Set(rawObservations.map((o) => o.attributeId).filter(Boolean)).size;
-    const coverageNote =
-      coverage && !isClient ? `, cobrindo ${coverage.percentage}% dos aspectos observáveis` : "";
-    return `Projeto com risco ${risk} e ${rawObservations.length} observação(ões) registradas sobre ${attrCount} aspecto(s) do projeto${coverageNote}. ${rawPhenomena.length > 0 ? `Há ${rawPhenomena.length} fenômeno(s) em acompanhamento.` : "Nenhum fenômeno consolidado até aqui."}`;
-  }, [rawProject, rawObservations, rawPhenomena, coverage, isClient]);
-
   const displayTimeline = useMemo(
     () =>
       feedEvents.map((e) => ({
@@ -522,56 +513,6 @@ function ProjectDetailPage() {
       </div>
 
       <div className="space-y-12 px-6 py-8 md:px-10">
-        {/* Resumo Observacional */}
-        <section>
-          <SectionTitle
-            eyebrow="Interpretação narrativa"
-            title="Resumo Observacional"
-            description="Síntese do que o observatório já registrou sobre este projeto."
-          />
-          {observatorySummary ? (
-            <div className="mt-3 rounded-xl border border-foreground/20 bg-foreground/[0.025] p-5">
-              <div className="flex items-start gap-3">
-                <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-foreground/70" />
-                <p className="text-[14px] leading-relaxed text-foreground">{observatorySummary}</p>
-              </div>
-            </div>
-          ) : (
-            <div className="mt-3 rounded-xl border border-dashed border-border bg-muted/20 p-5 text-[12.5px] leading-relaxed text-muted-foreground">
-              O observatório ainda não tem o que interpretar aqui. Registre a primeira observação —
-              manualmente ou aceitando uma sugestão da IA na seção de observações — e a síntese
-              deste projeto aparece neste espaço.
-            </div>
-          )}
-        </section>
-
-        {/* Cobertura da observação — instrumento do consultor; oculto para o cliente */}
-        {coverage && !isClient && (
-          <section>
-            <SectionTitle
-              eyebrow="Avaliação de cobertura"
-              title="Cobertura da observação"
-              description="Dos 43 aspectos que o observatório sabe acompanhar, quantos já têm pelo menos uma observação neste projeto."
-            />
-            <div className="mt-4 rounded-xl border border-border bg-card p-5">
-              <div className="flex items-baseline gap-3">
-                <span className="text-[28px] font-semibold tracking-tight">
-                  {coverage.percentage}%
-                </span>
-                <span className="text-[12.5px] text-muted-foreground">
-                  {coverage.covered} de {coverage.totalInScope} aspectos já observados
-                </span>
-              </div>
-              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-foreground/70"
-                  style={{ width: `${coverage.percentage}%` }}
-                />
-              </div>
-            </div>
-          </section>
-        )}
-
         {/* Atributos observados */}
         <section>
           <SectionTitle
@@ -1261,7 +1202,6 @@ function ManualObservationSection({
         status: statusCodes[discussionForm.status],
         visibility: visibilityCodes[discussionForm.visibility],
         createdBy: currentUserId,
-        contributions: [],
       });
 
       const linked = await linkObservationToDiscussion(discussionObsId, created.id);
@@ -1297,8 +1237,8 @@ function ManualObservationSection({
     <section>
       <SectionTitle
         eyebrow="Evidências do projeto"
-        title="Registro Manual de Observação"
-        description="Para este MVP, as evidências do projeto são registradas manualmente. Futuramente, esses registros poderão ser complementados por upload de artefatos e análise automatizada."
+        title="Observações"
+        description="O que o observatório registrou neste projeto, manualmente ou aceitando sugestões da IA."
         action={
           <div className="flex items-center gap-2">
             <Button
