@@ -23,6 +23,7 @@ import { Route as ProjectsIdRouteImport } from './routes/projects.$id'
 import { Route as DomainsNewRouteImport } from './routes/domains.new'
 import { Route as DomainsIdRouteImport } from './routes/domains.$id'
 import { Route as CommunitySlugRouteImport } from './routes/community.$slug'
+import { Route as ProjectsIdEditRouteImport } from './routes/projects.$id_.edit'
 
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
@@ -94,6 +95,11 @@ const CommunitySlugRoute = CommunitySlugRouteImport.update({
   path: '/community/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProjectsIdEditRoute = ProjectsIdEditRouteImport.update({
+  id: '/projects/$id_/edit',
+  path: '/projects/$id/edit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -110,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/community/': typeof CommunityIndexRoute
   '/domains/': typeof DomainsIndexRoute
   '/projects/': typeof ProjectsIndexRoute
+  '/projects/$id/edit': typeof ProjectsIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -125,6 +132,7 @@ export interface FileRoutesByTo {
   '/community': typeof CommunityIndexRoute
   '/domains': typeof DomainsIndexRoute
   '/projects': typeof ProjectsIndexRoute
+  '/projects/$id/edit': typeof ProjectsIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -142,6 +150,7 @@ export interface FileRoutesById {
   '/community/': typeof CommunityIndexRoute
   '/domains/': typeof DomainsIndexRoute
   '/projects/': typeof ProjectsIndexRoute
+  '/projects/$id_/edit': typeof ProjectsIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -160,6 +169,7 @@ export interface FileRouteTypes {
     | '/community/'
     | '/domains/'
     | '/projects/'
+    | '/projects/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -175,6 +185,7 @@ export interface FileRouteTypes {
     | '/community'
     | '/domains'
     | '/projects'
+    | '/projects/$id/edit'
   id:
     | '__root__'
     | '/'
@@ -191,6 +202,7 @@ export interface FileRouteTypes {
     | '/community/'
     | '/domains/'
     | '/projects/'
+    | '/projects/$id_/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -205,6 +217,7 @@ export interface RootRouteChildren {
   ProjectsNewRoute: typeof ProjectsNewRoute
   CommunityIndexRoute: typeof CommunityIndexRoute
   ProjectsIndexRoute: typeof ProjectsIndexRoute
+  ProjectsIdEditRoute: typeof ProjectsIdEditRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -307,6 +320,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunitySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/projects/$id_/edit': {
+      id: '/projects/$id_/edit'
+      path: '/projects/$id/edit'
+      fullPath: '/projects/$id/edit'
+      preLoaderRoute: typeof ProjectsIdEditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -337,6 +357,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProjectsNewRoute: ProjectsNewRoute,
   CommunityIndexRoute: CommunityIndexRoute,
   ProjectsIndexRoute: ProjectsIndexRoute,
+  ProjectsIdEditRoute: ProjectsIdEditRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
