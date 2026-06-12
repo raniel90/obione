@@ -379,8 +379,8 @@ function ProjectDetailPage() {
     const risk = riskCodeToLabel[rawProject.riskLevel].toLowerCase();
     const attrCount = new Set(rawObservations.map((o) => o.attributeId).filter(Boolean)).size;
     const coverageNote =
-      coverage && !isClient ? `, cobrindo ${coverage.percentage}% da lente MPO` : "";
-    return `Projeto com risco ${risk} e ${rawObservations.length} observação(ões) registradas sobre ${attrCount} atributo(s) do MPO${coverageNote}. ${rawPhenomena.length > 0 ? `Há ${rawPhenomena.length} fenômeno(s) em acompanhamento.` : "Nenhum fenômeno consolidado até aqui."}`;
+      coverage && !isClient ? `, cobrindo ${coverage.percentage}% dos aspectos observáveis` : "";
+    return `Projeto com risco ${risk} e ${rawObservations.length} observação(ões) registradas sobre ${attrCount} aspecto(s) do projeto${coverageNote}. ${rawPhenomena.length > 0 ? `Há ${rawPhenomena.length} fenômeno(s) em acompanhamento.` : "Nenhum fenômeno consolidado até aqui."}`;
   }, [rawProject, rawObservations, rawPhenomena, coverage, isClient]);
 
   const displayTimeline = useMemo(
@@ -498,7 +498,7 @@ function ProjectDetailPage() {
               </span>
               {!isClient && coverage && (
                 <span className="inline-flex items-center gap-1.5">
-                  Cobertura do MPO
+                  Cobertura da observação
                   <span className="font-medium text-foreground">{coverage.percentage}%</span>
                 </span>
               )}
@@ -545,13 +545,13 @@ function ProjectDetailPage() {
           )}
         </section>
 
-        {/* Cobertura do MPO — instrumento do consultor; oculto para o cliente */}
+        {/* Cobertura da observação — instrumento do consultor; oculto para o cliente */}
         {coverage && !isClient && (
           <section>
             <SectionTitle
-              eyebrow="MPO · Avaliação de cobertura"
-              title="Cobertura observacional"
-              description="Dos 43 aspectos que a lente do observatório sabe enxergar, quantos já têm pelo menos uma observação neste projeto."
+              eyebrow="Avaliação de cobertura"
+              title="Cobertura da observação"
+              description="Dos 43 aspectos que o observatório sabe acompanhar, quantos já têm pelo menos uma observação neste projeto."
             />
             <div className="mt-4 rounded-xl border border-border bg-card p-5">
               <div className="flex items-baseline gap-3">
@@ -575,7 +575,7 @@ function ProjectDetailPage() {
         {/* Atributos observados */}
         <section>
           <SectionTitle
-            eyebrow="MPO · Mapa de atributos observados"
+            eyebrow="Mapa de atributos observados"
             title="Atributos Observados"
             description="Como o ObiOne decompõe e interpreta este projeto."
           />
@@ -608,7 +608,7 @@ function ProjectDetailPage() {
                   value: String(rawObservations.filter((o) => o.impact === "HIGH").length),
                 },
                 {
-                  label: "Atributos MPO observados",
+                  label: "Aspectos observados",
                   value: String(
                     new Set(rawObservations.map((o) => o.attributeId).filter(Boolean)).size,
                   ),
@@ -634,7 +634,7 @@ function ProjectDetailPage() {
                   ? []
                   : [
                       {
-                        label: "Cobertura do MPO",
+                        label: "Cobertura da observação",
                         value: coverage ? `${coverage.percentage}%` : "—",
                         className: toneClass.info,
                       },
@@ -1378,7 +1378,7 @@ function ManualObservationSection({
                           onValueChange={(v) => setForm((f) => ({ ...f, attribute: v }))}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Selecione um atributo do MPO" />
+                            <SelectValue placeholder="Selecione um aspecto do projeto" />
                           </SelectTrigger>
                           <SelectContent>
                             {mpoCategories.map((cat) => (
@@ -1531,7 +1531,7 @@ function ManualObservationSection({
       {items.length === 0 && (
         <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/20 p-5 text-[12.5px] leading-relaxed text-muted-foreground">
           Nenhuma observação registrada ainda. Registre a primeira manualmente ou peça sugestões à
-          IA — é a partir das observações que o observatório mede a cobertura do MPO.
+          IA. É a partir das observações que o observatório mede a cobertura.
         </div>
       )}
       <div className="mt-4 space-y-3">
@@ -1657,7 +1657,7 @@ function ManualObservationSection({
                   onValueChange={(v) => setEditForm((f) => ({ ...f, attribute: v }))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione um atributo do MPO" />
+                    <SelectValue placeholder="Selecione um aspecto do projeto" />
                   </SelectTrigger>
                   <SelectContent>
                     {mpoCategories.map((cat) => (
