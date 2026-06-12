@@ -223,26 +223,13 @@ function Breadcrumbs() {
         const isFirst = idx === 0;
         return (
           <span key={`${c.label}-${idx}`} className="flex items-center gap-2">
-            {!isFirst && <span className="font-mono text-[11px] text-muted-foreground/60">/</span>}
+            {!isFirst && <span className="text-[11px] text-muted-foreground/60">/</span>}
             {c.to && !isLast ? (
-              <Link
-                to={c.to}
-                className={cn(
-                  "transition-colors hover:text-foreground",
-                  isFirst && "font-mono text-[11px] uppercase tracking-wider",
-                )}
-              >
-                {isFirst ? c.label : c.label}
+              <Link to={c.to} className="transition-colors hover:text-foreground">
+                {c.label}
               </Link>
             ) : (
-              <span
-                className={cn(
-                  isLast ? "text-foreground" : "",
-                  isFirst && "font-mono text-[11px] uppercase tracking-wider",
-                )}
-              >
-                {c.label}
-              </span>
+              <span className={cn(isLast && "text-foreground")}>{c.label}</span>
             )}
           </span>
         );

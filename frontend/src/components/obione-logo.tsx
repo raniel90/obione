@@ -33,9 +33,6 @@ export function ObiOneWordmark({ className }: { className?: string }) {
     <div className={cn("flex items-center gap-2", className)}>
       <ObiOneMark size={20} className="text-foreground" />
       <span className="text-sm font-semibold tracking-tight text-foreground">ObiOne</span>
-      <span className="hidden sm:inline text-[10px] uppercase tracking-[0.18em] text-muted-foreground border-l border-border pl-2 ml-1">
-        Observatory
-      </span>
     </div>
   );
 }

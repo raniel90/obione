@@ -225,26 +225,27 @@ function ObservatoryDashboard() {
   const active = projects.filter((p) => p.status === "active").length;
   const completed = projects.filter((p) => p.status === "completed").length;
 
+  // Top domains by project count, for the Domínios card footer.
+  const topDomains = domains
+    .map((d) => ({
+      name: d.name,
+      count: projects.filter((p) => p.domainId === d.id).length,
+    }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 3);
+
   return (
     <AppShell>
       <PageHeader
         title="Observatório de Projetos"
         description="O que a consultoria está observando agora e o que a comunidade já aprendeu com isso."
         actions={
-          <div className="flex items-center gap-2">
-            <Button asChild variant="outline" size="sm" className="gap-1.5">
-              <Link to="/projects">
-                Ver todos os projetos
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </Button>
-            <Button asChild size="sm" className="gap-1.5">
-              <Link to="/projects/new">
-                <Plus className="h-3.5 w-3.5" />
-                Novo projeto
-              </Link>
-            </Button>
-          </div>
+          <Button asChild size="sm" className="gap-1.5">
+            <Link to="/projects/new">
+              <Plus className="h-3.5 w-3.5" />
+              Novo projeto
+            </Link>
+          </Button>
         }
       />
 
@@ -262,6 +263,20 @@ function ObservatoryDashboard() {
               hint="áreas de atuação da consultoria"
               icon={Layers}
               to="/domains"
+              footer={
+                <>
+                  {topDomains.map((d) => (
+                    <span key={d.name} className="inline-flex items-baseline gap-1">
+                      {d.name}
+                      <span className="font-mono text-foreground">{d.count}</span>
+                    </span>
+                  ))}
+                  <span className="ml-auto inline-flex items-center gap-1 text-muted-foreground transition-colors group-hover:text-foreground">
+                    Ver todos
+                    <ArrowRight className="h-3 w-3" />
+                  </span>
+                </>
+              }
             />
             <PanoramaCard
               label="Projetos"
@@ -278,6 +293,10 @@ function ObservatoryDashboard() {
                   <span className="inline-flex items-center gap-1.5">
                     <span className="h-1.5 w-1.5 rounded-full bg-success" />
                     {completed} concluído{completed === 1 ? "" : "s"}
+                  </span>
+                  <span className="ml-auto inline-flex items-center gap-1 text-muted-foreground transition-colors group-hover:text-foreground">
+                    Ver todos
+                    <ArrowRight className="h-3 w-3" />
                   </span>
                 </>
               }
