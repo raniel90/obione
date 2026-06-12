@@ -92,6 +92,7 @@ import {
   Plus,
   PenSquare,
 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
 function ProjectRouteError({ reset }: { reset: () => void }) {
@@ -444,10 +445,10 @@ function ProjectDetailPage() {
               <p className="mt-1 max-w-3xl text-[13px] text-muted-foreground">{project.summary}</p>
             </div>
             <div className="flex shrink-0 flex-wrap items-center gap-2">
-              {domain && (
+              {domain?.slug && (
                 <Button asChild size="sm" variant="outline" className="gap-1.5">
-                  <Link to="/domains/$id" params={{ id: domain.id }}>
-                    Ver domínio <ArrowRight className="h-3 w-3" />
+                  <Link to="/community/$slug" params={{ slug: domain.slug }}>
+                    Ver comunidade <ArrowRight className="h-3 w-3" />
                   </Link>
                 </Button>
               )}
@@ -462,7 +463,7 @@ function ProjectDetailPage() {
           {/* Overview + indicadores (sintetizados) */}
           <div className="rounded-xl border border-border bg-card p-4">
             <div className="grid grid-cols-2 gap-x-6 gap-y-3 md:grid-cols-6">
-              <MetaItem label="Domínio" value={domain?.name ?? project.domain} />
+              <MetaItem label="Comunidade" value={domain?.name ?? project.domain} />
               <MetaItem label="Tipo" value={project.model} />
               <MetaItem label="Consultor" value={project.owner} />
               <MetaItem label="Cliente" value={project.clientName ?? "—"} />
@@ -512,268 +513,141 @@ function ProjectDetailPage() {
         </div>
       </div>
 
-      <div className="space-y-12 px-6 py-8 md:px-10">
-        {/* Atributos observados */}
-        <section>
-          <SectionTitle
-            eyebrow="Mapa de atributos observados"
-            title="Atributos Observados"
-            description="Como o ObiOne decompõe e interpreta este projeto."
-          />
-          <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
-            <AttrBlock
-              title="Atributos gerais"
-              description="Descrevem o projeto em nível macro."
-              items={[
-                { label: "Nome", value: project.name },
-                { label: "Domínio", value: domain?.name ?? project.domain },
-                {
-                  label: "Status",
-                  value: rawProject ? updateStatusToLabel[rawProject.status] : "—",
-                },
-                { label: "Cliente", value: project.clientName ?? "—" },
-                { label: "Consultor", value: project.owner },
-                { label: "Tipo", value: project.model },
-                ...(rawProject?.observationObjective
-                  ? [{ label: "Objetivo observacional", value: rawProject.observationObjective }]
-                  : []),
-              ]}
+      <div className="px-6 py-8 md:px-10">
+        <Tabs defaultValue="observacoes">
+          <TabsList>
+            <TabsTrigger value="observacoes">Observações</TabsTrigger>
+            <TabsTrigger value="fenomenos">Fenômenos</TabsTrigger>
+            <TabsTrigger value="comunidade">Comunidade</TabsTrigger>
+            <TabsTrigger value="timeline">Linha do tempo</TabsTrigger>
+          </TabsList>
+          <TabsContent value="observacoes" className="mt-6">
+            {/* Artefatos */}
+            <ManualObservationSection
+              projectId={id}
+              domainId={project.domainId}
+              initial={observationsList}
+              rawObservations={rawObservations}
+              phenomena={rawPhenomena}
+              attrNameById={attrNameById}
+              phenNameById={phenNameById}
+              onObservationsChange={(observs) => {
+                setRawObservations(observs);
+                setSvcObservations(
+                  observs.map((o) => toProjectObservation(o, attrNameById, phenNameById)),
+                );
+              }}
+              onDiscussionCreated={() => setDiscussionsRefresh((k) => k + 1)}
             />
-            <AttrBlock
-              title="Atributos específicos"
-              description="Eventos, ocorrências e evidências concretas."
-              items={[
-                { label: "Observações registradas", value: String(rawObservations.length) },
-                {
-                  label: "Observações de impacto alto",
-                  value: String(rawObservations.filter((o) => o.impact === "HIGH").length),
-                },
-                {
-                  label: "Aspectos observados",
-                  value: String(
-                    new Set(rawObservations.map((o) => o.attributeId).filter(Boolean)).size,
-                  ),
-                },
-                {
-                  label: "Sugestões da IA aceitas",
-                  value: String(rawObservations.filter((o) => o.origin === "AI_SUGGESTED").length),
-                },
-              ]}
-            />
-            <AttrBlock
-              title="Atributos intermediários"
-              description="Interpretações derivadas pelo observatório."
-              items={[
-                {
-                  label: "Nível de risco",
-                  value: rawProject ? riskCodeToLabel[rawProject.riskLevel] : "—",
-                  className: rawProject
-                    ? toneClass[riskLevelTone(rawProject.riskLevel)]
-                    : undefined,
-                },
-                ...(isClient
-                  ? []
-                  : [
-                      {
-                        label: "Cobertura da observação",
-                        value: coverage ? `${coverage.percentage}%` : "—",
-                        className: toneClass.info,
-                      },
-                    ]),
-              ]}
-              highlight
-            />
-          </div>
-        </section>
-
-        {/* Fenômenos */}
-        <section>
-          <SectionTitle
-            eyebrow="Padrões e comportamentos"
-            title="Fenômenos Associados"
-            description="Sinais identificados a partir do cruzamento dos atributos observados."
-          />
-          {phenomenaList.length === 0 && (
-            <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/20 p-5 text-[12.5px] leading-relaxed text-muted-foreground">
-              Nenhum fenômeno em acompanhamento ainda — fenômenos surgem do cruzamento das
-              observações registradas neste projeto.
-            </div>
-          )}
-          <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
-            {phenomenaList.map((ph) => {
-              const TrendIcon = trendIcon[ph.trend];
-              return (
-                <article key={ph.id} className="rounded-xl border border-border bg-card p-5">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
-                      <Radar className="h-3 w-3" /> Fenômeno
-                    </div>
-                    <TrendIcon
-                      className={cn(
-                        "h-3.5 w-3.5",
-                        ph.trend === "up" && "text-warning",
-                        ph.trend === "down" && "text-success",
-                        ph.trend === "stable" && "text-muted-foreground",
-                      )}
-                    />
-                  </div>
-                  <h3 className="mt-2 text-[14px] font-semibold leading-snug text-foreground">
-                    {ph.title}
-                  </h3>
-                  <dl className="mt-3 space-y-1.5 text-[12.5px]">
-                    <DefRow label="Evidências" value={ph.evidence} />
-                    <DefRow label="Impacto" value={ph.impact} />
-                    <DefRow
-                      label="Tendência"
-                      value={
-                        ph.trend === "up"
-                          ? "Crescente"
-                          : ph.trend === "down"
-                            ? "Decrescente"
-                            : "Estável"
-                      }
-                    />
-                    <DefRow label="Status" value={ph.status} />
-                  </dl>
-                </article>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* Artefatos */}
-        <ManualObservationSection
-          projectId={id}
-          domainId={project.domainId}
-          initial={observationsList}
-          rawObservations={rawObservations}
-          phenomena={rawPhenomena}
-          attrNameById={attrNameById}
-          phenNameById={phenNameById}
-          onObservationsChange={(observs) => {
-            setRawObservations(observs);
-            setSvcObservations(
-              observs.map((o) => toProjectObservation(o, attrNameById, phenNameById)),
-            );
-          }}
-          onDiscussionCreated={() => setDiscussionsRefresh((k) => k + 1)}
-        />
-
-        {/* Comunidade do Projeto */}
-        <section>
-          <SectionTitle
-            eyebrow="Camada sociotécnica"
-            title="Comunidade do Projeto"
-            description="Participantes vinculados que interpretam os fenômenos e produzem conhecimento."
-          />
-
-          <div className="mt-4 rounded-xl border border-border bg-card p-5">
-            <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
-              <Users className="h-3 w-3" /> Participantes
-            </div>
-            <ul className="mt-3 divide-y divide-border">
-              <li className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0">
-                <div className="min-w-0">
-                  <p className="text-[13px] font-medium text-foreground">{project.owner}</p>
-                  <p className="text-[11.5px] text-muted-foreground">
-                    Responsável pela análise observacional
-                  </p>
+          </TabsContent>
+          <TabsContent value="fenomenos" className="mt-6">
+            {/* Fenômenos */}
+            <section>
+              <SectionTitle
+                eyebrow="Padrões e comportamentos"
+                title="Fenômenos Associados"
+                description="Sinais identificados a partir do cruzamento dos atributos observados."
+              />
+              {phenomenaList.length === 0 && (
+                <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/20 p-5 text-[12.5px] leading-relaxed text-muted-foreground">
+                  Nenhum fenômeno em acompanhamento ainda — fenômenos surgem do cruzamento das
+                  observações registradas neste projeto.
                 </div>
-                <span className="shrink-0 rounded-md border border-border bg-muted/40 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                  Consultor
-                </span>
-              </li>
-              {project.clientName && (
-                <li className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0">
-                  <div className="min-w-0">
-                    <p className="text-[13px] font-medium text-foreground">{project.clientName}</p>
-                    <p className="text-[11.5px] text-muted-foreground">
-                      Validação, feedback e contexto de negócio
-                    </p>
-                  </div>
-                  <span className="shrink-0 rounded-md border border-border bg-muted/40 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                    Cliente
-                  </span>
-                </li>
               )}
-            </ul>
-          </div>
-
-          <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/20 p-4 text-[12.5px] leading-relaxed text-muted-foreground">
-            No ObiOne, a comunidade do projeto representa a camada colaborativa de interpretação. Os
-            participantes vinculados contribuem com feedback, evidências e hipóteses para
-            transformar observações em conhecimento.
-          </div>
-        </section>
-
-        {/* Discussões e Conhecimentos do Projeto */}
-        <ProjectDiscussionsAndKnowledge
-          projectId={id}
-          projectName={project.name}
-          domainName={domain?.name ?? project.domain}
-          domainSlug={domain?.slug}
-          phenNameById={phenNameById}
-          refreshKey={discussionsRefresh}
-        />
-
-        {/* Timeline */}
-        <section>
-          <SectionTitle
-            eyebrow="Evolução observacional"
-            title="Linha do Tempo Observacional"
-            description="O observatório acompanha a evolução do projeto ao longo do tempo."
-          />
-          {displayTimeline.length === 0 && (
-            <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/20 p-5 text-[12.5px] leading-relaxed text-muted-foreground">
-              Ainda não há eventos registrados — observações, discussões e conhecimentos deste
-              projeto aparecerão aqui conforme forem criados.
-            </div>
-          )}
-          <ol className="mt-4 space-y-2">
-            {displayTimeline.map((ev) => (
-              <li
-                key={ev.id}
-                className="flex items-start gap-3 rounded-lg border border-border bg-card p-3"
-              >
-                <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-muted/40 text-foreground">
-                  <TimelineIcon type={ev.type} />
+              <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
+                {phenomenaList.map((ph) => {
+                  const TrendIcon = trendIcon[ph.trend];
+                  return (
+                    <article key={ph.id} className="rounded-xl border border-border bg-card p-5">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                          <Radar className="h-3 w-3" /> Fenômeno
+                        </div>
+                        <TrendIcon
+                          className={cn(
+                            "h-3.5 w-3.5",
+                            ph.trend === "up" && "text-warning",
+                            ph.trend === "down" && "text-success",
+                            ph.trend === "stable" && "text-muted-foreground",
+                          )}
+                        />
+                      </div>
+                      <h3 className="mt-2 text-[14px] font-semibold leading-snug text-foreground">
+                        {ph.title}
+                      </h3>
+                      <dl className="mt-3 space-y-1.5 text-[12.5px]">
+                        <DefRow label="Evidências" value={ph.evidence} />
+                        <DefRow label="Impacto" value={ph.impact} />
+                        <DefRow
+                          label="Tendência"
+                          value={
+                            ph.trend === "up"
+                              ? "Crescente"
+                              : ph.trend === "down"
+                                ? "Decrescente"
+                                : "Estável"
+                          }
+                        />
+                        <DefRow label="Status" value={ph.status} />
+                      </dl>
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          </TabsContent>
+          <TabsContent value="comunidade" className="mt-6">
+            {/* Discussões e Conhecimentos do Projeto */}
+            <ProjectDiscussionsAndKnowledge
+              projectId={id}
+              projectName={project.name}
+              domainName={domain?.name ?? project.domain}
+              domainSlug={domain?.slug}
+              phenNameById={phenNameById}
+              refreshKey={discussionsRefresh}
+            />
+          </TabsContent>
+          <TabsContent value="timeline" className="mt-6">
+            {/* Timeline */}
+            <section>
+              <SectionTitle
+                eyebrow="Evolução observacional"
+                title="Linha do Tempo Observacional"
+                description="O observatório acompanha a evolução do projeto ao longo do tempo."
+              />
+              {displayTimeline.length === 0 && (
+                <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/20 p-5 text-[12.5px] leading-relaxed text-muted-foreground">
+                  Ainda não há eventos registrados — observações, discussões e conhecimentos deste
+                  projeto aparecerão aqui conforme forem criados.
                 </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[12.5px] leading-relaxed text-foreground">{ev.description}</p>
-                  <div className="mt-0.5 flex items-center gap-2 text-[11px] text-muted-foreground">
-                    <span className="capitalize">{ev.type}</span>
-                    <span className="h-1 w-1 rounded-full bg-border" />
-                    <span>{ev.actor}</span>
-                    <span className="h-1 w-1 rounded-full bg-border" />
-                    <span className="font-mono">{formatDate(ev.date)}</span>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        {/* Relação com domínio */}
-        <section>
-          <SectionTitle eyebrow="Relação observacional" title="Contexto do domínio" />
-          <div className="mt-3 flex flex-col gap-4 rounded-xl border border-border bg-card p-5 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-start gap-3">
-              <Layers className="mt-0.5 h-4 w-4 text-muted-foreground" />
-              <p className="max-w-3xl text-[13px] leading-relaxed text-foreground/90">
-                {domain
-                  ? `Este projeto pertence ao domínio ${domain.name}. ${domain.description ?? "Os fenômenos observados aqui contribuem para o entendimento de padrões nos demais projetos do domínio."}`
-                  : "Este projeto ainda não está vinculado a um domínio do observatório."}
-              </p>
-            </div>
-            {domain && (
-              <Button asChild size="sm" variant="outline" className="shrink-0 gap-1.5">
-                <Link to="/domains/$id" params={{ id: domain.id }}>
-                  Ver domínio <ArrowRight className="h-3 w-3" />
-                </Link>
-              </Button>
-            )}
-          </div>
-        </section>
+              )}
+              <ol className="mt-4 space-y-2">
+                {displayTimeline.map((ev) => (
+                  <li
+                    key={ev.id}
+                    className="flex items-start gap-3 rounded-lg border border-border bg-card p-3"
+                  >
+                    <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-muted/40 text-foreground">
+                      <TimelineIcon type={ev.type} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[12.5px] leading-relaxed text-foreground">
+                        {ev.description}
+                      </p>
+                      <div className="mt-0.5 flex items-center gap-2 text-[11px] text-muted-foreground">
+                        <span className="capitalize">{ev.type}</span>
+                        <span className="h-1 w-1 rounded-full bg-border" />
+                        <span>{ev.actor}</span>
+                        <span className="h-1 w-1 rounded-full bg-border" />
+                        <span className="font-mono">{formatDate(ev.date)}</span>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          </TabsContent>
+        </Tabs>
       </div>
     </AppShell>
   );

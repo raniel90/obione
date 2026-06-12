@@ -9,7 +9,9 @@ import {
   Archive,
   Lightbulb,
   BookOpen,
+  Info,
 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -89,6 +91,40 @@ export function SectionLabel({ children }: { children: React.ReactNode }) {
     <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
       {children}
     </p>
+  );
+}
+
+export function SectionHeader({
+  title,
+  tooltip,
+  action,
+}: {
+  title: string;
+  tooltip?: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center gap-1.5">
+        <h2 className="text-[18px] font-semibold tracking-tight text-foreground">{title}</h2>
+        {tooltip && (
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info
+                  className="h-3.5 w-3.5 cursor-help text-muted-foreground/70 transition-colors hover:text-foreground"
+                  aria-label={`Sobre ${title}`}
+                />
+              </TooltipTrigger>
+              <TooltipContent side="right" className="max-w-xs text-[12px] leading-relaxed">
+                {tooltip}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+      </div>
+      {action}
+    </div>
   );
 }
 
