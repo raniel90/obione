@@ -5,7 +5,6 @@ import {
   Layers,
   Users,
   Settings,
-  Search,
   Moon,
   Sun,
   Upload,
@@ -267,17 +266,6 @@ function Header() {
       <Breadcrumbs />
 
       <div className="flex items-center gap-2">
-        <div className="hidden lg:flex items-center gap-2 rounded-md border border-border bg-muted/40 px-2.5 py-1.5 text-[12px] text-muted-foreground w-72">
-          <Search className="h-3.5 w-3.5" />
-          <input
-            placeholder="Buscar projetos, domínios, tags…"
-            className="flex-1 bg-transparent outline-none placeholder:text-muted-foreground/70"
-          />
-          <kbd className="hidden xl:inline text-[10px] font-mono border border-border rounded px-1 py-0.5 text-muted-foreground">
-            ⌘K
-          </kbd>
-        </div>
-
         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={toggle}>
           {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </Button>
