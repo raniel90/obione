@@ -3,7 +3,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import {
   Users,
-  Network,
   MessageSquare,
   Activity,
   Layers,
@@ -26,7 +25,7 @@ import {
 import {
   KpiCard,
   Mini,
-  SectionLabel,
+  SectionHeader,
   discussionStatusTone,
   knowledgeStatusTone,
 } from "@/components/community-pieces";
@@ -38,11 +37,11 @@ import type { KnowledgeConfidenceCode, KnowledgeStatusCode } from "@/types/knowl
 export const Route = createFileRoute("/community/")({
   head: () => ({
     meta: [
-      { title: "Comunidade Observacional — ObiOne" },
+      { title: "Comunidade — ObiOne" },
       {
         name: "description",
         content:
-          "Visão geral da comunidade observacional do ObiOne: indicadores, comunidades por domínio e produções recentes.",
+          "Hub da comunidade do ObiOne: indicadores, comunidades, discussões e conhecimento recente.",
       },
     ],
   }),
@@ -193,10 +192,7 @@ function CommunityPage() {
   if (loading || !overview) {
     return (
       <AppShell>
-        <PageHeader
-          title="Comunidade Observacional"
-          description="Carregando dados da comunidade…"
-        />
+        <PageHeader title="Comunidade" description="Carregando dados da comunidade…" />
       </AppShell>
     );
   }
@@ -208,51 +204,18 @@ function CommunityPage() {
   return (
     <AppShell>
       <PageHeader
-        title="Comunidade Observacional"
-        description="Porta de entrada para as comunidades por domínio que interpretam fenômenos e produzem conhecimento organizacional."
+        title="Comunidade"
+        description="Espaço onde consultoria e clientes discutem observações e consolidam conhecimento dos projetos."
       />
 
       <div className="px-6 py-8 md:px-10 space-y-12">
-        {/* Conceito */}
-        <section className="rounded-xl border border-dashed border-border bg-muted/30 p-5">
-          <div className="flex items-start gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border bg-background">
-              <Network className="h-4 w-4 text-foreground" />
-            </div>
-            <div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-                camada sociotécnica
-              </p>
-              <p className="mt-1.5 max-w-3xl text-[12.5px] leading-relaxed text-muted-foreground">
-                A comunidade no ObiOne é organizada por domínio. Cada comunidade reúne participantes
-                que interpretam fenômenos, discutem evidências e transformam observações em
-                conhecimento coletivo.
-              </p>
-              <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
-                <span className="rounded-md border border-border bg-background px-2 py-0.5">
-                  Comunidade geral
-                </span>
-                <ArrowRight className="h-3 w-3" />
-                <span className="rounded-md border border-border bg-background px-2 py-0.5">
-                  Comunidade por domínio
-                </span>
-                <ArrowRight className="h-3 w-3" />
-                <span className="rounded-md border border-border bg-background px-2 py-0.5">
-                  Discussões observacionais
-                </span>
-                <ArrowRight className="h-3 w-3" />
-                <span className="rounded-md border border-foreground/30 bg-foreground px-2 py-0.5 text-background">
-                  Conhecimento produzido
-                </span>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* KPIs globais */}
         <section>
-          <SectionLabel>// indicadores globais</SectionLabel>
-          <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-5">
+          <SectionHeader
+            title="Indicadores"
+            tooltip="Números agregados de todas as comunidades: participantes, discussões observacionais e conhecimentos consolidados."
+          />
+          <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-5">
             <KpiCard label="Comunidades ativas" value={overview.activeCommunities} icon={Layers} />
             <KpiCard
               label="Participantes autorizados"
@@ -277,23 +240,21 @@ function CommunityPage() {
           </div>
         </section>
 
-        {/* Comunidades por domínio */}
+        {/* Comunidades */}
         <section>
-          <div className="flex items-baseline justify-between">
-            <div>
-              <SectionLabel>// comunidades por domínio</SectionLabel>
-              <h2 className="mt-2 text-[16px] font-semibold tracking-tight text-foreground">
-                Comunidades por domínio
-              </h2>
-              <p className="mt-1 max-w-2xl text-[12.5px] text-muted-foreground">
-                Cada domínio possui sua própria comunidade observacional. Acesse para ver
-                participantes, discussões e conhecimento produzido.
-              </p>
-            </div>
-            <span className="font-mono text-[11px] text-muted-foreground">
-              {communities.length} contextos
-            </span>
-          </div>
+          <SectionHeader
+            title="Comunidades"
+            tooltip="Cada comunidade reúne consultoria e clientes para interpretar fenômenos, discutir evidências e transformar observações em conhecimento. Há uma comunidade para cada domínio."
+            action={
+              <Link
+                to="/domains"
+                className="inline-flex items-center gap-1 text-[12px] text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Ver domínios
+                <ArrowRight className="h-3 w-3" />
+              </Link>
+            }
+          />
 
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {communities.map((c) => {
@@ -307,11 +268,16 @@ function CommunityPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2.5">
                       <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-muted/40">
-                        <Layers className="h-4 w-4" />
+                        <Users className="h-4 w-4" />
                       </div>
-                      <h3 className="text-[14.5px] font-semibold tracking-tight text-foreground">
-                        {c.domain}
-                      </h3>
+                      <div>
+                        <h3 className="text-[14.5px] font-semibold tracking-tight text-foreground">
+                          {c.domain}
+                        </h3>
+                        <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                          Domínio: {c.domain}
+                        </p>
+                      </div>
                     </div>
                     <CommunityStatusPill status={c.status} />
                   </div>
@@ -329,7 +295,7 @@ function CommunityPage() {
 
                   <div className="mt-4 flex items-center justify-end border-t border-border pt-3">
                     <span className="inline-flex items-center gap-1 text-[12px] font-medium text-foreground/80 transition-colors group-hover:text-foreground">
-                      Acessar comunidade
+                      Entrar na comunidade
                       <ArrowUpRight className="h-3 w-3" />
                     </span>
                   </div>
@@ -341,17 +307,15 @@ function CommunityPage() {
 
         {/* Recent discussions preview */}
         <section>
-          <div className="flex items-baseline justify-between">
-            <div>
-              <SectionLabel>// últimas discussões</SectionLabel>
-              <h2 className="mt-2 text-[16px] font-semibold tracking-tight text-foreground">
-                Discussões recentes
-              </h2>
-            </div>
-            <span className="font-mono text-[11px] text-muted-foreground">
-              prévia · 3 de {discussions.length}
-            </span>
-          </div>
+          <SectionHeader
+            title="Discussões recentes"
+            tooltip="Últimas discussões observacionais abertas nas comunidades. Abra um card para acompanhar na comunidade correspondente."
+            action={
+              <span className="font-mono text-[11px] text-muted-foreground">
+                prévia · 3 de {discussions.length}
+              </span>
+            }
+          />
           <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-3">
             {recentDiscussions.map((d) => {
               return (
@@ -399,17 +363,15 @@ function CommunityPage() {
 
         {/* Recent knowledge preview */}
         <section>
-          <div className="flex items-baseline justify-between">
-            <div>
-              <SectionLabel>// conhecimentos recentes</SectionLabel>
-              <h2 className="mt-2 text-[16px] font-semibold tracking-tight text-foreground">
-                Conhecimentos recentes
-              </h2>
-            </div>
-            <span className="font-mono text-[11px] text-muted-foreground">
-              prévia · 3 de {knowledge.length}
-            </span>
-          </div>
+          <SectionHeader
+            title="Conhecimentos recentes"
+            tooltip="Aprendizados que as comunidades consolidaram a partir das discussões e evidências dos projetos."
+            action={
+              <span className="font-mono text-[11px] text-muted-foreground">
+                prévia · 3 de {knowledge.length}
+              </span>
+            }
+          />
           <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-3">
             {recentKnowledge.map((k) => {
               return (
