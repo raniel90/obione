@@ -18,8 +18,9 @@ import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/theme-provider";
 import { cn, getUserInitials } from "@/lib/utils";
 import { useEffect, useState } from "react";
-import { projects } from "@/lib/mock-data";
 import { getCurrentUser, logout } from "@/services/authService";
+import { getProjects, getProjectById } from "@/services/projectService";
+import { getDomains } from "@/services/domainService";
 import type { User } from "@/types/user";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -51,8 +52,27 @@ const navItems = [
   },
 ] as const;
 
+function useObservatoryCounts() {
+  const [counts, setCounts] = useState<{ projects: number; domains: number } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([getProjects(), getDomains()])
+      .then(([projects, domains]) => {
+        if (!cancelled) setCounts({ projects: projects.length, domains: domains.length });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return counts;
+}
+
 function Sidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const counts = useObservatoryCounts();
 
   return (
     <aside className="hidden md:flex w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
@@ -95,7 +115,9 @@ function Sidebar() {
             Observatório ativo
           </div>
           <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-            9 projetos monitorados em 6 domínios.
+            {counts
+              ? `${counts.projects} projeto${counts.projects === 1 ? "" : "s"} em ${counts.domains} domínio${counts.domains === 1 ? "" : "s"}.`
+              : "Carregando portfólio…"}
           </p>
         </div>
       </div>
@@ -153,15 +175,31 @@ function useBreadcrumb(): { label: string; to?: string }[] {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const crumbs: { label: string; to?: string }[] = [{ label: "Observatório", to: "/" }];
 
+  const projectId =
+    pathname.startsWith("/projects/") && pathname !== "/projects/new"
+      ? pathname.split("/")[2]
+      : null;
+  const [projectName, setProjectName] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setProjectName(null);
+    if (!projectId) return;
+    getProjectById(projectId).then((p) => {
+      if (!cancelled && p) setProjectName(p.name);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId]);
+
   if (pathname === "/") return crumbs;
 
   if (pathname.startsWith("/projects")) {
     crumbs.push({ label: "Projetos", to: "/projects" });
     if (pathname === "/projects/new") crumbs.push({ label: "Novo Projeto" });
     else if (pathname.startsWith("/projects/")) {
-      const id = pathname.split("/")[2];
-      const p = projects.find((x) => x.id === id);
-      crumbs.push({ label: p?.name ?? "Projeto" });
+      crumbs.push({ label: projectName ?? "Projeto" });
     }
   } else if (pathname.startsWith("/domains")) {
     crumbs.push({ label: "Domínios", to: "/domains" });
