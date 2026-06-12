@@ -12,14 +12,15 @@ public final class PhenomenonMapper {
     private PhenomenonMapper() {
     }
 
-    public static PhenomenonResponseDTO toResponseDTO(Phenomenon phenomenon) {
+    /** {@code evidenceCount} is derived from linked observations, never the stored field. */
+    public static PhenomenonResponseDTO toResponseDTO(Phenomenon phenomenon, int evidenceCount) {
         return new PhenomenonResponseDTO(
                 phenomenon.getId(),
                 phenomenon.getDomain().getId(),
                 phenomenon.getProject() != null ? phenomenon.getProject().getId() : null,
                 phenomenon.getName(),
                 phenomenon.getDescription(),
-                phenomenon.getEvidenceCount(),
+                evidenceCount,
                 splitRelatedAttributeIds(phenomenon.getRelatedAttributeIds()),
                 phenomenon.getImpact(),
                 phenomenon.getTrend(),
