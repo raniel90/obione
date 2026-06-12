@@ -248,7 +248,7 @@ function ObservatoryDashboard() {
     <AppShell>
       <PageHeader
         title="Observatório de Projetos"
-        description="Central viva de inteligência colaborativa: observe fenômenos, interprete padrões e acompanhe a evolução estratégica dos projetos monitorados."
+        description="O que a consultoria está observando agora e o que a comunidade já aprendeu com isso."
         actions={
           <div className="flex items-center gap-2">
             <Button asChild variant="outline" size="sm" className="gap-1.5">
@@ -271,34 +271,34 @@ function ObservatoryDashboard() {
         {/* ---------- Visão Operacional ---------- */}
         <section>
           <SectionHeader
-            title="Panorama do observatório"
-            description="Indicadores macro do que está atualmente sob observação ativa."
+            title="Panorama"
+            description="Domínios são as áreas de atuação da consultoria. Cada projeto é um caso de cliente observado dentro de um domínio."
           />
           <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
             <ObservationalKpi
-              label="Projetos monitorados"
-              value={projects.length}
-              hint="sob observação"
-              icon={LayoutGrid}
-              to="/projects"
-            />
-            <ObservationalKpi
-              label="Em observação ativa"
-              value={active}
-              hint="ciclo corrente"
-              icon={Activity}
-            />
-            <ObservationalKpi
-              label="Domínios observados"
+              label="Domínios"
               value={domains.length}
-              hint="campos de estudo"
+              hint="áreas de atuação"
               icon={Layers}
               to="/domains"
             />
             <ObservationalKpi
-              label="Ciclos concluídos"
+              label="Projetos"
+              value={projects.length}
+              hint="casos de clientes"
+              icon={LayoutGrid}
+              to="/projects"
+            />
+            <ObservationalKpi
+              label="Em observação"
+              value={active}
+              hint="projetos ativos"
+              icon={Activity}
+            />
+            <ObservationalKpi
+              label="Concluídos"
               value={completed}
-              hint="aprendizado consolidado"
+              hint="ciclos encerrados"
               icon={CheckCircle2}
             />
           </div>
@@ -308,8 +308,8 @@ function ObservatoryDashboard() {
         <section className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <SectionHeader
-              title="Conhecimento consolidado pela comunidade"
-              description="Aprendizados reais que nasceram do ciclo observação → discussão → conhecimento."
+              title="Conhecimento consolidado"
+              description="Aprendizados que a comunidade extraiu das discussões dos projetos. Abra um card para vê-lo na comunidade do domínio."
               action={
                 <Link
                   to="/community"

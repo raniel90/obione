@@ -1,10 +1,15 @@
+import { Link } from "@tanstack/react-router";
 import type { FeedEvent } from "@/services/feedService";
 import { Radar, MessageSquare, Sparkles, Eye } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-const feedIcon: Record<string, React.ComponentType<{ className?: string }>> = {
-  observation: Radar,
-  discussion: MessageSquare,
-  knowledge: Sparkles,
+const kindConfig: Record<
+  string,
+  { label: string; icon: React.ComponentType<{ className?: string }>; tone: string }
+> = {
+  observation: { label: "Observação", icon: Radar, tone: "text-info bg-info/10" },
+  discussion: { label: "Discussão", icon: MessageSquare, tone: "text-warning bg-warning/10" },
+  knowledge: { label: "Conhecimento", icon: Sparkles, tone: "text-success bg-success/10" },
 };
 
 export function relativeTime(iso: string): string {
@@ -19,26 +24,59 @@ export function relativeTime(iso: string): string {
 }
 
 export function FeedEventItem({ e }: { e: FeedEvent }) {
-  const Icon = feedIcon[e.kind] ?? Eye;
-  return (
-    <li className="flex gap-3 py-3">
-      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border bg-background text-muted-foreground">
+  const kind = kindConfig[e.kind] ?? {
+    label: "Evento",
+    icon: Eye,
+    tone: "text-muted-foreground bg-muted",
+  };
+  const Icon = kind.icon;
+
+  const body = (
+    <>
+      <div
+        className={cn(
+          "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full",
+          kind.tone,
+        )}
+      >
         <Icon className="h-3.5 w-3.5" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-[13px] leading-snug text-foreground">{e.title}</p>
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground">
+            {kind.label}
+          </span>
+          <span className="whitespace-nowrap text-[11px] text-muted-foreground">
+            {relativeTime(e.createdAt)}
+          </span>
+        </div>
+        <p className="mt-0.5 text-[13px] leading-snug text-foreground">{e.title}</p>
         <div className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground">
           <span className="truncate">{e.actorName ?? "Observatório"}</span>
           {e.projectName && (
             <>
               <span className="h-1 w-1 rounded-full bg-border" />
-              <span className="truncate font-mono uppercase tracking-wider">{e.projectName}</span>
+              <span className="truncate">{e.projectName}</span>
             </>
           )}
-          <span className="h-1 w-1 rounded-full bg-border" />
-          <span className="whitespace-nowrap">{relativeTime(e.createdAt)}</span>
         </div>
       </div>
-    </li>
+    </>
   );
+
+  if (e.projectId != null) {
+    return (
+      <li>
+        <Link
+          to="/projects/$id"
+          params={{ id: String(e.projectId) }}
+          className="-mx-2 flex gap-3 rounded-md px-2 py-3 transition-colors hover:bg-muted/50"
+        >
+          {body}
+        </Link>
+      </li>
+    );
+  }
+
+  return <li className="flex gap-3 py-3">{body}</li>;
 }
