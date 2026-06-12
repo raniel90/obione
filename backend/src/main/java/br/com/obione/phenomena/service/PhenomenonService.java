@@ -12,6 +12,7 @@ import br.com.obione.phenomena.enums.PhenomenonImpact;
 import br.com.obione.phenomena.enums.PhenomenonStatus;
 import br.com.obione.phenomena.enums.PhenomenonTrend;
 import br.com.obione.phenomena.mapper.PhenomenonMapper;
+import br.com.obione.observations.repository.ObservationRepository;
 import br.com.obione.phenomena.repository.PhenomenonRepository;
 import br.com.obione.projects.entity.Project;
 import br.com.obione.projects.repository.ProjectRepository;
@@ -26,28 +27,37 @@ public class PhenomenonService {
     private final PhenomenonRepository phenomenonRepository;
     private final DomainRepository domainRepository;
     private final ProjectRepository projectRepository;
+    private final ObservationRepository observationRepository;
 
     public PhenomenonService(
             PhenomenonRepository phenomenonRepository,
             DomainRepository domainRepository,
-            ProjectRepository projectRepository
+            ProjectRepository projectRepository,
+            ObservationRepository observationRepository
     ) {
         this.phenomenonRepository = phenomenonRepository;
         this.domainRepository = domainRepository;
         this.projectRepository = projectRepository;
+        this.observationRepository = observationRepository;
+    }
+
+    /** Evidence is what the observatory actually registered: observations linked to the phenomenon. */
+    private PhenomenonResponseDTO toDto(Phenomenon phenomenon) {
+        int evidence = (int) observationRepository.countByPhenomenonId(String.valueOf(phenomenon.getId()));
+        return PhenomenonMapper.toResponseDTO(phenomenon, evidence);
     }
 
     @Transactional(readOnly = true)
     public List<PhenomenonResponseDTO> findAll() {
         return phenomenonRepository.findAll().stream()
-                .map(PhenomenonMapper::toResponseDTO)
+                .map(this::toDto)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public PhenomenonResponseDTO findById(Long id) {
         return phenomenonRepository.findById(id)
-                .map(PhenomenonMapper::toResponseDTO)
+                .map(this::toDto)
                 .orElseThrow(() -> new ResourceNotFoundException("Fenômeno não encontrado: " + id));
     }
 
@@ -55,7 +65,7 @@ public class PhenomenonService {
     public List<PhenomenonResponseDTO> findByProjectId(Long projectId) {
         ensureProjectExists(projectId);
         return phenomenonRepository.findByProject_IdOrderByCreatedAtDesc(projectId).stream()
-                .map(PhenomenonMapper::toResponseDTO)
+                .map(this::toDto)
                 .toList();
     }
 
@@ -63,7 +73,7 @@ public class PhenomenonService {
     public List<PhenomenonResponseDTO> findByDomainId(Long domainId) {
         ensureDomainExists(domainId);
         return phenomenonRepository.findByDomain_IdOrderByCreatedAtDesc(domainId).stream()
-                .map(PhenomenonMapper::toResponseDTO)
+                .map(this::toDto)
                 .toList();
     }
 
@@ -93,7 +103,7 @@ public class PhenomenonService {
                 .status(request.status() != null ? request.status() : PhenomenonStatus.OBSERVED)
                 .build();
 
-        return PhenomenonMapper.toResponseDTO(phenomenonRepository.save(phenomenon));
+        return toDto(phenomenonRepository.save(phenomenon));
     }
 
     @Transactional
@@ -147,7 +157,7 @@ public class PhenomenonService {
             phenomenon.setStatus(request.status());
         }
 
-        return PhenomenonMapper.toResponseDTO(phenomenonRepository.save(phenomenon));
+        return toDto(phenomenonRepository.save(phenomenon));
     }
 
     private Phenomenon loadPhenomenon(Long id) {

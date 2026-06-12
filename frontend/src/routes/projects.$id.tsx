@@ -60,12 +60,14 @@ import {
   updateObservation,
 } from "@/services/observationService";
 import {
+  addContribution,
   createDiscussion,
   getDiscussionsByProject,
   statusCodes,
   toCommunityDiscussion,
   visibilityCodes,
 } from "@/services/discussionService";
+import type { Discussion as SvcDiscussion } from "@/types/discussion";
 import { getCurrentUser } from "@/services/authService";
 import { getPhenomenaByProject } from "@/services/phenomenonService";
 import { getMpoAttributes, getMpoCategories } from "@/services/mpoAttributeService";
@@ -371,6 +373,7 @@ function ProjectDetailPage() {
   const [projectDiscussions, setProjectDiscussions] = useState<
     ReturnType<typeof toCommunityDiscussion>[]
   >([]);
+  const [rawDiscussions, setRawDiscussions] = useState<SvcDiscussion[]>([]);
   const [projectKnowledge, setProjectKnowledge] = useState<CommunityKnowledge[]>([]);
 
   useEffect(() => {
@@ -379,6 +382,7 @@ function ProjectDetailPage() {
     const projectName = rawProject?.name ?? "";
     getDiscussionsByProject(id).then((discussions) => {
       if (cancelled) return;
+      setRawDiscussions(discussions);
       setProjectDiscussions(
         discussions.map((d) =>
           toCommunityDiscussion(d, {
@@ -563,16 +567,16 @@ function ProjectDetailPage() {
           <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />
           <FunnelStage
             count={projectDiscussions.length}
-            label="discussões"
-            active={activeTab === "comunidade"}
-            onClick={() => setActiveTab("comunidade")}
+            label="conversas"
+            active={activeTab === "observacoes"}
+            onClick={() => setActiveTab("observacoes")}
           />
           <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />
           <FunnelStage
             count={projectKnowledge.length}
-            label="conhecimentos"
-            active={activeTab === "comunidade"}
-            onClick={() => setActiveTab("comunidade")}
+            label="aprendizados"
+            active={activeTab === "aprendizados"}
+            onClick={() => setActiveTab("aprendizados")}
           />
           <div className="ml-auto">
             <FunnelStage
@@ -588,7 +592,7 @@ function ProjectDetailPage() {
           <TabsList>
             <TabsTrigger value="observacoes">Observações</TabsTrigger>
             <TabsTrigger value="fenomenos">Fenômenos</TabsTrigger>
-            <TabsTrigger value="comunidade">Comunidade</TabsTrigger>
+            <TabsTrigger value="aprendizados">Aprendizados</TabsTrigger>
             <TabsTrigger value="timeline">Linha do tempo</TabsTrigger>
           </TabsList>
           <TabsContent value="observacoes" className="mt-6">
@@ -598,6 +602,7 @@ function ProjectDetailPage() {
               domainId={project.domainId}
               initial={observationsList}
               rawObservations={rawObservations}
+              discussions={rawDiscussions}
               phenomena={rawPhenomena}
               attrNameById={attrNameById}
               phenNameById={phenNameById}
@@ -666,10 +671,8 @@ function ProjectDetailPage() {
               </div>
             </section>
           </TabsContent>
-          <TabsContent value="comunidade" className="mt-6">
-            {/* Discussões e Conhecimentos do Projeto */}
+          <TabsContent value="aprendizados" className="mt-6">
             <ProjectDiscussionsAndKnowledge
-              projectDiscussions={projectDiscussions}
               projectKnowledge={projectKnowledge}
               domainSlug={domain?.slug}
             />
@@ -721,6 +724,82 @@ function ProjectDetailPage() {
 }
 
 /* --------------------------------- Helpers -------------------------------- */
+
+function ObservationThread({
+  discussion,
+  currentUserId,
+  onChanged,
+}: {
+  discussion: SvcDiscussion;
+  currentUserId: string;
+  onChanged: () => void;
+}) {
+  const [text, setText] = useState("");
+  const [sending, setSending] = useState(false);
+
+  const send = async () => {
+    const value = text.trim();
+    if (!value || sending) return;
+    setSending(true);
+    const created = await addContribution(discussion.id, {
+      userId: currentUserId,
+      type: "INTERPRETATION",
+      text: value,
+    });
+    setSending(false);
+    if (!created) {
+      toast.error("Não foi possível enviar o comentário.");
+      return;
+    }
+    setText("");
+    onChanged();
+  };
+
+  return (
+    <div className="mt-3 rounded-lg border border-border bg-muted/20 p-3">
+      <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-wider text-muted-foreground">
+        <MessageSquare className="h-3 w-3" />
+        Conversa · {discussion.contributions.length} comentário
+        {discussion.contributions.length === 1 ? "" : "s"}
+      </div>
+      {discussion.question && (
+        <p className="mt-2 text-[12.5px] italic text-muted-foreground">“{discussion.question}”</p>
+      )}
+      <ul className="mt-2 space-y-2">
+        {discussion.contributions.map((c) => (
+          <li key={c.id} className="rounded-md bg-background p-2.5">
+            <p className="text-[12.5px] leading-relaxed text-foreground">{c.text}</p>
+            <p className="mt-1 text-[10.5px] text-muted-foreground">
+              {c.userName ?? "Participante"}
+            </p>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-2 flex gap-2">
+        <Input
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Contribua com a conversa…"
+          className="h-8 flex-1 text-[12.5px]"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              send();
+            }
+          }}
+        />
+        <Button
+          size="sm"
+          className="h-8 text-[12px]"
+          disabled={sending || !text.trim()}
+          onClick={send}
+        >
+          {sending ? "Enviando…" : "Comentar"}
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 function FunnelStage({
   count,
@@ -882,6 +961,7 @@ function ManualObservationSection({
   domainId,
   initial,
   rawObservations,
+  discussions,
   phenomena,
   attrNameById,
   phenNameById,
@@ -892,6 +972,7 @@ function ManualObservationSection({
   domainId: string;
   initial: ProjectObservation[];
   rawObservations: SvcObservation[];
+  discussions: SvcDiscussion[];
   phenomena: SvcPhenomenon[];
   attrNameById: Map<string, string>;
   phenNameById: Map<string, string>;
@@ -1509,14 +1590,16 @@ function ManualObservationSection({
                 >
                   <PenSquare className="h-3 w-3" /> Editar
                 </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-7 gap-1 px-2 text-[11px]"
-                  onClick={() => openDiscussion(o.id)}
-                >
-                  <MessageSquare className="h-3 w-3" /> Criar discussão
-                </Button>
+                {!discussions.some((d) => d.observationId === o.id) && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 gap-1 px-2 text-[11px]"
+                    onClick={() => openDiscussion(o.id)}
+                  >
+                    <MessageSquare className="h-3 w-3" /> Iniciar conversa
+                  </Button>
+                )}
                 <Button
                   size="sm"
                   variant="ghost"
@@ -1529,6 +1612,17 @@ function ManualObservationSection({
                 </Button>
               </div>
             </div>
+
+            {discussions
+              .filter((d) => d.observationId === o.id)
+              .map((d) => (
+                <ObservationThread
+                  key={d.id}
+                  discussion={d}
+                  currentUserId={currentUserId}
+                  onChanged={onDiscussionCreated}
+                />
+              ))}
           </article>
         ))}
       </div>
@@ -1742,7 +1836,7 @@ function ManualObservationSection({
             </div>
             <DialogFooter>
               <Button type="submit" size="sm" disabled={discussionSubmitting}>
-                {discussionSubmitting ? "Criando…" : "Criar discussão"}
+                {discussionSubmitting ? "Iniciando…" : "Iniciar conversa"}
               </Button>
             </DialogFooter>
           </form>
@@ -1761,14 +1855,12 @@ function Meta({ label, value, className }: { label: string; value: string; class
   );
 }
 
-/* --------------- Discussões e Conhecimentos do Projeto ----------------- */
+/* --------------------------- Aprendizados do Projeto ----------------------- */
 
 function ProjectDiscussionsAndKnowledge({
-  projectDiscussions,
   projectKnowledge,
   domainSlug,
 }: {
-  projectDiscussions: ReturnType<typeof toCommunityDiscussion>[];
   projectKnowledge: CommunityKnowledge[];
   domainSlug?: string;
 }) {
@@ -1782,117 +1874,54 @@ function ProjectDiscussionsAndKnowledge({
     </Link>
   );
 
-  if (projectDiscussions.length === 0 && projectKnowledge.length === 0) return null;
+  if (projectKnowledge.length === 0) {
+    return (
+      <div className="rounded-xl border border-dashed border-border bg-muted/20 p-5 text-[12.5px] leading-relaxed text-muted-foreground">
+        Nenhum aprendizado consolidado ainda. Quando as conversas das observações amadurecem, o
+        consultor as consolida na comunidade e o resultado aparece aqui.
+      </div>
+    );
+  }
 
   return (
-    <>
-      {projectDiscussions.length > 0 && (
-        <section>
-          <SectionTitle
-            eyebrow="Camada sociotécnica"
-            title="Discussões do Projeto"
-            description="Interpretações coletivas vinculadas a fenômenos deste projeto."
-            action={
-              <Button asChild size="sm" variant="outline" className="gap-1.5">
-                {communityLink}
-              </Button>
-            }
-          />
-          <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
-            {projectDiscussions.map((d) => (
-              <article key={d.id} className="rounded-xl border border-border bg-card p-5">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-wider text-muted-foreground">
-                    <MessageSquare className="h-3 w-3" /> {d.phenomenon}
-                  </div>
-                  <span className="rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                    {d.status}
-                  </span>
-                </div>
-                <h3 className="mt-2 text-[14px] font-semibold leading-snug text-foreground">
-                  {d.title}
-                </h3>
-                <p className="mt-2 text-[12px] text-muted-foreground">
-                  {d.contributions} contribuições · último: {d.lastParticipant}
-                </p>
-                <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                  <Button
-                    asChild
-                    size="sm"
-                    variant="outline"
-                    className="h-7 gap-1 px-2 text-[11px]"
-                  >
-                    {domainSlug ? (
-                      <Link to="/community/$slug" params={{ slug: domainSlug }}>
-                        <Eye className="h-3 w-3" /> Ver discussão
-                      </Link>
-                    ) : (
-                      <Link to="/community">
-                        <Eye className="h-3 w-3" /> Ver discussão
-                      </Link>
-                    )}
-                  </Button>
-                  {d.status !== "Consolidada" && d.status !== "Arquivada" && (
-                    <Button
-                      asChild
-                      size="sm"
-                      variant="ghost"
-                      className="h-7 gap-1 px-2 text-[11px]"
-                    >
-                      {domainSlug ? (
-                        <Link to="/community/$slug" params={{ slug: domainSlug }}>
-                          <Sparkles className="h-3 w-3" /> Consolidar conhecimento
-                        </Link>
-                      ) : (
-                        <Link to="/community">
-                          <Sparkles className="h-3 w-3" /> Consolidar conhecimento
-                        </Link>
-                      )}
-                    </Button>
-                  )}
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {projectKnowledge.length > 0 && (
-        <section>
-          <SectionTitle
-            eyebrow="Aprendizado consolidado"
-            title="Conhecimentos do Projeto"
-            description="Aprendizados que nasceram das discussões observacionais deste projeto."
-          />
-          <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
-            {projectKnowledge.map((k) => (
-              <article key={k.id} className="rounded-xl border border-border bg-card p-5">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-wider text-muted-foreground">
-                    <BookOpen className="h-3 w-3" /> {k.phenomenon}
-                  </div>
-                  <span className="rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                    {k.status}
-                  </span>
-                </div>
-                <h3 className="mt-2 text-[14.5px] font-semibold leading-snug text-foreground">
-                  {k.title}
-                </h3>
-                <p className="mt-2 text-[13px] leading-relaxed text-foreground/90">{k.summary}</p>
-                <div className="mt-3 rounded-md border border-border bg-muted/30 p-3 text-[12px] text-foreground">
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                    recomendação ·{" "}
-                  </span>
-                  {k.recommendation}
-                </div>
-                <p className="mt-3 text-[11px] text-muted-foreground">
-                  Confiança: <span className="font-medium text-foreground">{k.confidence}</span>
-                </p>
-              </article>
-            ))}
-          </div>
-        </section>
-      )}
-    </>
+    <section>
+      <SectionTitle
+        eyebrow="O que este projeto ensinou"
+        title="Aprendizados do projeto"
+        description="Consolidações que nasceram das conversas sobre as observações."
+        action={
+          <Button asChild size="sm" variant="outline" className="gap-1.5">
+            {communityLink}
+          </Button>
+        }
+      />
+      <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
+        {projectKnowledge.map((k) => (
+          <article key={k.id} className="rounded-xl border border-border bg-card p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-wider text-muted-foreground">
+                <BookOpen className="h-3 w-3" /> {k.phenomenon}
+              </div>
+              <span className="rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                {k.status}
+              </span>
+            </div>
+            <h3 className="mt-2 text-[14.5px] font-semibold leading-snug text-foreground">
+              {k.title}
+            </h3>
+            <p className="mt-2 text-[13px] leading-relaxed text-foreground/90">{k.summary}</p>
+            <div className="mt-3 rounded-md border border-border bg-muted/30 p-3 text-[12px] text-foreground">
+              <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                recomendação ·{" "}
+              </span>
+              {k.recommendation}
+            </div>
+            <p className="mt-3 text-[11px] text-muted-foreground">
+              Confiança: <span className="font-medium text-foreground">{k.confidence}</span>
+            </p>
+          </article>
+        ))}
+      </div>
+    </section>
   );
 }
