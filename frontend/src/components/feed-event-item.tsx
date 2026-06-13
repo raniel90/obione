@@ -8,8 +8,8 @@ const kindConfig: Record<
   { label: string; icon: React.ComponentType<{ className?: string }>; tone: string }
 > = {
   observation: { label: "Observação", icon: Radar, tone: "text-info bg-info/10" },
-  discussion: { label: "Discussão", icon: MessageSquare, tone: "text-warning bg-warning/10" },
-  knowledge: { label: "Conhecimento", icon: Sparkles, tone: "text-success bg-success/10" },
+  discussion: { label: "Conversa", icon: MessageSquare, tone: "text-warning bg-warning/10" },
+  knowledge: { label: "Aprendizado", icon: Sparkles, tone: "text-success bg-success/10" },
 };
 
 export function relativeTime(iso: string): string {

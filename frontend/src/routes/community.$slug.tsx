@@ -161,8 +161,7 @@ export const Route = createFileRoute("/community/$slug")({
       { title: "Comunidade — ObiOne" },
       {
         name: "description",
-        content:
-          "Comunidade observacional do domínio: discussões, conhecimento produzido e fenômenos em análise.",
+        content: "Comunidade do domínio: conversas, aprendizados e fenômenos em análise.",
       },
     ],
   }),
@@ -321,7 +320,7 @@ function DomainCommunityPage() {
     <AppShell>
       <PageHeader
         title={`Comunidade: ${domainName}`}
-        description={`Espaço para discutir observações e consolidar conhecimento do domínio ${domainName}.`}
+        description={`Espaço para conversar sobre observações e consolidar aprendizados do domínio ${domainName}.`}
       />
 
       <div className="px-6 py-8 md:px-10 space-y-12">
@@ -348,7 +347,7 @@ function DomainCommunityPage() {
             </span>
           </div>
           <Button size="sm" className="gap-1.5" onClick={() => setCreateOpen(true)}>
-            <Plus className="h-3.5 w-3.5" /> Nova discussão observacional
+            <Plus className="h-3.5 w-3.5" /> Iniciar conversa
           </Button>
         </div>
 
@@ -356,13 +355,13 @@ function DomainCommunityPage() {
         <section>
           <SectionHeader
             title="Indicadores"
-            tooltip="Participação, projetos, discussões e conhecimentos desta comunidade."
+            tooltip="Participação, projetos, conversas e aprendizados desta comunidade."
           />
           <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-5">
             <KpiCard label="Participantes" value={domainParticipants.length} icon={Users} />
             <KpiCard label="Projetos vinculados" value={domainProjects.length} icon={Folder} />
-            <KpiCard label="Discussões abertas" value={openCount} icon={MessageSquare} />
-            <KpiCard label="Conhecimentos consolidados" value={consolidatedCount} icon={BookOpen} />
+            <KpiCard label="Conversas abertas" value={openCount} icon={MessageSquare} />
+            <KpiCard label="Aprendizados" value={consolidatedCount} icon={BookOpen} />
             <KpiCard label="Fenômenos em análise" value={phenomenaFrequency.length} icon={Radar} />
           </div>
         </section>
@@ -478,10 +477,10 @@ function DomainCommunityPage() {
           </div>
         </section>
 
-        {/* Discussões observacionais */}
+        {/* Conversas */}
         <section>
           <SectionHeader
-            title="Discussões observacionais"
+            title="Conversas"
             tooltip="Interpretações coletivas sobre fenômenos identificados nos projetos deste domínio."
             action={
               <Button
@@ -490,14 +489,14 @@ function DomainCommunityPage() {
                 className="gap-1.5"
                 onClick={() => setCreateOpen(true)}
               >
-                <Plus className="h-3.5 w-3.5" /> Nova discussão
+                <Plus className="h-3.5 w-3.5" /> Iniciar conversa
               </Button>
             }
           />
 
           {discussions.length === 0 ? (
             <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/30 p-6 text-center text-[12.5px] text-muted-foreground">
-              Nenhuma discussão registrada neste domínio.
+              Nenhuma conversa registrada neste domínio.
             </div>
           ) : (
             <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
@@ -547,13 +546,13 @@ function DomainCommunityPage() {
         {/* Conhecimento produzido */}
         <section>
           <SectionHeader
-            title="Conhecimento produzido"
-            tooltip="Aprendizados consolidados pela comunidade a partir das discussões e evidências deste domínio."
+            title="Aprendizados"
+            tooltip="Aprendizados consolidados pela comunidade a partir das conversas e evidências deste domínio."
           />
 
           {knowledge.length === 0 ? (
             <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/30 p-6 text-center text-[12.5px] text-muted-foreground">
-              Nenhum conhecimento consolidado ainda neste domínio.
+              Nenhum aprendizado consolidado ainda neste domínio.
             </div>
           ) : (
             <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">

@@ -41,7 +41,7 @@ export const Route = createFileRoute("/community/")({
       {
         name: "description",
         content:
-          "Hub da comunidade do ObiOne: indicadores, comunidades, discussões e conhecimento recente.",
+          "Hub da comunidade do ObiOne: indicadores, comunidades, conversas e aprendizados recentes.",
       },
     ],
   }),
@@ -205,7 +205,7 @@ function CommunityPage() {
     <AppShell>
       <PageHeader
         title="Comunidade"
-        description="Espaço onde consultoria e clientes discutem observações e consolidam conhecimento dos projetos."
+        description="Espaço onde consultoria e clientes conversam sobre observações e consolidam aprendizados dos projetos."
       />
 
       <div className="px-6 py-8 md:px-10 space-y-12">
@@ -213,7 +213,7 @@ function CommunityPage() {
         <section>
           <SectionHeader
             title="Indicadores"
-            tooltip="Números agregados de todas as comunidades: participantes, discussões observacionais e conhecimentos consolidados."
+            tooltip="Números agregados de todas as comunidades: participantes, conversas e aprendizados consolidados."
           />
           <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-5">
             <KpiCard label="Comunidades ativas" value={overview.activeCommunities} icon={Layers} />
@@ -223,15 +223,11 @@ function CommunityPage() {
               icon={Users}
             />
             <KpiCard
-              label="Discussões observacionais"
+              label="Conversas"
               value={overview.observationalDiscussions}
               icon={MessageSquare}
             />
-            <KpiCard
-              label="Conhecimentos consolidados"
-              value={consolidatedKnowledgeCount}
-              icon={BookOpen}
-            />
+            <KpiCard label="Aprendizados" value={consolidatedKnowledgeCount} icon={BookOpen} />
             <KpiCard
               label="Contribuições recentes"
               value={overview.recentContributions}
@@ -244,7 +240,7 @@ function CommunityPage() {
         <section>
           <SectionHeader
             title="Comunidades"
-            tooltip="Cada comunidade reúne consultoria e clientes para interpretar fenômenos, discutir evidências e transformar observações em conhecimento. Há uma comunidade para cada domínio."
+            tooltip="Cada comunidade reúne consultoria e clientes para interpretar fenômenos, conversar sobre evidências e transformar observações em aprendizados. Há uma comunidade para cada domínio."
             action={
               <Link
                 to="/domains"
@@ -290,7 +286,7 @@ function CommunityPage() {
                     <Mini label="Participantes" value={c.participants} />
                     <Mini label="Projetos vinculados" value={c.linkedProjects} />
                     <Mini label="Discussões abertas" value={c.discussions} />
-                    <Mini label="Conhecimentos" value={c.insights} />
+                    <Mini label="Aprendizados" value={c.insights} />
                   </div>
 
                   <div className="mt-4 flex items-center justify-end border-t border-border pt-3">
@@ -308,8 +304,8 @@ function CommunityPage() {
         {/* Recent discussions preview */}
         <section>
           <SectionHeader
-            title="Discussões recentes"
-            tooltip="Últimas discussões observacionais abertas nas comunidades. Abra um card para acompanhar na comunidade correspondente."
+            title="Conversas recentes"
+            tooltip="Últimas conversas abertas nas comunidades. Abra um card para acompanhar na comunidade correspondente."
             action={
               <span className="font-mono text-[11px] text-muted-foreground">
                 prévia · 3 de {discussions.length}
@@ -364,8 +360,8 @@ function CommunityPage() {
         {/* Recent knowledge preview */}
         <section>
           <SectionHeader
-            title="Conhecimentos recentes"
-            tooltip="Aprendizados que as comunidades consolidaram a partir das discussões e evidências dos projetos."
+            title="Aprendizados recentes"
+            tooltip="Aprendizados que as comunidades consolidaram a partir das conversas e evidências dos projetos."
             action={
               <span className="font-mono text-[11px] text-muted-foreground">
                 prévia · 3 de {knowledge.length}

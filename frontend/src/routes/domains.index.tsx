@@ -32,7 +32,7 @@ export const Route = createFileRoute("/domains/")({
       { title: "Domínios — ObiOne" },
       {
         name: "description",
-        content: "Áreas de atuação da consultoria que agrupam projetos, fenômenos e conhecimento.",
+        content: "Áreas de atuação da consultoria que agrupam projetos, fenômenos e aprendizados.",
       },
     ],
   }),
@@ -186,7 +186,7 @@ function DomainsPage() {
     <AppShell>
       <PageHeader
         title="Domínios"
-        description="Áreas de atuação da consultoria que agrupam projetos, fenômenos e conhecimento."
+        description="Áreas de atuação da consultoria que agrupam projetos, fenômenos e aprendizados."
         actions={
           <Button asChild size="sm" className="gap-1.5">
             <Link to="/domains/new">
@@ -202,13 +202,13 @@ function DomainsPage() {
         <section>
           <SectionHeader
             title="Visão geral"
-            tooltip="Totais calculados a partir dos registros do observatório: projetos, fenômenos e conhecimentos vinculados aos domínios."
+            tooltip="Totais calculados a partir dos registros do observatório: projetos, fenômenos e aprendizados vinculados aos domínios."
           />
           <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
             <KpiCard label="Domínios" value={domains.length} icon={Layers} />
             <KpiCard label="Projetos" value={projects.length} icon={LayoutGrid} />
             <KpiCard label="Fenômenos" value={phenomena.length} icon={Radar} />
-            <KpiCard label="Conhecimentos" value={knowledge.length} icon={BookOpen} />
+            <KpiCard label="Aprendizados" value={knowledge.length} icon={BookOpen} />
           </div>
         </section>
 
@@ -216,7 +216,7 @@ function DomainsPage() {
         <section className="mt-12">
           <SectionHeader
             title="Todos os domínios"
-            tooltip="Abra um domínio para acompanhar seus projetos, os fenômenos observados e o conhecimento consolidado pela comunidade."
+            tooltip="Abra um domínio para acompanhar seus projetos, os fenômenos observados e os aprendizados consolidados pela comunidade."
             action={
               <Link
                 to="/community"
@@ -313,7 +313,7 @@ function DomainsPage() {
                           <span className="inline-flex items-center gap-1">
                             <BookOpen className="h-3 w-3" />
                             <span className="font-mono text-foreground">{nKnowledge}</span>
-                            conhecimento{nKnowledge === 1 ? "" : "s"}
+                            aprendizado{nKnowledge === 1 ? "" : "s"}
                           </span>
                         </span>
                         <span className="inline-flex shrink-0 items-center gap-1 text-foreground/80 transition-colors group-hover:text-foreground">

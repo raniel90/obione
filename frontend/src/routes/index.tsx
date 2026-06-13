@@ -262,13 +262,13 @@ function ObservatoryDashboard() {
         <section>
           <SectionHeader
             title="Panorama"
-            tooltip="Cada projeto pertence a uma comunidade, o espaço onde suas observações são discutidas e viram conhecimento. O domínio é a área de atuação que a agrupa."
+            tooltip="Cada projeto pertence a uma comunidade, o espaço onde suas observações viram conversas e aprendizados. O domínio é a área de atuação que a agrupa."
           />
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             <PanoramaCard
               label="Comunidades"
               value={domains.length}
-              hint="espaços de discussão por área de atuação"
+              hint="espaços de conversa por área de atuação"
               icon={UsersIcon}
               to="/community"
               footer={
@@ -316,8 +316,8 @@ function ObservatoryDashboard() {
         <section className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <SectionHeader
-              title="Conhecimento consolidado"
-              tooltip="Aprendizados que a comunidade extraiu das discussões dos projetos. Abra um card para vê-lo na comunidade do domínio."
+              title="Aprendizados"
+              tooltip="Aprendizados que a comunidade consolidou a partir das conversas dos projetos. Abra um card para vê-lo na comunidade."
               action={
                 <Link
                   to="/community"
@@ -330,8 +330,8 @@ function ObservatoryDashboard() {
             />
             {knowledge.length === 0 ? (
               <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/20 p-5 text-[12.5px] leading-relaxed text-muted-foreground">
-                Nenhum conhecimento consolidado ainda — consolide discussões nas comunidades de
-                domínio (ou use a Sintetizadora) para que os aprendizados apareçam aqui.
+                Nenhum aprendizado consolidado ainda: consolide conversas nas comunidades de domínio
+                (ou use a Sintetizadora) para que os aprendizados apareçam aqui.
               </div>
             ) : (
               <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -351,7 +351,7 @@ function ObservatoryDashboard() {
           <aside>
             <SectionHeader
               title="Atividade recente"
-              tooltip="Observações, discussões e conhecimentos registrados nos projetos, do mais recente ao mais antigo."
+              tooltip="Observações, conversas e aprendizados registrados nos projetos, do mais recente ao mais antigo."
               action={
                 <Link
                   to="/feed"
@@ -365,8 +365,8 @@ function ObservatoryDashboard() {
             <div className="mt-4 rounded-xl border border-border bg-card">
               {feedEvents.length === 0 ? (
                 <p className="p-4 text-[12.5px] leading-relaxed text-muted-foreground">
-                  Sem atividade registrada ainda — observações, discussões e conhecimentos
-                  aparecerão aqui.
+                  Sem atividade registrada ainda: observações, conversas e aprendizados aparecerão
+                  aqui.
                 </p>
               ) : (
                 <ul className="divide-y divide-border px-4">
