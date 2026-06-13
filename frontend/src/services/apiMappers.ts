@@ -1,6 +1,7 @@
 import type {
   Observation,
   ObservationImpact,
+  ObservationOrigin,
   ObservationRisk,
   ObservationStatus,
 } from "@/types/observation";
@@ -143,6 +144,9 @@ export interface ApiObservation {
   risk: ObservationRisk;
   interpretation: string | null;
   status: ObservationStatus;
+  origin: ObservationOrigin | null;
+  sourceExcerpt: string | null;
+  suggestionId: number | null;
   createdById: number | null;
   createdByName: string | null;
   createdAt: string;
@@ -347,6 +351,9 @@ export function mapObservation(dto: ApiObservation): Observation {
     risk: dto.risk,
     interpretation: dto.interpretation ?? "",
     status: dto.status,
+    origin: dto.origin ?? "MANUAL",
+    sourceExcerpt: dto.sourceExcerpt ?? undefined,
+    suggestionId: dto.suggestionId ?? undefined,
     createdBy: dto.createdById != null ? String(dto.createdById) : "",
     createdByName: dto.createdByName ?? undefined,
     createdAt: formatCreatedAt(dto.createdAt),
@@ -552,9 +559,9 @@ export function mapDomainCommunitySummary(dto: ApiDomainCommunity): DomainCommun
     domainName: dto.domainName,
     description: dto.description ?? "",
     participants: dto.participantCount,
-    linkedProjects: dto.projectCount,
-    discussions: dto.discussionCount,
-    insights: dto.knowledgeCount,
+    projectCount: dto.projectCount,
+    discussionCount: dto.discussionCount,
+    knowledgeCount: dto.knowledgeCount,
     status: mapDomainCommunityStatus(dto.status),
   };
 }

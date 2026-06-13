@@ -6,7 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **ObiOne** — Observatório de Projetos. PhD-level course project (TAES — Tópicos Avançados em Engenharia de Software, UPE/POLI), supervised by Prof. Ivaldir Honório de Farias Júnior.
 
-ObiOne is an **observatório-de-portfólio para consultorias de projetos**: it observes consultancy projects through the lens of the *Modelo de Observatório de Projetos* (MPO — Vieira, 2022, Quadro 37, 44 attributes), curates a **semi-open community** (the consultancy curates; each client sees only their own project), and surfaces cross-project knowledge by domain (phenomena, lessons, governance, discussions).
+ObiOne is an **observatório-comunidade de conhecimento** for project consultancies, grounded in the *Modelo de Observatório de Projetos* (MPO — Vieira, 2022). The consultancy organizes its portfolio by **domains**; each project is observed and produces **observations** (evidence anchored to MPO attributes and phenomena); a **semi-open community** (consultancy + clients, role-scoped) debates them in typed **discussions** and consolidates them into reusable **knowledge**. GenAI is an **assistive layer** over the `observation → discussion → knowledge` pipeline (suggest observations on the MPO grammar, categorize domains, synthesize knowledge), always human-in-the-loop.
+
+> **v2 reality vs. original proposal:** the current build implements the observatory roadmap of `atividades/aderencia_observatorio_v2.md` (§7, delivered): canonical **MPO 44/8 catalog** (`mpo/MpoCatalog`), per-project **coverage** (`GET /projects/{id}/coverage`), an **assistive AI layer** (`ai/` — 4 roles, suggestions journaled in `ai_suggestion_logs` with provider/model/timestamp and acceptance tracking, `GET /ai/stats`), **role-based governance** (reads authenticated, mutations consultant/admin — no per-attribute CBAC from the v1 spec), and a real **temporal feed**. The AI provider is selected by `obione.llm.provider`: `mock` (default, deterministic, no key) or `openai` (Spring AI; requires `OPENAI_API_KEY`). Auth is still mock-token (no JWT).
 
 Repository: `raniel90/obione` (this repo). The application is a **v2 rewrite**:
 
@@ -61,7 +63,7 @@ Repository: `raniel90/obione` (this repo). The application is a **v2 rewrite**:
 | Framework | Spring Boot | 3.5.x (web, data-jpa, security, validation, devtools) |
 | Build | Maven via `./mvnw` | `mvn` need not be on PATH |
 | ORM | Spring Data JPA / Hibernate | `ddl-auto: update` |
-| DB (dev/test) | **H2 in-memory** (`jdbc:h2:mem:obione_dev`) | no external DB needed; console at `/api/h2-console` |
+| DB (dev) | **H2 file-based** (`jdbc:h2:file:./data/obione_dev`, gitignored) | survives restarts; seeded on first boot (delete `backend/data/` to reseed); console at `/api/h2-console`. Tests use in-memory H2 (`src/test/resources/application.yml`) |
 | DB (prod) | PostgreSQL | driver present, not wired into the active config |
 | Security | Spring Security + BCrypt | CORS, CSRF off; **mock-token** auth (no JWT yet) |
 | API docs | springdoc-openapi | Swagger UI at `/api/swagger-ui.html` |
@@ -124,9 +126,9 @@ bun run format   # Prettier --write
 - Backend listens on **`http://localhost:8080`** with **context-path `/api`** → every endpoint is under `/api/...` (e.g. `GET /api/health`, Swagger `/api/swagger-ui.html`, H2 console `/api/h2-console`).
 - CORS allows the frontend origins `http://localhost:5173`, `:3000`, `:8081` (see `config/SecurityConfig.java`).
 - Frontend talks to the backend via `frontend/src/services/apiClient.ts` → `API_BASE_URL = "http://localhost:8080/api"` (hardcoded; no `.env` needed). Auth token is stored in `localStorage["obione-auth"]`.
-- **Auth is a mock token**: `AuthService` validates email + BCrypt password against the `users` table and returns a fixed token whose session is held **in memory** (`ConcurrentHashMap`). Restarting the backend invalidates all sessions. `SecurityConfig` currently uses `anyRequest().permitAll()` (MVP) — real authorization is not enforced at the filter yet.
-- **Demo data is seeded on startup**: each context ships a `*DataSeeder` (e.g. `users/seed/UserDataSeeder`, `projects/seed/ProjectDataSeeder`) that populates the in-memory H2 on boot. There is no separate seed/migration step — just start the backend.
-- `backend/docker-compose.yml` is **broken** (its contents are a copy of `application.yml`, not a Compose file). Ignore it; dev needs no DB container because H2 is in-memory.
+- **Auth is a mock token**: `AuthService` validates email + BCrypt password against the `users` table and returns a fixed token whose session is held **in memory** (`ConcurrentHashMap`). Restarting the backend invalidates all sessions. `SecurityConfig` enforces **role-based governance**: reads require authentication, mutations require CONSULTANT/ADMIN (clients may POST discussion contributions); only health/auth/swagger/h2-console stay `permitAll`.
+- **Demo data is seeded on first boot**: each context ships a `*DataSeeder` (e.g. `users/seed/UserDataSeeder`, `projects/seed/ProjectDataSeeder`), guarded by `count() > 0` — the file-based H2 keeps data across restarts; delete `backend/data/` for a fresh seed. There is no separate seed/migration step.
+- `backend/docker-compose.yml` is **broken** (its contents are a copy of `application.yml`, not a Compose file). Ignore it; dev needs no DB container because H2 is embedded (file-based).
 
 ## Architecture
 
@@ -170,7 +172,7 @@ bun run format   # Prettier --write
 - Don't modify `backend/v1/` or `frontend/v1/` — they are the archived previous stack.
 - Don't hand-edit `frontend/src/routeTree.gen.ts` (generated).
 - Don't run `java -jar` with a JDK < 21; prefer `./mvnw spring-boot:run`.
-- Don't rely on `backend/docker-compose.yml` (broken) or expect an external DB in dev (H2 is in-memory).
+- Don't rely on `backend/docker-compose.yml` (broken) or expect an external DB in dev (H2 is embedded; data in gitignored `backend/data/`).
 - Don't add documentation files (`*.md`) outside `atividades/` unless explicitly asked.
 - Don't name the consultancy that provided the `.docx` projects — refer to it only as "consultoria" or "organização executora".
 - Confirm the current date with the user before crystallizing absolute dates in academic docs (history of slipping dates).

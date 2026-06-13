@@ -9,5 +9,7 @@ public interface ObservationRepository extends JpaRepository<Observation, Long> 
 
     List<Observation> findByProject_IdOrderByCreatedAtDesc(Long projectId);
 
+    long countByPhenomenonId(String phenomenonId);
+
     boolean existsByProject_Id(Long projectId);
 }

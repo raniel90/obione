@@ -1,5 +1,6 @@
 package br.com.obione.observations.service;
 
+import br.com.obione.ai.service.AiSuggestionAcceptanceService;
 import br.com.obione.common.exception.BadRequestException;
 import br.com.obione.common.exception.ResourceNotFoundException;
 import br.com.obione.observations.dto.CreateObservationRequestDTO;
@@ -7,6 +8,7 @@ import br.com.obione.observations.dto.ObservationResponseDTO;
 import br.com.obione.observations.dto.UpdateObservationRequestDTO;
 import br.com.obione.observations.entity.Observation;
 import br.com.obione.observations.enums.ObservationImpact;
+import br.com.obione.observations.enums.ObservationOrigin;
 import br.com.obione.observations.enums.ObservationStatus;
 import br.com.obione.observations.mapper.ObservationMapper;
 import br.com.obione.observations.repository.ObservationRepository;
@@ -28,15 +30,18 @@ public class ObservationService {
     private final ObservationRepository observationRepository;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
+    private final AiSuggestionAcceptanceService acceptanceService;
 
     public ObservationService(
             ObservationRepository observationRepository,
             ProjectRepository projectRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            AiSuggestionAcceptanceService acceptanceService
     ) {
         this.observationRepository = observationRepository;
         this.projectRepository = projectRepository;
         this.userRepository = userRepository;
+        this.acceptanceService = acceptanceService;
     }
 
     @Transactional(readOnly = true)
@@ -62,6 +67,11 @@ public class ObservationService {
             throw new BadRequestException("Não é possível registrar observação em projeto encerrado");
         }
 
+        // An observation born from an accepted AI suggestion is always AI_SUGGESTED.
+        ObservationOrigin origin = request.suggestionId() != null
+                ? ObservationOrigin.AI_SUGGESTED
+                : (request.origin() != null ? request.origin() : ObservationOrigin.MANUAL);
+
         Observation observation = Observation.builder()
                 .project(project)
                 .title(request.title().trim())
@@ -72,10 +82,14 @@ public class ObservationService {
                 .risk(request.risk() != null ? request.risk() : RiskLevel.MODERATE)
                 .interpretation(request.interpretation())
                 .status(request.status() != null ? request.status() : ObservationStatus.REGISTERED)
+                .origin(origin)
+                .sourceExcerpt(request.sourceExcerpt())
+                .suggestionId(request.suggestionId())
                 .createdBy(resolveCreatedBy(request.createdById()))
                 .build();
 
         Observation saved = observationRepository.save(observation);
+        acceptanceService.markAccepted(request.suggestionId());
         ProjectObservationEffects.apply(project, saved.getRisk());
         projectRepository.save(project);
 

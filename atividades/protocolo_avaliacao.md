@@ -8,6 +8,8 @@ Documento metodológico para a avaliação do ObiOne. Cobre três frentes comple
 
 > **Atualização 29/05/2026.** O escopo do protocolo foi revisto após o pivot CBAC + no-upload (apêndice §12 de `refinamento_observatorio_consultorias.md`). Saem do escopo de avaliação a **Conectora** (RF21, síntese cross-projeto, removida) e o **Resumo do Cliente** (RF12, removido). Entram a **acurácia da categorização de temática** (§ 5) e a **avaliação da governança CBAC + cockpit** via Likert reescrito (§ 6). As métricas de extração das §§ 1-4 mudam apenas em um detalhe: a "fonte" passa a ser `project.description` em vez de `.docx`, mas o critério de match e a rubrica continuam idênticos.
 
+> **Atualização 10/06/2026 — governança na v2.** A v2 implementou a governança como **enforcement por papel** (leitura autenticada; mutações restritas a consultor/admin; cliente contribui em discussões — PR #53), e não como CBAC por atributo (RF04). Onde este protocolo menciona "CBAC" (dimensão `usabilidade_cbac` do consultor, `clareza_atributos_liberados` / `sentido_controle` do cliente, snapshot de configuração), leia-se **governança por papel**: o objeto avaliado passa a ser a visibilidade resultante do papel do cliente, não uma configuração por atributo. A granularidade menor é uma mutação deliberada e registrada (`aderencia_observatorio_v2.md` §6.4). As dimensões Likert permanecem válidas com essa releitura; o passo "Configuração do CBAC pelo consultor" (§ 8) deixa de existir como ação por projeto.
+
 ---
 
 ## 1. Critério Híbrido de Match

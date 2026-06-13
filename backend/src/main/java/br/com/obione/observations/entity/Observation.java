@@ -1,6 +1,7 @@
 package br.com.obione.observations.entity;
 
 import br.com.obione.observations.enums.ObservationImpact;
+import br.com.obione.observations.enums.ObservationOrigin;
 import br.com.obione.observations.enums.ObservationStatus;
 import br.com.obione.projects.entity.Project;
 import br.com.obione.projects.enums.RiskLevel;
@@ -69,6 +70,20 @@ public class Observation {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private ObservationStatus status;
+
+    /** RNF05 — whether the observation was typed by hand or accepted from an AI suggestion. */
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50)
+    private ObservationOrigin origin = ObservationOrigin.MANUAL;
+
+    /** Literal passage of the project text that motivated an AI-suggested observation. */
+    @Column(length = 2000)
+    private String sourceExcerpt;
+
+    /** Id of the {@code ai_suggestion_logs} row this observation was accepted from. */
+    @Column(name = "suggestion_id")
+    private Long suggestionId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_id")

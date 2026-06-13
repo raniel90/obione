@@ -20,9 +20,9 @@ export interface DomainCommunitySummary {
   domainName: string;
   description: string;
   participants: number;
-  linkedProjects: number;
-  discussions: number;
-  insights: number;
+  projectCount: number;
+  discussionCount: number;
+  knowledgeCount: number;
   status: DomainCommunityStatusCode;
 }
 

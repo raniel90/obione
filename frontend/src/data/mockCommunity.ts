@@ -3,53 +3,142 @@ import type {
   DomainCommunitySummary,
   CommunityParticipant,
 } from "@/types/community";
-import { communityKpis, domainCommunities, participants } from "@/lib/community-data";
-import { mockDomains } from "./mockDomains";
-import { slugifyDomain } from "@/lib/community-utils";
 
 export const mockCommunityOverview: CommunityOverview = {
-  activeCommunities: communityKpis.activeCommunities,
-  authorizedParticipants: communityKpis.authorizedParticipants,
-  observationalDiscussions: communityKpis.observationalDiscussions,
-  collaborativeInsights: communityKpis.collaborativeInsights,
-  recentContributions: communityKpis.recentContributions,
+  activeCommunities: 5,
+  authorizedParticipants: 18,
+  observationalDiscussions: 12,
+  collaborativeInsights: 7,
+  recentContributions: 24,
 };
 
-const statusMap = {
-  ativa: "ACTIVE",
-  monitorada: "MONITORED",
-  "em-formação": "FORMING",
-} as const;
+export const mockDomainCommunities: DomainCommunitySummary[] = [
+  {
+    id: "c1",
+    domainId: "d1",
+    domainSlug: "marketing-estrategico",
+    domainName: "Marketing Estratégico",
+    description:
+      "Comunidade voltada à interpretação de posicionamento, planejamento e estratégia de marca.",
+    participants: 7,
+    projectCount: 4,
+    discussionCount: 5,
+    knowledgeCount: 3,
+    status: "ACTIVE",
+  },
+  {
+    id: "c2",
+    domainId: "d2",
+    domainSlug: "branding",
+    domainName: "Branding",
+    description: "Comunidade voltada à análise de identidade, narrativa e expressão de marca.",
+    participants: 8,
+    projectCount: 3,
+    discussionCount: 6,
+    knowledgeCount: 4,
+    status: "ACTIVE",
+  },
+  {
+    id: "c3",
+    domainId: "d3",
+    domainSlug: "pesquisa-de-mercado",
+    domainName: "Pesquisa de Mercado",
+    description: "Comunidade voltada à análise de público, comportamento, respostas e tendências.",
+    participants: 5,
+    projectCount: 2,
+    discussionCount: 3,
+    knowledgeCount: 2,
+    status: "MONITORED",
+  },
+  {
+    id: "c4",
+    domainId: "d4",
+    domainSlug: "comunicacao-digital",
+    domainName: "Comunicação Digital",
+    description: "Comunidade voltada à análise de campanhas, canais, conteúdo e presença digital.",
+    participants: 6,
+    projectCount: 3,
+    discussionCount: 4,
+    knowledgeCount: 3,
+    status: "ACTIVE",
+  },
+  {
+    id: "c5",
+    domainId: "d5",
+    domainSlug: "gestao-comercial",
+    domainName: "Gestão Comercial",
+    description:
+      "Comunidade voltada à análise de funil, performance, operação e estratégia comercial.",
+    participants: 4,
+    projectCount: 2,
+    discussionCount: 2,
+    knowledgeCount: 1,
+    status: "FORMING",
+  },
+];
 
-export const mockDomainCommunities: DomainCommunitySummary[] = domainCommunities.map((c) => ({
-  id: c.id,
-  domainId: c.domainId,
-  domainSlug: slugifyDomain(c.domain),
-  domainName: c.domain,
-  description: c.description,
-  participants: c.participants,
-  linkedProjects: c.linkedProjects,
-  discussions: c.discussions,
-  insights: c.insights,
-  status: statusMap[c.status],
-}));
-
-const roleMap = { admin: "ADMIN", consultor: "CONSULTANT", cliente: "CLIENT" } as const;
-const pStatusMap = {
-  ativo: "ACTIVE",
-  convidado: "INVITED",
-  "aguardando-validação": "PENDING",
-} as const;
-
-export const mockCommunityParticipants: CommunityParticipant[] = participants.map((p) => {
-  const dom = mockDomains.find((d) => p.domain?.includes(d.name));
-  return {
-    id: p.id,
-    userId: p.id,
-    domainId: dom?.id ?? "",
-    name: p.name,
-    role: roleMap[p.role],
-    participation: p.participation,
-    status: pStatusMap[p.status],
-  };
-});
+export const mockCommunityParticipants: CommunityParticipant[] = [
+  {
+    id: "p1",
+    userId: "p1",
+    domainId: "",
+    name: "Ana Coelho",
+    role: "ADMIN",
+    participation: "Governança",
+    status: "ACTIVE",
+  },
+  {
+    id: "p2",
+    userId: "p2",
+    domainId: "d1",
+    name: "Lucas Martins",
+    role: "CONSULTANT",
+    participation: "Interpretação",
+    status: "ACTIVE",
+  },
+  {
+    id: "p3",
+    userId: "p3",
+    domainId: "d3",
+    name: "Marina Reis",
+    role: "CONSULTANT",
+    participation: "Curadoria",
+    status: "ACTIVE",
+  },
+  {
+    id: "p4",
+    userId: "p4",
+    domainId: "d4",
+    name: "Pedro Almeida",
+    role: "CONSULTANT",
+    participation: "Interpretação",
+    status: "ACTIVE",
+  },
+  {
+    id: "p5",
+    userId: "p5",
+    domainId: "",
+    name: "Cliente Athos Capital",
+    role: "CLIENT",
+    participation: "Feedback",
+    status: "ACTIVE",
+  },
+  {
+    id: "p6",
+    userId: "p6",
+    domainId: "",
+    name: "Cliente Norvik",
+    role: "CLIENT",
+    participation: "Validação",
+    status: "INVITED",
+  },
+  {
+    id: "p7",
+    userId: "p7",
+    domainId: "",
+    name: "Cliente LATAM",
+    role: "CLIENT",
+    participation: "Acompanhamento",
+    status: "PENDING",
+  },
+];

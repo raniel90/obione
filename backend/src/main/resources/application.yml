@@ -7,8 +7,12 @@ spring:
   application:
     name: obione-backend
 
+  # File-based H2 so dev data survives backend restarts (devtools hot-restart
+  # included). Seeders are guarded (count > 0 → skip), so demo data is created
+  # only on the first boot. Delete backend/data/ to reset to a fresh seed.
   datasource:
-    url: jdbc:h2:mem:obione_dev
+    # AUTO_SERVER avoids the file-lock race when devtools hot-restarts the context.
+    url: jdbc:h2:file:./data/obione_dev;AUTO_SERVER=TRUE
     driver-class-name: org.h2.Driver
     username: sa
     password:
@@ -25,3 +29,29 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+  # Spring AI / OpenAI — only used when obione.llm.provider=openai.
+  # spring.ai.model.* gates each autoconfiguration: with provider=mock the
+  # OpenAI beans never start, so no API key is required for CI/demo. Only the
+  # chat model is ever enabled; the other modalities stay off.
+  ai:
+    model:
+      chat: ${obione.llm.provider:mock}
+      embedding: none
+      image: none
+      moderation: none
+      audio:
+        speech: none
+        transcription: none
+    openai:
+      api-key: ${OPENAI_API_KEY:}
+      chat:
+        options:
+          model: gpt-4o-mini
+          temperature: 0.3
+
+# AI assistant provider: "mock" (default, deterministic, no network — CI/demo)
+# or "openai" (real LLM; requires OPENAI_API_KEY).
+obione:
+  llm:
+    provider: mock

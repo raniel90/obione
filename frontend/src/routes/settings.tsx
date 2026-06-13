@@ -14,6 +14,7 @@ import {
   Link2,
   Layers,
   Power,
+  Sparkles,
 } from "lucide-react";
 import {
   Table,
@@ -37,6 +38,8 @@ import {
   updateProfilePermission,
 } from "@/services/governanceService";
 import { getUsers, updateUser } from "@/services/userService";
+import { getAiStats } from "@/services/aiService";
+import type { AiStats } from "@/services/aiService";
 import type { Profile } from "@/types/profile";
 import type { Permission, ProfilePermission } from "@/types/permission";
 import type { ProfileCode, User as DomainUser } from "@/types/user";
@@ -68,6 +71,7 @@ function SettingsPage() {
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [profilePermissions, setProfilePermissions] = useState<ProfilePermission[]>([]);
   const [users, setUsers] = useState<DomainUser[]>([]);
+  const [aiStats, setAiStats] = useState<AiStats | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -80,6 +84,11 @@ function SettingsPage() {
         setUsers(us);
       },
     );
+    getAiStats()
+      .then((s) => {
+        if (alive) setAiStats(s);
+      })
+      .catch(() => {});
     return () => {
       alive = false;
     };
@@ -214,6 +223,35 @@ function SettingsPage() {
             })}
           </div>
         </section>
+
+        {/* IA — sugestões × aceites */}
+        {aiStats && aiStats.totalSuggestions > 0 && (
+          <section>
+            <SectionLabel>// camada de IA</SectionLabel>
+            <div className="mt-3 rounded-lg border border-border bg-card p-5">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-foreground" />
+                <h3 className="text-[15px] font-semibold tracking-tight text-foreground">
+                  Sugestões da IA × aceites
+                </h3>
+                <span className="ml-auto font-mono text-[11px] text-muted-foreground">
+                  {aiStats.totalAccepted}/{aiStats.totalSuggestions} aceitas
+                </span>
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
+                {aiStats.byType
+                  .filter((t) => t.total > 0)
+                  .map((t) => (
+                    <Stat
+                      key={t.type}
+                      label={t.type.toLowerCase().replace("_", " ")}
+                      value={`${t.accepted}/${t.total} · ${t.acceptanceRatePercent}%`}
+                    />
+                  ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Matriz */}
         <section>

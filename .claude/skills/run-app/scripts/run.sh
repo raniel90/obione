@@ -7,6 +7,12 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && git rev-parse --show-toplevel)"
 BACKEND_LOG="/tmp/obione-backend.log"
 FRONTEND_LOG="/tmp/obione-frontend.log"
 
+# --- Local secrets (.env: OPENAI_API_KEY, OBIONE_LLM_PROVIDER, ...) ----------
+if [ -f "$ROOT/.env" ]; then
+  set -a; . "$ROOT/.env"; set +a
+  echo "• loaded $ROOT/.env (provider: ${OBIONE_LLM_PROVIDER:-mock})"
+fi
+
 # --- JDK 21 (the backend requires Java 21) ---------------------------------
 JAVA_HOME="$(/usr/libexec/java_home -v 21 2>/dev/null || true)"
 if [ -z "$JAVA_HOME" ] && command -v brew >/dev/null 2>&1; then
@@ -62,7 +68,7 @@ ObiOne is up:
   Frontend     http://localhost:5173
   Backend API  http://localhost:8080/api   (health: /api/health)
   Swagger UI   http://localhost:8080/api/swagger-ui.html
-  H2 console   http://localhost:8080/api/h2-console   (jdbc:h2:mem:obione_dev, user sa)
+  H2 console   http://localhost:8080/api/h2-console   (jdbc:h2:file:./data/obione_dev, user sa)
 
 Seeded logins (password in parentheses):
   admin@obione.dev (admin123) · consultor@obione.dev (consultor123) · cliente@obione.dev (cliente123)

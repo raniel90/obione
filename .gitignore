@@ -19,11 +19,18 @@ dist-ssr/
 # Java / Maven
 target/
 
+# H2 dev database (file-based, recreated from seeders)
+backend/data/
+
 # Python
 __pycache__/
 *.pyc
 .venv/
 venv/
+
+# Secrets / local environment (never commit)
+.env
+.env.local
 
 # impeccable critique snapshots (arquivo local, não versionar)
 .impeccable/

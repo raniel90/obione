@@ -8,7 +8,9 @@ function toOptionalId(value: string | undefined): number | undefined {
   return Number.isFinite(parsed) ? parsed : undefined;
 }
 
-function buildCreateBody(data: Omit<Project, "id" | "createdAt" | "updatedAt">) {
+function buildCreateBody(
+  data: Omit<Project, "id" | "createdAt" | "updatedAt"> & { suggestionId?: number },
+) {
   const body: Record<string, unknown> = {
     name: data.name,
     domainId: Number(data.domainId),
@@ -29,6 +31,7 @@ function buildCreateBody(data: Omit<Project, "id" | "createdAt" | "updatedAt">) 
   if (consultantId !== undefined) body.consultantId = consultantId;
   if (data.startDate) body.startDate = data.startDate;
   if (data.expectedEndDate) body.expectedEndDate = data.expectedEndDate;
+  if (data.suggestionId !== undefined) body.suggestionId = data.suggestionId;
 
   return body;
 }
@@ -64,6 +67,30 @@ export async function getProjects(): Promise<Project[]> {
   return data.map(mapProject);
 }
 
+export interface CategoryCoverage {
+  key: string;
+  label: string;
+  total: number;
+  covered: number;
+  percentage: number;
+}
+
+export interface ProjectCoverage {
+  totalInScope: number;
+  covered: number;
+  percentage: number;
+  categories: CategoryCoverage[];
+}
+
+/** MPO coverage: in-scope attributes with ≥1 observation — GET /api/projects/{id}/coverage. */
+export async function getProjectCoverage(id: string): Promise<ProjectCoverage | null> {
+  try {
+    return await request<ProjectCoverage>(`/projects/${id}/coverage`);
+  } catch {
+    return null;
+  }
+}
+
 export async function getProjectById(id: string): Promise<Project | null> {
   try {
     const data = await request<ApiProject>(`/projects/${id}`);
@@ -79,7 +106,7 @@ export async function getProjectsByDomain(domainId: string): Promise<Project[]> 
 }
 
 export async function createProject(
-  data: Omit<Project, "id" | "createdAt" | "updatedAt">,
+  data: Omit<Project, "id" | "createdAt" | "updatedAt"> & { suggestionId?: number },
 ): Promise<Project> {
   const created = await request<ApiProject>("/projects", {
     method: "POST",

@@ -2,13 +2,10 @@ import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   FolderKanban,
-  Layers,
   Users,
   Settings,
-  Search,
   Moon,
   Sun,
-  Bell,
   Upload,
   Plus,
   LogIn,
@@ -19,30 +16,27 @@ import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/theme-provider";
 import { cn, getUserInitials } from "@/lib/utils";
 import { useEffect, useState } from "react";
-import { projects } from "@/lib/mock-data";
 import { getCurrentUser, logout } from "@/services/authService";
+import { getProjects, getProjectById } from "@/services/projectService";
+import { getDomains } from "@/services/domainService";
 import type { User } from "@/types/user";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const navItems = [
   { label: "Observatório", to: "/", icon: LayoutDashboard, match: (p: string) => p === "/" },
   {
+    label: "Comunidade",
+    to: "/community",
+    icon: Users,
+    // Domínios são sub-páginas da Comunidade (agregador), então /domains
+    // mantém o item Comunidade ativo.
+    match: (p: string) => p.startsWith("/community") || p.startsWith("/domains"),
+  },
+  {
     label: "Projetos",
     to: "/projects",
     icon: FolderKanban,
     match: (p: string) => p.startsWith("/projects"),
-  },
-  {
-    label: "Domínios",
-    to: "/domains",
-    icon: Layers,
-    match: (p: string) => p.startsWith("/domains"),
-  },
-  {
-    label: "Comunidade",
-    to: "/community",
-    icon: Users,
-    match: (p: string) => p.startsWith("/community"),
   },
   {
     label: "Configurações",
@@ -52,8 +46,27 @@ const navItems = [
   },
 ] as const;
 
+function useObservatoryCounts() {
+  const [counts, setCounts] = useState<{ projects: number; domains: number } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([getProjects(), getDomains()])
+      .then(([projects, domains]) => {
+        if (!cancelled) setCounts({ projects: projects.length, domains: domains.length });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return counts;
+}
+
 function Sidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const counts = useObservatoryCounts();
 
   return (
     <aside className="hidden md:flex w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
@@ -96,7 +109,9 @@ function Sidebar() {
             Observatório ativo
           </div>
           <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-            9 projetos monitorados em 6 domínios.
+            {counts
+              ? `${counts.projects} projeto${counts.projects === 1 ? "" : "s"} em ${counts.domains} domínio${counts.domains === 1 ? "" : "s"}.`
+              : "Carregando portfólio…"}
           </p>
         </div>
       </div>
@@ -154,23 +169,40 @@ function useBreadcrumb(): { label: string; to?: string }[] {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const crumbs: { label: string; to?: string }[] = [{ label: "Observatório", to: "/" }];
 
+  const projectId =
+    pathname.startsWith("/projects/") && pathname !== "/projects/new"
+      ? pathname.split("/")[2]
+      : null;
+  const [projectName, setProjectName] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setProjectName(null);
+    if (!projectId) return;
+    getProjectById(projectId).then((p) => {
+      if (!cancelled && p) setProjectName(p.name);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId]);
+
   if (pathname === "/") return crumbs;
 
   if (pathname.startsWith("/projects")) {
     crumbs.push({ label: "Projetos", to: "/projects" });
     if (pathname === "/projects/new") crumbs.push({ label: "Novo Projeto" });
     else if (pathname.startsWith("/projects/")) {
-      const id = pathname.split("/")[2];
-      const p = projects.find((x) => x.id === id);
-      crumbs.push({ label: p?.name ?? "Projeto" });
+      crumbs.push({ label: projectName ?? "Projeto" });
     }
   } else if (pathname.startsWith("/domains")) {
+    crumbs.push({ label: "Comunidade", to: "/community" });
     crumbs.push({ label: "Domínios", to: "/domains" });
     if (pathname === "/domains/new") crumbs.push({ label: "Novo Domínio" });
     else if (pathname.startsWith("/domains/")) crumbs.push({ label: "Detalhe" });
   } else if (pathname.startsWith("/community")) {
     crumbs.push({ label: "Comunidade", to: "/community" });
-    if (pathname.startsWith("/community/")) crumbs.push({ label: "Domínio" });
+    if (pathname.startsWith("/community/")) crumbs.push({ label: "Detalhe" });
   } else if (pathname.startsWith("/settings")) {
     crumbs.push({ label: "Configurações" });
   }
@@ -187,26 +219,13 @@ function Breadcrumbs() {
         const isFirst = idx === 0;
         return (
           <span key={`${c.label}-${idx}`} className="flex items-center gap-2">
-            {!isFirst && <span className="font-mono text-[11px] text-muted-foreground/60">/</span>}
+            {!isFirst && <span className="text-[11px] text-muted-foreground/60">/</span>}
             {c.to && !isLast ? (
-              <Link
-                to={c.to}
-                className={cn(
-                  "transition-colors hover:text-foreground",
-                  isFirst && "font-mono text-[11px] uppercase tracking-wider",
-                )}
-              >
-                {isFirst ? c.label : c.label}
+              <Link to={c.to} className="transition-colors hover:text-foreground">
+                {c.label}
               </Link>
             ) : (
-              <span
-                className={cn(
-                  isLast ? "text-foreground" : "",
-                  isFirst && "font-mono text-[11px] uppercase tracking-wider",
-                )}
-              >
-                {c.label}
-              </span>
+              <span className={cn(isLast && "text-foreground")}>{c.label}</span>
             )}
           </span>
         );
@@ -230,22 +249,8 @@ function Header() {
       <Breadcrumbs />
 
       <div className="flex items-center gap-2">
-        <div className="hidden lg:flex items-center gap-2 rounded-md border border-border bg-muted/40 px-2.5 py-1.5 text-[12px] text-muted-foreground w-72">
-          <Search className="h-3.5 w-3.5" />
-          <input
-            placeholder="Buscar projetos, domínios, tags…"
-            className="flex-1 bg-transparent outline-none placeholder:text-muted-foreground/70"
-          />
-          <kbd className="hidden xl:inline text-[10px] font-mono border border-border rounded px-1 py-0.5 text-muted-foreground">
-            ⌘K
-          </kbd>
-        </div>
-
         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={toggle}>
           {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-        </Button>
-        <Button variant="ghost" size="icon" className="h-8 w-8">
-          <Bell className="h-4 w-4" />
         </Button>
 
         {session ? (

@@ -78,6 +78,16 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   });
 
   if (!res.ok) {
+    // A 401 means the mock session died (backend restart) or the token is
+    // stale — drop it and send the user back to login instead of silently
+    // rendering empty screens.
+    if (res.status === 401 && typeof window !== "undefined" && path !== "/auth/login") {
+      clearAuthToken();
+      const here = window.location.pathname;
+      if (here !== "/login" && here !== "/register") {
+        window.location.assign("/login");
+      }
+    }
     const message = await parseErrorMessage(res);
     throw new ApiError(res.status, message);
   }

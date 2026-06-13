@@ -1,6 +1,12 @@
 package br.com.obione.projects.service;
 
+import br.com.obione.ai.service.AiSuggestionAcceptanceService;
 import br.com.obione.common.exception.BadRequestException;
+import br.com.obione.phenomena.entity.Phenomenon;
+import br.com.obione.phenomena.enums.PhenomenonImpact;
+import br.com.obione.phenomena.enums.PhenomenonStatus;
+import br.com.obione.phenomena.enums.PhenomenonTrend;
+import br.com.obione.phenomena.repository.PhenomenonRepository;
 import br.com.obione.common.exception.ResourceNotFoundException;
 import br.com.obione.domains.entity.Domain;
 import br.com.obione.domains.repository.DomainRepository;
@@ -28,15 +34,21 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final DomainRepository domainRepository;
     private final UserRepository userRepository;
+    private final AiSuggestionAcceptanceService acceptanceService;
+    private final PhenomenonRepository phenomenonRepository;
 
     public ProjectService(
             ProjectRepository projectRepository,
             DomainRepository domainRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            AiSuggestionAcceptanceService acceptanceService,
+            PhenomenonRepository phenomenonRepository
     ) {
         this.projectRepository = projectRepository;
         this.domainRepository = domainRepository;
         this.userRepository = userRepository;
+        this.acceptanceService = acceptanceService;
+        this.phenomenonRepository = phenomenonRepository;
     }
 
     @Transactional(readOnly = true)
@@ -88,7 +100,34 @@ public class ProjectService {
                 .expectedEndDate(request.expectedEndDate())
                 .build();
 
-        return ProjectMapper.toResponseDTO(projectRepository.save(project));
+        Project saved = projectRepository.save(project);
+        acceptanceService.markAccepted(request.suggestionId());
+        seedExpectedPhenomena(saved);
+        return ProjectMapper.toResponseDTO(saved);
+    }
+
+    /**
+     * Expected phenomena declared at creation become real Phenomenon entities
+     * (hypotheses under observation, zero evidence) so the observatory can
+     * confirm or discard them as observations accumulate.
+     */
+    private void seedExpectedPhenomena(Project project) {
+        if (project.getExpectedPhenomena() == null) {
+            return;
+        }
+        project.getExpectedPhenomena().stream()
+                .map(String::trim)
+                .filter(name -> !name.isEmpty())
+                .distinct()
+                .forEach(name -> phenomenonRepository.save(Phenomenon.builder()
+                        .domain(project.getDomain())
+                        .project(project)
+                        .name(name)
+                        .description("Hipótese declarada no cadastro do projeto, aguardando evidências.")
+                        .impact(PhenomenonImpact.MEDIUM)
+                        .trend(PhenomenonTrend.STABLE)
+                        .status(PhenomenonStatus.OBSERVED)
+                        .build()));
     }
 
     @Transactional

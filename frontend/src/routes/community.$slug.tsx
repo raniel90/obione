@@ -27,7 +27,9 @@ import {
   visibilityCodes,
   contributionTypeCodes,
 } from "@/services/discussionService";
+import { toast } from "sonner";
 import { consolidateKnowledge, toCommunityKnowledge } from "@/services/knowledgeService";
+import { suggestKnowledge } from "@/services/aiService";
 import type {
   CommunityDiscussionSummary,
   CommunityKnowledgeSummary,
@@ -56,14 +58,13 @@ import {
 } from "@/lib/community-data";
 import {
   KpiCard,
-  SectionLabel,
+  SectionHeader,
   DiscussionCard,
   KnowledgeCard,
   CreateDiscussionDialog,
   DiscussionDetailDialog,
   ConsolidateKnowledgeDialog,
 } from "@/components/community-pieces";
-import { findDomainCommunityBySlug } from "@/lib/community-utils";
 
 const communityStatusFromCode: Record<DomainCommunityStatusCode, CommunityStatus> = {
   ACTIVE: "ativa",
@@ -155,19 +156,15 @@ function mapParticipantToUi(participant: CommunityParticipant, domainName: strin
 }
 
 export const Route = createFileRoute("/community/$slug")({
-  head: ({ params }) => {
-    const c = findDomainCommunityBySlug(params.slug);
-    const name = c?.domain ?? "Comunidade";
-    return {
-      meta: [
-        { title: `Comunidade: ${name} — ObiOne` },
-        {
-          name: "description",
-          content: `Comunidade observacional do domínio ${name}: discussões, conhecimento produzido e fenômenos em análise.`,
-        },
-      ],
-    };
-  },
+  head: () => ({
+    meta: [
+      { title: "Comunidade — ObiOne" },
+      {
+        name: "description",
+        content: "Comunidade do domínio: conversas, aprendizados e fenômenos em análise.",
+      },
+    ],
+  }),
   component: DomainCommunityPage,
   notFoundComponent: () => (
     <AppShell>
@@ -323,7 +320,7 @@ function DomainCommunityPage() {
     <AppShell>
       <PageHeader
         title={`Comunidade: ${domainName}`}
-        description={`Espaço colaborativo para interpretar fenômenos, evidências e aprendizados do domínio ${domainName}.`}
+        description={`Espaço para conversar sobre observações e consolidar aprendizados do domínio ${domainName}.`}
       />
 
       <div className="px-6 py-8 md:px-10 space-y-12">
@@ -350,31 +347,69 @@ function DomainCommunityPage() {
             </span>
           </div>
           <Button size="sm" className="gap-1.5" onClick={() => setCreateOpen(true)}>
-            <Plus className="h-3.5 w-3.5" /> Nova discussão observacional
+            <Plus className="h-3.5 w-3.5" /> Iniciar conversa
           </Button>
         </div>
 
         {/* Indicadores */}
         <section>
-          <SectionLabel>// indicadores da comunidade</SectionLabel>
-          <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-5">
+          <SectionHeader
+            title="Indicadores"
+            tooltip="Participação, projetos, conversas e aprendizados desta comunidade."
+          />
+          <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-5">
             <KpiCard label="Participantes" value={domainParticipants.length} icon={Users} />
             <KpiCard label="Projetos vinculados" value={domainProjects.length} icon={Folder} />
-            <KpiCard label="Discussões abertas" value={openCount} icon={MessageSquare} />
-            <KpiCard label="Conhecimentos consolidados" value={consolidatedCount} icon={BookOpen} />
+            <KpiCard label="Conversas abertas" value={openCount} icon={MessageSquare} />
+            <KpiCard label="Aprendizados" value={consolidatedCount} icon={BookOpen} />
             <KpiCard label="Fenômenos em análise" value={phenomenaFrequency.length} icon={Radar} />
           </div>
         </section>
 
+        {/* Projetos vinculados */}
+        <section>
+          <SectionHeader
+            title="Projetos vinculados"
+            tooltip="Projetos observados por esta comunidade. Abra um projeto para ver suas observações e evidências."
+          />
+          {domainProjects.length === 0 ? (
+            <p className="mt-3 text-[12.5px] text-muted-foreground">
+              Nenhum projeto vinculado a este domínio.
+            </p>
+          ) : (
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {domainProjects.map((p) => (
+                <Link
+                  key={p.id}
+                  to="/projects/$id"
+                  params={{ id: p.id }}
+                  className="group rounded-xl border border-border bg-card p-4 transition-colors hover:border-foreground/30"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <h3 className="text-[13.5px] font-semibold tracking-tight text-foreground">
+                      {p.name}
+                    </h3>
+                    <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground transition-colors group-hover:text-foreground" />
+                  </div>
+                  <p className="mt-2 line-clamp-2 text-[12px] leading-relaxed text-muted-foreground">
+                    {p.summary}
+                  </p>
+                  <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
+                    <span className="font-mono uppercase tracking-wider">{p.model}</span>
+                    <span>{p.progress}%</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </section>
+
         {/* Participantes do domínio */}
         <section>
-          <SectionLabel>// participantes do domínio</SectionLabel>
-          <h2 className="mt-2 text-[16px] font-semibold tracking-tight text-foreground">
-            Participantes
-          </h2>
-          <p className="mt-1 max-w-2xl text-[12.5px] text-muted-foreground">
-            Pessoas autorizadas a interpretar fenômenos e contribuir com evidências neste domínio.
-          </p>
+          <SectionHeader
+            title="Participantes"
+            tooltip="Pessoas autorizadas a interpretar fenômenos e contribuir com evidências neste domínio."
+          />
 
           <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card">
             {domainParticipants.length === 0 ? (
@@ -442,69 +477,26 @@ function DomainCommunityPage() {
           </div>
         </section>
 
-        {/* Projetos vinculados */}
+        {/* Conversas */}
         <section>
-          <SectionLabel>// projetos vinculados</SectionLabel>
-          <h2 className="mt-2 text-[16px] font-semibold tracking-tight text-foreground">
-            Projetos vinculados
-          </h2>
-          {domainProjects.length === 0 ? (
-            <p className="mt-3 text-[12.5px] text-muted-foreground">
-              Nenhum projeto vinculado a este domínio.
-            </p>
-          ) : (
-            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {domainProjects.map((p) => (
-                <Link
-                  key={p.id}
-                  to="/projects/$id"
-                  params={{ id: p.id }}
-                  className="group rounded-xl border border-border bg-card p-4 transition-colors hover:border-foreground/30"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <h3 className="text-[13.5px] font-semibold tracking-tight text-foreground">
-                      {p.name}
-                    </h3>
-                    <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground transition-colors group-hover:text-foreground" />
-                  </div>
-                  <p className="mt-2 line-clamp-2 text-[12px] leading-relaxed text-muted-foreground">
-                    {p.summary}
-                  </p>
-                  <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
-                    <span className="font-mono uppercase tracking-wider">{p.model}</span>
-                    <span>{p.progress}%</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* Discussões observacionais */}
-        <section>
-          <div className="flex items-end justify-between gap-3">
-            <div>
-              <SectionLabel>// discussões observacionais</SectionLabel>
-              <h2 className="mt-2 text-[16px] font-semibold tracking-tight text-foreground">
-                Discussões Observacionais
-              </h2>
-              <p className="mt-1 max-w-2xl text-[12.5px] text-muted-foreground">
-                Interpretações coletivas sobre fenômenos identificados nos projetos deste domínio.
-              </p>
-            </div>
-            <Button
-              size="sm"
-              variant="outline"
-              className="gap-1.5"
-              onClick={() => setCreateOpen(true)}
-            >
-              <Plus className="h-3.5 w-3.5" /> Nova discussão
-            </Button>
-          </div>
+          <SectionHeader
+            title="Conversas"
+            tooltip="Interpretações coletivas sobre fenômenos identificados nos projetos deste domínio."
+            action={
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5"
+                onClick={() => setCreateOpen(true)}
+              >
+                <Plus className="h-3.5 w-3.5" /> Iniciar conversa
+              </Button>
+            }
+          />
 
           {discussions.length === 0 ? (
             <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/30 p-6 text-center text-[12.5px] text-muted-foreground">
-              Nenhuma discussão registrada neste domínio.
+              Nenhuma conversa registrada neste domínio.
             </div>
           ) : (
             <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
@@ -526,6 +518,13 @@ function DomainCommunityPage() {
                   onConsolidate={() => {
                     setSelectedDiscussion(d);
                     setConsolidateOpen(true);
+                    void suggestKnowledge(d.id)
+                      .then((draft) =>
+                        toast.info(
+                          `IA sugere consolidar como "${draft.title}": ${draft.summary} — Recomendação: ${draft.recommendation}`,
+                        ),
+                      )
+                      .catch(() => {});
                   }}
                   onArchive={() => {
                     void archiveDiscussion(d.id).then((updated) => {
@@ -546,17 +545,14 @@ function DomainCommunityPage() {
 
         {/* Conhecimento produzido */}
         <section>
-          <SectionLabel>// conhecimento produzido pela comunidade</SectionLabel>
-          <h2 className="mt-2 text-[16px] font-semibold tracking-tight text-foreground">
-            Conhecimento produzido pela comunidade
-          </h2>
-          <p className="mt-1 max-w-2xl text-[12.5px] text-muted-foreground">
-            Aprendizados consolidados a partir das discussões e evidências deste domínio.
-          </p>
+          <SectionHeader
+            title="Aprendizados"
+            tooltip="Aprendizados consolidados pela comunidade a partir das conversas e evidências deste domínio."
+          />
 
           {knowledge.length === 0 ? (
             <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/30 p-6 text-center text-[12.5px] text-muted-foreground">
-              Nenhum conhecimento consolidado ainda neste domínio.
+              Nenhum aprendizado consolidado ainda neste domínio.
             </div>
           ) : (
             <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
@@ -569,10 +565,10 @@ function DomainCommunityPage() {
 
         {/* Fenômenos mais discutidos */}
         <section>
-          <SectionLabel>// fenômenos mais discutidos</SectionLabel>
-          <h2 className="mt-2 text-[16px] font-semibold tracking-tight text-foreground">
-            Fenômenos mais discutidos
-          </h2>
+          <SectionHeader
+            title="Fenômenos mais discutidos"
+            tooltip="Fenômenos com mais evidências registradas nos projetos deste domínio."
+          />
           {phenomenaFrequency.length === 0 ? (
             <p className="mt-3 text-[12.5px] text-muted-foreground">
               Nenhum fenômeno em análise neste domínio.
@@ -609,8 +605,7 @@ function DomainCommunityPage() {
                 Domínio observacional
               </h3>
               <p className="mt-1 text-[12.5px] text-muted-foreground">
-                Veja o observatório completo do domínio {domainName} — atributos, fenômenos e
-                padrões.
+                Área de atuação que agrupa os projetos desta comunidade.
               </p>
             </div>
             <Button asChild size="sm" variant="outline">
@@ -646,7 +641,6 @@ function DomainCommunityPage() {
             status: statusCodes[d.status],
             visibility: visibilityCodes[d.visibility],
             createdBy: "",
-            contributions: [],
           }).then((created) => {
             setDiscussions((list) => [
               toCommunityDiscussion(created, {
