@@ -225,7 +225,7 @@ export function DiscussionCard({
 
       <div className="mt-3 flex flex-wrap items-center gap-1.5">
         <Button size="sm" variant="outline" className="h-7 gap-1 px-2 text-[11px]" onClick={onView}>
-          <Eye className="h-3 w-3" /> Ver discussão
+          <Eye className="h-3 w-3" /> Ver conversa
         </Button>
         {d.status !== "Consolidada" && d.status !== "Arquivada" && (
           <Button
@@ -234,7 +234,7 @@ export function DiscussionCard({
             className="h-7 gap-1 px-2 text-[11px]"
             onClick={onConsolidate}
           >
-            <Lightbulb className="h-3 w-3" /> Consolidar conhecimento
+            <Lightbulb className="h-3 w-3" /> Consolidar aprendizado
           </Button>
         )}
         {d.status !== "Arquivada" && (
@@ -382,20 +382,20 @@ export function CreateDiscussionDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[640px]">
         <DialogHeader>
-          <DialogTitle>Nova discussão observacional</DialogTitle>
+          <DialogTitle>Iniciar conversa</DialogTitle>
           <DialogDescription>
-            Abra uma discussão a partir de um fenômeno ou observação registrada.
+            Abra uma conversa a partir de um fenômeno ou observação registrada.
           </DialogDescription>
         </DialogHeader>
         {success ? (
           <div className="flex flex-col items-center gap-2 py-6 text-center">
             <CheckCircle2 className="h-8 w-8 text-success" />
-            <p className="text-sm font-medium">Discussão criada com sucesso.</p>
+            <p className="text-sm font-medium">Conversa iniciada com sucesso.</p>
           </div>
         ) : (
           <form onSubmit={submit} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="dis-title">Título da discussão</Label>
+              <Label htmlFor="dis-title">Título da conversa</Label>
               <Input
                 id="dis-title"
                 placeholder="Ex.: Por que projetos de Branding apresentam mais mudanças de escopo?"
@@ -514,14 +514,14 @@ export function CreateDiscussionDialog({
               <Textarea
                 id="dis-q"
                 rows={2}
-                placeholder="Qual pergunta essa discussão pretende responder?"
+                placeholder="Qual pergunta essa conversa pretende responder?"
                 value={form.investigativeQuestion}
                 onChange={(e) => setForm((f) => ({ ...f, investigativeQuestion: e.target.value }))}
               />
             </div>
             <DialogFooter>
               <Button type="submit" size="sm">
-                <Plus className="h-3.5 w-3.5" /> Criar discussão
+                <Plus className="h-3.5 w-3.5" /> Iniciar conversa
               </Button>
             </DialogFooter>
           </form>
@@ -894,7 +894,7 @@ export function ConsolidateKnowledgeDialog({
             </div>
             <DialogFooter>
               <Button type="submit" size="sm">
-                Consolidar conhecimento
+                Consolidar aprendizado
               </Button>
             </DialogFooter>
           </form>
