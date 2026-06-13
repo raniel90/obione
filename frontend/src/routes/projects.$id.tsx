@@ -254,7 +254,7 @@ function toProjectPhenomenon(p: SvcPhenomenon): ProjectPhenomenon {
   return {
     id: p.id,
     title: p.name,
-    evidence: `${p.evidenceCount} evidências registradas`,
+    evidence: `${p.evidenceCount} ${p.evidenceCount === 1 ? "evidência registrada" : "evidências registradas"}`,
     impact: phenImpactLabel[p.impact],
     trend: trendMap[p.trend],
     status: phenStatusMap[p.status],
@@ -502,11 +502,13 @@ function ProjectDetailPage() {
                   </Link>
                 </Button>
               )}
-              <Button asChild size="sm" className="gap-1.5">
-                <Link to="/projects/$id/edit" params={{ id }}>
-                  <PenSquare className="h-3.5 w-3.5" /> Editar projeto
-                </Link>
-              </Button>
+              {!isClient && (
+                <Button asChild size="sm" className="gap-1.5">
+                  <Link to="/projects/$id/edit" params={{ id }}>
+                    <PenSquare className="h-3.5 w-3.5" /> Editar projeto
+                  </Link>
+                </Button>
+              )}
             </div>
           </div>
 
@@ -544,12 +546,14 @@ function ProjectDetailPage() {
                   <span className="font-medium text-foreground">{coverage.percentage}%</span>
                 </span>
               )}
-              <span className="inline-flex items-center gap-1.5">
-                Aceitas da IA
-                <span className="font-medium text-foreground">
-                  {rawObservations.filter((o) => o.origin === "AI_SUGGESTED").length}
+              {!isClient && (
+                <span className="inline-flex items-center gap-1.5">
+                  Aceitas da IA
+                  <span className="font-medium text-foreground">
+                    {rawObservations.filter((o) => o.origin === "AI_SUGGESTED").length}
+                  </span>
                 </span>
-              </span>
+              )}
             </div>
           </div>
         </div>
@@ -600,6 +604,7 @@ function ProjectDetailPage() {
             <ManualObservationSection
               projectId={id}
               domainId={project.domainId}
+              isClient={isClient}
               initial={observationsList}
               rawObservations={rawObservations}
               discussions={rawDiscussions}
@@ -896,18 +901,6 @@ function TimelineIcon({ type }: { type: string }) {
 
 /* --------------------- Manual observation section ------------------------ */
 
-const PHENOMENA = [
-  "Mudança recorrente de escopo",
-  "Baixa participação do cliente",
-  "Atraso em validações",
-  "Retrabalho",
-  "Risco de atraso",
-  "Alta colaboração",
-  "Baixa transparência",
-  "Volatilidade de requisitos",
-  "Outro",
-];
-
 const observationStatusTone: Record<string, string> = {
   registrada: "border-border text-muted-foreground bg-muted/40",
   "em análise": "border-warning/30 text-warning bg-warning/5",
@@ -959,6 +952,7 @@ const DISCUSSION_STATUS: DiscussionStatus[] = [
 function ManualObservationSection({
   projectId,
   domainId,
+  isClient,
   initial,
   rawObservations,
   discussions,
@@ -970,6 +964,7 @@ function ManualObservationSection({
 }: {
   projectId: string;
   domainId: string;
+  isClient: boolean;
   initial: ProjectObservation[];
   rawObservations: SvcObservation[];
   discussions: SvcDiscussion[];
@@ -999,7 +994,7 @@ function ManualObservationSection({
     date: new Date().toISOString().slice(0, 10),
     description: "",
     attribute: "",
-    phenomenon: PHENOMENA[0],
+    phenomenon: "",
     customPhenomenon: "",
     impact: "Médio" as ProjectObservation["impact"],
     risk: "Moderado" as ProjectObservation["risk"],
@@ -1010,7 +1005,7 @@ function ManualObservationSection({
     title: "",
     description: "",
     attribute: "",
-    phenomenon: PHENOMENA[0],
+    phenomenon: "",
     customPhenomenon: "",
     impact: "Médio" as ProjectObservation["impact"],
     risk: "Moderado" as ProjectObservation["risk"],
@@ -1028,9 +1023,10 @@ function ManualObservationSection({
     getMpoCategories().then(setMpoCategories);
   }, []);
 
+  // Options come from the project's own phenomena (the hypotheses declared at
+  // creation) so manual evidence lands on them; "Outro" allows naming a new one.
   const phenomenonOptions = useMemo(() => {
     const names = phenomena.map((p) => p.name);
-    if (names.length === 0) return [...PHENOMENA];
     if (!names.includes("Outro")) names.push("Outro");
     return names;
   }, [phenomena]);
@@ -1048,12 +1044,13 @@ function ManualObservationSection({
   }, []);
 
   const resolvePhenomenonId = (select: string, custom: string) => {
+    if (!select) return undefined;
     if (select === "Outro") return custom.trim() || undefined;
     const byName = phenomena.find((p) => p.name === select);
     if (byName) return byName.id;
     const byId = phenomena.find((p) => p.id === select);
     if (byId) return byId.id;
-    return select;
+    return undefined;
   };
 
   const resolvePhenomenonIdFromRaw = (raw?: SvcObservation) => {
@@ -1122,15 +1119,13 @@ function ManualObservationSection({
     if (!form.title.trim() || !form.description.trim() || submitting) return;
     if (isCustomPhenomenon && !form.customPhenomenon.trim()) return;
 
-    const finalPhenomenon = isCustomPhenomenon ? form.customPhenomenon.trim() : form.phenomenon;
-
     setSubmitting(true);
     try {
       const created = await createObservation(projectId, {
         title: form.title.trim(),
         description: form.description.trim(),
         attributeId: form.attribute,
-        phenomenonId: finalPhenomenon,
+        phenomenonId: resolvePhenomenonId(form.phenomenon, form.customPhenomenon),
         impact: impactToCode[form.impact],
         risk: riskToCode[form.risk],
         interpretation: form.interpretation.trim(),
@@ -1148,6 +1143,7 @@ function ManualObservationSection({
           title: "",
           description: "",
           interpretation: "",
+          phenomenon: "",
           customPhenomenon: "",
         }));
       }, 1400);
@@ -1162,13 +1158,13 @@ function ManualObservationSection({
 
     const phenLabel = raw.phenomenonId
       ? (phenNameById.get(raw.phenomenonId) ?? raw.phenomenonId)
-      : PHENOMENA[0];
+      : "";
     const matchedPhen = phenomena.find(
       (p) => p.id === raw.phenomenonId || p.name === raw.phenomenonId,
     );
     const phenSelect = matchedPhen
       ? matchedPhen.name
-      : phenomenonOptions.includes(phenLabel)
+      : !phenLabel || phenomenonOptions.includes(phenLabel)
         ? phenLabel
         : "Outro";
 
@@ -1291,191 +1287,195 @@ function ManualObservationSection({
         title="Observações"
         description="O que o observatório registrou neste projeto, manualmente ou aceitando sugestões da IA."
         action={
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              className="gap-1.5"
-              onClick={handleSuggestObservations}
-              disabled={aiLoading}
-            >
-              <Sparkles className="h-3.5 w-3.5" />
-              {aiLoading ? "Sugerindo…" : "Sugerir observações (IA)"}
-            </Button>
-            <Dialog open={open} onOpenChange={setOpen}>
-              <DialogTrigger asChild>
-                <Button size="sm" className="gap-1.5">
-                  <Plus className="h-3.5 w-3.5" /> Nova observação
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[640px]">
-                <DialogHeader>
-                  <DialogTitle>Registrar nova observação</DialogTitle>
-                  <DialogDescription>
-                    Registre uma evidência observada no projeto: descrição, atributo afetado,
-                    fenômeno associado e sua interpretação inicial.
-                  </DialogDescription>
-                </DialogHeader>
-                {success ? (
-                  <div className="flex flex-col items-center gap-2 py-6 text-center">
-                    <CheckCircle2 className="h-8 w-8 text-success" />
-                    <p className="text-sm font-medium">Observação registrada com sucesso.</p>
-                  </div>
-                ) : (
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="space-y-1.5">
-                      <Label htmlFor="obs-title">Título da observação</Label>
-                      <Input
-                        id="obs-title"
-                        placeholder="Ex.: Cliente solicitou nova alteração de escopo após aprovação inicial"
-                        value={form.title}
-                        onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                      />
+          isClient ? undefined : (
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5"
+                onClick={handleSuggestObservations}
+                disabled={aiLoading}
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                {aiLoading ? "Sugerindo…" : "Sugerir observações (IA)"}
+              </Button>
+              <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" className="gap-1.5">
+                    <Plus className="h-3.5 w-3.5" /> Nova observação
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[640px]">
+                  <DialogHeader>
+                    <DialogTitle>Registrar nova observação</DialogTitle>
+                    <DialogDescription>
+                      Registre uma evidência observada no projeto: descrição, atributo afetado,
+                      fenômeno associado e sua interpretação inicial.
+                    </DialogDescription>
+                  </DialogHeader>
+                  {success ? (
+                    <div className="flex flex-col items-center gap-2 py-6 text-center">
+                      <CheckCircle2 className="h-8 w-8 text-success" />
+                      <p className="text-sm font-medium">Observação registrada com sucesso.</p>
                     </div>
-                    <div className="grid gap-3 sm:grid-cols-2">
+                  ) : (
+                    <form onSubmit={handleSubmit} className="space-y-4">
                       <div className="space-y-1.5">
-                        <Label htmlFor="obs-date">Data da observação</Label>
+                        <Label htmlFor="obs-title">Título da observação</Label>
                         <Input
-                          id="obs-date"
-                          type="date"
-                          value={form.date}
-                          onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
+                          id="obs-title"
+                          placeholder="Ex.: Cliente solicitou nova alteração de escopo após aprovação inicial"
+                          value={form.title}
+                          onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
                         />
                       </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="obs-author">Responsável pelo registro</Label>
-                        <Input
-                          id="obs-author"
-                          value={form.author}
-                          onChange={(e) => setForm((f) => ({ ...f, author: e.target.value }))}
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="obs-desc">Descrição da evidência</Label>
-                      <Textarea
-                        id="obs-desc"
-                        rows={3}
-                        placeholder="Descreva o que aconteceu, qual evidência foi observada e por que isso é relevante para o projeto."
-                        value={form.description}
-                        onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-                      />
-                    </div>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="space-y-1.5">
-                        <Label>Atributo relacionado</Label>
-                        <Select
-                          value={form.attribute}
-                          onValueChange={(v) => setForm((f) => ({ ...f, attribute: v }))}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione um aspecto do projeto" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {mpoCategories.map((cat) => (
-                              <SelectGroup key={cat.key}>
-                                <SelectLabel>{cat.label}</SelectLabel>
-                                {cat.attributes
-                                  .filter((a) => a.type !== "fora_de_escopo")
-                                  .map((a) => (
-                                    <SelectItem key={a.id} value={a.id}>
-                                      {a.name}
-                                    </SelectItem>
-                                  ))}
-                              </SelectGroup>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label>Fenômeno observado</Label>
-                        <Select
-                          value={form.phenomenon}
-                          onValueChange={(v) => setForm((f) => ({ ...f, phenomenon: v }))}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {PHENOMENA.map((p) => (
-                              <SelectItem key={p} value={p}>
-                                {p}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {isCustomPhenomenon && (
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="obs-date">Data da observação</Label>
                           <Input
-                            className="mt-2"
-                            placeholder="Nomear novo fenômeno observado"
-                            value={form.customPhenomenon}
-                            onChange={(e) =>
-                              setForm((f) => ({ ...f, customPhenomenon: e.target.value }))
-                            }
+                            id="obs-date"
+                            type="date"
+                            value={form.date}
+                            onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
                           />
-                        )}
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="obs-author">Responsável pelo registro</Label>
+                          <Input
+                            id="obs-author"
+                            value={form.author}
+                            onChange={(e) => setForm((f) => ({ ...f, author: e.target.value }))}
+                          />
+                        </div>
                       </div>
                       <div className="space-y-1.5">
-                        <Label>Impacto</Label>
-                        <Select
-                          value={form.impact}
-                          onValueChange={(v) =>
-                            setForm((f) => ({ ...f, impact: v as ProjectObservation["impact"] }))
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {["Baixo", "Médio", "Alto"].map((v) => (
-                              <SelectItem key={v} value={v}>
-                                {v}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <Label htmlFor="obs-desc">Descrição da evidência</Label>
+                        <Textarea
+                          id="obs-desc"
+                          rows={3}
+                          placeholder="Descreva o que aconteceu, qual evidência foi observada e por que isso é relevante para o projeto."
+                          value={form.description}
+                          onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                        />
+                      </div>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="space-y-1.5">
+                          <Label>Atributo relacionado</Label>
+                          <Select
+                            value={form.attribute}
+                            onValueChange={(v) => setForm((f) => ({ ...f, attribute: v }))}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione um aspecto do projeto" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {mpoCategories.map((cat) => (
+                                <SelectGroup key={cat.key}>
+                                  <SelectLabel>{cat.label}</SelectLabel>
+                                  {cat.attributes
+                                    .filter((a) => a.type !== "fora_de_escopo")
+                                    .map((a) => (
+                                      <SelectItem key={a.id} value={a.id}>
+                                        {a.name}
+                                      </SelectItem>
+                                    ))}
+                                </SelectGroup>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label>Fenômeno observado</Label>
+                          <Select
+                            value={form.phenomenon}
+                            onValueChange={(v) => setForm((f) => ({ ...f, phenomenon: v }))}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Nenhum (opcional)" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {phenomenonOptions.map((p) => (
+                                <SelectItem key={p} value={p}>
+                                  {p}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          {isCustomPhenomenon && (
+                            <Input
+                              className="mt-2"
+                              placeholder="Nomear novo fenômeno observado"
+                              value={form.customPhenomenon}
+                              onChange={(e) =>
+                                setForm((f) => ({ ...f, customPhenomenon: e.target.value }))
+                              }
+                            />
+                          )}
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label>Impacto</Label>
+                          <Select
+                            value={form.impact}
+                            onValueChange={(v) =>
+                              setForm((f) => ({ ...f, impact: v as ProjectObservation["impact"] }))
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {["Baixo", "Médio", "Alto"].map((v) => (
+                                <SelectItem key={v} value={v}>
+                                  {v}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label>Risco</Label>
+                          <Select
+                            value={form.risk}
+                            onValueChange={(v) =>
+                              setForm((f) => ({ ...f, risk: v as ProjectObservation["risk"] }))
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {["Baixo", "Moderado", "Elevado", "Crítico"].map((v) => (
+                                <SelectItem key={v} value={v}>
+                                  {v}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
                       <div className="space-y-1.5">
-                        <Label>Risco</Label>
-                        <Select
-                          value={form.risk}
-                          onValueChange={(v) =>
-                            setForm((f) => ({ ...f, risk: v as ProjectObservation["risk"] }))
+                        <Label htmlFor="obs-interp">Interpretação inicial</Label>
+                        <Textarea
+                          id="obs-interp"
+                          rows={2}
+                          placeholder="Descreva a interpretação inicial sobre essa observação."
+                          value={form.interpretation}
+                          onChange={(e) =>
+                            setForm((f) => ({ ...f, interpretation: e.target.value }))
                           }
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {["Baixo", "Moderado", "Elevado", "Crítico"].map((v) => (
-                              <SelectItem key={v} value={v}>
-                                {v}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        />
                       </div>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="obs-interp">Interpretação inicial</Label>
-                      <Textarea
-                        id="obs-interp"
-                        rows={2}
-                        placeholder="Descreva a interpretação inicial sobre essa observação."
-                        value={form.interpretation}
-                        onChange={(e) => setForm((f) => ({ ...f, interpretation: e.target.value }))}
-                      />
-                    </div>
-                    <DialogFooter>
-                      <Button type="submit" size="sm" disabled={submitting}>
-                        {submitting ? "Registrando…" : "Registrar observação"}
-                      </Button>
-                    </DialogFooter>
-                  </form>
-                )}
-              </DialogContent>
-            </Dialog>
-          </div>
+                      <DialogFooter>
+                        <Button type="submit" size="sm" disabled={submitting}>
+                          {submitting ? "Registrando…" : "Registrar observação"}
+                        </Button>
+                      </DialogFooter>
+                    </form>
+                  )}
+                </DialogContent>
+              </Dialog>
+            </div>
+          )
         }
       />
 
@@ -1581,36 +1581,38 @@ function ManualObservationSection({
 
             <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted-foreground">
               <span>por {o.author}</span>
-              <div className="flex items-center gap-1.5">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-7 gap-1 px-2 text-[11px]"
-                  onClick={() => openEdit(o.id)}
-                >
-                  <PenSquare className="h-3 w-3" /> Editar
-                </Button>
-                {!discussions.some((d) => d.observationId === o.id) && (
+              {!isClient && (
+                <div className="flex items-center gap-1.5">
                   <Button
                     size="sm"
                     variant="ghost"
                     className="h-7 gap-1 px-2 text-[11px]"
-                    onClick={() => openDiscussion(o.id)}
+                    onClick={() => openEdit(o.id)}
                   >
-                    <MessageSquare className="h-3 w-3" /> Iniciar conversa
+                    <PenSquare className="h-3 w-3" /> Editar
                   </Button>
-                )}
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-7 gap-1 px-2 text-[11px]"
-                  disabled={analyzingId === o.id || o.status === "em análise"}
-                  onClick={() => handleMarkAnalyzed(o.id)}
-                >
-                  <CheckCircle2 className="h-3 w-3" />
-                  {analyzingId === o.id ? "Atualizando…" : "Marcar como analisada"}
-                </Button>
-              </div>
+                  {!discussions.some((d) => d.observationId === o.id) && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 gap-1 px-2 text-[11px]"
+                      onClick={() => openDiscussion(o.id)}
+                    >
+                      <MessageSquare className="h-3 w-3" /> Iniciar conversa
+                    </Button>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 gap-1 px-2 text-[11px]"
+                    disabled={analyzingId === o.id || o.status === "em análise"}
+                    onClick={() => handleMarkAnalyzed(o.id)}
+                  >
+                    <CheckCircle2 className="h-3 w-3" />
+                    {analyzingId === o.id ? "Atualizando…" : "Marcar como analisada"}
+                  </Button>
+                </div>
+              )}
             </div>
 
             {discussions
@@ -1686,7 +1688,7 @@ function ManualObservationSection({
                   onValueChange={(v) => setEditForm((f) => ({ ...f, phenomenon: v }))}
                 >
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Nenhum (opcional)" />
                   </SelectTrigger>
                   <SelectContent>
                     {phenomenonOptions.map((p) => (
@@ -1769,14 +1771,14 @@ function ManualObservationSection({
       <Dialog open={discussionOpen} onOpenChange={setDiscussionOpen}>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[640px]">
           <DialogHeader>
-            <DialogTitle>Nova discussão observacional</DialogTitle>
+            <DialogTitle>Iniciar conversa</DialogTitle>
             <DialogDescription>
-              Abra uma discussão a partir desta observação registrada no projeto.
+              Comece uma conversa a partir desta observação registrada no projeto.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleDiscussionSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="dis-title">Título da discussão</Label>
+              <Label htmlFor="dis-title">Título da conversa</Label>
               <Input
                 id="dis-title"
                 value={discussionForm.title}
