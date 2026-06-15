@@ -1,23 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ObiOneMark } from "@/components/obione-logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { AlertCircle, ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
-import { getDomains } from "@/services/domainService";
-import { createUser } from "@/services/userService";
+import { register } from "@/services/authService";
 import { ApiError } from "@/services/apiClient";
-import type { Domain } from "@/types/domain";
-import type { ProfileCode } from "@/types/user";
 
 export const Route = createFileRoute("/register")({
   head: () => ({
@@ -32,61 +21,21 @@ export const Route = createFileRoute("/register")({
   component: RegisterPage,
 });
 
-type Role = "admin" | "consultor" | "cliente";
-
-const ROLES: { value: Role; label: string }[] = [
-  { value: "admin", label: "Administrador" },
-  { value: "consultor", label: "Consultor" },
-  { value: "cliente", label: "Cliente" },
-];
-
-const roleToProfileCode: Record<Role, ProfileCode> = {
-  admin: "ADMIN",
-  consultor: "CONSULTANT",
-  cliente: "CLIENT",
-};
-
 function RegisterPage() {
-  const [domains, setDomains] = useState<Domain[]>([]);
-  const [domainsLoading, setDomainsLoading] = useState(true);
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
-    role: "" as Role | "",
-    domainId: "",
-    objective: "",
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    getDomains()
-      .then((list) => {
-        if (!cancelled) setDomains(list);
-      })
-      .catch(() => {
-        if (!cancelled) setError("Não foi possível carregar os domínios. Tente novamente.");
-      })
-      .finally(() => {
-        if (!cancelled) setDomainsLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    if (!form.role || !form.domainId) {
-      setError("Selecione o tipo de usuário e o domínio de interesse.");
-      return;
-    }
     if (form.password.length < 8) {
       setError("A senha deve ter no mínimo 8 caracteres.");
       return;
@@ -98,14 +47,10 @@ function RegisterPage() {
 
     setLoading(true);
     try {
-      await createUser({
+      await register({
         name: form.name.trim(),
         email: form.email.trim(),
         password: form.password,
-        profileCode: roleToProfileCode[form.role],
-        status: "PENDING",
-        domainIds: [form.domainId],
-        projectIds: [],
       });
       setSuccess(true);
     } catch (err) {
@@ -152,8 +97,8 @@ function RegisterPage() {
         </Link>
       </header>
 
-      <main className="relative z-10 flex min-h-[calc(100vh-72px)] items-start justify-center px-6 pb-20 pt-6 md:pt-10">
-        <div className="w-full max-w-[460px]">
+      <main className="relative z-10 flex min-h-[calc(100vh-72px)] items-start justify-center px-6 pb-20 pt-6 md:items-center md:pt-0">
+        <div className="w-full max-w-[400px]">
           <div className="flex flex-col items-center text-center">
             <div className="relative">
               <div
@@ -171,7 +116,7 @@ function RegisterPage() {
             <h1 className="mt-3 text-[26px] font-semibold leading-tight tracking-tight text-foreground">
               Observar. Organizar. Decidir.
             </h1>
-            <p className="mt-3 max-w-[380px] text-[13px] leading-relaxed text-muted-foreground">
+            <p className="mt-3 max-w-[340px] text-[13px] leading-relaxed text-muted-foreground">
               Participe do observatório e acompanhe projetos, domínios e análises estratégicas.
             </p>
           </div>
@@ -193,7 +138,8 @@ function RegisterPage() {
                   Solicitar acesso ao ObiOne
                 </h2>
                 <p className="mt-1 text-[12.5px] text-muted-foreground">
-                  Preencha as informações abaixo para solicitar acesso ao observatório.
+                  Crie sua conta para participar da comunidade. O acesso é liberado após a aprovação
+                  de um administrador.
                 </p>
               </div>
 
@@ -267,78 +213,6 @@ function RegisterPage() {
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="role" className="text-[12.5px]">
-                    Tipo de usuário
-                  </Label>
-                  <Select
-                    value={form.role}
-                    onValueChange={(v) => setForm({ ...form, role: v as Role })}
-                  >
-                    <SelectTrigger id="role" className="h-10">
-                      <SelectValue placeholder="Selecione o perfil…" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ROLES.map((r) => (
-                        <SelectItem key={r.value} value={r.value}>
-                          {r.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-[11px] text-muted-foreground">
-                    O perfil define o papel inicial do usuário no observatório. A participação na
-                    comunidade e o acesso a domínios e projetos são definidos posteriormente pelas
-                    permissões configuradas pelo administrador.
-                  </p>
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="domain" className="text-[12.5px]">
-                    Domínio de interesse
-                  </Label>
-                  <Select
-                    value={form.domainId}
-                    onValueChange={(v) => setForm({ ...form, domainId: v })}
-                    disabled={domainsLoading || domains.length === 0}
-                  >
-                    <SelectTrigger id="domain" className="h-10">
-                      <SelectValue
-                        placeholder={
-                          domainsLoading ? "Carregando domínios…" : "Selecione o domínio…"
-                        }
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {domains.map((d) => (
-                        <SelectItem key={d.id} value={d.id}>
-                          {d.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-[11px] text-muted-foreground">
-                    Os domínios representam áreas estratégicas e contextos analíticos.
-                  </p>
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="objective" className="text-[12.5px]">
-                    Objetivo de acesso
-                  </Label>
-                  <Textarea
-                    id="objective"
-                    value={form.objective}
-                    onChange={(e) => setForm({ ...form, objective: e.target.value })}
-                    placeholder="Descreva resumidamente seu interesse no observatório."
-                    rows={3}
-                    className="resize-none"
-                  />
-                  <p className="text-[11px] text-muted-foreground">
-                    Campo informativo nesta versão — não é persistido no cadastro.
-                  </p>
-                </div>
-
                 {error && (
                   <div
                     role="alert"
@@ -349,11 +223,7 @@ function RegisterPage() {
                   </div>
                 )}
 
-                <Button
-                  type="submit"
-                  className="h-10 w-full text-[13px]"
-                  disabled={loading || domainsLoading || domains.length === 0}
-                >
+                <Button type="submit" className="h-10 w-full text-[13px]" disabled={loading}>
                   {loading ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -365,9 +235,9 @@ function RegisterPage() {
                 </Button>
 
                 <p className="rounded-md border border-dashed border-border bg-muted/30 px-3 py-2 text-center text-[11px] leading-relaxed text-muted-foreground">
-                  <span className="font-mono text-foreground">governança</span> · o acesso ao
-                  observatório depende do perfil selecionado, do vínculo com domínios/projetos e das
-                  permissões configuradas pelo administrador.
+                  <span className="font-mono text-foreground">governança</span> · você entra como
+                  participante da comunidade. O vínculo com domínios e projetos é definido pelo
+                  administrador na aprovação.
                 </p>
               </form>
 
@@ -399,8 +269,8 @@ function SuccessState({ email }: { email: string }) {
         Tudo certo. Sua solicitação foi enviada.
       </h2>
       <p className="mt-3 max-w-[380px] text-[13px] leading-relaxed text-muted-foreground">
-        Seu acesso será analisado por um administrador do domínio. Após aprovação você poderá
-        acessar os projetos e recursos vinculados ao seu contexto organizacional.
+        Seu acesso será analisado por um administrador. Após a aprovação você poderá entrar e
+        acompanhar os projetos e recursos vinculados ao seu contexto.
       </p>
 
       {email && (

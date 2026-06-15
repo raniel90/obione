@@ -1,5 +1,6 @@
 package br.com.obione.users.service;
 
+import br.com.obione.auth.dto.RegisterRequestDTO;
 import br.com.obione.common.exception.DuplicateResourceException;
 import br.com.obione.common.exception.ResourceNotFoundException;
 import br.com.obione.profiles.entity.Profile;
@@ -9,6 +10,7 @@ import br.com.obione.users.dto.CreateUserRequestDTO;
 import br.com.obione.users.dto.UpdateUserRequestDTO;
 import br.com.obione.users.dto.UserResponseDTO;
 import br.com.obione.users.entity.User;
+import br.com.obione.users.enums.UserStatus;
 import br.com.obione.users.mapper.UserMapper;
 import br.com.obione.users.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -53,6 +55,36 @@ public class UserService {
         return userRepository.findByProfile_Code(profileCode).stream()
                 .map(UserMapper::toResponseDTO)
                 .toList();
+    }
+
+    /**
+     * Public self-registration. The profile and status are forced server-side
+     * to CLIENT / PENDING — never taken from the request — so an anonymous
+     * visitor cannot grant themselves staff access. An administrator activates
+     * the account (and assigns domains/projects) afterwards.
+     */
+    @Transactional
+    public UserResponseDTO register(RegisterRequestDTO request) {
+        String normalizedEmail = normalizeEmail(request.email());
+
+        if (userRepository.existsByEmailIgnoreCase(normalizedEmail)) {
+            throw new DuplicateResourceException("E-mail já cadastrado: " + normalizedEmail);
+        }
+
+        Profile profile = profileRepository.findByCode(ProfileCode.CLIENT)
+                .orElseThrow(() -> new ResourceNotFoundException("Perfil não encontrado: " + ProfileCode.CLIENT));
+
+        User user = User.builder()
+                .name(request.name().trim())
+                .email(normalizedEmail)
+                .password(passwordEncoder.encode(request.password()))
+                .profile(profile)
+                .status(UserStatus.PENDING)
+                .domainIds(UserMapper.copyList(null))
+                .projectIds(UserMapper.copyList(null))
+                .build();
+
+        return UserMapper.toResponseDTO(userRepository.save(user));
     }
 
     @Transactional
