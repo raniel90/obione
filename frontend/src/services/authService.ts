@@ -28,6 +28,28 @@ export async function login(email: string, password: string): Promise<LoginResul
   }
 }
 
+export interface RegisterInput {
+  name: string;
+  email: string;
+  password: string;
+}
+
+/**
+ * Public self-registration. The server provisions a PENDING client account
+ * (approval-gated), so no session/token is issued here — the user signs in
+ * only after an administrator activates the account.
+ */
+export async function register(input: RegisterInput): Promise<void> {
+  await request("/auth/register", {
+    method: "POST",
+    json: {
+      name: input.name.trim(),
+      email: input.email.trim(),
+      password: input.password,
+    },
+  });
+}
+
 export async function logout(): Promise<void> {
   // Best-effort server-side invalidation; never blocks the local logout.
   await request("/auth/logout", { method: "POST" }).catch(() => {});
