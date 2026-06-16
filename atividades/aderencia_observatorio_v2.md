@@ -119,10 +119,10 @@ Os 5 reforços do §7 foram implementados e mergeados em `dev` (PRs #49–#54). 
 |---|---|---|---|
 | Lente de observação definida | ⚠️ Fraco | ✅ **Forte** | Catálogo canônico 44/8 (Quadro 37) em `backend/.../mpo/MpoCatalog.java` (1 atributo `fora_de_escopo` ⇒ **43 em escopo**, alinhado ao protocolo); `GET /mpo/categories` e `/mpo/attributes`; formulários do frontend religados ao catálogo (fim do `mockMpoAttributes.ts`) |
 | Avaliar (cobertura/qualidade) | ❌ Ausente | ✅ | `ProjectCoverageService` — % por categoria + global (observados/43); `GET /projects/{id}/coverage`; seção "Cobertura observacional" no detalhe do projeto |
-| IA Generativa (diferencial) | ❌ Ausente | ✅ | Contexto `ai/` com os 4 papéis do §5 (Categorizadora, Observadora, Sintetizadora, Conectora); Spring AI com `MockLlmClient` (default) + `OllamaLlmClient` (llama3.1:8b); **human-in-the-loop**: a IA só sugere, a observação nasce quando o consultor aceita |
+| IA Generativa (diferencial) | ❌ Ausente | ✅ | Contexto `ai/` com 5 papéis (Categorizadora, Observadora, Sintetizadora, Conectora + setup assistido de projeto); Spring AI com `MockLlmClient` (default, sem chave) + `OpenAiLlmClient` (`gpt-4o-mini`; Ollama removido); **human-in-the-loop**: a IA só sugere, a observação nasce quando o consultor aceita |
 | Acesso semi-aberto/governança | ⚠️ Simulado | ✅ (por papel) | `SecurityConfig` sai do `permitAll`: leitura autenticada; mutações `CONSULTANT`/`ADMIN`; cliente contribui em discussões (`MockTokenAuthFilter`) |
 | Acompanhar/temporal | ⚠️ Fraco | ✅ | `FeedService` agrega eventos reais (observação/discussão/conhecimento), DESC por data, filtros por domínio/projeto |
-| Coletar/Transformar rastreável | ❌ Ausente | ⚠️ **Parcial** | A Observadora sugere observações já mapeadas a atributos do MPO, mas sem trecho-fonte persistido (ver limitações abaixo) |
+| Coletar/Transformar rastreável | ❌ Ausente | ✅ | A Observadora sugere observações mapeadas a atributos do MPO **com trecho-fonte** (`sourceExcerpt`); a observação aceita persiste `origin`/`sourceExcerpt`/`suggestionId`. Resta versão de prompt + hash da fonte para rigor pleno (ver limitações) |
 | Categorizar/Abrangência · Interagir · Armazenar | ✅ | ✅ | Mantidos |
 
 **Ciclo central ponta a ponta:** IA sugere observação → consultor aceita → observação criada → cobertura sobe.
@@ -132,7 +132,25 @@ Os 5 reforços do §7 foram implementados e mergeados em `dev` (PRs #49–#54). 
 1. ~~**RNF04/RNF05 não atendidos**~~ — **atendidos em 10/06/2026** (PRs #56–#60, ciclo IA): toda sugestão de IA é registrada em `ai_suggestion_logs` com provider/modelo/timestamp/payload (RNF04); a Observadora cita trecho-fonte (`sourceExcerpt`) e a observação aceita carrega `origin`/`sourceExcerpt`/`suggestionId` (RNF05); a **taxa de aceitação** por papel é derivada do log (`GET /ai/stats`). A IA ganhou provider real — **OpenAI** (`gpt-4o-mini` via Spring AI; Ollama removido; mock segue como default sem chave) — e um 5º papel: **setup assistido de projeto** (`POST /ai/project-setup`), que alimenta o novo wizard IA-first de criação (`/projects/new`, 2 etapas: descrever → revisar sugestões). Resta para o rigor pleno: versão de prompt e hash da fonte no log.
 2. **RNF09 (custo de LLM) não implementado** — agora relevante com OpenAI real (era mitigado pelo Ollama local); o log de sugestões é o lugar natural para tokens/latência.
 3. **Governança é por papel, não CBAC por atributo (RF04)** — mutação deliberada (§6.4); nota correspondente adicionada ao `protocolo_avaliacao.md` (10/06/2026).
-4. **`/register` ficou efetivamente bloqueado** — a página chama `POST /users`, que após o enforcement por papel exige `CONSULTANT`/`ADMIN`; um cadastro anônimo falha com 401/403. Isso resolve o conflito com o RF01 ("sem cadastro público") no nível da API, mas deixa a rota `register.tsx` quebrada na UI — decidir entre remover a página ou implementar o signup-com-aprovação do §6.3.
+4. ~~**`/register` ficou efetivamente bloqueado**~~ — **corrigido em 16/06/2026** (PR #75): a página deixou de chamar `POST /users` (staff-only) e passou a usar o novo `POST /auth/register` público (sob o `permitAll` de `/auth/**`). O `UserService.register` força `CLIENT` + `PENDING` no servidor, ignorando qualquer papel vindo do cliente (fechou o buraco de escalonamento de privilégio que existia na UI anterior, onde o visitante escolhia o próprio papel). Sem token: um usuário PENDING não loga até um admin ativá-lo em `/settings` (o `login` já exige `ACTIVE`). É exatamente o **signup-com-aprovação do §6.3** — o conflito com o RF01 ("sem cadastro público") foi documentado como decisão deliberada da comunidade semi-aberta.
+
+---
+
+## 10. Adendo (16/06/2026) — produto comunidade-first + validação fim a fim
+
+Após o ciclo de IA (§9), uma onda de produto/UX consolidou a tese comunidade-conhecimento na interface e fechou o ciclo de vida do projeto. Tudo mergeado em `dev` e promovido para `main` (PRs #55 e #76; `main == dev`).
+
+**Comunidade como conceito central (PRs #69, #70).** A comunidade passou a ser o conceito principal e o domínio um agregador dela (relação 1:1 no backend — a comunidade é derivada do `Domain`, sem entidade própria). O menu reorganizou-se em Observatório → Comunidade → Projetos → Configurações; `/community` é o hub; os projetos exibem "Comunidade" em vez de "Domínio".
+
+**Detalhe do projeto redesenhado (PRs #68, #71, #72, #73).** A tela passou a 4 abas por contexto — **Observações** (default) · **Fenômenos** · **Aprendizados** · **Linha do tempo** — com um **funil observação → conversa → aprendizado** no topo. As discussões viraram **conversas** inline dentro de cada observação; o conhecimento consolidado virou **Aprendizados**; o `evidenceCount` do fenômeno é derivado das observações vinculadas. O **jargão MPO foi removido da UI** (o cliente não conhece o modelo) — a lente continua viva nos dados e nos docs, não na linguagem da tela.
+
+**Loop do wizard fechado (PRs #66, #67).** Os fenômenos esperados declarados no cadastro viram **hipóteses** reais (entidades `Phenomenon`); a Observadora **prioriza os atributos declarados** no projeto; criou-se a tela `/projects/:id/edit` com roteiro de observação editável.
+
+**`/register` corrigido (PR #75).** Vide §9, limitação #4 (resolvida): signup-com-aprovação público, `CLIENT`/`PENDING` forçados no servidor.
+
+**Validação fim a fim (16/06/2026).** O ciclo central foi exercitado de ponta a ponta com dados de simulação, com a IA real (OpenAI): cadastro via wizard IA-first → hipóteses criadas → a Observadora prioriza os riscos declarados → consultor aceita sugestões → observação manual alimenta a cobertura e as hipóteses → conversa com participação do cliente → home e feed refletindo a atividade. Governança por papel confirmada na UI (o cliente não vê ações de staff nem a cobertura; contribui em conversas).
+
+**Estado do scorecard.** As dimensões do §9 permanecem ✅; esta onda reforça **Interagir → conhecimento** (conversas/aprendizados de primeira classe) e **Acompanhar** (funil + linha do tempo), e melhora a legibilidade da **lente** para o cliente (sem jargão). Pendências de software remanescentes (não acadêmicas): suíte de testes do v2; JWT real (segue mock-token); **RNF09** (custo/latência de LLM, ainda não logado); versão de prompt + hash da fonte no log de IA; Postgres de produção (hoje H2 file-based).
 
 ---
 
