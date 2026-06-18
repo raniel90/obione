@@ -20,7 +20,9 @@ class GovernanceIntegrationTest extends ApiTestSupport {
 
     @Test
     void anonymousReadIsUnauthorized() {
-        ResponseEntity<List<Map<String, Object>>> res = getList("/projects", null);
+        // Status-only check: use get() (Map) rather than getList(), since the
+        // 401 error body is a JSON object, not the project array.
+        ResponseEntity<Map> res = get("/projects", null);
         assertThat(res.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
@@ -34,13 +36,11 @@ class GovernanceIntegrationTest extends ApiTestSupport {
     @Test
     void clientCannotMutate() {
         Session client = login(CLIENT_EMAIL, CLIENT_PASSWORD);
-        // Body is irrelevant: the role check runs before the controller. The
-        // client is authenticated (see clientCanContributeToDiscussion) but
-        // lacks CONSULTANT/ADMIN, so the mutation is denied. The mock-auth
-        // stack currently surfaces that denial as 401 rather than 403; either
-        // way the guarantee — clients cannot mutate — holds.
+        // The client is authenticated (see clientCanContributeToDiscussion) but
+        // lacks CONSULTANT/ADMIN, so a staff-only mutation is forbidden (403,
+        // not 401 — the request is authorized-aware, just unauthorized).
         ResponseEntity<Map> res = post("/projects", Map.of(), client.token());
-        assertThat(res.getStatusCode()).isIn(HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN);
+        assertThat(res.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
