@@ -26,9 +26,7 @@ import {
   visibilityCodes,
   contributionTypeCodes,
 } from "@/services/discussionService";
-import { toast } from "sonner";
 import { consolidateKnowledge, toCommunityKnowledge } from "@/services/knowledgeService";
-import { suggestKnowledge } from "@/services/aiService";
 import type {
   CommunityDiscussionSummary,
   CommunityKnowledgeSummary,
@@ -484,13 +482,6 @@ function DomainCommunityPage() {
                   onConsolidate={() => {
                     setSelectedDiscussion(d);
                     setConsolidateOpen(true);
-                    void suggestKnowledge(d.id)
-                      .then((draft) =>
-                        toast.info(
-                          `IA sugere consolidar como "${draft.title}": ${draft.summary} — Recomendação: ${draft.recommendation}`,
-                        ),
-                      )
-                      .catch(() => {});
                   }}
                   onArchive={() => {
                     void archiveDiscussion(d.id).then((updated) => {

@@ -41,8 +41,6 @@ import type {
 } from "@/types/observation";
 import { toast } from "sonner";
 import { getProjectById } from "@/services/projectService";
-import { suggestObservations } from "@/services/aiService";
-import type { ObservationSuggestion } from "@/services/aiService";
 import { getFeed } from "@/services/feedService";
 import type { FeedEvent } from "@/services/feedService";
 import { getDomains } from "@/services/domainService";
@@ -106,6 +104,8 @@ function ProjectRouteError({ reset }: { reset: () => void }) {
   );
 }
 
+type ProjectTab = "observacoes" | "aprendizados" | "timeline";
+
 export const Route = createFileRoute("/projects/$id")({
   head: () => ({
     meta: [
@@ -116,6 +116,12 @@ export const Route = createFileRoute("/projects/$id")({
       },
     ],
   }),
+  // Deep-link to a tab (e.g. the feed sends a conversa to ?tab=observacoes).
+  // Optional so existing links to the project don't need to pass search.
+  validateSearch: (search: Record<string, unknown>): { tab?: ProjectTab } => {
+    const tab = search.tab;
+    return tab === "aprendizados" || tab === "timeline" || tab === "observacoes" ? { tab } : {};
+  },
   errorComponent: ProjectRouteError,
   component: ProjectDetailPage,
 });
@@ -271,7 +277,8 @@ function ProjectDetailPage() {
   const [rawObservations, setRawObservations] = useState<SvcObservation[]>([]);
   const [attrNameById, setAttrNameById] = useState<Map<string, string>>(new Map());
   const [discussionsRefresh, setDiscussionsRefresh] = useState(0);
-  const [activeTab, setActiveTab] = useState("observacoes");
+  const { tab: initialTab } = Route.useSearch();
+  const [activeTab, setActiveTab] = useState<string>(initialTab ?? "observacoes");
   const [feedEvents, setFeedEvents] = useState<FeedEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -841,9 +848,6 @@ function ManualObservationSection({
   const [submitting, setSubmitting] = useState(false);
   const [analyzingId, setAnalyzingId] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState("");
-  const [aiSuggestions, setAiSuggestions] = useState<ObservationSuggestion[]>([]);
-  const [aiSuggestionId, setAiSuggestionId] = useState<number | null>(null);
-  const [aiLoading, setAiLoading] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editSubmitting, setEditSubmitting] = useState(false);
@@ -901,46 +905,6 @@ function ManualObservationSection({
   const prependObservation = (created: SvcObservation) => {
     setItems((prev) => [toProjectObservation(created, attrNameById), ...prev]);
     onObservationsChange([created, ...rawObservations]);
-  };
-
-  const handleSuggestObservations = async () => {
-    setAiLoading(true);
-    try {
-      const res = await suggestObservations(projectId);
-      setAiSuggestions(res.suggestions);
-      setAiSuggestionId(res.suggestionId);
-      if (res.suggestions.length === 0) toast.info("A IA não sugeriu observações.");
-    } catch {
-      toast.error("Não foi possível obter sugestões da IA.");
-    } finally {
-      setAiLoading(false);
-    }
-  };
-
-  const acceptSuggestion = async (s: ObservationSuggestion) => {
-    try {
-      const impact = (
-        ["LOW", "MEDIUM", "HIGH"].includes(s.impact) ? s.impact : "MEDIUM"
-      ) as SvcObsImpact;
-      const created = await createObservation(projectId, {
-        title: s.title,
-        description: s.description,
-        attributeId: s.attributeId,
-        impact,
-        risk: "MODERATE" as SvcObsRisk,
-        interpretation: "",
-        status: "REGISTERED",
-        origin: "AI_SUGGESTED",
-        sourceExcerpt: s.sourceExcerpt || undefined,
-        suggestionId: aiSuggestionId ?? undefined,
-        createdBy: currentUserId,
-      });
-      prependObservation(created);
-      setAiSuggestions((prev) => prev.filter((x) => x !== s));
-      toast.success("Observação criada a partir da sugestão da IA.");
-    } catch {
-      toast.error("Não foi possível criar a observação.");
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -1094,16 +1058,6 @@ function ManualObservationSection({
         action={
           isClient ? undefined : (
             <div className="flex items-center gap-2">
-              <Button
-                size="sm"
-                variant="ghost"
-                className="gap-1.5 text-muted-foreground"
-                onClick={handleSuggestObservations}
-                disabled={aiLoading}
-              >
-                <Sparkles className="h-3.5 w-3.5" />
-                {aiLoading ? "Sugerindo…" : "Sugerir com IA"}
-              </Button>
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                   <Button size="sm" className="gap-1.5">
@@ -1255,46 +1209,6 @@ function ManualObservationSection({
           )
         }
       />
-
-      {aiSuggestions.length > 0 && (
-        <div className="mt-4 space-y-2 rounded-xl border border-dashed border-foreground/30 bg-foreground/[0.02] p-4">
-          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-            Sugestões da IA · revise antes de aceitar
-          </p>
-          {aiSuggestions.map((s, i) => (
-            <div
-              key={i}
-              className="flex items-start justify-between gap-3 rounded-md border border-border bg-card p-3"
-            >
-              <div className="min-w-0">
-                <p className="text-[13px] font-medium">{s.title}</p>
-                <p className="text-[12px] text-muted-foreground">{s.description}</p>
-                {s.sourceExcerpt && (
-                  <p className="mt-1 border-l-2 border-border pl-2 text-[11px] italic text-muted-foreground">
-                    “{s.sourceExcerpt}”
-                  </p>
-                )}
-                <p className="mt-1 text-[11px] text-muted-foreground">
-                  atributo: {attrNameById.get(s.attributeId) ?? s.attributeId} · impacto:{" "}
-                  {obsImpactMap[s.impact as SvcObsImpact] ?? "Médio"}
-                </p>
-              </div>
-              <div className="flex shrink-0 gap-1.5">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setAiSuggestions((p) => p.filter((x) => x !== s))}
-                >
-                  Descartar
-                </Button>
-                <Button size="sm" onClick={() => acceptSuggestion(s)}>
-                  Aceitar
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
 
       {items.length === 0 && (
         <div className="mt-4 flex flex-col items-start gap-3 rounded-xl border border-dashed border-border bg-muted/20 p-6 text-[12.5px] leading-relaxed text-muted-foreground">

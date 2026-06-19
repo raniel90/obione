@@ -7,7 +7,6 @@ import {
   Activity,
   Layers,
   ArrowUpRight,
-  ArrowRight,
   BookOpen,
   Eye,
   Sparkles,
@@ -255,15 +254,6 @@ function CommunityPage() {
           <SectionHeader
             title="Comunidades"
             tooltip="Cada comunidade reúne consultoria e clientes para conversar sobre as evidências dos projetos e transformar observações em aprendizados. Há uma comunidade para cada domínio."
-            action={
-              <Link
-                to="/domains"
-                className="inline-flex items-center gap-1 text-[12px] text-muted-foreground transition-colors hover:text-foreground"
-              >
-                Ver domínios
-                <ArrowRight className="h-3 w-3" />
-              </Link>
-            }
           />
 
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -320,11 +310,6 @@ function CommunityPage() {
           <SectionHeader
             title="Conversas recentes"
             tooltip="Últimas conversas abertas nas comunidades. Abra um card para acompanhar na comunidade correspondente."
-            action={
-              <span className="font-mono text-[11px] text-muted-foreground">
-                prévia · 3 de {discussions.length}
-              </span>
-            }
           />
           <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-3">
             {recentDiscussions.map((d) => {
@@ -378,11 +363,6 @@ function CommunityPage() {
           <SectionHeader
             title="Aprendizados recentes"
             tooltip="Aprendizados que as comunidades consolidaram a partir das conversas e evidências dos projetos."
-            action={
-              <span className="font-mono text-[11px] text-muted-foreground">
-                prévia · 3 de {knowledge.length}
-              </span>
-            }
           />
           <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-3">
             {recentKnowledge.map((k) => {
