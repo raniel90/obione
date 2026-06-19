@@ -39,14 +39,8 @@ import type {
   ObservationRisk as SvcObsRisk,
   ObservationStatus as SvcObsStatus,
 } from "@/types/observation";
-import type {
-  Phenomenon as SvcPhenomenon,
-  PhenomenonTrend,
-  PhenomenonStatus,
-} from "@/types/phenomenon";
 import { toast } from "sonner";
-import { getProjectById, getProjectCoverage } from "@/services/projectService";
-import type { ProjectCoverage } from "@/services/projectService";
+import { getProjectById } from "@/services/projectService";
 import { suggestObservations } from "@/services/aiService";
 import type { ObservationSuggestion } from "@/services/aiService";
 import { getFeed } from "@/services/feedService";
@@ -69,32 +63,25 @@ import {
 } from "@/services/discussionService";
 import type { Discussion as SvcDiscussion } from "@/types/discussion";
 import { getCurrentUser } from "@/services/authService";
-import { getPhenomenaByProject } from "@/services/phenomenonService";
 import { getMpoAttributes, getMpoCategories } from "@/services/mpoAttributeService";
 import type { MpoCategory } from "@/types/mpoAttribute";
 import { type DiscussionStatus, type VisibilityScope } from "@/lib/community-data";
 import { getKnowledgeByProject, toCommunityKnowledge } from "@/services/knowledgeService";
 import type { CommunityKnowledge } from "@/lib/community-data";
 import { BookOpen } from "lucide-react";
-import type { ProjectObservation, ProjectPhenomenon } from "@/lib/project-observatory";
+import type { ProjectObservation } from "@/lib/project-observatory";
 import {
   ArrowLeft,
   ArrowRight,
   ClipboardList,
-  Layers,
-  Radar,
   Sparkles,
   MessageSquare,
-  TrendingUp,
-  TrendingDown,
-  Minus,
-  Users,
   CheckCircle2,
-  Eye,
   Plus,
   PenSquare,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { relativeTime } from "@/components/feed-event-item";
 import { cn } from "@/lib/utils";
 
 function ProjectRouteError({ reset }: { reset: () => void }) {
@@ -212,18 +199,13 @@ const obsStatusMap: Record<SvcObsStatus, ProjectObservation["status"]> = {
   CONSOLIDATED: "consolidada",
 };
 
-function toProjectObservation(
-  o: SvcObservation,
-  attrMap: Map<string, string>,
-  phenMap: Map<string, string>,
-): ProjectObservation {
+function toProjectObservation(o: SvcObservation, attrMap: Map<string, string>): ProjectObservation {
   return {
     id: o.id,
     title: o.title,
     date: o.createdAt,
     description: o.description,
     attribute: attrMap.get(o.attributeId) ?? o.attributeId ?? "—",
-    phenomenon: o.phenomenonId ? (phenMap.get(o.phenomenonId) ?? o.phenomenonId) : "—",
     impact: obsImpactMap[o.impact],
     risk: obsRiskMap[o.risk],
     interpretation: o.interpretation,
@@ -234,34 +216,14 @@ function toProjectObservation(
   };
 }
 
-const trendMap: Record<PhenomenonTrend, ProjectPhenomenon["trend"]> = {
-  STABLE: "stable",
-  GROWING: "up",
-  DECREASING: "down",
+type TimelineItem = {
+  key: string;
+  kind: string;
+  title: string;
+  actor: string;
+  date: string;
+  observationId?: string;
 };
-const phenStatusMap: Record<PhenomenonStatus, ProjectPhenomenon["status"]> = {
-  OBSERVED: "Em observação",
-  IN_ANALYSIS: "Atenção",
-  CONSOLIDATED: "Consolidado",
-};
-const phenImpactLabel: Record<SvcPhenomenon["impact"], string> = {
-  LOW: "Baixo",
-  MEDIUM: "Médio",
-  HIGH: "Alto",
-};
-
-function toProjectPhenomenon(p: SvcPhenomenon): ProjectPhenomenon {
-  return {
-    id: p.id,
-    title: p.name,
-    evidence: `${p.evidenceCount} ${p.evidenceCount === 1 ? "evidência registrada" : "evidências registradas"}`,
-    impact: phenImpactLabel[p.impact],
-    trend: trendMap[p.trend],
-    status: phenStatusMap[p.status],
-  };
-}
-
-const trendIcon = { up: TrendingUp, down: TrendingDown, stable: Minus } as const;
 
 function SectionTitle({
   eyebrow,
@@ -305,15 +267,11 @@ function ProjectDetailPage() {
   const [project, setProject] = useState<LegacyProject | null>(null);
   const [rawProject, setRawProject] = useState<SvcProject | null>(null);
   const [domain, setDomain] = useState<SvcDomain | null>(null);
-  const [svcPhenomena, setSvcPhenomena] = useState<ProjectPhenomenon[]>([]);
-  const [rawPhenomena, setRawPhenomena] = useState<SvcPhenomenon[]>([]);
   const [svcObservations, setSvcObservations] = useState<ProjectObservation[]>([]);
   const [rawObservations, setRawObservations] = useState<SvcObservation[]>([]);
   const [attrNameById, setAttrNameById] = useState<Map<string, string>>(new Map());
-  const [phenNameById, setPhenNameById] = useState<Map<string, string>>(new Map());
   const [discussionsRefresh, setDiscussionsRefresh] = useState(0);
   const [activeTab, setActiveTab] = useState("observacoes");
-  const [coverage, setCoverage] = useState<ProjectCoverage | null>(null);
   const [feedEvents, setFeedEvents] = useState<FeedEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -323,33 +281,26 @@ function ProjectDetailPage() {
     Promise.all([
       getProjectById(id),
       getDomains(),
-      getPhenomenaByProject(id),
       getObservationsByProject(id),
       getMpoAttributes(),
-      getProjectCoverage(id),
       getFeed({ projectId: id }).catch(() => [] as FeedEvent[]),
     ])
-      .then(([p, ds, phs, observs, attrs, cov, fe]) => {
+      .then(([p, ds, observs, attrs, fe]) => {
         if (cancelled) return;
         if (!p) {
           setProject(null);
           setLoading(false);
           return;
         }
-        setCoverage(cov);
         setFeedEvents(fe);
         const domainsById = new Map(ds.map((d) => [d.id, d] as const));
         setDomain(domainsById.get(p.domainId) ?? null);
         setRawProject(p);
         setProject(toLegacyProject(p, domainsById));
-        setRawPhenomena(phs);
-        setSvcPhenomena(phs.map(toProjectPhenomenon));
         const attrMap = new Map(attrs.map((a) => [a.id, a.name] as const));
-        const phenMap = new Map(phs.map((ph) => [ph.id, ph.name] as const));
         setAttrNameById(attrMap);
-        setPhenNameById(phenMap);
         setRawObservations(observs);
-        setSvcObservations(observs.map((o) => toProjectObservation(o, attrMap, phenMap)));
+        setSvcObservations(observs.map((o) => toProjectObservation(o, attrMap)));
         setLoading(false);
       })
       .catch(() => {
@@ -388,7 +339,6 @@ function ProjectDetailPage() {
           toCommunityDiscussion(d, {
             domain: domainName,
             project: projectName,
-            phenomenon: d.phenomenonId ? (phenNameById.get(d.phenomenonId) ?? d.phenomenonId) : "—",
             originObservation: d.observationId ? `Observação #${d.observationId}` : undefined,
           }),
         ),
@@ -402,9 +352,6 @@ function ProjectDetailPage() {
             toCommunityKnowledge(k, {
               domain: domainName,
               project: projectName,
-              phenomenon: k.phenomenonId
-                ? (phenNameById.get(k.phenomenonId) ?? k.phenomenonId)
-                : undefined,
             }),
           ),
         );
@@ -413,29 +360,31 @@ function ProjectDetailPage() {
     return () => {
       cancelled = true;
     };
-  }, [id, domain, rawProject, phenNameById, discussionsRefresh]);
+  }, [id, domain, rawProject, discussionsRefresh]);
 
-  // Coverage depends on which attributes are observed — refresh it whenever
-  // observations change (manual record or accepted AI suggestion). `loading`
-  // is read but intentionally not a dependency: the initial load already
-  // fetched coverage, so the loading→false transition must not refetch.
-  useEffect(() => {
-    if (loading) return;
-    getProjectCoverage(id).then(setCoverage);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, rawObservations.length]);
-
-  const displayTimeline = useMemo(
-    () =>
-      feedEvents.map((e) => ({
-        id: `${e.kind}-${e.id}`,
-        type: e.kind,
-        description: e.title,
-        actor: e.actorName ?? "Observatório",
-        date: e.createdAt,
-      })),
-    [feedEvents],
-  );
+  // Timeline events enriched for navigation: a conversa resolves to the
+  // observation it came from, so clicking it reaches the thread.
+  const timelineItems = useMemo<TimelineItem[]>(() => {
+    const obsByDiscussion = new Map(
+      rawDiscussions.map((d) => [
+        String(d.id),
+        d.observationId ? String(d.observationId) : undefined,
+      ]),
+    );
+    return feedEvents.map((e) => ({
+      key: `${e.kind}-${e.id}`,
+      kind: e.kind,
+      title: e.title,
+      actor: e.actorName ?? "Observatório",
+      date: e.createdAt,
+      observationId:
+        e.kind === "observation"
+          ? String(e.id)
+          : e.kind === "discussion"
+            ? obsByDiscussion.get(String(e.id))
+            : undefined,
+    }));
+  }, [feedEvents, rawDiscussions]);
 
   if (loading) {
     return (
@@ -461,11 +410,22 @@ function ProjectDetailPage() {
     );
   }
 
-  const phenomenaList: ProjectPhenomenon[] = svcPhenomena;
   const observationsList: ProjectObservation[] = svcObservations;
 
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+
+  // Switch to the Observações tab and bring a specific observation into view
+  // (used by the timeline so conversations are reachable).
+  const openObservation = (observationId?: string) => {
+    setActiveTab("observacoes");
+    if (!observationId) return;
+    setTimeout(() => {
+      document
+        .getElementById(`obs-${observationId}`)
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 60);
+  };
 
   return (
     <AppShell>
@@ -540,67 +500,25 @@ function ProjectDetailPage() {
                   {rawProject ? riskCodeToLabel[rawProject.riskLevel] : "—"}
                 </span>
               </span>
-              {!isClient && coverage && (
-                <span className="inline-flex items-center gap-1.5">
-                  Cobertura da observação
-                  <span className="font-medium text-foreground">{coverage.percentage}%</span>
-                </span>
-              )}
-              {!isClient && (
-                <span className="inline-flex items-center gap-1.5">
-                  Aceitas da IA
-                  <span className="font-medium text-foreground">
-                    {rawObservations.filter((o) => o.origin === "AI_SUGGESTED").length}
-                  </span>
-                </span>
-              )}
             </div>
           </div>
         </div>
       </div>
 
       <div className="px-6 py-8 md:px-10">
-        {/* Funil do observatório: observar → discutir → aprender */}
-        <div className="mb-6 flex flex-wrap items-center gap-1.5 rounded-xl border border-border bg-card p-2.5">
-          <FunnelStage
-            count={rawObservations.length}
-            label="observações"
-            active={activeTab === "observacoes"}
-            onClick={() => setActiveTab("observacoes")}
-          />
-          <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />
-          <FunnelStage
-            count={projectDiscussions.length}
-            label="conversas"
-            active={activeTab === "observacoes"}
-            onClick={() => setActiveTab("observacoes")}
-          />
-          <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />
-          <FunnelStage
-            count={projectKnowledge.length}
-            label="aprendizados"
-            active={activeTab === "aprendizados"}
-            onClick={() => setActiveTab("aprendizados")}
-          />
-          <div className="ml-auto">
-            <FunnelStage
-              count={rawPhenomena.length}
-              label="fenômenos"
-              active={activeTab === "fenomenos"}
-              onClick={() => setActiveTab("fenomenos")}
-            />
-          </div>
-        </div>
-
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
-            <TabsTrigger value="observacoes">Observações</TabsTrigger>
-            <TabsTrigger value="fenomenos">Fenômenos</TabsTrigger>
-            <TabsTrigger value="aprendizados">Aprendizados</TabsTrigger>
+            <TabsTrigger value="observacoes">
+              Observações
+              <TabCount n={rawObservations.length} />
+            </TabsTrigger>
+            <TabsTrigger value="aprendizados">
+              Aprendizados
+              <TabCount n={projectKnowledge.length} />
+            </TabsTrigger>
             <TabsTrigger value="timeline">Linha do tempo</TabsTrigger>
           </TabsList>
           <TabsContent value="observacoes" className="mt-6">
-            {/* Artefatos */}
             <ManualObservationSection
               projectId={id}
               domainId={project.domainId}
@@ -608,73 +526,13 @@ function ProjectDetailPage() {
               initial={observationsList}
               rawObservations={rawObservations}
               discussions={rawDiscussions}
-              phenomena={rawPhenomena}
               attrNameById={attrNameById}
-              phenNameById={phenNameById}
               onObservationsChange={(observs) => {
                 setRawObservations(observs);
-                setSvcObservations(
-                  observs.map((o) => toProjectObservation(o, attrNameById, phenNameById)),
-                );
+                setSvcObservations(observs.map((o) => toProjectObservation(o, attrNameById)));
               }}
               onDiscussionCreated={() => setDiscussionsRefresh((k) => k + 1)}
             />
-          </TabsContent>
-          <TabsContent value="fenomenos" className="mt-6">
-            {/* Fenômenos */}
-            <section>
-              <SectionTitle
-                eyebrow="Padrões e comportamentos"
-                title="Fenômenos Associados"
-                description="Sinais identificados a partir do cruzamento dos atributos observados."
-              />
-              {phenomenaList.length === 0 && (
-                <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/20 p-5 text-[12.5px] leading-relaxed text-muted-foreground">
-                  Nenhum fenômeno em acompanhamento ainda — fenômenos surgem do cruzamento das
-                  observações registradas neste projeto.
-                </div>
-              )}
-              <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
-                {phenomenaList.map((ph) => {
-                  const TrendIcon = trendIcon[ph.trend];
-                  return (
-                    <article key={ph.id} className="rounded-xl border border-border bg-card p-5">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
-                          <Radar className="h-3 w-3" /> Fenômeno
-                        </div>
-                        <TrendIcon
-                          className={cn(
-                            "h-3.5 w-3.5",
-                            ph.trend === "up" && "text-warning",
-                            ph.trend === "down" && "text-success",
-                            ph.trend === "stable" && "text-muted-foreground",
-                          )}
-                        />
-                      </div>
-                      <h3 className="mt-2 text-[14px] font-semibold leading-snug text-foreground">
-                        {ph.title}
-                      </h3>
-                      <dl className="mt-3 space-y-1.5 text-[12.5px]">
-                        <DefRow label="Evidências" value={ph.evidence} />
-                        <DefRow label="Impacto" value={ph.impact} />
-                        <DefRow
-                          label="Tendência"
-                          value={
-                            ph.trend === "up"
-                              ? "Crescente"
-                              : ph.trend === "down"
-                                ? "Decrescente"
-                                : "Estável"
-                          }
-                        />
-                        <DefRow label="Status" value={ph.status} />
-                      </dl>
-                    </article>
-                  );
-                })}
-              </div>
-            </section>
           </TabsContent>
           <TabsContent value="aprendizados" className="mt-6">
             <ProjectDiscussionsAndKnowledge
@@ -683,44 +541,12 @@ function ProjectDetailPage() {
             />
           </TabsContent>
           <TabsContent value="timeline" className="mt-6">
-            {/* Timeline */}
-            <section>
-              <SectionTitle
-                eyebrow="Evolução observacional"
-                title="Linha do Tempo Observacional"
-                description="O observatório acompanha a evolução do projeto ao longo do tempo."
-              />
-              {displayTimeline.length === 0 && (
-                <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/20 p-5 text-[12.5px] leading-relaxed text-muted-foreground">
-                  Ainda não há eventos registrados — observações, discussões e conhecimentos deste
-                  projeto aparecerão aqui conforme forem criados.
-                </div>
-              )}
-              <ol className="mt-4 space-y-2">
-                {displayTimeline.map((ev) => (
-                  <li
-                    key={ev.id}
-                    className="flex items-start gap-3 rounded-lg border border-border bg-card p-3"
-                  >
-                    <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-muted/40 text-foreground">
-                      <TimelineIcon type={ev.type} />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[12.5px] leading-relaxed text-foreground">
-                        {ev.description}
-                      </p>
-                      <div className="mt-0.5 flex items-center gap-2 text-[11px] text-muted-foreground">
-                        <span className="capitalize">{ev.type}</span>
-                        <span className="h-1 w-1 rounded-full bg-border" />
-                        <span>{ev.actor}</span>
-                        <span className="h-1 w-1 rounded-full bg-border" />
-                        <span className="font-mono">{formatDate(ev.date)}</span>
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </section>
+            <ProjectTimeline
+              items={timelineItems}
+              isClient={isClient}
+              onOpenObservation={openObservation}
+              onOpenLearnings={() => setActiveTab("aprendizados")}
+            />
           </TabsContent>
         </Tabs>
       </div>
@@ -806,35 +632,6 @@ function ObservationThread({
   );
 }
 
-function FunnelStage({
-  count,
-  label,
-  active,
-  onClick,
-}: {
-  count: number;
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "inline-flex items-baseline gap-1.5 rounded-md px-2.5 py-1.5 text-[12.5px] transition-colors hover:bg-muted/60",
-        active && "bg-muted/60",
-        count === 0 ? "text-muted-foreground" : "text-foreground",
-      )}
-    >
-      <span className={cn("text-[15px] font-semibold tabular-nums", count === 0 && "font-normal")}>
-        {count}
-      </span>
-      {label}
-    </button>
-  );
-}
-
 function MetaItem({ label, value }: { label: string; value: string }) {
   return (
     <div>
@@ -844,59 +641,127 @@ function MetaItem({ label, value }: { label: string; value: string }) {
   );
 }
 
-function DefRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-baseline justify-between gap-3">
-      <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</dt>
-      <dd className="text-right text-foreground">{value}</dd>
-    </div>
-  );
+/** Discreet count chip shown next to a tab label. */
+function TabCount({ n }: { n: number }) {
+  if (n === 0) return null;
+  return <span className="text-[11px] font-normal tabular-nums text-muted-foreground">{n}</span>;
 }
 
-function AttrBlock({
-  title,
-  description,
+/* ------------------------------- Timeline -------------------------------- */
+
+const timelineKind: Record<
+  string,
+  { label: string; icon: React.ComponentType<{ className?: string }>; tone: string }
+> = {
+  observation: { label: "Observação", icon: ClipboardList, tone: "text-info bg-info/10" },
+  discussion: { label: "Conversa", icon: MessageSquare, tone: "text-warning bg-warning/10" },
+  knowledge: { label: "Aprendizado", icon: BookOpen, tone: "text-success bg-success/10" },
+};
+
+function dayLabel(iso: string) {
+  return new Date(iso).toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function ProjectTimeline({
   items,
-  highlight,
+  isClient,
+  onOpenObservation,
+  onOpenLearnings,
 }: {
-  title: string;
-  description: string;
-  items: { label: string; value: string; className?: string }[];
-  highlight?: boolean;
+  items: TimelineItem[];
+  isClient: boolean;
+  onOpenObservation: (observationId?: string) => void;
+  onOpenLearnings: () => void;
 }) {
-  return (
-    <div
-      className={cn(
-        "rounded-xl border p-5",
-        highlight ? "border-foreground/20 bg-foreground/[0.025]" : "border-border bg-card",
-      )}
-    >
-      <div className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-        <Layers className="h-3 w-3" /> {title}
+  if (items.length === 0) {
+    return (
+      <div className="rounded-xl border border-dashed border-border bg-muted/20 p-5 text-[12.5px] leading-relaxed text-muted-foreground">
+        Ainda não há atividade. Observações, conversas e aprendizados aparecem aqui conforme
+        acontecem no projeto.
       </div>
-      <p className="mt-1 text-[11.5px] text-muted-foreground">{description}</p>
-      <dl className="mt-3 space-y-2">
-        {items.map((it) => (
-          <div key={it.label} className="flex items-baseline justify-between gap-3 text-[12.5px]">
-            <dt className="text-muted-foreground">{it.label}</dt>
-            <dd className={cn("text-right font-medium text-foreground", it.className)}>
-              {it.value}
-            </dd>
-          </div>
-        ))}
-      </dl>
+    );
+  }
+
+  // Group consecutive events by day, preserving the incoming (newest-first) order.
+  const groups: { day: string; items: TimelineItem[] }[] = [];
+  for (const it of items) {
+    const day = dayLabel(it.date);
+    const last = groups[groups.length - 1];
+    if (last && last.day === day) last.items.push(it);
+    else groups.push({ day, items: [it] });
+  }
+
+  const target = (it: TimelineItem) => {
+    if (it.kind === "knowledge") return onOpenLearnings;
+    if (it.kind === "observation" || it.kind === "discussion")
+      return () => onOpenObservation(it.observationId);
+    return undefined;
+  };
+
+  return (
+    <div className="space-y-6">
+      {groups.map((group) => (
+        <div key={group.day}>
+          <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+            {group.day}
+          </p>
+          <ol className="relative ml-3 space-y-1 border-l border-border pl-6">
+            {group.items.map((it) => {
+              const cfg = timelineKind[it.kind] ?? {
+                label: "Evento",
+                icon: ClipboardList,
+                tone: "text-muted-foreground bg-muted",
+              };
+              const Icon = cfg.icon;
+              const onClick = target(it);
+              const reachable = !!onClick && !(it.kind === "discussion" && isClient);
+              const Row = (
+                <>
+                  <span
+                    className={cn(
+                      "absolute -left-[13px] flex h-6 w-6 items-center justify-center rounded-full ring-4 ring-background",
+                      cfg.tone,
+                    )}
+                  >
+                    <Icon className="h-3 w-3" />
+                  </span>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span className="text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground">
+                      {cfg.label}
+                    </span>
+                    <span className="whitespace-nowrap text-[11px] text-muted-foreground">
+                      {relativeTime(it.date)}
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-[13px] leading-snug text-foreground">{it.title}</p>
+                  <p className="mt-0.5 text-[11px] text-muted-foreground">{it.actor}</p>
+                </>
+              );
+              return (
+                <li key={it.key} className="relative">
+                  {reachable ? (
+                    <button
+                      type="button"
+                      onClick={onClick}
+                      className="block w-full rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-muted/50"
+                    >
+                      {Row}
+                    </button>
+                  ) : (
+                    <div className="px-3 py-2.5">{Row}</div>
+                  )}
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+      ))}
     </div>
   );
-}
-
-function TimelineIcon({ type }: { type: string }) {
-  const map: Record<string, React.ComponentType<{ className?: string }>> = {
-    observation: ClipboardList,
-    discussion: MessageSquare,
-    knowledge: BookOpen,
-  };
-  const Icon = map[type] ?? Eye;
-  return <Icon className="h-3.5 w-3.5" />;
 }
 
 /* --------------------- Manual observation section ------------------------ */
@@ -956,9 +821,7 @@ function ManualObservationSection({
   initial,
   rawObservations,
   discussions,
-  phenomena,
   attrNameById,
-  phenNameById,
   onObservationsChange,
   onDiscussionCreated,
 }: {
@@ -968,9 +831,7 @@ function ManualObservationSection({
   initial: ProjectObservation[];
   rawObservations: SvcObservation[];
   discussions: SvcDiscussion[];
-  phenomena: SvcPhenomenon[];
   attrNameById: Map<string, string>;
-  phenNameById: Map<string, string>;
   onObservationsChange: (observs: SvcObservation[]) => void;
   onDiscussionCreated: () => void;
 }) {
@@ -994,8 +855,6 @@ function ManualObservationSection({
     date: new Date().toISOString().slice(0, 10),
     description: "",
     attribute: "",
-    phenomenon: "",
-    customPhenomenon: "",
     impact: "Médio" as ProjectObservation["impact"],
     risk: "Moderado" as ProjectObservation["risk"],
     interpretation: "",
@@ -1005,8 +864,6 @@ function ManualObservationSection({
     title: "",
     description: "",
     attribute: "",
-    phenomenon: "",
-    customPhenomenon: "",
     impact: "Médio" as ProjectObservation["impact"],
     risk: "Moderado" as ProjectObservation["risk"],
     interpretation: "",
@@ -1023,14 +880,6 @@ function ManualObservationSection({
     getMpoCategories().then(setMpoCategories);
   }, []);
 
-  // Options come from the project's own phenomena (the hypotheses declared at
-  // creation) so manual evidence lands on them; "Outro" allows naming a new one.
-  const phenomenonOptions = useMemo(() => {
-    const names = phenomena.map((p) => p.name);
-    if (!names.includes("Outro")) names.push("Outro");
-    return names;
-  }, [phenomena]);
-
   useEffect(() => {
     setItems(initial);
   }, [initial]);
@@ -1043,31 +892,14 @@ function ManualObservationSection({
     });
   }, []);
 
-  const resolvePhenomenonId = (select: string, custom: string) => {
-    if (!select) return undefined;
-    if (select === "Outro") return custom.trim() || undefined;
-    const byName = phenomena.find((p) => p.name === select);
-    if (byName) return byName.id;
-    const byId = phenomena.find((p) => p.id === select);
-    if (byId) return byId.id;
-    return undefined;
-  };
-
-  const resolvePhenomenonIdFromRaw = (raw?: SvcObservation) => {
-    if (!raw?.phenomenonId) return undefined;
-    if (phenNameById.has(raw.phenomenonId)) return raw.phenomenonId;
-    const byName = phenomena.find((p) => p.name === raw.phenomenonId);
-    return byName?.id ?? (/^\d+$/.test(raw.phenomenonId) ? raw.phenomenonId : undefined);
-  };
-
   const applyObservationUpdate = (updated: SvcObservation) => {
-    const display = toProjectObservation(updated, attrNameById, phenNameById);
+    const display = toProjectObservation(updated, attrNameById);
     setItems((prev) => prev.map((o) => (o.id === updated.id ? display : o)));
     onObservationsChange(rawObservations.map((o) => (o.id === updated.id ? updated : o)));
   };
 
   const prependObservation = (created: SvcObservation) => {
-    setItems((prev) => [toProjectObservation(created, attrNameById, phenNameById), ...prev]);
+    setItems((prev) => [toProjectObservation(created, attrNameById), ...prev]);
     onObservationsChange([created, ...rawObservations]);
   };
 
@@ -1111,13 +943,9 @@ function ManualObservationSection({
     }
   };
 
-  const isCustomPhenomenon = form.phenomenon === "Outro";
-  const isEditCustomPhenomenon = editForm.phenomenon === "Outro";
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title.trim() || !form.description.trim() || submitting) return;
-    if (isCustomPhenomenon && !form.customPhenomenon.trim()) return;
 
     setSubmitting(true);
     try {
@@ -1125,7 +953,6 @@ function ManualObservationSection({
         title: form.title.trim(),
         description: form.description.trim(),
         attributeId: form.attribute,
-        phenomenonId: resolvePhenomenonId(form.phenomenon, form.customPhenomenon),
         impact: impactToCode[form.impact],
         risk: riskToCode[form.risk],
         interpretation: form.interpretation.trim(),
@@ -1143,8 +970,6 @@ function ManualObservationSection({
           title: "",
           description: "",
           interpretation: "",
-          phenomenon: "",
-          customPhenomenon: "",
         }));
       }, 1400);
     } finally {
@@ -1156,24 +981,10 @@ function ManualObservationSection({
     const raw = rawObservations.find((o) => o.id === observationId);
     if (!raw) return;
 
-    const phenLabel = raw.phenomenonId
-      ? (phenNameById.get(raw.phenomenonId) ?? raw.phenomenonId)
-      : "";
-    const matchedPhen = phenomena.find(
-      (p) => p.id === raw.phenomenonId || p.name === raw.phenomenonId,
-    );
-    const phenSelect = matchedPhen
-      ? matchedPhen.name
-      : !phenLabel || phenomenonOptions.includes(phenLabel)
-        ? phenLabel
-        : "Outro";
-
     setEditForm({
       title: raw.title,
       description: raw.description,
       attribute: raw.attributeId ?? "",
-      phenomenon: phenSelect,
-      customPhenomenon: phenSelect === "Outro" ? (raw.phenomenonId ?? "") : "",
       impact: obsImpactMap[raw.impact],
       risk: obsRiskMap[raw.risk],
       interpretation: raw.interpretation ?? "",
@@ -1187,7 +998,6 @@ function ManualObservationSection({
     if (!editingId || !editForm.title.trim() || !editForm.description.trim() || editSubmitting) {
       return;
     }
-    if (isEditCustomPhenomenon && !editForm.customPhenomenon.trim()) return;
 
     setEditSubmitting(true);
     try {
@@ -1195,7 +1005,6 @@ function ManualObservationSection({
         title: editForm.title.trim(),
         description: editForm.description.trim(),
         attributeId: editForm.attribute,
-        phenomenonId: resolvePhenomenonId(editForm.phenomenon, editForm.customPhenomenon),
         impact: impactToCode[editForm.impact],
         risk: riskToCode[editForm.risk],
         interpretation: editForm.interpretation.trim(),
@@ -1219,8 +1028,8 @@ function ManualObservationSection({
     const raw = rawObservations.find((o) => o.id === observationId);
     const display = items.find((o) => o.id === observationId);
     setDiscussionForm({
-      title: `Discussão sobre: ${display?.title ?? raw?.title ?? "observação"}`,
-      question: "Como esta observação impacta os fenômenos do projeto?",
+      title: `Conversa sobre: ${display?.title ?? raw?.title ?? "observação"}`,
+      question: "O que esta observação revela e o que devemos fazer a respeito?",
       visibility: "Participantes do projeto",
       status: "Aberta",
     });
@@ -1235,8 +1044,6 @@ function ManualObservationSection({
     }
     if (discussionSubmitting) return;
 
-    const raw = rawObservations.find((o) => o.id === discussionObsId);
-
     setDiscussionSubmitting(true);
     try {
       const created = await createDiscussion({
@@ -1245,7 +1052,6 @@ function ManualObservationSection({
         domainId,
         projectId,
         observationId: discussionObsId,
-        phenomenonId: resolvePhenomenonIdFromRaw(raw),
         status: statusCodes[discussionForm.status],
         visibility: visibilityCodes[discussionForm.visibility],
         createdBy: currentUserId,
@@ -1255,7 +1061,7 @@ function ManualObservationSection({
       if (linked) applyObservationUpdate(linked);
 
       onDiscussionCreated();
-      toast.success("Discussão observacional criada com sucesso.");
+      toast.success("Conversa iniciada com sucesso.");
       setDiscussionOpen(false);
       setDiscussionObsId(null);
     } catch {
@@ -1283,34 +1089,33 @@ function ManualObservationSection({
   return (
     <section>
       <SectionTitle
-        eyebrow="Evidências do projeto"
         title="Observações"
-        description="O que o observatório registrou neste projeto, manualmente ou aceitando sugestões da IA."
+        description="O que o observatório registrou neste projeto."
         action={
           isClient ? undefined : (
             <div className="flex items-center gap-2">
               <Button
                 size="sm"
-                variant="outline"
-                className="gap-1.5"
+                variant="ghost"
+                className="gap-1.5 text-muted-foreground"
                 onClick={handleSuggestObservations}
                 disabled={aiLoading}
               >
                 <Sparkles className="h-3.5 w-3.5" />
-                {aiLoading ? "Sugerindo…" : "Sugerir observações (IA)"}
+                {aiLoading ? "Sugerindo…" : "Sugerir com IA"}
               </Button>
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                   <Button size="sm" className="gap-1.5">
-                    <Plus className="h-3.5 w-3.5" /> Nova observação
+                    <Plus className="h-3.5 w-3.5" /> Registrar observação
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[640px]">
                   <DialogHeader>
                     <DialogTitle>Registrar nova observação</DialogTitle>
                     <DialogDescription>
-                      Registre uma evidência observada no projeto: descrição, atributo afetado,
-                      fenômeno associado e sua interpretação inicial.
+                      Registre uma evidência observada no projeto: descrição, atributo afetado e sua
+                      interpretação inicial.
                     </DialogDescription>
                   </DialogHeader>
                   {success ? (
@@ -1383,34 +1188,6 @@ function ManualObservationSection({
                               ))}
                             </SelectContent>
                           </Select>
-                        </div>
-                        <div className="space-y-1.5">
-                          <Label>Fenômeno observado</Label>
-                          <Select
-                            value={form.phenomenon}
-                            onValueChange={(v) => setForm((f) => ({ ...f, phenomenon: v }))}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Nenhum (opcional)" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {phenomenonOptions.map((p) => (
-                                <SelectItem key={p} value={p}>
-                                  {p}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          {isCustomPhenomenon && (
-                            <Input
-                              className="mt-2"
-                              placeholder="Nomear novo fenômeno observado"
-                              value={form.customPhenomenon}
-                              onChange={(e) =>
-                                setForm((f) => ({ ...f, customPhenomenon: e.target.value }))
-                              }
-                            />
-                          )}
                         </div>
                         <div className="space-y-1.5">
                           <Label>Impacto</Label>
@@ -1520,14 +1297,25 @@ function ManualObservationSection({
       )}
 
       {items.length === 0 && (
-        <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/20 p-5 text-[12.5px] leading-relaxed text-muted-foreground">
-          Nenhuma observação registrada ainda. Registre a primeira manualmente ou peça sugestões à
-          IA. É a partir das observações que o observatório mede a cobertura.
+        <div className="mt-4 flex flex-col items-start gap-3 rounded-xl border border-dashed border-border bg-muted/20 p-6 text-[12.5px] leading-relaxed text-muted-foreground">
+          <p>
+            Tudo começa por aqui. Registre a primeira observação do projeto — uma evidência do que
+            você notou — e a partir dela inicie conversas e consolide aprendizados.
+          </p>
+          {!isClient && (
+            <Button size="sm" className="gap-1.5" onClick={() => setOpen(true)}>
+              <Plus className="h-3.5 w-3.5" /> Registrar primeira observação
+            </Button>
+          )}
         </div>
       )}
       <div className="mt-4 space-y-3">
         {items.map((o) => (
-          <article key={o.id} className="rounded-xl border border-border bg-card p-5">
+          <article
+            key={o.id}
+            id={`obs-${o.id}`}
+            className="scroll-mt-24 rounded-xl border border-border bg-card p-5"
+          >
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-wider text-muted-foreground">
@@ -1560,9 +1348,8 @@ function ManualObservationSection({
               </span>
             </div>
 
-            <div className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-3 md:grid-cols-4">
+            <div className="mt-4 grid grid-cols-3 gap-3 border-t border-border pt-3">
               <Meta label="Atributo" value={o.attribute} />
-              <Meta label="Fenômeno" value={o.phenomenon} />
               <Meta label="Impacto" value={o.impact} className={impactTone[o.impact]} />
               <Meta label="Risco" value={o.risk} className={riskTone[o.risk]} />
             </div>
@@ -1582,20 +1369,12 @@ function ManualObservationSection({
             <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted-foreground">
               <span>por {o.author}</span>
               {!isClient && (
-                <div className="flex items-center gap-1.5">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-7 gap-1 px-2 text-[11px]"
-                    onClick={() => openEdit(o.id)}
-                  >
-                    <PenSquare className="h-3 w-3" /> Editar
-                  </Button>
+                <div className="flex items-center gap-1">
                   {!discussions.some((d) => d.observationId === o.id) && (
                     <Button
                       size="sm"
-                      variant="ghost"
-                      className="h-7 gap-1 px-2 text-[11px]"
+                      variant="outline"
+                      className="h-7 gap-1 px-2.5 text-[11px]"
                       onClick={() => openDiscussion(o.id)}
                     >
                       <MessageSquare className="h-3 w-3" /> Iniciar conversa
@@ -1604,12 +1383,20 @@ function ManualObservationSection({
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="h-7 gap-1 px-2 text-[11px]"
+                    className="h-7 gap-1 px-2 text-[11px] text-muted-foreground"
+                    onClick={() => openEdit(o.id)}
+                  >
+                    <PenSquare className="h-3 w-3" /> Editar
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 gap-1 px-2 text-[11px] text-muted-foreground"
                     disabled={analyzingId === o.id || o.status === "em análise"}
                     onClick={() => handleMarkAnalyzed(o.id)}
                   >
                     <CheckCircle2 className="h-3 w-3" />
-                    {analyzingId === o.id ? "Atualizando…" : "Marcar como analisada"}
+                    {analyzingId === o.id ? "Atualizando…" : "Analisada"}
                   </Button>
                 </div>
               )}
@@ -1680,34 +1467,6 @@ function ManualObservationSection({
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label>Fenômeno observado</Label>
-                <Select
-                  value={editForm.phenomenon}
-                  onValueChange={(v) => setEditForm((f) => ({ ...f, phenomenon: v }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Nenhum (opcional)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {phenomenonOptions.map((p) => (
-                      <SelectItem key={p} value={p}>
-                        {p}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {isEditCustomPhenomenon && (
-                  <Input
-                    className="mt-2"
-                    placeholder="Nomear fenômeno observado"
-                    value={editForm.customPhenomenon}
-                    onChange={(e) =>
-                      setEditForm((f) => ({ ...f, customPhenomenon: e.target.value }))
-                    }
-                  />
-                )}
               </div>
               <div className="space-y-1.5">
                 <Label>Impacto</Label>
@@ -1902,7 +1661,7 @@ function ProjectDiscussionsAndKnowledge({
           <article key={k.id} className="rounded-xl border border-border bg-card p-5">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-wider text-muted-foreground">
-                <BookOpen className="h-3 w-3" /> {k.phenomenon}
+                <BookOpen className="h-3 w-3" /> Aprendizado
               </div>
               <span className="rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                 {k.status}

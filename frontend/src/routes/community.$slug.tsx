@@ -7,7 +7,6 @@ import {
   Users,
   MessageSquare,
   BookOpen,
-  Radar,
   Plus,
   Layers,
   ArrowUpRight,
@@ -39,7 +38,6 @@ import type {
 } from "@/types/community";
 import type { DiscussionStatusCode, DiscussionVisibility } from "@/types/discussion";
 import type { KnowledgeConfidenceCode, KnowledgeStatusCode } from "@/types/knowledge";
-import type { Phenomenon as SvcPhenomenon } from "@/types/phenomenon";
 import type { Project as SvcProject } from "@/types/project";
 import {
   participantStatusLabels,
@@ -117,7 +115,6 @@ function mapDiscussionToUi(discussion: CommunityDiscussionSummary, domainName: s
     title: discussion.title,
     domain: domainName,
     project: discussion.projectName,
-    phenomenon: discussion.phenomenonName ?? "—",
     originObservation: "—",
     investigativeQuestion: discussion.question,
     contributionsList: [],
@@ -134,7 +131,6 @@ function mapKnowledgeToUi(item: CommunityKnowledgeSummary, domainName: string): 
     title: item.title,
     domain: domainName,
     project: item.projectName,
-    phenomenon: item.phenomenonName ?? "—",
     summary: item.summary,
     evidences: "",
     recommendation: item.recommendation,
@@ -161,7 +157,7 @@ export const Route = createFileRoute("/community/$slug")({
       { title: "Comunidade — ObiOne" },
       {
         name: "description",
-        content: "Comunidade do domínio: conversas, aprendizados e fenômenos em análise.",
+        content: "Comunidade do domínio: projetos, conversas e aprendizados.",
       },
     ],
   }),
@@ -190,7 +186,6 @@ function DomainCommunityPage() {
   const [loading, setLoading] = useState(true);
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [knowledge, setKnowledge] = useState<CommunityKnowledge[]>([]);
-  const [phenomena, setPhenomena] = useState<SvcPhenomenon[]>([]);
   const [selectedDiscussion, setSelectedDiscussion] = useState<Discussion | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [consolidateOpen, setConsolidateOpen] = useState(false);
@@ -218,19 +213,6 @@ function DomainCommunityPage() {
       setDomainCommunity(detail);
       setDiscussions(detail.discussions.map((d) => mapDiscussionToUi(d, detail.domainName)));
       setKnowledge(detail.knowledge.map((k) => mapKnowledgeToUi(k, detail.domainName)));
-      setPhenomena(
-        detail.topPhenomena.map((p) => ({
-          id: p.id,
-          domainId: detail.domainId,
-          name: p.name,
-          description: p.description,
-          evidenceCount: p.evidenceCount,
-          relatedAttributeIds: [],
-          impact: p.impact,
-          trend: p.trend,
-          status: p.status,
-        })),
-      );
       setLoading(false);
     });
     return () => {
@@ -266,15 +248,6 @@ function DomainCommunityPage() {
     }));
   }, [domainCommunity, domainName, svcProjects]);
 
-  const phenomenaFrequency = useMemo(
-    () =>
-      (domainCommunity?.topPhenomena ?? []).map((p) => ({
-        phenomenon: p.name,
-        count: p.evidenceCount,
-      })),
-    [domainCommunity?.topPhenomena],
-  );
-
   const openCount = discussions.filter(
     (d) => d.status === "Aberta" || d.status === "Em análise",
   ).length;
@@ -301,17 +274,11 @@ function DomainCommunityPage() {
     setSelectedDiscussion((current) => (current?.id === updated.id ? updated : current));
   };
 
-  const mapDiscussionNames = (item: {
-    projectId?: string;
-    phenomenonId?: string;
-    observationId?: string;
-  }) => {
+  const mapDiscussionNames = (item: { projectId?: string; observationId?: string }) => {
     const projectNameById = new Map(svcProjects.map((p) => [p.id, p.name] as const));
-    const phenomenonNameById = new Map(phenomena.map((p) => [p.id, p.name] as const));
     return {
       domain: domainName,
       project: item.projectId ? projectNameById.get(item.projectId) : undefined,
-      phenomenon: item.phenomenonId ? phenomenonNameById.get(item.phenomenonId) : undefined,
       originObservation: item.observationId ? `Observação #${item.observationId}` : undefined,
     };
   };
@@ -357,12 +324,11 @@ function DomainCommunityPage() {
             title="Indicadores"
             tooltip="Participação, projetos, conversas e aprendizados desta comunidade."
           />
-          <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-5">
+          <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
             <KpiCard label="Participantes" value={domainParticipants.length} icon={Users} />
             <KpiCard label="Projetos vinculados" value={domainProjects.length} icon={Folder} />
             <KpiCard label="Conversas abertas" value={openCount} icon={MessageSquare} />
             <KpiCard label="Aprendizados" value={consolidatedCount} icon={BookOpen} />
-            <KpiCard label="Fenômenos em análise" value={phenomenaFrequency.length} icon={Radar} />
           </div>
         </section>
 
@@ -408,7 +374,7 @@ function DomainCommunityPage() {
         <section>
           <SectionHeader
             title="Participantes"
-            tooltip="Pessoas autorizadas a interpretar fenômenos e contribuir com evidências neste domínio."
+            tooltip="Pessoas autorizadas a interpretar observações e contribuir com evidências neste domínio."
           />
 
           <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card">
@@ -481,7 +447,7 @@ function DomainCommunityPage() {
         <section>
           <SectionHeader
             title="Conversas"
-            tooltip="Interpretações coletivas sobre fenômenos identificados nos projetos deste domínio."
+            tooltip="Interpretações coletivas consolidadas a partir das conversas dos projetos deste domínio."
             action={
               <Button
                 size="sm"
@@ -563,37 +529,6 @@ function DomainCommunityPage() {
           )}
         </section>
 
-        {/* Fenômenos mais discutidos */}
-        <section>
-          <SectionHeader
-            title="Fenômenos mais discutidos"
-            tooltip="Fenômenos com mais evidências registradas nos projetos deste domínio."
-          />
-          {phenomenaFrequency.length === 0 ? (
-            <p className="mt-3 text-[12.5px] text-muted-foreground">
-              Nenhum fenômeno em análise neste domínio.
-            </p>
-          ) : (
-            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {phenomenaFrequency.map((p) => (
-                <div key={p.phenomenon} className="rounded-xl border border-border bg-card p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-muted/40">
-                        <Radar className="h-3.5 w-3.5" />
-                      </div>
-                      <p className="text-[13px] font-medium leading-snug text-foreground">
-                        {p.phenomenon}
-                      </p>
-                    </div>
-                    <span className="font-mono text-[11px] text-muted-foreground">{p.count}×</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-
         {/* Link related domain */}
         <section className="rounded-xl border border-border bg-card p-5">
           <div className="flex items-start gap-3">
@@ -630,14 +565,12 @@ function DomainCommunityPage() {
           }
 
           const project = svcProjects.find((p) => p.name === d.project);
-          const phenomenon = phenomena.find((p) => p.name === d.phenomenon);
 
           void createDiscussion({
             title: d.title,
             question: d.investigativeQuestion,
             domainId,
             projectId: project?.id,
-            phenomenonId: phenomenon?.id,
             status: statusCodes[d.status],
             visibility: visibilityCodes[d.visibility],
             createdBy: "",
@@ -646,7 +579,6 @@ function DomainCommunityPage() {
               toCommunityDiscussion(created, {
                 domain: domainName,
                 project: d.project,
-                phenomenon: d.phenomenon,
                 originObservation: d.originObservation || undefined,
               }),
               ...list,
@@ -717,14 +649,10 @@ function DomainCommunityPage() {
             confidence: confidenceToCode[k.confidence],
           }).then((created) => {
             const projectNameById = new Map(svcProjects.map((p) => [p.id, p.name] as const));
-            const phenomenonNameById = new Map(phenomena.map((p) => [p.id, p.name] as const));
             setKnowledge((list) => [
               toCommunityKnowledge(created, {
                 domain: domainName,
                 project: created.projectId ? projectNameById.get(created.projectId) : k.project,
-                phenomenon: created.phenomenonId
-                  ? phenomenonNameById.get(created.phenomenonId)
-                  : k.phenomenon,
               }),
               ...list,
             ]);

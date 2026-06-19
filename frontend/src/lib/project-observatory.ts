@@ -1,17 +1,6 @@
 // Display types for the project detail screen. All values come from the
 // backend (services/*); this module no longer ships mock observatory data.
 
-export type Trend = "up" | "down" | "stable";
-
-export interface ProjectPhenomenon {
-  id: string;
-  title: string;
-  evidence: string;
-  impact: string;
-  trend: Trend;
-  status: "Em observação" | "Consolidado" | "Atenção";
-}
-
 export type ObservationStatus =
   | "registrada"
   | "em análise"
@@ -27,7 +16,6 @@ export interface ProjectObservation {
   date: string;
   description: string;
   attribute: string;
-  phenomenon: string;
   impact: ObservationImpact;
   risk: ObservationRisk;
   interpretation: string;

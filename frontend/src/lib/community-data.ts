@@ -53,7 +53,8 @@ export interface Discussion {
   title: string;
   domain: string;
   project?: string;
-  phenomenon: string;
+  /** @deprecated phenomena removed from the product UI; kept optional for back-compat. */
+  phenomenon?: string;
   originObservation: string;
   investigativeQuestion: string;
   contributionsList: DiscussionContribution[];
@@ -71,7 +72,8 @@ export interface CommunityKnowledge {
   title: string;
   domain: string;
   project?: string;
-  phenomenon: string;
+  /** @deprecated phenomena removed from the product UI; kept optional for back-compat. */
+  phenomenon?: string;
   summary: string;
   evidences: string;
   recommendation: string;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useLocation } from "@tanstack/react-router";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import {
   Users,
@@ -10,7 +10,6 @@ import {
   ArrowRight,
   BookOpen,
   Eye,
-  Radar,
   Sparkles,
   CircleDot,
 } from "lucide-react";
@@ -112,7 +111,6 @@ interface DiscussionCard {
   title: string;
   domain: string;
   domainSlug: string;
-  phenomenon: string;
   contributions: number;
   lastParticipant: string;
   status: DiscussionStatus;
@@ -134,6 +132,23 @@ function CommunityPage() {
   const [discussions, setDiscussions] = useState<DiscussionCard[]>([]);
   const [knowledge, setKnowledge] = useState<KnowledgeCard[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // When arriving via "Ver todos" from the home (/community#aprendizados),
+  // Arriving via "Ver todos" from the home (/community#aprendizados): scroll to
+  // the learnings section once its content has loaded (TanStack's native
+  // hash-scroll fires before the async cards render, so we redo it here) and
+  // add a brief highlight so the user lands clearly on the learnings.
+  const hash = useLocation({ select: (l) => l.hash });
+  const [highlightLearnings, setHighlightLearnings] = useState(false);
+  useEffect(() => {
+    if (hash !== "aprendizados" || loading) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const el = document.getElementById("aprendizados");
+    el?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+    setHighlightLearnings(true);
+    const t = setTimeout(() => setHighlightLearnings(false), reduce ? 0 : 1400);
+    return () => clearTimeout(t);
+  }, [hash, loading]);
 
   useEffect(() => {
     let cancelled = false;
@@ -163,7 +178,6 @@ function CommunityPage() {
           title: d.title,
           domain: d.domainName,
           domainSlug: d.domainSlug,
-          phenomenon: d.phenomenonName ?? "Fenômeno observado",
           contributions: d.contributionsCount,
           lastParticipant: "Comunidade",
           status: discussionStatusFromCode[d.status],
@@ -240,7 +254,7 @@ function CommunityPage() {
         <section>
           <SectionHeader
             title="Comunidades"
-            tooltip="Cada comunidade reúne consultoria e clientes para interpretar fenômenos, conversar sobre evidências e transformar observações em aprendizados. Há uma comunidade para cada domínio."
+            tooltip="Cada comunidade reúne consultoria e clientes para conversar sobre as evidências dos projetos e transformar observações em aprendizados. Há uma comunidade para cada domínio."
             action={
               <Link
                 to="/domains"
@@ -337,10 +351,6 @@ function CommunityPage() {
                   <h3 className="mt-2 text-[13.5px] font-semibold leading-snug tracking-tight text-foreground">
                     {d.title}
                   </h3>
-                  <div className="mt-2 flex items-center gap-1.5 text-[11.5px] text-muted-foreground">
-                    <Radar className="h-3 w-3" />
-                    <span>{d.phenomenon}</span>
-                  </div>
                   <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-[11px] text-muted-foreground">
                     <span className="inline-flex items-center gap-1">
                       <MessageSquare className="h-3 w-3" />
@@ -358,7 +368,13 @@ function CommunityPage() {
         </section>
 
         {/* Recent knowledge preview */}
-        <section>
+        <section
+          id="aprendizados"
+          className={cn(
+            "scroll-mt-20 rounded-2xl transition-shadow duration-700",
+            highlightLearnings && "shadow-[0_0_0_2px_var(--color-ring)]",
+          )}
+        >
           <SectionHeader
             title="Aprendizados recentes"
             tooltip="Aprendizados que as comunidades consolidaram a partir das conversas e evidências dos projetos."
