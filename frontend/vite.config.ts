@@ -16,6 +16,17 @@ export default defineConfig({
     server: {
       port: 5173,
       strictPort: true, // falha se 5173 estiver ocupada, em vez de tentar 8080
+      // Permite servir através de um túnel (ex.: *.trycloudflare.com) sem o
+      // "Blocked request. This host is not allowed".
+      allowedHosts: true,
+      // Único origin: o front chama "/api" e o Vite repassa ao backend
+      // (que serve sob o context-path /api).
+      proxy: {
+        "/api": {
+          target: "http://localhost:8080",
+          changeOrigin: true,
+        },
+      },
     },
   },
 });
