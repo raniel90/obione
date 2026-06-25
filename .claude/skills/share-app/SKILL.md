@@ -52,3 +52,8 @@ Stop the tunnel (app keeps running):
   (`.claude/skills/run-app/scripts/run.sh`); the tunnel only forwards `:5173`.
 - **"Blocked request. This host is not allowed."** → `frontend/vite.config.ts` must keep
   `server.allowedHosts: true`.
+- **App carrega mas login/dados falham no túnel (mas funciona em localhost)** → causado por
+  um `VITE_API_BASE_URL` **absoluto** (ex.: `http://localhost:8000`) no `frontend/.env`
+  (gitignored), que faz o navegador remoto bater no próprio localhost. O `share.sh`
+  **corrige isso sozinho**: reescreve para `VITE_API_BASE_URL=/api` (relativo, servido pelo
+  proxy do Vite) e reinicia o frontend antes de abrir o túnel. Nada a fazer manualmente.
