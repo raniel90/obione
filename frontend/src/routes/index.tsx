@@ -321,6 +321,7 @@ function ObservatoryDashboard() {
               action={
                 <Link
                   to="/community"
+                  hash="aprendizados"
                   className="inline-flex items-center gap-1 text-[12px] text-muted-foreground transition-colors hover:text-foreground"
                 >
                   Ver todos

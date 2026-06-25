@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -34,7 +34,6 @@ import type {
 import { toast } from "sonner";
 import {
   Telescope,
-  Radar,
   Sparkles,
   Users,
   ArrowLeft,
@@ -69,17 +68,6 @@ const STATUS: { value: ProjectStatus; label: string }[] = [
   { value: "em-andamento", label: "Em andamento" },
   { value: "em-risco", label: "Em risco" },
   { value: "concluído", label: "Concluído" },
-];
-
-const PHENOMENA = [
-  "Mudanças recorrentes de escopo",
-  "Baixa participação do cliente",
-  "Atraso em validações",
-  "Retrabalho criativo",
-  "Volatilidade de requisitos",
-  "Risco de atraso",
-  "Baixa documentação",
-  "Alto engajamento colaborativo",
 ];
 
 const typeMap: Record<ProjectModel, ProjectTypeCode> = {
@@ -143,7 +131,6 @@ function NewProjectPage() {
     engagement: "MEDIUM" as EngagementCode,
     risk: "LOW" as RiskCode,
     attributes: [] as string[],
-    phenomena: [] as string[],
   });
   const [reviewErrors, setReviewErrors] = useState<{
     clientId?: string;
@@ -179,12 +166,7 @@ function NewProjectPage() {
   const summaryValue = watch("summary");
   const aiReady = (summaryValue?.trim().length ?? 0) >= AI_MIN_DESCRIPTION;
 
-  const phenomenonOptions = useMemo(() => {
-    const fromSuggestion = suggestion?.expectedPhenomena ?? [];
-    return [...new Set([...fromSuggestion, ...PHENOMENA])];
-  }, [suggestion]);
-
-  const toggleReviewArray = (key: "attributes" | "phenomena", value: string) =>
+  const toggleReviewArray = (key: "attributes", value: string) =>
     setReview((r) => ({
       ...r,
       [key]: r[key].includes(value) ? r[key].filter((v) => v !== value) : [...r[key], value],
@@ -203,7 +185,6 @@ function NewProjectPage() {
         ...r,
         domainId: s.suggestedDomainId != null ? String(s.suggestedDomainId) : r.domainId,
         attributes: s.attributeIds.length > 0 ? s.attributeIds : r.attributes,
-        phenomena: s.expectedPhenomena.length > 0 ? s.expectedPhenomena : r.phenomena,
       }));
     } catch {
       toast.error("A IA não respondeu. Siga revisando manualmente.");
@@ -248,7 +229,7 @@ function NewProjectPage() {
         summary: story.summary,
         observationObjective: story.observationalGoal,
         initialAttributeIds: review.attributes,
-        expectedPhenomena: review.phenomena,
+        expectedPhenomena: [],
         progress: review.progress,
         riskLevel: review.risk,
         clientEngagement: review.engagement,
@@ -309,7 +290,7 @@ function NewProjectPage() {
             <Section
               icon={Telescope}
               title="Conte sobre o projeto"
-              tooltip="A descrição é o insumo do observatório: a partir dela a IA sugere o domínio, os aspectos a observar e os fenômenos esperados."
+              tooltip="A descrição é o insumo do observatório: a partir dela a IA sugere o domínio e os aspectos a observar."
             >
               <div className="space-y-4">
                 <Field label="Nome do projeto" required>
@@ -452,35 +433,6 @@ function NewProjectPage() {
                     </div>
                   </div>
                 ))}
-              </div>
-            </Section>
-
-            <Section
-              icon={Radar}
-              title="Fenômenos esperados"
-              tooltip="Padrões que podem surgir no projeto (atrasos, mudanças de escopo, baixa participação do cliente). Funcionam como hipóteses para o observatório acompanhar."
-            >
-              <div className="flex flex-wrap gap-2">
-                {phenomenonOptions.map((p) => {
-                  const selected = review.phenomena.includes(p);
-                  const fromAi = suggestion?.expectedPhenomena.includes(p) ?? false;
-                  return (
-                    <button
-                      key={p}
-                      type="button"
-                      onClick={() => toggleReviewArray("phenomena", p)}
-                      className={cn(
-                        "inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[12px] transition-colors",
-                        selected
-                          ? "border-foreground bg-foreground text-background"
-                          : "border-border bg-background text-muted-foreground hover:border-foreground/30 hover:text-foreground",
-                      )}
-                    >
-                      {fromAi && <Sparkles className="h-3 w-3" />}
-                      {p}
-                    </button>
-                  );
-                })}
               </div>
             </Section>
 

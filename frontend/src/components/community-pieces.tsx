@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import {
   Eye,
-  Radar,
   MessageSquare,
   CircleDot,
   Plus,
@@ -10,7 +9,10 @@ import {
   Lightbulb,
   BookOpen,
   Info,
+  Sparkles,
 } from "lucide-react";
+import { toast } from "sonner";
+import { suggestKnowledge } from "@/services/aiService";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,17 +46,6 @@ import {
   type ContributionType,
   type ParticipantRole,
 } from "@/lib/community-data";
-
-export const PHENOMENA_OPTIONS = [
-  "Mudança recorrente de escopo",
-  "Baixa participação do cliente",
-  "Atraso em validações",
-  "Retrabalho",
-  "Risco de atraso",
-  "Volatilidade de requisitos",
-  "Alta colaboração",
-  "Outro",
-];
 
 export const VISIBILITY_OPTIONS: VisibilityScope[] = [
   "Comunidade do domínio",
@@ -196,11 +187,6 @@ export function DiscussionCard({
         {d.title}
       </h3>
 
-      <div className="mt-2 flex items-center gap-1.5 text-[11.5px] text-muted-foreground">
-        <Radar className="h-3 w-3" />
-        <span>{d.phenomenon}</span>
-      </div>
-
       {d.originObservation && (
         <p className="mt-2 line-clamp-2 text-[12px] leading-relaxed text-muted-foreground">
           {d.originObservation}
@@ -280,11 +266,6 @@ export function KnowledgeCard({ k }: { k: CommunityKnowledge }) {
         {k.title}
       </h3>
 
-      <div className="mt-2 flex items-center gap-1.5 text-[11.5px] text-muted-foreground">
-        <Radar className="h-3 w-3" />
-        <span>{k.phenomenon}</span>
-      </div>
-
       <p className="mt-3 text-[13px] leading-relaxed text-foreground/90">{k.summary}</p>
 
       {k.evidences && (
@@ -335,7 +316,6 @@ export function CreateDiscussionDialog({
     title: "",
     domain: fixedDomain ?? domains[0].name,
     project: projects[0].name,
-    phenomenon: PHENOMENA_OPTIONS[0],
     originObservation: "",
     investigativeQuestion: "",
     visibility: VISIBILITY_OPTIONS[0],
@@ -355,7 +335,6 @@ export function CreateDiscussionDialog({
       title: form.title,
       domain: form.domain,
       project: form.project,
-      phenomenon: form.phenomenon,
       originObservation: form.originObservation,
       investigativeQuestion: form.investigativeQuestion,
       visibility: form.visibility,
@@ -384,7 +363,7 @@ export function CreateDiscussionDialog({
         <DialogHeader>
           <DialogTitle>Iniciar conversa</DialogTitle>
           <DialogDescription>
-            Abra uma conversa a partir de um fenômeno ou observação registrada.
+            Abra uma conversa a partir de uma observação registrada.
           </DialogDescription>
         </DialogHeader>
         {success ? (
@@ -437,24 +416,6 @@ export function CreateDiscussionDialog({
                     {(projectsForDomain.length ? projectsForDomain : projects).map((p) => (
                       <SelectItem key={p.id} value={p.name}>
                         {p.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label>Fenômeno associado</Label>
-                <Select
-                  value={form.phenomenon}
-                  onValueChange={(v) => setForm((f) => ({ ...f, phenomenon: v }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PHENOMENA_OPTIONS.map((p) => (
-                      <SelectItem key={p} value={p}>
-                        {p}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -605,10 +566,7 @@ export function DiscussionDetailDialog({
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <InfoBlock label="Fenômeno associado" value={discussion.phenomenon} icon={Radar} />
-            <InfoBlock label="Visibilidade" value={discussion.visibility} icon={Eye} />
-          </div>
+          <InfoBlock label="Visibilidade" value={discussion.visibility} icon={Eye} />
           <div className="rounded-lg border border-border bg-muted/30 p-3">
             <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
               // observação de origem
@@ -740,6 +698,7 @@ export function ConsolidateKnowledgeDialog({
   onConsolidate: (k: CommunityKnowledge) => void;
 }) {
   const [success, setSuccess] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
   const [form, setForm] = useState({
     title: "",
     summary: "",
@@ -751,6 +710,27 @@ export function ConsolidateKnowledgeDialog({
 
   if (!discussion) return null;
 
+  // The Sintetizadora drafts a learning from the conversation; the consultant
+  // reviews and edits before consolidating (human-in-the-loop).
+  const fillWithAi = async () => {
+    setAiLoading(true);
+    try {
+      const draft = await suggestKnowledge(discussion.id);
+      setForm((f) => ({
+        ...f,
+        title: draft.title || f.title,
+        summary: draft.summary || f.summary,
+        evidences: draft.evidence || f.evidences,
+        recommendation: draft.recommendation || f.recommendation,
+      }));
+      toast.success("Rascunho preenchido pela IA. Revise antes de consolidar.");
+    } catch {
+      toast.error("Não foi possível obter a sugestão da IA.");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title.trim() || !form.summary.trim()) return;
@@ -759,7 +739,6 @@ export function ConsolidateKnowledgeDialog({
       title: form.title,
       domain: discussion.domain,
       project: discussion.project,
-      phenomenon: discussion.phenomenon,
       summary: form.summary,
       evidences: form.evidences,
       recommendation: form.recommendation,
@@ -808,10 +787,23 @@ export function ConsolidateKnowledgeDialog({
                 <span className="font-mono uppercase tracking-wider">Projeto: </span>
                 {discussion.project ?? "—"}
               </span>
-              <span>
-                <span className="font-mono uppercase tracking-wider">Fenômeno: </span>
-                {discussion.phenomenon}
-              </span>
+            </div>
+            <div className="flex items-center justify-between gap-3 rounded-lg border border-dashed border-border bg-muted/20 p-3">
+              <p className="text-[11.5px] leading-relaxed text-muted-foreground">
+                Deixe a IA propor um rascunho a partir desta conversa. Você revisa antes de
+                consolidar.
+              </p>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="shrink-0 gap-1.5"
+                onClick={fillWithAi}
+                disabled={aiLoading}
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                {aiLoading ? "Consultando IA…" : "Sugerir com IA"}
+              </Button>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="kn-title">Título do conhecimento</Label>
