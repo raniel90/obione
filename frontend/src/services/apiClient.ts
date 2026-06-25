@@ -1,4 +1,7 @@
-export const API_BASE_URL = "http://localhost:8080/api";
+// Relative by default so the app works behind a single origin (e.g. a
+// Cloudflare quick tunnel): the Vite dev server proxies "/api" to the backend.
+// Override with VITE_API_BASE_URL for a split frontend/backend deploy.
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api";
 const TOKEN_KEY = "obione-auth";
 
 export class ApiError extends Error {

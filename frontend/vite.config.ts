@@ -16,6 +16,26 @@ export default defineConfig({
     server: {
       port: 5173,
       strictPort: true, // falha se 5173 estiver ocupada, em vez de tentar 8080
+      // Permite servir através de um túnel (ex.: *.trycloudflare.com) sem o
+      // "Blocked request. This host is not allowed".
+      allowedHosts: true,
+      // Único origin: o front chama "/api" e o Vite repassa ao backend
+      // (que serve sob o context-path /api).
+      proxy: {
+        "/api": {
+          target: "http://localhost:8080",
+          changeOrigin: true,
+          configure: (proxy) => {
+            // O proxy é server-to-server e o navegador já está em same-origin.
+            // Removemos o header Origin (que, atrás de um túnel, seria o host
+            // *.trycloudflare.com) para o CORS do backend (allowlist localhost)
+            // não barrar mutações com 403 "Invalid CORS request".
+            proxy.on("proxyReq", (proxyReq: { removeHeader: (h: string) => void }) => {
+              proxyReq.removeHeader("origin");
+            });
+          },
+        },
+      },
     },
   },
 });

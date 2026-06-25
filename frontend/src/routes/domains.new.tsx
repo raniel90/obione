@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { domainTypeOptions, indicatorOptions } from "@/lib/domain-observatory";
 import { createDomain } from "@/services/domainService";
 import { cn } from "@/lib/utils";
-import { CheckCircle2, Sparkles } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 
 export const Route = createFileRoute("/domains/new")({
   head: () => ({
@@ -29,7 +29,6 @@ interface FormState {
   objective: string;
   type: (typeof domainTypeOptions)[number];
   indicators: string[];
-  phenomena: string;
 }
 
 const initial: FormState = {
@@ -38,7 +37,6 @@ const initial: FormState = {
   objective: "",
   type: "Estratégico",
   indicators: [],
-  phenomena: "",
 };
 
 function NewDomainPage() {
@@ -71,10 +69,7 @@ function NewDomainPage() {
         type: typeMap[form.type],
         observationObjective: form.objective,
         priorityIndicators: form.indicators,
-        expectedPhenomena: form.phenomena
-          .split(/\n|,/)
-          .map((s) => s.trim())
-          .filter(Boolean),
+        expectedPhenomena: [],
         status: "FORMING",
         projectCount: 0,
         participantCount: 0,
@@ -205,21 +200,6 @@ function NewDomainPage() {
             </div>
             <p className="text-[11px] text-muted-foreground">
               Selecione um ou mais atributos intermediários que o observatório priorizará.
-            </p>
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="phenomena">Fenômenos esperados</Label>
-            <Textarea
-              id="phenomena"
-              value={form.phenomena}
-              onChange={(e) => setForm({ ...form, phenomena: e.target.value })}
-              placeholder="Ex.: mudanças de escopo recorrentes, baixa participação do cliente…"
-              rows={3}
-            />
-            <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-              <Sparkles className="h-3 w-3" />
-              Sinais iniciais que o observatório deve buscar nas evidências.
             </p>
           </div>
         </div>
