@@ -25,6 +25,15 @@ export default defineConfig({
         "/api": {
           target: "http://localhost:8080",
           changeOrigin: true,
+          configure: (proxy) => {
+            // O proxy é server-to-server e o navegador já está em same-origin.
+            // Removemos o header Origin (que, atrás de um túnel, seria o host
+            // *.trycloudflare.com) para o CORS do backend (allowlist localhost)
+            // não barrar mutações com 403 "Invalid CORS request".
+            proxy.on("proxyReq", (proxyReq: { removeHeader: (h: string) => void }) => {
+              proxyReq.removeHeader("origin");
+            });
+          },
         },
       },
     },
