@@ -24,6 +24,13 @@ Idempotent and self-contained: ensures `cloudflared` is installed (via Homebrew)
 app up (delegates to the `run-app` skill), starts the tunnel in the background
 (log in `/tmp/obione-tunnel.log`), and prints the public URL + seeded logins.
 
+It only **reuses** an existing tunnel if it's actually routing: besides checking the process
+is alive, it inspects the cloudflared log and confirms the most recent connection event is a
+successful registration (not a later failure). A process that's up but whose edge connection
+broke is torn down and a fresh tunnel is started. The health check reads the log on purpose,
+**not** `curl` to the public URL: the macOS resolver caches an `NXDOMAIN` for the brand-new
+subdomain, so a local `curl` returns `000` even when the tunnel works in a browser.
+
 Stop the tunnel (app keeps running):
 
 ```bash
