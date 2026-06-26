@@ -13,12 +13,38 @@ url_from_log() {
   grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' "$TUNNEL_LOG" 2>/dev/null | head -1
 }
 
-# --- Reuse an existing tunnel if still alive --------------------------------
+# Saúde do túnel pela inspeção do log do cloudflared — NÃO por curl à URL
+# pública: o resolver do macOS guarda um NXDOMAIN do subdomínio novo, então um
+# curl local daria falso-negativo (000) mesmo com o túnel funcionando no
+# navegador. Heurística: o túnel está saudável se o evento de conexão MAIS
+# RECENTE for um "Registered tunnel connection" (e não uma falha posterior).
+# cloudflared re-registra ao reconectar, então comparar a última linha de
+# registro com a última linha de falha distingue "caiu e voltou" de "caiu".
+tunnel_healthy() {
+  [ -f "$TUNNEL_LOG" ] || return 1
+  local reg fail
+  reg="$(grep -nE 'Registered tunnel connection' "$TUNNEL_LOG" 2>/dev/null | tail -1 | cut -d: -f1)"
+  # Apenas falhas de CONEXÃO do túnel — não erros de requisição individual
+  # (ex.: "Incoming request ended abruptly: context canceled", que é um request
+  # cancelado pelo navegador e NÃO derruba o túnel).
+  fail="$(grep -nE 'Lost connection with the edge|Unregistered tunnel connection|control stream encountered a failure|Retrying connection|no more connections active|Serve tunnel error' "$TUNNEL_LOG" 2>/dev/null | tail -1 | cut -d: -f1)"
+  [ -n "$reg" ] || return 1          # nunca registrou → não saudável
+  [ -n "$fail" ] || return 0         # registrou e nenhuma falha de conexão → saudável
+  [ "$reg" -gt "$fail" ]             # saudável só se o registro veio após a última falha
+}
+
+# --- Reuse an existing tunnel if still alive AND healthy --------------------
 if [ -f "$TUNNEL_PID" ] && kill -0 "$(cat "$TUNNEL_PID")" 2>/dev/null; then
   EXISTING="$(url_from_log)"
-  if [ -n "$EXISTING" ]; then
-    echo "• Túnel já ativo (PID $(cat "$TUNNEL_PID"))"
+  if [ -n "$EXISTING" ] && tunnel_healthy; then
+    echo "• Túnel já ativo e saudável (PID $(cat "$TUNNEL_PID"))"
     URL="$EXISTING"
+  else
+    # Processo vivo, mas a conexão com o edge está quebrada (não roteia).
+    # Derruba para subir um túnel novo logo abaixo.
+    echo "• Túnel existente não está roteando — reiniciando…"
+    kill "$(cat "$TUNNEL_PID")" 2>/dev/null || true
+    rm -f "$TUNNEL_PID"
   fi
 fi
 
