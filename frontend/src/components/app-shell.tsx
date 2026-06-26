@@ -10,10 +10,13 @@ import {
   Plus,
   LogIn,
   LogOut,
+  HelpCircle,
 } from "lucide-react";
 import { ObiOneMark, ObiOneWordmark } from "@/components/obione-logo";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/theme-provider";
+import { OnboardingDialog } from "@/components/onboarding-dialog";
+import { useOnboarding } from "@/hooks/use-onboarding";
 import { cn, getUserInitials } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { getCurrentUser, logout } from "@/services/authService";
@@ -234,7 +237,7 @@ function Breadcrumbs() {
   );
 }
 
-function Header() {
+function Header({ onShowOnboarding }: { onShowOnboarding: () => void }) {
   const { theme, toggle } = useTheme();
   const { session, user, signOut } = useAuthSession();
   const navigate = useNavigate();
@@ -249,6 +252,18 @@ function Header() {
       <Breadcrumbs />
 
       <div className="flex items-center gap-2">
+        {session && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1.5 text-[12px] text-muted-foreground"
+            onClick={onShowOnboarding}
+          >
+            <HelpCircle className="h-4 w-4" />
+            <span className="hidden sm:inline">Como funciona</span>
+          </Button>
+        )}
+
         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={toggle}>
           {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </Button>
@@ -298,13 +313,16 @@ function Header() {
 }
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const { open, onOpenChange, reopen } = useOnboarding();
+
   return (
     <div className="flex min-h-screen w-full bg-background">
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
-        <Header />
+        <Header onShowOnboarding={reopen} />
         <main className="flex-1">{children}</main>
       </div>
+      <OnboardingDialog open={open} onOpenChange={onOpenChange} />
     </div>
   );
 }
