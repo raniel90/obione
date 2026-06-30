@@ -146,20 +146,6 @@ centered("{bruno.rocha, cynthia.oliveira, moises.junior, raniel.silva}@upe.br",
          font=COURIER, size=10, before=6, after=6)
 
 abstract_block(
-    "Abstract.",
-    "Consultancies accumulate valuable knowledge in every project, yet they rarely "
-    "have a system light enough to preserve and reuse it across clients. This paper "
-    "presents ObiOne, a community-oriented project observatory built on the Model for "
-    "Project Observatories (MPO) and powered by Generative AI. The work follows Design "
-    "Science Research: beyond building the artifact, it evaluates its real operation "
-    "(the cycle exercised end to end with OpenAI's AI) and the perceived value in a "
-    "pilot with four consultants. Results were positive (mean 4.48 of 5), with "
-    "governance and consolidated learnings as the strongest dimensions (5.0) and "
-    "initial clarity as the single attention point (3.8). The main contribution is the "
-    "empirical demonstration that the MPO is implementable with generative AI in a real "
-    "consultancy.")
-
-abstract_block(
     "Resumo.",
     "Consultorias acumulam conhecimento valioso a cada projeto, mas raramente dispõem "
     "de um sistema leve o bastante para preservá-lo e reaproveitá-lo entre clientes. "
@@ -386,11 +372,15 @@ refs = [
 for r in refs:
     reference(r)
 
-# Apêndices (ponteiros)
+# Apêndices (URLs do repositório no GitHub)
 heading("Apêndices")
-body("Apêndice A — Requisitos do Observatório: detalhados em atividades/requisitos.md.", first=True)
-body("Apêndice B — Arquitetura do Observatório: detalhada em atividades/arquitetura_backend.md e arquitetura_pipeline.md.")
-body("Apêndice C — Telas do Observatório: registradas em atividades/Principais_Telas_ObiOne.pdf.")
+body("O material completo do projeto (requisitos, código do backend e do frontend, "
+     "arquitetura, protocolo de avaliação e telas) está disponível no repositório do "
+     "ObiOne no GitHub:", first=True)
+body("Repositório: https://github.com/raniel90/obione")
+body("Requisitos: https://github.com/raniel90/obione/blob/main/atividades/requisitos.md")
+body("Código (backend e frontend): https://github.com/raniel90/obione/tree/main")
+body("Arquitetura e protocolo de avaliação: https://github.com/raniel90/obione/tree/main/atividades")
 
 doc.save(OUT)
 print("OK:", OUT)
