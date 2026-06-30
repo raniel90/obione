@@ -140,7 +140,7 @@ def reference(text):
 title("ObiOne: um observatório-comunidade de projetos viabilizado por IA Generativa")
 centered("Bruno Rocha, Cynthia Oliveira, Moisés Júnior, Raniel Silva", size=12, bold=True, after=12)
 centered("Escola Politécnica de Pernambuco — Universidade de Pernambuco (UPE)", after=0)
-centered("Caixa Postal 50720-001 — Recife — PE — Brasil", after=0)
+centered("Recife — PE — Brasil", after=0)
 centered("Orientador: Prof. Ivaldir Honório de Farias Júnior", after=6)
 centered("{bruno.rocha, cynthia.oliveira, moises.junior, raniel.silva}@upe.br",
          font=COURIER, size=10, before=6, after=6)
