@@ -10,6 +10,8 @@ Saída: Artigo_ObiOne_SBC.docx
 from docx import Document
 from docx.shared import Pt, Cm
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.oxml.ns import qn
+from docx.oxml import OxmlElement
 import os
 
 TIMES = "Times New Roman"
@@ -123,6 +125,45 @@ def reference(text):
     p.paragraph_format.left_indent = Cm(1.27)
     p.paragraph_format.first_line_indent = Cm(-1.27)
     _run(p, text, size=12)
+
+
+def add_hyperlink(paragraph, url, text):
+    """Insere um hyperlink clicável (azul, sublinhado) num parágrafo."""
+    part = paragraph.part
+    r_id = part.relate_to(
+        url,
+        "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink",
+        is_external=True,
+    )
+    hlink = OxmlElement("w:hyperlink")
+    hlink.set(qn("r:id"), r_id)
+    new_run = OxmlElement("w:r")
+    rPr = OxmlElement("w:rPr")
+    color = OxmlElement("w:color"); color.set(qn("w:val"), "1155CC"); rPr.append(color)
+    u = OxmlElement("w:u"); u.set(qn("w:val"), "single"); rPr.append(u)
+    rFonts = OxmlElement("w:rFonts"); rFonts.set(qn("w:ascii"), "Times New Roman"); rFonts.set(qn("w:hAnsi"), "Times New Roman"); rPr.append(rFonts)
+    sz = OxmlElement("w:sz"); sz.set(qn("w:val"), "24"); rPr.append(sz)
+    new_run.append(rPr)
+    t = OxmlElement("w:t"); t.text = text; new_run.append(t)
+    hlink.append(new_run)
+    paragraph._p.append(hlink)
+
+
+def link_line(label, url):
+    """Parágrafo 'label: <hyperlink>' no corpo (Times 12, justificado)."""
+    p = doc.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    p.paragraph_format.space_before = Pt(3)
+    _run(p, f"{label}: ")
+    add_hyperlink(p, url, url)
+
+
+def figure(img_path, caption_text, width_cm=13.0):
+    """Insere imagem centralizada + legenda estilo SBC (Helvetica 10 bold)."""
+    p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p.paragraph_format.space_before = Pt(6)
+    run = p.add_run(); run.add_picture(str(img_path), width=Cm(width_cm))
+    caption(caption_text)
 
 
 # ====================== CONTEÚDO ======================
@@ -452,15 +493,32 @@ refs = [
 for r in refs:
     reference(r)
 
-# Apêndices (URLs do repositório no GitHub)
+# Apêndices
 heading("Apêndices")
-body("O material completo do projeto (requisitos, código do backend e do frontend, "
-     "arquitetura, protocolo de avaliação e telas) está disponível no repositório do "
-     "ObiOne no GitHub:", first=True)
-body("Repositório: https://github.com/raniel90/obione")
-body("Requisitos: https://github.com/raniel90/obione/blob/main/atividades/requisitos.md")
-body("Código (backend e frontend): https://github.com/raniel90/obione/tree/main")
-body("Arquitetura e protocolo de avaliação: https://github.com/raniel90/obione/tree/main/atividades")
+subheading("Apêndice A - Requisitos e rastreabilidade ao MPO")
+body("A Tabela A.1 relaciona os principais requisitos funcionais do ObiOne às "
+     "características e processos do MPO (Vieira, 2022) e à sua materialização no sistema. "
+     "A especificação completa dos requisitos está no repositório.", first=True)
+caption("Tabela A.1. Rastreabilidade dos requisitos funcionais ao MPO.")
+table(
+    ["RF", "Requisito", "Âncora no MPO (Vieira, 2022)", "Implementação"],
+    [
+        ["RF01", "Autenticar usuário", "Segurança (p. 192)", "auth por token; SecurityConfig"],
+        ["RF02", "Perfis e acesso semi-aberto", "Acesso semi-aberto (p. 189); agentes (pp. 200-201)", "papéis consultor/admin/cliente"],
+        ["RF03", "Cadastrar projeto (descrição textual)", "Coletar (p. 195)", "wizard de cadastro"],
+        ["RF04", "Governança de visibilidade por papel", "Acesso semi-aberto (p. 189); Segurança (p. 192)", "enforcement por papel"],
+        ["RF05", "Extrair atributos do MPO via IA", "Quadro 37 (p. 264); Transformar (p. 196)", "camada de IA (Observadora)"],
+        ["RF06", "Persistir extração estruturada", "Armazenar (p. 196)", "entidades JPA"],
+        ["RF07", "Portfólio perfil-aware", "Abrangência (p. 189); Disponibilizar (p. 196)", "listagem por papel"],
+        ["RF08", "Detalhe do projeto", "Projetos (p. 186); Disponibilizar (p. 196)", "detalhe com atributos MPO"],
+        ["RF09", "Cobertura do MPO", "Abrangência (p. 189); Avaliar (p. 198)", "GET /projects/{id}/coverage"],
+        ["RF10", "Comentar/conversar no projeto", "Interatividade (p. 191); Interagir (p. 198)", "discussões da comunidade"],
+        ["RF11", "Feed de novidades", "Acompanhar (p. 198)", "feed temporal in-app"],
+        ["RF12", "Consolidar aprendizados (IA)", "Transformar; Categorizar (pp. 196-197)", "camada de IA (Sintetizadora)"],
+        ["RF13", "Categorizar por temática/domínio", "Categorizar/Classificar (pp. 196-197)", "camada de IA (Configuradora)"],
+    ])
+link_line("Repositório", "https://github.com/raniel90/obione")
+link_line("Especificação de requisitos", "https://github.com/raniel90/obione/blob/main/atividades/requisitos.md")
 
 doc.save(OUT)
 print("OK:", OUT)
