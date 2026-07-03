@@ -234,20 +234,16 @@ body("A avaliação combinou a demonstração de uso real do artefato com a medi
      "conforme o Apêndice C. Os resultados são reportados como casos, sem inferência "
      "estatística.", first=True)
 
-# 4. Estudo de Caso
-heading("4. Estudo de Caso")
-subheading("4.1. Contexto, stakeholders e abordagem")
-body("O objeto do estudo de caso escolhido aborda um observatório de projetos para uma "
-     "consultoria. Os stakeholders são a consultoria de marketing, como organização "
-     "executora e curadora, e seus clientes, que acessam cada um o próprio projeto. A "
-     "abordagem é a Design Science Research: por ser uma pergunta de viabilidade, "
-     "responder exige construir o sistema, colocá-lo em uso e observar o resultado "
-     "(Hevner et al., 2004; Peffers et al., 2007).", first=True)
-subheading("4.2. Requisitos e rastreabilidade ao MPO")
-body("A construção partiu de um mapeamento explícito entre requisitos e o MPO, "
-     "garantindo que o artefato implementasse o modelo. O critério associa cada "
-     "requisito a uma dimensão ou característica do MPO e à sua materialização no "
-     "sistema. A Tabela 1 apresenta uma amostra representativa.", first=True)
+# 4. Implementação
+heading("4. Implementação")
+subheading("4.1. Requisitos e rastreabilidade ao MPO")
+body("O ObiOne foi desenvolvido para uma consultoria de marketing, que atua como "
+     "organização executora e curadora, e seus clientes, que acessam cada um o próprio "
+     "projeto. A elicitação e a especificação seguiram práticas usuais de engenharia de "
+     "requisitos (Sommerville, 2016), e cada requisito funcional foi ancorado a uma "
+     "característica ou processo do MPO, de modo que o artefato implementasse o modelo, e "
+     "não apenas se inspirasse nele. A Tabela 1 apresenta uma amostra; a rastreabilidade "
+     "completa está no Apêndice A.", first=True)
 caption("Tabela 1. Amostra da rastreabilidade requisito → MPO → implementação.")
 table(
     ["Requisito (ObiOne)", "Âncora no MPO", "Implementação"],
@@ -262,19 +258,31 @@ body("A cobertura resultante abrange os 44 atributos do Quadro 37 em 8 dimensõe
      "Trata-se de cobertura arquitetural: o sistema provê os campos e os fluxos "
      "correspondentes. A avaliação empírica da qualidade da extração é uma frente "
      "prevista no protocolo, ainda não executada (Seção 5.4).", first=True)
-subheading("4.3. Arquitetura e ferramentas")
-body("O ObiOne é uma aplicação web. O backend usa Java 21 e Spring Boot, com "
-     "persistência via JPA; o frontend usa React e TanStack Router. O provedor de IA é "
-     "configurável, com um modo determinístico para testes e o provedor da OpenAI para "
-     "uso real. Não foram usadas plataformas low-code/no-code: o sistema foi desenvolvido "
-     "em código, o que deu controle sobre o pipeline de IA e sobre a governança.",
+subheading("4.2. Arquitetura")
+body("O ObiOne é uma aplicação web dividida em backend e frontend. O backend usa Java 21 "
+     "e Spring Boot, com os módulos web, data-jpa, security e validation, e segue uma "
+     "organização por contexto de domínio em camadas: controladores REST finos, serviços "
+     "com a lógica de negócio, repositórios Spring Data, entidades JPA e objetos de "
+     "transferência de dados com mapeadores dedicados. A persistência de desenvolvimento "
+     "usa um banco H2 em arquivo, com PostgreSQL previsto para produção. O frontend usa "
+     "React com TanStack Start e roteamento baseado em arquivos, construído com Vite; o "
+     "estado de servidor é gerido por react-query e os formulários por react-hook-form com "
+     "validação por esquema. A API responde sob o caminho base barra-api, e a aplicação "
+     "adota um padrão de origem única: o servidor de desenvolvimento serve a interface e "
+     "encaminha as chamadas de API ao backend, o que simplifica o acesso remoto para as "
+     "sessões de validação.", first=True)
+subheading("4.3. Camada de IA")
+body("A IA é uma camada assistiva sobre o ciclo de observação, conversa e aprendizado, "
+     "organizada em quatro papéis. A Observadora sugere observações ancoradas na gramática "
+     "do MPO; a Sintetizadora consolida conversas em aprendizados reaproveitáveis; a "
+     "Configuradora apoia o cadastro e a categorização de domínio; e a Consultora apoia a "
+     "leitura do portfólio. A integração usa Spring AI, com o provedor selecionável por "
+     "configuração: um modo determinístico, sem chave e voltado a testes, e o provedor da "
+     "OpenAI para uso real. Cada sugestão é registrada com sua proveniência, provedor, "
+     "modelo e instante, e com a indicação de aceite pelo consultor, o que torna o uso da "
+     "IA auditável. Toda sugestão é apenas uma proposta: a decisão de publicar é sempre "
+     "humana, em linha com o princípio human-in-the-loop (CHI, 2026; medRxiv, 2024).",
      first=True)
-subheading("4.4. Pipeline de IA, governança e ciclo")
-body("A IA atua em quatro papéis assistivos. A Observadora sugere observações ancoradas "
-     "na gramática do MPO; a Sintetizadora consolida conversas em aprendizados; a "
-     "Configuradora apoia o cadastro e a categorização de domínio; a Consultora apoia a "
-     "leitura do portfólio. Cada sugestão é registrada com proveniência e indicação de "
-     "aceite, permitindo auditar o uso da IA.", first=True)
 body("O acesso é semi-aberto: a consultoria enxerga todo o portfólio e conduz a "
      "curadoria; cada cliente acessa apenas o seu projeto e participa das conversas. As "
      "mutações são restritas a consultor e administrador. Uma decisão central, e não "
@@ -406,6 +414,7 @@ refs = [
     'Hevner, A. R., March, S. T., Park, J. and Ram, S. (2004) "Design Science in Information Systems Research", MIS Quarterly, v. 28, n. 1, p. 75-106. DOI: 10.2307/25148625.',
     'Kamudyariwa, X. B., Osobajo, O. A., Oke, A. and Adebayo, Y. (2025) "Application of the systemic lessons learned knowledge model to learning in complex projects". DOI: 10.1177/13505076251339433.',
     'Peffers, K., Tuunanen, T., Rothenberger, M. A. and Chatterjee, S. (2007) "A Design Science Research Methodology for Information Systems Research", Journal of Management Information Systems, v. 24, n. 3, p. 45-77. DOI: 10.2753/MIS0742-1222240302.',
+    'Sommerville, I. (2016) "Software Engineering", 10. ed. Pearson.',
     '"Generative AI for Thematic Analysis in a Maternal Health Study: Coding Semi-structured Interviews using Large Language Models" (2024), medRxiv (preprint). DOI: 10.1101/2024.09.16.24313707.',
     '"Qualitative Coding Analysis through Open-Source Large Language Models: A User Study and Design Recommendations" (2026), In: CHI Conference on Human Factors in Computing Systems, Extended Abstracts. DOI: 10.1145/3772363.3798320.',
     'Vieira, J. K. M. (2022) "Observatórios de Projetos: Um Modelo Conceitual", Tese de Doutorado, Centro de Informática, Universidade Federal de Pernambuco, Recife.',
