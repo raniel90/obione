@@ -87,7 +87,7 @@ O ObiOne foi desenvolvido para uma consultoria de marketing, que atua como organ
 | Registro e acompanhamento | Processos Acompanhar e Avaliar (Vieira, 2022) | ciclo observação -> conversa -> aprendizado |
 | Consolidação de aprendizados | Transparência e disseminação (de Farias Junior et al., 2025) | comunidade por domínio |
 
-A cobertura resultante abrange os 44 atributos do MPO em 8 dimensões. Trata-se de cobertura arquitetural: o sistema provê os campos e os fluxos correspondentes. A avaliação empírica da qualidade da extração é uma frente prevista no protocolo, ainda não executada (Seção 5.4).
+A cobertura resultante abrange os 44 atributos de observação previstos pelo MPO, distribuídos em oito dimensões. Trata-se de cobertura arquitetural: o sistema provê os campos e os fluxos correspondentes. A avaliação empírica da qualidade da extração é uma frente prevista no protocolo, ainda não executada (Seção 5.4).
 
 ### 4.2 Arquitetura
 
@@ -107,11 +107,11 @@ A camada de IA é o principal diferencial do ObiOne e atua de forma assistiva so
 | Conectora | Sintetiza padrões entre projetos do domínio (implementada; não avaliada) | resumos dos projetos do domínio | padrões e lições anonimizados |
 | Configuradora | Sugere o setup inicial no cadastro | nome, descrição, objetivo | domínio, atributos e fenômenos esperados |
 
-O processamento de um projeto segue um fluxo comum. A partir do texto do projeto, o serviço assistente monta o contexto e injeta a lente do MPO, isto é, a lista dos 44 atributos de observação; aciona o provedor de IA, que devolve uma saída estruturada; registra a sugestão com sua proveniência; e a devolve ao consultor para revisão. A Figura 1 ilustra esse fluxo.
+O processamento de um projeto segue um fluxo comum. A partir do texto do projeto, o serviço assistente reúne o contexto e o analisa à luz dos atributos de observação do MPO; aciona a IA, que devolve uma sugestão estruturada; registra essa sugestão de forma auditável, com sua proveniência; e a devolve ao consultor para revisão. A Figura 1 ilustra esse fluxo.
 
 **Figura 1. Pipeline da camada de IA.**
 
-`Descrição do projeto → Contexto + lente MPO (44 atributos) → Provedor de IA (mock ou OpenAI; saída estruturada) → Registro em ai_suggestion_logs (proveniência) → Revisão do consultor → Observação ou aprendizado`
+`Descrição do projeto → Análise pela IA à luz do MPO → Sugestão estruturada e auditável → Revisão do consultor → Observação ou aprendizado publicado`
 
 Três técnicas sustentam a confiabilidade das sugestões. A primeira é a saída estruturada: o modelo é obrigado a responder no formato de um objeto de dados, que o sistema mapeia diretamente, sem interpretação livre do texto. A segunda é o grounding pela lente do MPO, reforçado por instruções que orientam o modelo a não inventar atributos fora da lista fornecida e a citar o trecho literal do resumo que motivou cada observação. A terceira é uma validação determinística em código: na configuração inicial de um projeto, identificadores de atributo ou de domínio inexistentes no catálogo são descartados antes de a resposta ser devolvida; nos demais papéis, essa restrição é reforçada pelas instruções do prompt. O provedor é configurável: um modo determinístico, sem chave e voltado a testes, e o provedor da OpenAI, com o modelo gpt-4o-mini e temperatura baixa, para uso real.
 
