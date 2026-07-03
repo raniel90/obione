@@ -73,8 +73,11 @@ def abstract_block(label, text):
     _run(p, text, italic=True)
 
 
-def heading(text):
+def heading(text, new_page=True):
     p = doc.add_paragraph()
+    if new_page:
+        # Cada seção de nível 1 começa no topo de uma nova página.
+        p.paragraph_format.page_break_before = True
     p.paragraph_format.space_before = Pt(12)
     p.paragraph_format.space_after = Pt(6)
     p.alignment = WD_ALIGN_PARAGRAPH.LEFT
@@ -199,8 +202,8 @@ abstract_block(
     "atenção. A principal contribuição é a demonstração empírica de que o MPO é "
     "implementável com IA generativa em uma consultoria real.")
 
-# 1. Introdução
-heading("1. Introdução")
+# 1. Introdução (fica na primeira página, logo após o Resumo)
+heading("1. Introdução", new_page=False)
 body("Em consultorias, o conhecimento produzido em um projeto tende a ficar com quem o "
      "viveu. Lições sobre o que deu certo, riscos que se materializaram e decisões que "
      "mudaram o rumo do trabalho raramente são capturadas de forma reaproveitável. "
