@@ -18,7 +18,7 @@ Consultorias acumulam conhecimento valioso a cada projeto, mas raramente dispõe
 
 Em consultorias, o conhecimento produzido em um projeto tende a ficar com quem o viveu. Lições sobre o que deu certo, riscos que se materializaram e decisões que mudaram o rumo do trabalho raramente são capturadas de forma reaproveitável. Revisões sistemáticas a respeito da gestão do conhecimento mostram que a captura, análise e aplicação de lições aprendidas dependem mais de fatores culturais e organizacionais do que de ferramentas (Henz, 2024; Kamudyariwa et al., 2025). O obstáculo prático é o custo, visto que manter um repositório vivo de conhecimento exige um esforço contínuo que poucas consultorias de pequeno e médio porte conseguem sustentar.
 
-Observatórios de projetos são uma resposta a esse problema. São sistemas de informação que apoiam a coleta, organização, armazenamento, análise e a publicação de observações, promovendo transparência (Vieira et al., CISTI). O Modelo de Observatório de Projetos (MPO) consolida essa abordagem em um conjunto de conceitos hierárquicos que orienta a concepção desses sistemas (Vieira, 2022; de Farias Junior et al., 2025).
+Observatórios de projetos são uma resposta a esse problema. São sistemas de informação que apoiam a coleta, organização, armazenamento, análise e a publicação de observações, promovendo transparência (Vieira et al., 2021). O Modelo de Observatório de Projetos (MPO) consolida essa abordagem em um conjunto de conceitos hierárquicos que orienta a concepção desses sistemas (Vieira, 2022; de Farias Junior et al., 2025).
 
 Diante desse cenário, sobressaem-se duas lacunas principais. A primeira é técnica e empírica: embora o MPO tenha sido validado conceitualmente e em estudos de caso (de Farias Junior et al., 2025), nenhuma implementação conhecida o operacionaliza com IA generativa. A segunda é comunitária: os observatórios descritos na literatura tratam da organização executora, sem explorar a participação do cliente como ator do ciclo de conhecimento. Nesse contexto, a IA generativa surge como uma janela de oportunidade, pois reduz o custo de extrair e sintetizar informação textual.
 
@@ -30,7 +30,7 @@ Alinhado a essa oportunidade, o propósito do observatório é fornecer à consu
 
 ### 2.1 Observatórios de projetos e o MPO
 
-Observatórios de projetos são sistemas de informação que sistematizam a transparência por meio da observação (Vieira et al., CISTI). O MPO é um modelo conceitual para esses observatórios, organizado a partir de conceitos estruturados em três níveis, geral, intermediário e específico (de Farias Junior et al., 2025). Sua versão de tese sistematiza atributos de observação no Quadro 37, abrangendo dimensões que vão de dados estruturais do projeto a registros narrativos como escopo, riscos e lições aprendidas (Vieira, 2022).
+Observatórios de projetos são sistemas de informação que sistematizam a transparência por meio da observação (Vieira et al., 2021). O MPO é um modelo conceitual para esses observatórios, organizado a partir de conceitos estruturados em três níveis, geral, intermediário e específico (de Farias Junior et al., 2025). Sua versão de tese sistematiza atributos de observação no Quadro 37, abrangendo dimensões que vão de dados estruturais do projeto a registros narrativos como escopo, riscos e lições aprendidas (Vieira, 2022).
 
 ### 2.2 Gestão do conhecimento em projetos
 
@@ -102,7 +102,7 @@ A percepção de valor foi medida em duas rodadas de piloto com quatro consultor
 
 | Dimensão | 1ª | 2ª | Δ | Dimensão | 1ª | 2ª | Δ |
 |---|---|---|---|---|---|---|---|
-| Clareza | 3,8 | 3,8 | 0,0 | Comunidade | 4,8 | 4,2 | -0,5 |
+| Clareza | 3,8 | 3,8 | 0,0 | Comunidade | 4,8 | 4,3 | -0,5 |
 | Organização | 4,8 | 4,0 | -0,8 | Aprendizados | 5,0 | 4,2 | -0,8 |
 | Usabilidade | 4,5 | 4,5 | 0,0 | IA assistiva | 4,5 | 4,0 | -0,5 |
 | Conteúdo | 4,8 | 4,8 | 0,0 | Portfólio | 4,2 | 4,2 | 0,0 |
@@ -159,9 +159,7 @@ Sommerville, I. (2016) "Software Engineering", 10ª ed., Pearson Education, Bost
 
 Vieira, J. K. M. (2022) "Observatórios de Projetos: Um Modelo Conceitual", Tese de Doutorado, Centro de Informática, Universidade Federal de Pernambuco, Recife.
 
-Vieira, J. K. M., de Farias Junior, I. H. and de Moura, H. P. "Observatories as Transparency Instruments for Projects", In: Conferência Ibérica de Sistemas e Tecnologias de Informação (CISTI).
-
-Vieira, J. K. M., de Farias Junior, I. H. and de Moura, H. P. "Utilization of a Conceptual Model in Projects Observatories Development: A Case Study".
+Vieira, J. K. M., de Farias Junior, I. H. and de Moura, H. P. (2021) "Observatories as Transparency Instruments for Projects", In: 16ª Conferência Ibérica de Sistemas e Tecnologias de Informação (CISTI).
 
 ## Apêndices
 
