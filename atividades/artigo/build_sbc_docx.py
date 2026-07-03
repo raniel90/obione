@@ -520,5 +520,13 @@ table(
 link_line("Repositório", "https://github.com/raniel90/obione")
 link_line("Especificação de requisitos", "https://github.com/raniel90/obione/blob/main/atividades/requisitos.md")
 
+subheading("Apêndice B - Arquitetura do Observatório")
+body("A arquitetura em camadas do backend, com controladores, serviços, repositórios, "
+     "entidades e mapeadores, e o pipeline da camada de IA estão descritos em detalhe nos "
+     "documentos de arquitetura do repositório, listados a seguir.", first=True)
+link_line("Arquitetura do backend", "https://github.com/raniel90/obione/blob/main/atividades/arquitetura_backend.md")
+link_line("Pipeline da camada de IA", "https://github.com/raniel90/obione/blob/main/atividades/arquitetura_pipeline.md")
+link_line("Diagrama da arquitetura", "https://github.com/raniel90/obione/blob/main/atividades/arquitetura_diagrama.md")
+
 doc.save(OUT)
 print("OK:", OUT)
