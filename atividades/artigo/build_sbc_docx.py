@@ -13,11 +13,13 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 import os
+from pathlib import Path
 
 TIMES = "Times New Roman"
 COURIER = "Courier New"
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "Artigo_ObiOne_SBC.docx")
+PRINTS = Path(HERE).parent / "apresentacoes" / "prints"
 
 doc = Document()
 
@@ -527,6 +529,29 @@ body("A arquitetura em camadas do backend, com controladores, serviços, reposit
 link_line("Arquitetura do backend", "https://github.com/raniel90/obione/blob/main/atividades/arquitetura_backend.md")
 link_line("Pipeline da camada de IA", "https://github.com/raniel90/obione/blob/main/atividades/arquitetura_pipeline.md")
 link_line("Diagrama da arquitetura", "https://github.com/raniel90/obione/blob/main/atividades/arquitetura_diagrama.md")
+
+subheading("Apêndice C - Telas por perfil")
+body("A Tabela C.1 resume quais perfis acessam cada tela; em seguida, as Figuras C.1 a "
+     "C.6 ilustram as telas principais. O conjunto completo de telas está em "
+     "Principais_Telas_ObiOne.pdf, no repositório.", first=True)
+caption("Tabela C.1. Telas e perfis que as acessam.")
+table(
+    ["Tela", "Consultor", "Administrador", "Cliente"],
+    [
+        ["Observatório (home)", "sim", "sim", "visão limitada"],
+        ["Comunidade", "sim", "sim", "sim (seu domínio)"],
+        ["Detalhe do projeto", "sim (todos atributos)", "sim", "sim (seu projeto)"],
+        ["Feed de novidades", "sim", "sim", "sim"],
+        ["Consolidar com IA", "sim", "sim", "não"],
+        ["Wizard de cadastro", "sim", "sim", "não"],
+    ])
+figure(PRINTS / "01-home.png", "Figura C.1. Observatório (home).")
+figure(PRINTS / "02-comunidade.png", "Figura C.2. Comunidade.")
+figure(PRINTS / "03-detalhe-projeto.png", "Figura C.3. Detalhe do projeto.")
+figure(PRINTS / "04-feed.png", "Figura C.4. Feed de novidades.")
+figure(PRINTS / "05-consolidar-ia.png", "Figura C.5. Consolidar aprendizado com IA.")
+figure(PRINTS / "06-wizard.png", "Figura C.6. Wizard de cadastro de projeto.")
+link_line("Telas completas", "https://github.com/raniel90/obione/blob/main/atividades/Principais_Telas_ObiOne.pdf")
 
 doc.save(OUT)
 print("OK:", OUT)
