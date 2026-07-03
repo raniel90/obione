@@ -178,6 +178,20 @@ def figure(img_path, caption_text, width_cm=13.0):
     caption(caption_text)
 
 
+def flow_box(text):
+    """Caixa única (bordada) com o fluxo em uma linha, setas → entre etapas.
+    Um 'diagrama simples' de pipeline, sem imagem."""
+    t = doc.add_table(rows=1, cols=1)
+    t.style = "Table Grid"
+    t.autofit = False
+    t.allow_autofit = False
+    cell = t.rows[0].cells[0]
+    cell.width = Cm(15.0)
+    cell.paragraphs[0].clear()
+    cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+    _run(cell.paragraphs[0], text, size=11)
+
+
 # ====================== CONTEÚDO ======================
 title("ObiOne: um observatório-comunidade de projetos viabilizado por IA Generativa")
 centered("Bruno Rocha, Cynthia Oliveira, Moisés Júnior, Raniel Silva", size=12, bold=True, after=12)
@@ -341,17 +355,48 @@ body("O ObiOne é uma aplicação web dividida em backend e frontend. O backend 
      "encaminha as chamadas de API ao backend, o que simplifica o acesso remoto para as "
      "sessões de validação.", first=True)
 subheading("4.3. Camada de IA")
-body("A IA é uma camada assistiva sobre o ciclo de observação, conversa e aprendizado, "
-     "organizada em quatro papéis. A Observadora sugere observações ancoradas na gramática "
-     "do MPO; a Sintetizadora consolida conversas em aprendizados reaproveitáveis; a "
-     "Configuradora apoia o cadastro e a categorização de domínio; e a Consultora apoia a "
-     "leitura do portfólio. A integração usa Spring AI, com o provedor selecionável por "
-     "configuração: um modo determinístico, sem chave e voltado a testes, e o provedor da "
-     "OpenAI para uso real. Cada sugestão é registrada com sua proveniência, provedor, "
-     "modelo e instante, e com a indicação de aceite pelo consultor, o que torna o uso da "
-     "IA auditável. Toda sugestão é apenas uma proposta: a decisão de publicar é sempre "
-     "humana, em linha com o princípio human-in-the-loop (CHI, 2026; medRxiv, 2024).",
-     first=True)
+body("A camada de IA é o principal diferencial do ObiOne e atua de forma assistiva sobre "
+     "o ciclo de observação, conversa e aprendizado. Está organizada em cinco papéis; em "
+     "todos, a saída é uma sugestão, nunca uma ação publicada automaticamente. A Tabela 3 "
+     "resume os papéis, com suas entradas e saídas.", first=True)
+caption("Tabela 3. Papéis da camada de IA, com entradas e saídas.")
+table(
+    ["Papel", "Função", "Entrada", "Saída"],
+    [
+        ["Categorizadora", "Sugere o domínio do projeto", "resumo, objetivo, domínios disponíveis", "domínio sugerido e confiança"],
+        ["Observadora", "Sugere observações ancoradas no MPO", "resumo, objetivo, lente MPO, atributos prioritários", "observações mapeadas a atributos, com impacto e trecho literal"],
+        ["Sintetizadora", "Rascunha um aprendizado a partir da conversa", "título, pergunta, contribuições", "rascunho com resumo, evidência e recomendação"],
+        ["Conectora", "Sintetiza padrões entre projetos do domínio (implementada; não avaliada)", "resumos dos projetos do domínio", "padrões e lições anonimizados"],
+        ["Configuradora", "Sugere o setup inicial no cadastro", "nome, descrição, objetivo", "domínio, atributos e fenômenos esperados"],
+    ],
+    widths=[3.0, 4.5, 3.75, 3.75])
+body("O processamento de um projeto segue um fluxo comum. A partir do texto do projeto, o "
+     "serviço assistente monta o contexto e injeta a lente do MPO, isto é, a lista dos 44 "
+     "atributos do Quadro 37; aciona o provedor de IA, que devolve uma saída estruturada; "
+     "registra a sugestão com sua proveniência; e a devolve ao consultor para revisão. A "
+     "Figura 1 ilustra esse fluxo.", first=True)
+flow_box("Descrição do projeto  →  Contexto + lente MPO (44 atributos)  →  "
+         "Provedor de IA (mock ou OpenAI; saída estruturada)  →  Registro em "
+         "ai_suggestion_logs (proveniência)  →  Revisão do consultor  →  "
+         "Observação ou aprendizado")
+caption("Figura 1. Pipeline da camada de IA.")
+body("Três técnicas sustentam a confiabilidade das sugestões. A primeira é a saída "
+     "estruturada: o modelo é obrigado a responder no formato de um objeto de dados, que "
+     "o sistema mapeia diretamente, sem interpretação livre do texto. A segunda é o "
+     "grounding pela lente do MPO, reforçado por instruções que orientam o modelo a não "
+     "inventar atributos fora da lista fornecida e a citar o trecho literal do resumo que "
+     "motivou cada observação. A terceira é uma validação determinística em código, que "
+     "descarta identificadores de atributo ou de domínio inexistentes no catálogo antes de "
+     "devolver a resposta. O provedor é configurável: um modo determinístico, sem chave e "
+     "voltado a testes, e o provedor da OpenAI, com o modelo gpt-4o-mini e temperatura "
+     "baixa, para uso real.", first=True)
+body("A IA nunca escreve diretamente nas observações ou nos aprendizados. Ela apenas "
+     "sugere e registra cada sugestão em um log de auditoria, com o provedor, o modelo, o "
+     "instante e a indicação de aceite, o que dá reprodutibilidade ao uso da IA. A "
+     "persistência só ocorre quando o consultor aceita a sugestão, e a observação é então "
+     "gravada com a origem marcada como assistida pela IA. A taxa de aceite por tipo de "
+     "sugestão é observável no sistema, permitindo acompanhar o quanto as sugestões são de "
+     "fato aproveitadas.", first=True)
 subheading("4.4. Prototipação")
 body("Antes do desenvolvimento final, as telas foram prototipadas com apoio de "
      "ferramentas de geração assistida por IA no ecossistema React, incluindo o Lovable, "
@@ -399,9 +444,9 @@ body("A percepção de valor foi medida em duas rodadas de piloto com quatro con
      "obteve média 4,48 de 5, com 44 de 48 respostas nas notas 4 ou 5 e 29 máximas. A "
      "segunda foi mais crítica: média 4,1, com 36 de 48 respostas positivas e 19 "
      "máximas. No acumulado dos oito participantes, a média foi 4,3 de 5, com 80 de 96 "
-     "respostas positivas. A Tabela 3 apresenta o comparativo por dimensão entre as duas "
+     "respostas positivas. A Tabela 4 apresenta o comparativo por dimensão entre as duas "
      "rodadas.", first=True)
-caption("Tabela 3. Médias por dimensão nas duas rodadas (escala 1 a 5, N=4 por rodada).")
+caption("Tabela 4. Médias por dimensão nas duas rodadas (escala 1 a 5, N=4 por rodada).")
 table(
     ["Dimensão", "1ª rodada", "2ª rodada", "Δ"],
     [
