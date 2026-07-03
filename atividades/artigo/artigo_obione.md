@@ -87,7 +87,7 @@ O ObiOne foi desenvolvido para uma consultoria de marketing, que atua como organ
 | Registro e acompanhamento | Processos Acompanhar e Avaliar (Vieira, 2022) | ciclo observação -> conversa -> aprendizado |
 | Consolidação de aprendizados | Transparência e disseminação (de Farias Junior et al., 2025) | comunidade por domínio |
 
-A cobertura resultante abrange os 44 atributos do Quadro 37 em 8 dimensões. Trata-se de cobertura arquitetural: o sistema provê os campos e os fluxos correspondentes. A avaliação empírica da qualidade da extração é uma frente prevista no protocolo, ainda não executada (Seção 5.4).
+A cobertura resultante abrange os 44 atributos do MPO em 8 dimensões. Trata-se de cobertura arquitetural: o sistema provê os campos e os fluxos correspondentes. A avaliação empírica da qualidade da extração é uma frente prevista no protocolo, ainda não executada (Seção 5.4).
 
 ### 4.2 Arquitetura
 
@@ -107,7 +107,7 @@ A camada de IA é o principal diferencial do ObiOne e atua de forma assistiva so
 | Conectora | Sintetiza padrões entre projetos do domínio (implementada; não avaliada) | resumos dos projetos do domínio | padrões e lições anonimizados |
 | Configuradora | Sugere o setup inicial no cadastro | nome, descrição, objetivo | domínio, atributos e fenômenos esperados |
 
-O processamento de um projeto segue um fluxo comum. A partir do texto do projeto, o serviço assistente monta o contexto e injeta a lente do MPO, isto é, a lista dos 44 atributos do Quadro 37; aciona o provedor de IA, que devolve uma saída estruturada; registra a sugestão com sua proveniência; e a devolve ao consultor para revisão. A Figura 1 ilustra esse fluxo.
+O processamento de um projeto segue um fluxo comum. A partir do texto do projeto, o serviço assistente monta o contexto e injeta a lente do MPO, isto é, a lista dos 44 atributos de observação; aciona o provedor de IA, que devolve uma saída estruturada; registra a sugestão com sua proveniência; e a devolve ao consultor para revisão. A Figura 1 ilustra esse fluxo.
 
 **Figura 1. Pipeline da camada de IA.**
 

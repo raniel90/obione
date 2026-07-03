@@ -374,7 +374,7 @@ table(
         ["Registro e acompanhamento", "Processos Acompanhar e Avaliar (Vieira, 2022)", "ciclo observação → conversa → aprendizado"],
         ["Consolidação de aprendizados", "Transparência e disseminação (de Farias Junior et al., 2025)", "comunidade por domínio"],
     ])
-body("A cobertura resultante abrange os 44 atributos do Quadro 37 em 8 dimensões. "
+body("A cobertura resultante abrange os 44 atributos do MPO em 8 dimensões. "
      "Trata-se de cobertura arquitetural: o sistema provê os campos e os fluxos "
      "correspondentes. A avaliação empírica da qualidade da extração é uma frente "
      "prevista no protocolo, ainda não executada (Seção 5.4).", first=True)
@@ -409,7 +409,7 @@ table(
     widths=[3.0, 4.5, 3.75, 3.75])
 body("O processamento de um projeto segue um fluxo comum. A partir do texto do projeto, o "
      "serviço assistente monta o contexto e injeta a lente do MPO, isto é, a lista dos 44 "
-     "atributos do Quadro 37; aciona o provedor de IA, que devolve uma saída estruturada; "
+     "atributos de observação; aciona o provedor de IA, que devolve uma saída estruturada; "
      "registra a sugestão com sua proveniência; e a devolve ao consultor para revisão. A "
      "Figura 1 ilustra esse fluxo.", first=True)
 flow_box("Descrição do projeto  →  Contexto + lente MPO (44 atributos)  →  "
