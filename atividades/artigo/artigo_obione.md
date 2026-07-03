@@ -119,9 +119,13 @@ Quanto aos aprendizados da equipe, no plano operacional o escopo amplo frente ao
 
 ## 7. Conclusão
 
-O custo de manter um observatório de projetos caiu com a IA generativa, mas o diferencial de valor é a comunidade, e isso não é substituível por tecnologia. Como síntese da experiência, o ObiOne demonstra empiricamente que o MPO é implementável com IA generativa em uma consultoria real, e que a participação de consultoria e clientes em um ciclo comum de conhecimento distingue o observatório de uma ferramenta de gestão.
+O custo de manter um observatório de projetos caiu com a IA generativa, mas o diferencial de valor é a comunidade, e isso não é substituível por tecnologia. Como síntese da experiência, o ObiOne demonstra empiricamente que o MPO é implementável com IA generativa em uma consultoria real, e que a participação de consultoria e clientes em um ciclo comum de conhecimento distingue o observatório de uma ferramenta de gestão. A principal contribuição é essa demonstração empírica.
 
-A principal contribuição é essa demonstração empírica. Como evoluções futuras, destacam-se consolidar a navegação guiada e realizar uma nova rodada, com os mesmos usuários antes e depois, para verificar a recuperação dos indicadores de clareza e de experiência inicial; ampliar a validação com mais participantes e domínios; avaliar o impacto da IA na qualidade dos aprendizados, e não apenas na redução de fricção; e explorar a síntese cross-projeto, que reconhece padrões entre clientes e ficou fora do escopo deste estudo.
+### 7.1 Questões em aberto
+
+A leitura comparativa das duas rodadas deixa cinco questões que delimitam os gaps da pesquisa e orientam sua continuidade: (1) o onboarding melhora a clareza quando medido nos mesmos usuários antes e depois, isolando o efeito da mudança de público? (2) uma navegação guiada, com menu evidente, fluxo em etapas e exemplos práticos, eleva a clareza acima do patamar observado de 3,8? (3) qual a acurácia e a fidelidade da extração dos atributos do MPO pela IA, conforme o protocolo ainda não executado? (4) a IA melhora a qualidade dos aprendizados consolidados, e não apenas reduz a fricção de iniciar o ciclo? (5) o padrão de valor percebido se mantém em outros domínios, com amostra maior e uso prolongado, e o que explica a queda na percepção de governança na segunda rodada?
+
+Essas questões orientam os trabalhos futuros: realizar uma nova rodada controlada, com os mesmos usuários antes e depois de uma navegação guiada; ampliar a validação com mais participantes e domínios; executar o protocolo de avaliação da extração do MPO; e explorar a síntese cross-projeto, que reconhece padrões entre clientes e ficou fora do escopo deste estudo.
 
 ## Referências
 
