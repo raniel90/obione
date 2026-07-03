@@ -370,7 +370,9 @@ from docx import Document
 t="\n".join(p.text for p in Document("atividades/artigo/Artigo_ObiOne_SBC.docx").paragraphs)
 assert "Sommerville, 2016" in t, "citação no corpo ausente"
 assert 'Sommerville, I. (2016)' in t, "referência ausente"
-assert "—" not in t, "em dash encontrado (proibido)"
+# em dash é permitido apenas na afiliação (endereço, antes do Resumo); no corpo, zero
+body_text = t.split("Resumo.", 1)[1] if "Resumo." in t else t
+assert "—" not in body_text, "em dash no corpo (proibido)"
 print("OK task6")
 PY
 ```
@@ -597,7 +599,8 @@ Confirmar: capa; Método com "Desenho da avaliação"; Implementação com 4.1-4
 python3 - <<'PY'
 from docx import Document
 t="\n".join(p.text for p in Document("atividades/artigo/Artigo_ObiOne_SBC.docx").paragraphs)
-assert "—" not in t, "em dash proibido encontrado"
+body_text = t.split("Resumo.", 1)[1] if "Resumo." in t else t
+assert "—" not in body_text, "em dash proibido no corpo"
 for k in ["3.2. Desenho da avaliação","4. Implementação","4.4. Prototipação","4.5. Governança","4.6. Jornada",
           "Sommerville, 2016","Apêndice A","Apêndice B","Apêndice C","Questões em aberto"]:
     assert k in t, f"faltou {k}"
