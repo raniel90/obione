@@ -142,11 +142,12 @@ abstract_block(
     "sobre o Modelo de Observatório de Projetos (MPO) e potencializado por IA "
     "Generativa. O trabalho segue a Design Science Research: além de construir o "
     "artefato, avalia seu funcionamento real (ciclo exercitado de ponta a ponta com IA "
-    "da OpenAI) e a percepção de valor em um piloto com quatro consultores. Os "
-    "resultados foram positivos (média 4,48 de 5), com governança e aprendizados como "
-    "dimensões mais fortes (5,0) e a clareza inicial como único ponto de atenção (3,8). "
-    "A principal contribuição é a demonstração empírica de que o MPO é implementável "
-    "com IA generativa em uma consultoria real.")
+    "da OpenAI) e a percepção de valor em duas rodadas de piloto, com oito consultores "
+    "no total. No acumulado os resultados foram positivos (média 4,3 de 5); a segunda "
+    "rodada, após a inclusão de um onboarding e com um público mais diverso, foi mais "
+    "crítica (4,1 ante 4,48) e manteve a clareza inicial (3,8) como o principal ponto de "
+    "atenção. A principal contribuição é a demonstração empírica de que o MPO é "
+    "implementável com IA generativa em uma consultoria real.")
 
 # 1. Introdução
 heading("1. Introdução")
@@ -277,44 +278,54 @@ body("Em junho de 2026, o ciclo foi exercitado de ponta a ponta com a IA da Open
      "consultor, alimentação da cobertura, conversa com participação do cliente e "
      "atualização do feed. A governança por papel foi confirmada na interface.", first=True)
 subheading("5.2. Percepção de valor")
-body("Para medir a percepção de valor inicial do MVP, realizou-se um piloto com quatro "
-     "consultores. Desse grupo, um participante possuía nível alto de familiaridade com "
-     "gestão de projetos e três apresentavam nível médio; em relação às ferramentas "
-     "utilizadas no cotidiano, dois usavam o Trello, e os outros alternavam entre "
-     "planilhas e demais softwares. A avaliação geral do MVP obteve média de 4,48 de 5 "
-     "pontos possíveis, registrando 44 de 48 respostas com notas 4 ou 5 (sendo 29 notas "
-     "máximas). As médias por dimensão estão listadas na Tabela 2.", first=True)
-caption("Tabela 2. Médias por dimensão (escala 1 a 5, N=4).")
+body("A percepção de valor foi medida em duas rodadas de piloto com quatro consultores "
+     "cada, aplicando o mesmo instrumento de doze afirmações Likert e três perguntas "
+     "abertas. A primeira rodada ocorreu após um walkthrough curto; a segunda, após a "
+     "inclusão de um onboarding de primeiro acesso e outros ajustes, com um público mais "
+     "diverso (incluindo um gestor e mais usuários de planilhas). A primeira rodada "
+     "obteve média 4,48 de 5, com 44 de 48 respostas nas notas 4 ou 5 e 29 máximas. A "
+     "segunda foi mais crítica: média 4,1, com 36 de 48 respostas positivas e 19 "
+     "máximas. No acumulado dos oito participantes, a média foi 4,3 de 5, com 80 de 96 "
+     "respostas positivas. A Tabela 2 apresenta o comparativo por dimensão entre as duas "
+     "rodadas.", first=True)
+caption("Tabela 2. Médias por dimensão nas duas rodadas (escala 1 a 5, N=4 por rodada).")
 table(
-    ["Dimensão", "Média", "Dimensão", "Média"],
+    ["Dimensão", "1ª", "2ª", "Δ", "Dimensão", "1ª", "2ª", "Δ"],
     [
-        ["Aprendizados", "5,0", "Usabilidade", "4,5"],
-        ["Governança", "5,0", "Diferenciação", "4,3"],
-        ["Organização", "4,8", "Portfólio", "4,3"],
-        ["Conteúdo", "4,8", "Intenção de uso", "4,3"],
-        ["Comunidade", "4,8", "Ciclo de conhecimento", "4,0"],
-        ["IA assistiva", "4,5", "Clareza", "3,8"],
+        ["Clareza", "3,8", "3,8", "0,0", "Comunidade", "4,8", "4,2", "-0,5"],
+        ["Organização", "4,8", "4,0", "-0,8", "Aprendizados", "5,0", "4,2", "-0,8"],
+        ["Usabilidade", "4,5", "4,5", "0,0", "IA assistiva", "4,5", "4,0", "-0,5"],
+        ["Conteúdo", "4,8", "4,8", "0,0", "Portfólio", "4,2", "4,2", "0,0"],
+        ["Diferenciação", "4,2", "3,8", "-0,5", "Governança", "5,0", "3,8", "-1,2"],
+        ["Ciclo de conhec.", "4,0", "4,2", "+0,2", "Intenção de uso", "4,2", "4,0", "-0,2"],
     ])
-body("As dimensões mais bem avaliadas foram governança e aprendizados, ambas com nota "
-     "máxima (5,0), seguidas por organização, conteúdo e comunidade. Esse padrão de "
-     "respostas mostra-se consistente com a tese defendida: o valor percebido "
-     "concentra-se no que a comunidade produz e governa, e não nas funcionalidades de IA "
-     "de forma isolada, que receberam média 4,5. Corroborando esses dados, nas respostas "
-     "abertas, um participante destacou que a solução conecta as diversas pontas do "
-     "trabalho em um único lugar, enquanto a dinâmica de conversa em comunidade foi "
-     "apontada como o grande diferencial.", first=True)
+body("A segunda rodada leu o produto de forma mais crítica em governança (-1,2), "
+     "organização e aprendizados (-0,8 cada), comunidade, diferenciação e IA assistiva "
+     "(-0,5 cada). Conteúdo, usabilidade, portfólio e, notadamente, a clareza "
+     "permaneceram estáveis, e o ciclo de conhecimento evoluiu (+0,2). A queda é "
+     "atribuída, em parte, a um público mais diverso e crítico e, em parte, à fricção "
+     "inicial que persiste: isolar o efeito do onboarding exigiria um desenho controlado "
+     "com os mesmos usuários antes e depois. Ainda assim, o valor central se manteve nas "
+     "respostas abertas, em que a IA passou a aparecer como força ("
+     "“aprendizado consolidado através da IA”) e o produto foi descrito como "
+     "amigável e que integra tecnologia e educação, enquanto o alerta recorrente seguiu "
+     "sendo a clareza e a navegação no primeiro uso.", first=True)
 subheading("5.3. Benefícios esperados")
 body("Os benefícios esperados com a solução incluem a redução do custo de manutenção do "
      "conhecimento entre projetos, o fortalecimento do relacionamento com os clientes por "
      "meio de maior engajamento e comunicação na comunidade, e o reaproveitamento de "
      "aprendizados já consolidados em novos projetos do mesmo domínio.", first=True)
 subheading("5.4. Limitações")
-body("O piloto obteve quatro participantes da mesma consultoria; os resultados são "
-     "reportados como casos, sem inferência estatística. A clareza inicial foi a única "
-     "dimensão abaixo de 4,0 (3,8): as respostas indicaram dúvida sobre o objetivo do "
-     "sistema e sobre o conceito de comunidades. Como ação corretiva, foi adicionado um "
-     "onboarding de primeiro acesso. A avaliação da qualidade da extração dos atributos "
-     "do MPO, prevista no protocolo, ainda não foi executada.", first=True)
+body("As duas rodadas somam oito participantes de uma mesma consultoria, em ciclos "
+     "distintos e com composição diferente; os resultados são reportados como casos, "
+     "sem inferência estatística, e a comparação entre rodadas é exploratória. A clareza "
+     "permaneceu como o principal ponto de atenção (3,8 nas duas rodadas): a inclusão de "
+     "um onboarding de primeiro acesso não moveu esse indicador, o que sugere que a "
+     "orientação inicial precisa ir além de um passo introdutório, na direção de uma "
+     "navegação mais guiada. Como a segunda rodada usou participantes distintos, não é "
+     "possível separar o efeito do onboarding da mudança de público. Por fim, a avaliação "
+     "da qualidade da extração dos atributos do MPO, prevista no protocolo, ainda não foi "
+     "executada.", first=True)
 
 # 6. Discussões e Lições Aprendidas
 heading("6. Discussões e Lições Aprendidas")
@@ -323,8 +334,13 @@ body("Os resultados confirmam o MPO como base válida e mostram que ele é imple
      "Estudos anteriores avaliaram o modelo conceitualmente e em casos (de Farias Junior "
      "et al., 2025); o ObiOne acrescenta uma implementação operacional com IA. A IA "
      "reduz a fricção de iniciar o ciclo; à objeção de que criaria dependência, o desenho "
-     "responde com o human-in-the-loop, e os dados respondem com a evidência de que o "
-     "valor percebido se concentra na comunidade.", first=True)
+     "responde com o human-in-the-loop, e as respostas abertas sustentam que o valor "
+     "percebido está no que a comunidade produz e no aprendizado consolidado com apoio da "
+     "IA. A segunda rodada, mais crítica, deixa claro que a restrição dominante para a "
+     "adoção não está no ciclo em si, mas na experiência inicial: enquanto a clareza e a "
+     "navegação não forem resolvidas, o valor demora a ser percebido. O fato de o "
+     "onboarding não ter movido a clareza indica que o próximo passo é uma navegação "
+     "guiada, com menu evidente, fluxo em etapas e exemplos práticos.", first=True)
 body("Como decisões arquiteturais, destacam-se a IA estritamente assistiva e a "
      "governança por papel, que viabiliza o acesso semi-aberto com isolamento entre "
      "clientes. Entre vantagens e limitações das ferramentas, o desenvolvimento em código "
@@ -349,10 +365,12 @@ body("O custo de manter um observatório de projetos caiu com a IA generativa, m
      "consultoria e clientes em um ciclo comum de conhecimento distingue o observatório "
      "de uma ferramenta de gestão.", first=True)
 body("A principal contribuição é essa demonstração empírica. Como evoluções futuras, "
-     "destacam-se ampliar a validação com mais participantes e domínios; avaliar o "
-     "impacto da IA na qualidade dos aprendizados, e não apenas na redução de fricção; e "
-     "explorar a síntese cross-projeto, que reconhece padrões entre clientes e ficou fora "
-     "do escopo deste estudo.")
+     "destacam-se consolidar a navegação guiada e realizar uma nova rodada, com os mesmos "
+     "usuários antes e depois, para verificar a recuperação dos indicadores de clareza e "
+     "de experiência inicial; ampliar a validação com mais participantes e domínios; "
+     "avaliar o impacto da IA na qualidade dos aprendizados, e não apenas na redução de "
+     "fricção; e explorar a síntese cross-projeto, que reconhece padrões entre clientes e "
+     "ficou fora do escopo deste estudo.")
 
 # Referências
 heading("Referências")
