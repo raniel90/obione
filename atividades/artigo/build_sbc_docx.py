@@ -557,8 +557,8 @@ body("A leitura comparativa das duas rodadas deixa cinco questões que delimitam
 body("Essas questões orientam os trabalhos futuros: realizar uma nova rodada controlada, "
      "com os mesmos usuários antes e depois de uma navegação guiada; ampliar a validação "
      "com mais participantes e domínios; executar o protocolo de avaliação da extração do "
-     "MPO; e explorar a síntese cross-projeto, que reconhece padrões entre clientes e "
-     "ficou fora do escopo deste estudo.")
+     "MPO; e avaliar a síntese cross-projeto (Conectora), já implementada com mitigações "
+     "de anonimização e gate de publicação, cuja avaliação de valor permanece em aberto.")
 
 # Referências
 heading("Referências")
