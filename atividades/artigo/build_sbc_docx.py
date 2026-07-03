@@ -391,7 +391,15 @@ body("Como decisões arquiteturais, destacam-se a IA estritamente assistiva e a 
      "deu controle sobre o pipeline e a governança, ao custo de mais esforço do que uma "
      "abordagem low-code. A experiência de uso do MPO mostrou que traduzir 44 atributos "
      "em uma interface sem jargão é mais difícil do que implementá-los.")
-body("Quanto aos aprendizados da equipe, no plano operacional o escopo amplo frente ao "
+body("A lição mais marcante foi de escopo. O projeto passou por um pivô: a proposta "
+     "inicial foi reescopada para refinar o propósito da solução, deslocando o foco de um "
+     "extrator de atributos para um observatório-comunidade. Esse refino exigiu bastante "
+     "trabalho ao longo de várias validações com os orientadores, e foi ele, mais do que "
+     "qualquer ganho de ferramenta, que destravou o valor percebido. A IA generativa "
+     "acelerou a construção, mas mostrou um limite claro: sem uma definição nítida do que "
+     "se está construindo, a velocidade da IA não leva a lugar nenhum; ela amplifica a "
+     "direção que já existe, não a substitui.")
+body("Amarradas a essa jornada, as lições de equipe se somam às de escopo. No plano operacional, o escopo amplo frente ao "
      "prazo exigiu disciplina de cronograma e trabalho de preparação de dados e "
      "integração contínua, com deslizes de data corrigidos ao longo do projeto. No plano "
      "técnico, os principais desafios foram a integração da IA, a configuração de acesso "
