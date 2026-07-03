@@ -106,18 +106,25 @@ def caption(text):
     _run(p, text, font="Helvetica", size=10, bold=True)
 
 
-def table(headers, rows):
+def table(headers, rows, widths=None):
     t = doc.add_table(rows=1, cols=len(headers))
     t.style = "Table Grid"
+    if widths:
+        t.autofit = False
+        t.allow_autofit = False
     for i, h in enumerate(headers):
         c = t.rows[0].cells[i]
         c.paragraphs[0].clear()
         _run(c.paragraphs[0], h, size=11, bold=True)
+        if widths:
+            c.width = Cm(widths[i])
     for row in rows:
         cells = t.add_row().cells
         for i, val in enumerate(row):
             cells[i].paragraphs[0].clear()
             _run(cells[i].paragraphs[0], val, size=11)
+            if widths:
+                cells[i].width = Cm(widths[i])
 
 
 def reference(text):
@@ -276,6 +283,22 @@ body("A avaliação combinou a demonstração de uso real do artefato com a medi
      "porém, oferece telas para os três perfis, consultor, administrador e cliente, "
      "conforme o Apêndice C. Os resultados são reportados como casos, sem inferência "
      "estatística.", first=True)
+subheading("3.3. Participantes")
+body("As duas rodadas somaram oito participantes de uma mesma consultoria, quatro em cada "
+     "rodada. Quanto ao papel, sete eram consultores e um era gestor. As ferramentas de "
+     "acompanhamento de projetos usadas no dia a dia eram sobretudo o Trello, por quatro "
+     "participantes, e planilhas, por três. A familiaridade com gestão de projetos era, na "
+     "maioria, de nível médio. A Tabela 1 resume o perfil.", first=True)
+caption("Tabela 1. Perfil dos participantes (N=8, duas rodadas de quatro).")
+table(
+    ["Dimensão", "Distribuição"],
+    [
+        ["Rodadas", "4 na primeira; 4 na segunda"],
+        ["Papel", "7 consultores; 1 gestor"],
+        ["Ferramenta de projetos usada hoje", "4 Trello; 3 planilhas; 1 outra"],
+        ["Familiaridade com gestão de projetos", "2 alto; 5 médio; 1 baixo"],
+    ],
+    widths=[6.5, 8.5])
 
 # 4. Implementação
 heading("4. Implementação")
@@ -285,9 +308,9 @@ body("O ObiOne foi desenvolvido para uma consultoria de marketing, que atua como
      "projeto. A elicitação e a especificação seguiram práticas usuais de engenharia de "
      "requisitos (Sommerville, 2016), e cada requisito funcional foi ancorado a uma "
      "característica ou processo do MPO, de modo que o artefato implementasse o modelo, e "
-     "não apenas se inspirasse nele. A Tabela 1 apresenta uma amostra; a rastreabilidade "
+     "não apenas se inspirasse nele. A Tabela 2 apresenta uma amostra; a rastreabilidade "
      "completa está no Apêndice A.", first=True)
-caption("Tabela 1. Amostra da rastreabilidade requisito → MPO → implementação.")
+caption("Tabela 2. Amostra da rastreabilidade requisito → MPO → implementação.")
 table(
     ["Requisito (ObiOne)", "Âncora no MPO", "Implementação"],
     [
@@ -373,19 +396,26 @@ body("A percepção de valor foi medida em duas rodadas de piloto com quatro con
      "obteve média 4,48 de 5, com 44 de 48 respostas nas notas 4 ou 5 e 29 máximas. A "
      "segunda foi mais crítica: média 4,1, com 36 de 48 respostas positivas e 19 "
      "máximas. No acumulado dos oito participantes, a média foi 4,3 de 5, com 80 de 96 "
-     "respostas positivas. A Tabela 2 apresenta o comparativo por dimensão entre as duas "
+     "respostas positivas. A Tabela 3 apresenta o comparativo por dimensão entre as duas "
      "rodadas.", first=True)
-caption("Tabela 2. Médias por dimensão nas duas rodadas (escala 1 a 5, N=4 por rodada).")
+caption("Tabela 3. Médias por dimensão nas duas rodadas (escala 1 a 5, N=4 por rodada).")
 table(
-    ["Dimensão", "1ª", "2ª", "Δ", "Dimensão", "1ª", "2ª", "Δ"],
+    ["Dimensão", "1ª rodada", "2ª rodada", "Δ"],
     [
-        ["Clareza", "3,8", "3,8", "0,0", "Comunidade", "4,8", "4,3", "-0,5"],
-        ["Organização", "4,8", "4,0", "-0,8", "Aprendizados", "5,0", "4,2", "-0,8"],
-        ["Usabilidade", "4,5", "4,5", "0,0", "IA assistiva", "4,5", "4,0", "-0,5"],
-        ["Conteúdo", "4,8", "4,8", "0,0", "Portfólio", "4,2", "4,2", "0,0"],
-        ["Diferenciação", "4,2", "3,8", "-0,5", "Governança", "5,0", "3,8", "-1,2"],
-        ["Ciclo de conhec.", "4,0", "4,2", "+0,2", "Intenção de uso", "4,2", "4,0", "-0,2"],
-    ])
+        ["Clareza", "3,8", "3,8", "0,0"],
+        ["Organização", "4,8", "4,0", "-0,8"],
+        ["Usabilidade", "4,5", "4,5", "0,0"],
+        ["Conteúdo", "4,8", "4,8", "0,0"],
+        ["Diferenciação", "4,2", "3,8", "-0,5"],
+        ["Ciclo de conhecimento", "4,0", "4,2", "+0,2"],
+        ["Comunidade", "4,8", "4,3", "-0,5"],
+        ["Aprendizados", "5,0", "4,2", "-0,8"],
+        ["IA assistiva", "4,5", "4,0", "-0,5"],
+        ["Portfólio", "4,2", "4,2", "0,0"],
+        ["Governança", "5,0", "3,8", "-1,2"],
+        ["Intenção de uso", "4,2", "4,0", "-0,2"],
+    ],
+    widths=[6.0, 3.0, 3.0, 3.0])
 body("A segunda rodada leu o produto de forma mais crítica em governança (-1,2), "
      "organização e aprendizados (-0,8 cada), comunidade, diferenciação e IA assistiva "
      "(-0,5 cada). Conteúdo, usabilidade, portfólio e, notadamente, a clareza "
@@ -395,8 +425,11 @@ body("A segunda rodada leu o produto de forma mais crítica em governança (-1,2
      "com os mesmos usuários antes e depois. Ainda assim, o valor central se manteve nas "
      "respostas abertas, em que a IA passou a aparecer como força ("
      "“aprendizado consolidado através da IA”) e o produto foi descrito como "
-     "amigável e que integra tecnologia e educação, enquanto o alerta recorrente seguiu "
-     "sendo a clareza e a navegação no primeiro uso.", first=True)
+     "amigável e que integra tecnologia e educação. O feedback crítico, por sua vez, "
+     "concentrou-se na experiência inicial: um participante relatou que “ficou um pouco "
+     "confusa a explicação sobre algumas funcionalidades”, e os pedidos de melhoria "
+     "convergiram para “navegação mais intuitiva, instruções mais claras e interface mais "
+     "simples”.", first=True)
 subheading("5.3. Benefícios esperados")
 body("Os benefícios esperados com a solução incluem a redução do custo de manutenção do "
      "conhecimento entre projetos, o fortalecimento do relacionamento com os clientes por "

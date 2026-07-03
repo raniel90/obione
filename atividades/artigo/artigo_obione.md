@@ -50,13 +50,26 @@ A construção do ObiOne segue a Design Science Research, que estabelece o artef
 
 A avaliação combinou a demonstração de uso real do artefato com a medição da percepção de valor. A percepção foi medida por um instrumento de doze afirmações em escala Likert de 1 a 5 e três perguntas abertas, aplicado em duas rodadas de piloto com quatro consultores cada, após um walkthrough do sistema. A segunda rodada ocorreu depois da inclusão de um onboarding de primeiro acesso e reuniu um público mais diverso. Como as duas rodadas usaram participantes distintos, a comparação é exploratória e carrega um confundidor: a variação entre rodadas mistura o efeito das mudanças no produto com a diferença de composição das coortes. A avaliação foi conduzida na perspectiva do consultor, perfil central do observatório; a aplicação, porém, oferece telas para os três perfis, consultor, administrador e cliente, conforme o Apêndice C. Os resultados são reportados como casos, sem inferência estatística.
 
+### 3.3 Participantes
+
+As duas rodadas somaram oito participantes de uma mesma consultoria, quatro em cada rodada. Quanto ao papel, sete eram consultores e um era gestor. As ferramentas de acompanhamento de projetos usadas no dia a dia eram sobretudo o Trello, por quatro participantes, e planilhas, por três. A familiaridade com gestão de projetos era, na maioria, de nível médio. A Tabela 1 resume o perfil.
+
+**Tabela 1. Perfil dos participantes (N=8, duas rodadas de quatro).**
+
+| Dimensão | Distribuição |
+|---|---|
+| Rodadas | 4 na primeira; 4 na segunda |
+| Papel | 7 consultores; 1 gestor |
+| Ferramenta de projetos usada hoje | 4 Trello; 3 planilhas; 1 outra |
+| Familiaridade com gestão de projetos | 2 alto; 5 médio; 1 baixo |
+
 ## 4. Implementação
 
 ### 4.1 Requisitos e rastreabilidade ao MPO
 
-O ObiOne foi desenvolvido para uma consultoria de marketing, que atua como organização executora e curadora, e seus clientes, que acessam cada um o próprio projeto. A elicitação e a especificação seguiram práticas usuais de engenharia de requisitos (Sommerville, 2016), e cada requisito funcional foi ancorado a uma característica ou processo do MPO, de modo que o artefato implementasse o modelo, e não apenas se inspirasse nele. A Tabela 1 apresenta uma amostra; a rastreabilidade completa está no Apêndice A.
+O ObiOne foi desenvolvido para uma consultoria de marketing, que atua como organização executora e curadora, e seus clientes, que acessam cada um o próprio projeto. A elicitação e a especificação seguiram práticas usuais de engenharia de requisitos (Sommerville, 2016), e cada requisito funcional foi ancorado a uma característica ou processo do MPO, de modo que o artefato implementasse o modelo, e não apenas se inspirasse nele. A Tabela 2 apresenta uma amostra; a rastreabilidade completa está no Apêndice A.
 
-**Tabela 1. Amostra da rastreabilidade requisito -> MPO -> implementação.**
+**Tabela 2. Amostra da rastreabilidade requisito -> MPO -> implementação.**
 
 | Requisito (ObiOne) | Âncora no MPO | Implementação |
 |---|---|---|
@@ -96,20 +109,26 @@ Em junho de 2026, o ciclo foi exercitado de ponta a ponta com a IA da OpenAI e d
 
 ### 5.2 Percepção de valor
 
-A percepção de valor foi medida em duas rodadas de piloto com quatro consultores cada, aplicando o mesmo instrumento de doze afirmações Likert e três perguntas abertas. A primeira rodada ocorreu após um walkthrough curto; a segunda, após a inclusão de um onboarding de primeiro acesso e outros ajustes, com um público mais diverso (incluindo um gestor e mais usuários de planilhas). A primeira rodada obteve média 4,48 de 5, com 44 de 48 respostas nas notas 4 ou 5 e 29 máximas. A segunda foi mais crítica: média 4,1, com 36 de 48 respostas positivas e 19 máximas. No acumulado dos oito participantes, a média foi 4,3 de 5, com 80 de 96 respostas positivas. A Tabela 2 apresenta o comparativo por dimensão entre as duas rodadas.
+A percepção de valor foi medida em duas rodadas de piloto com quatro consultores cada, aplicando o mesmo instrumento de doze afirmações Likert e três perguntas abertas. A primeira rodada ocorreu após um walkthrough curto; a segunda, após a inclusão de um onboarding de primeiro acesso e outros ajustes, com um público mais diverso (incluindo um gestor e mais usuários de planilhas). A primeira rodada obteve média 4,48 de 5, com 44 de 48 respostas nas notas 4 ou 5 e 29 máximas. A segunda foi mais crítica: média 4,1, com 36 de 48 respostas positivas e 19 máximas. No acumulado dos oito participantes, a média foi 4,3 de 5, com 80 de 96 respostas positivas. A Tabela 3 apresenta o comparativo por dimensão entre as duas rodadas.
 
-**Tabela 2. Médias por dimensão nas duas rodadas (escala 1 a 5, N=4 por rodada).**
+**Tabela 3. Médias por dimensão nas duas rodadas (escala 1 a 5, N=4 por rodada).**
 
-| Dimensão | 1ª | 2ª | Δ | Dimensão | 1ª | 2ª | Δ |
-|---|---|---|---|---|---|---|---|
-| Clareza | 3,8 | 3,8 | 0,0 | Comunidade | 4,8 | 4,3 | -0,5 |
-| Organização | 4,8 | 4,0 | -0,8 | Aprendizados | 5,0 | 4,2 | -0,8 |
-| Usabilidade | 4,5 | 4,5 | 0,0 | IA assistiva | 4,5 | 4,0 | -0,5 |
-| Conteúdo | 4,8 | 4,8 | 0,0 | Portfólio | 4,2 | 4,2 | 0,0 |
-| Diferenciação | 4,2 | 3,8 | -0,5 | Governança | 5,0 | 3,8 | -1,2 |
-| Ciclo de conhec. | 4,0 | 4,2 | +0,2 | Intenção de uso | 4,2 | 4,0 | -0,2 |
+| Dimensão | 1ª rodada | 2ª rodada | Δ |
+|---|---|---|---|
+| Clareza | 3,8 | 3,8 | 0,0 |
+| Organização | 4,8 | 4,0 | -0,8 |
+| Usabilidade | 4,5 | 4,5 | 0,0 |
+| Conteúdo | 4,8 | 4,8 | 0,0 |
+| Diferenciação | 4,2 | 3,8 | -0,5 |
+| Ciclo de conhecimento | 4,0 | 4,2 | +0,2 |
+| Comunidade | 4,8 | 4,3 | -0,5 |
+| Aprendizados | 5,0 | 4,2 | -0,8 |
+| IA assistiva | 4,5 | 4,0 | -0,5 |
+| Portfólio | 4,2 | 4,2 | 0,0 |
+| Governança | 5,0 | 3,8 | -1,2 |
+| Intenção de uso | 4,2 | 4,0 | -0,2 |
 
-A segunda rodada leu o produto de forma mais crítica em governança (-1,2), organização e aprendizados (-0,8 cada), comunidade, diferenciação e IA assistiva (-0,5 cada). Conteúdo, usabilidade, portfólio e, notadamente, a clareza permaneceram estáveis, e o ciclo de conhecimento evoluiu (+0,2). A queda é atribuída, em parte, a um público mais diverso e crítico e, em parte, à fricção inicial que persiste: isolar o efeito do onboarding exigiria um desenho controlado com os mesmos usuários antes e depois. Ainda assim, o valor central se manteve nas respostas abertas, em que a IA passou a aparecer como força ("aprendizado consolidado através da IA") e o produto foi descrito como amigável e que integra tecnologia e educação, enquanto o alerta recorrente seguiu sendo a clareza e a navegação no primeiro uso.
+A segunda rodada leu o produto de forma mais crítica em governança (-1,2), organização e aprendizados (-0,8 cada), comunidade, diferenciação e IA assistiva (-0,5 cada). Conteúdo, usabilidade, portfólio e, notadamente, a clareza permaneceram estáveis, e o ciclo de conhecimento evoluiu (+0,2). A queda é atribuída, em parte, a um público mais diverso e crítico e, em parte, à fricção inicial que persiste: isolar o efeito do onboarding exigiria um desenho controlado com os mesmos usuários antes e depois. Ainda assim, o valor central se manteve nas respostas abertas, em que a IA passou a aparecer como força ("aprendizado consolidado através da IA") e o produto foi descrito como amigável e que integra tecnologia e educação. O feedback crítico, por sua vez, concentrou-se na experiência inicial: um participante relatou que "ficou um pouco confusa a explicação sobre algumas funcionalidades", e os pedidos de melhoria convergiram para "navegação mais intuitiva, instruções mais claras e interface mais simples".
 
 ### 5.3 Benefícios esperados
 
