@@ -190,7 +190,7 @@ def flow_box(text):
 
 
 # ====================== CONTEÚDO ======================
-title("ObiOne: um observatório-comunidade de projetos viabilizado por IA Generativa")
+title("ObiOne: um observatório de projetos viabilizado por IA Generativa")
 centered("Bruno Rocha, Cynthia Oliveira, Moisés Júnior, Raniel Silva", size=12, bold=True, after=12)
 centered("Escola Politécnica de Pernambuco — Universidade de Pernambuco (UPE)", after=0)
 centered("Recife — PE — Brasil", after=0)
@@ -202,7 +202,7 @@ abstract_block(
     "Resumo.",
     "Consultorias acumulam conhecimento valioso a cada projeto, mas raramente dispõem "
     "de um sistema leve o bastante para preservá-lo e reaproveitá-lo entre clientes. "
-    "Este artigo apresenta o ObiOne, um observatório-comunidade de projetos construído "
+    "Este artigo apresenta o ObiOne, um observatório de projetos construído "
     "sobre o Modelo de Observatório de Projetos (MPO) e potencializado por IA "
     "Generativa. O trabalho segue a Design Science Research: além de construir o "
     "artefato, avalia seu funcionamento real (ciclo exercitado de ponta a ponta com IA "
@@ -253,15 +253,15 @@ body("Diante desse cenário, sobressaem-se duas lacunas. A primeira é técnica 
      "do ciclo de conhecimento. A IA generativa surge, nesse ponto, como uma janela de "
      "oportunidade, pois reduz o custo de extrair e sintetizar informação textual, tarefa "
      "antes cara e manual.")
-body("Este artigo investiga como a IA generativa pode viabilizar um observatório-"
-     "comunidade de projetos, de modo a reduzir a fricção de manutenção e promover o "
+body("Este artigo investiga como a IA generativa pode viabilizar um observatório de "
+     "projetos, de modo a reduzir a fricção de manutenção e promover o "
      "engajamento entre a organização executora e seus clientes. Desse objetivo geral "
      "derivam três objetivos específicos: demonstrar a viabilidade técnica de "
      "operacionalizar o MPO com IA generativa; construir e exercitar a dimensão "
      "comunitária, em que consultoria e clientes debatem observações e consolidam "
      "aprendizados; e avaliar a percepção de valor da solução por usuários reais.")
-body("Para responder a essa pergunta, o trabalho apresenta o ObiOne, um observatório-"
-     "comunidade construído sobre o MPO e potencializado por IA generativa, e segue a "
+body("Para responder a essa pergunta, o trabalho apresenta o ObiOne, um observatório "
+     "de projetos construído sobre o MPO e potencializado por IA generativa, e segue a "
      "Design Science Research, que trata a construção do artefato como forma legítima de "
      "investigação. O restante do artigo está organizado como segue: a Seção 2 apresenta "
      "a fundamentação teórica; a Seção 3, o método; a Seção 4, a implementação do "
@@ -556,7 +556,8 @@ body("Como decisões arquiteturais, destacam-se a IA estritamente assistiva e a 
      "em uma interface sem jargão é mais difícil do que implementá-los.")
 body("A lição mais marcante foi de escopo. O projeto passou por um pivô: a proposta "
      "inicial foi reescopada para refinar o propósito da solução, deslocando o foco de um "
-     "extrator de atributos para um observatório-comunidade. Esse refino exigiu bastante "
+     "extrator de atributos para um observatório de projetos com participação dos "
+     "clientes. Esse refino exigiu bastante "
      "trabalho ao longo de várias validações com os orientadores, e foi ele, mais do que "
      "qualquer ganho de ferramenta, que destravou o valor percebido. A IA generativa "
      "acelerou a construção, mas mostrou um limite claro: sem uma definição nítida do que "
