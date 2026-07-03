@@ -283,15 +283,35 @@ body("A IA é uma camada assistiva sobre o ciclo de observação, conversa e apr
      "IA auditável. Toda sugestão é apenas uma proposta: a decisão de publicar é sempre "
      "humana, em linha com o princípio human-in-the-loop (CHI, 2026; medRxiv, 2024).",
      first=True)
-body("O acesso é semi-aberto: a consultoria enxerga todo o portfólio e conduz a "
-     "curadoria; cada cliente acessa apenas o seu projeto e participa das conversas. As "
-     "mutações são restritas a consultor e administrador. Uma decisão central, e não "
-     "óbvia, é a de que a IA nunca publica sozinha: ela sugere, e o consultor revisa e "
-     "decide. A escolha pelo human-in-the-loop preserva a responsabilidade humana, dá "
-     "rastreabilidade às sugestões e protege contra a dependência tecnológica (CHI, 2026; "
-     "medRxiv, 2024). O fluxo central conecta cadastro assistido, registro de "
-     "observações, conversa na comunidade e consolidação de aprendizados, com um feed que "
-     "reflete a atividade.")
+subheading("4.4. Prototipação")
+body("Antes do desenvolvimento final, as telas foram prototipadas com apoio de "
+     "ferramentas de geração assistida por IA no ecossistema React, incluindo o Lovable, "
+     "que produziu o scaffold inicial da interface e da sua configuração de build. A "
+     "prototipação rápida corresponde à atividade de design e desenvolvimento da Design "
+     "Science Research e serviu de insumo concreto para as validações com os "
+     "orientadores, encurtando o ciclo entre uma ideia de tela e uma versão navegável.",
+     first=True)
+subheading("4.5. Governança por papel")
+body("O acesso ao observatório é semi-aberto e governado pelo papel do usuário. As "
+     "leituras exigem autenticação; as mutações são restritas aos papéis de consultor e "
+     "administrador, enquanto o cliente contribui nas conversas e enxerga apenas o seu "
+     "próprio projeto. O consultor conduz a curadoria e vê todo o portfólio; o "
+     "administrador acumula as permissões de gestão; o cliente participa da comunidade do "
+     "seu caso sem acesso às ações de equipe nem à visão consolidada do portfólio. Esse "
+     "arranjo garante o isolamento entre clientes e materializa, na prática, o acesso "
+     "semi-aberto previsto no MPO. As telas correspondentes a cada perfil estão no "
+     "Apêndice C.", first=True)
+subheading("4.6. Jornada do usuário e construção do MVP")
+body("A jornada central percorre quatro momentos: o cadastro de um projeto assistido por "
+     "um wizard com apoio de IA, o registro de observações ancoradas no MPO, a conversa da "
+     "comunidade sobre essas observações e a consolidação de aprendizados reaproveitáveis. "
+     "Um feed reflete a atividade recente e a cobertura de cada projeto frente ao MPO é "
+     "consultável. O MVP foi construído em torno desse fluxo e entregou o cadastro com "
+     "extração assistida, a organização da comunidade por domínio, o detalhe do projeto "
+     "com os atributos do MPO, a consolidação de aprendizados com apoio da Sintetizadora, "
+     "o feed de novidades e, após a primeira rodada de validação, um onboarding de "
+     "primeiro acesso que apresenta o objetivo do sistema e o ciclo de conhecimento.",
+     first=True)
 
 # 5. Resultados
 heading("5. Resultados")
