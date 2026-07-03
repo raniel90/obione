@@ -87,7 +87,27 @@ O ObiOne é uma aplicação web dividida em backend e frontend. O backend usa Ja
 
 ### 4.3 Camada de IA
 
-A IA é uma camada assistiva sobre o ciclo de observação, conversa e aprendizado, organizada em quatro papéis. A Observadora sugere observações ancoradas na gramática do MPO; a Sintetizadora consolida conversas em aprendizados reaproveitáveis; a Configuradora apoia o cadastro e a categorização de domínio; e a Consultora apoia a leitura do portfólio. A integração usa Spring AI, com o provedor selecionável por configuração: um modo determinístico, sem chave e voltado a testes, e o provedor da OpenAI para uso real. Cada sugestão é registrada com sua proveniência, provedor, modelo e instante, e com a indicação de aceite pelo consultor, o que torna o uso da IA auditável. Toda sugestão é apenas uma proposta: a decisão de publicar é sempre humana, em linha com o princípio human-in-the-loop (CHI, 2026; medRxiv, 2024).
+A camada de IA é o principal diferencial do ObiOne e atua de forma assistiva sobre o ciclo de observação, conversa e aprendizado. Está organizada em cinco papéis; em todos, a saída é uma sugestão, nunca uma ação publicada automaticamente. A Tabela 3 resume os papéis, com suas entradas e saídas.
+
+**Tabela 3. Papéis da camada de IA, com entradas e saídas.**
+
+| Papel | Função | Entrada | Saída |
+|---|---|---|---|
+| Categorizadora | Sugere o domínio do projeto | resumo, objetivo, domínios disponíveis | domínio sugerido e confiança |
+| Observadora | Sugere observações ancoradas no MPO | resumo, objetivo, lente MPO, atributos prioritários | observações mapeadas a atributos, com impacto e trecho literal |
+| Sintetizadora | Rascunha um aprendizado a partir da conversa | título, pergunta, contribuições | rascunho com resumo, evidência e recomendação |
+| Conectora | Sintetiza padrões entre projetos do domínio (implementada; não avaliada) | resumos dos projetos do domínio | padrões e lições anonimizados |
+| Configuradora | Sugere o setup inicial no cadastro | nome, descrição, objetivo | domínio, atributos e fenômenos esperados |
+
+O processamento de um projeto segue um fluxo comum. A partir do texto do projeto, o serviço assistente monta o contexto e injeta a lente do MPO, isto é, a lista dos 44 atributos do Quadro 37; aciona o provedor de IA, que devolve uma saída estruturada; registra a sugestão com sua proveniência; e a devolve ao consultor para revisão. A Figura 1 ilustra esse fluxo.
+
+**Figura 1. Pipeline da camada de IA.**
+
+`Descrição do projeto → Contexto + lente MPO (44 atributos) → Provedor de IA (mock ou OpenAI; saída estruturada) → Registro em ai_suggestion_logs (proveniência) → Revisão do consultor → Observação ou aprendizado`
+
+Três técnicas sustentam a confiabilidade das sugestões. A primeira é a saída estruturada: o modelo é obrigado a responder no formato de um objeto de dados, que o sistema mapeia diretamente, sem interpretação livre do texto. A segunda é o grounding pela lente do MPO, reforçado por instruções que orientam o modelo a não inventar atributos fora da lista fornecida e a citar o trecho literal do resumo que motivou cada observação. A terceira é uma validação determinística em código: na configuração inicial de um projeto, identificadores de atributo ou de domínio inexistentes no catálogo são descartados antes de a resposta ser devolvida; nos demais papéis, essa restrição é reforçada pelas instruções do prompt. O provedor é configurável: um modo determinístico, sem chave e voltado a testes, e o provedor da OpenAI, com o modelo gpt-4o-mini e temperatura baixa, para uso real.
+
+A IA nunca escreve diretamente nas observações ou nos aprendizados. Ela apenas sugere e registra cada sugestão em um log de auditoria, com o provedor, o modelo, o instante e a indicação de aceite, o que dá reprodutibilidade ao uso da IA. A persistência só ocorre quando o consultor aceita a sugestão, e a observação é então gravada com a origem marcada como assistida pela IA. A taxa de aceite por tipo de sugestão é observável no sistema, permitindo acompanhar o quanto as sugestões são de fato aproveitadas.
 
 ### 4.4 Prototipação
 
@@ -109,9 +129,9 @@ Em junho de 2026, o ciclo foi exercitado de ponta a ponta com a IA da OpenAI e d
 
 ### 5.2 Percepção de valor
 
-A percepção de valor foi medida em duas rodadas de piloto com quatro consultores cada, aplicando o mesmo instrumento de doze afirmações Likert e três perguntas abertas. A primeira rodada ocorreu após um walkthrough curto; a segunda, após a inclusão de um onboarding de primeiro acesso e outros ajustes, com um público mais diverso (incluindo um gestor e mais usuários de planilhas). A primeira rodada obteve média 4,48 de 5, com 44 de 48 respostas nas notas 4 ou 5 e 29 máximas. A segunda foi mais crítica: média 4,1, com 36 de 48 respostas positivas e 19 máximas. No acumulado dos oito participantes, a média foi 4,3 de 5, com 80 de 96 respostas positivas. A Tabela 3 apresenta o comparativo por dimensão entre as duas rodadas.
+A percepção de valor foi medida em duas rodadas de piloto com quatro consultores cada, aplicando o mesmo instrumento de doze afirmações Likert e três perguntas abertas. A primeira rodada ocorreu após um walkthrough curto; a segunda, após a inclusão de um onboarding de primeiro acesso e outros ajustes, com um público mais diverso (incluindo um gestor e mais usuários de planilhas). A primeira rodada obteve média 4,48 de 5, com 44 de 48 respostas nas notas 4 ou 5 e 29 máximas. A segunda foi mais crítica: média 4,1, com 36 de 48 respostas positivas e 19 máximas. No acumulado dos oito participantes, a média foi 4,3 de 5, com 80 de 96 respostas positivas. A Tabela 4 apresenta o comparativo por dimensão entre as duas rodadas.
 
-**Tabela 3. Médias por dimensão nas duas rodadas (escala 1 a 5, N=4 por rodada).**
+**Tabela 4. Médias por dimensão nas duas rodadas (escala 1 a 5, N=4 por rodada).**
 
 | Dimensão | 1ª rodada | 2ª rodada | Δ |
 |---|---|---|---|
@@ -156,7 +176,7 @@ O custo de manter um observatório de projetos caiu com a IA generativa, mas o d
 
 A leitura comparativa das duas rodadas deixa cinco questões que delimitam os gaps da pesquisa e orientam sua continuidade: (1) o onboarding melhora a clareza quando medido nos mesmos usuários antes e depois, isolando o efeito da mudança de público? (2) uma navegação guiada, com menu evidente, fluxo em etapas e exemplos práticos, eleva a clareza acima do patamar observado de 3,8? (3) qual a acurácia e a fidelidade da extração dos atributos do MPO pela IA, conforme o protocolo ainda não executado? (4) a IA melhora a qualidade dos aprendizados consolidados, e não apenas reduz a fricção de iniciar o ciclo? (5) o padrão de valor percebido se mantém em outros domínios, com amostra maior e uso prolongado, e o que explica a queda na percepção de governança na segunda rodada?
 
-Essas questões orientam os trabalhos futuros: realizar uma nova rodada controlada, com os mesmos usuários antes e depois de uma navegação guiada; ampliar a validação com mais participantes e domínios; executar o protocolo de avaliação da extração do MPO; e explorar a síntese cross-projeto, que reconhece padrões entre clientes e ficou fora do escopo deste estudo.
+Essas questões orientam os trabalhos futuros: realizar uma nova rodada controlada, com os mesmos usuários antes e depois de uma navegação guiada; ampliar a validação com mais participantes e domínios; executar o protocolo de avaliação da extração do MPO; e avaliar a síntese cross-projeto (Conectora), já implementada com mitigações de anonimização e gate de publicação, cuja avaliação de valor permanece em aberto.
 
 ## Referências
 
