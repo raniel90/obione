@@ -165,9 +165,7 @@ body("Observatórios de projetos são uma resposta a esse problema. São sistema
      "de observações, promovendo transparência (Vieira et al., CISTI). O Modelo de "
      "Observatório de Projetos (MPO) consolida essa abordagem em um conjunto de conceitos "
      "hierárquicos que orienta a concepção desses sistemas (Vieira, 2022; de Farias "
-     "Junior et al., 2025). Ferramentas usuais de gestão de projetos registram o que foi "
-     "feito, mas não capturam os motivos das decisões e não transformam observações em "
-     "conhecimento compartilhado.")
+     "Junior et al., 2025).")
 body("Diante desse cenário, sobressaem-se duas lacunas principais. A primeira é técnica "
      "e empírica: embora o MPO tenha sido validado conceitualmente e em estudos de caso "
      "(de Farias Junior et al., 2025), nenhuma implementação conhecida o operacionaliza "
@@ -176,6 +174,10 @@ body("Diante desse cenário, sobressaem-se duas lacunas principais. A primeira �
      "como ator do ciclo de conhecimento. Nesse contexto, a IA generativa surge como uma "
      "janela de oportunidade, pois reduz o custo de extrair e sintetizar informação "
      "textual.")
+body("Ferramentas usuais de gestão de projetos, como quadros de tarefas e painéis, "
+     "registram o que foi feito, mas não capturam o porquê das decisões nem transformam "
+     "observações em conhecimento compartilhado; o MPO endereça essa lacuna ao tratar a "
+     "observação, e não apenas a execução, como objeto de primeira classe.")
 body("Alinhado a essa oportunidade, o propósito do observatório é fornecer à consultoria "
      "um ambiente intuitivo para observar seus projetos, debater achados e consolidar "
      "aprendizados reaproveitáveis. Diante disso, o objetivo deste artigo é investigar "
@@ -213,10 +215,24 @@ heading("3. Método")
 subheading("3.1. Design Science Research")
 body("A construção do ObiOne segue a Design Science Research, que estabelece o artefato "
      "como forma legítima de pesquisa (Hevner et al., 2004) e organiza o trabalho em "
-     "atividades de problema, objetivos, design, demonstração, avaliação e comunicação "
-     "(Peffers et al., 2007). Ferramentas usuais de gestão capturam o estado das tarefas, "
-     "mas não o raciocínio por trás das decisões. O MPO e o ObiOne solucionam essa lacuna "
-     "ao elevar a observação a um elemento central do processo.", first=True)
+     "atividades de identificação do problema, definição de objetivos, design e "
+     "desenvolvimento, demonstração, avaliação e comunicação (Peffers et al., 2007). Por "
+     "se tratar de uma pergunta de viabilidade, responder exige construir o sistema, "
+     "colocá-lo em uso e observar o resultado, e não apenas coletar opiniões sobre uma "
+     "descrição.", first=True)
+subheading("3.2. Desenho da avaliação")
+body("A avaliação combinou a demonstração de uso real do artefato com a medição da "
+     "percepção de valor. A percepção foi medida por um instrumento de doze afirmações em "
+     "escala Likert de 1 a 5 e três perguntas abertas, aplicado em duas rodadas de piloto "
+     "com quatro consultores cada, após um walkthrough do sistema. A segunda rodada "
+     "ocorreu depois da inclusão de um onboarding de primeiro acesso e reuniu um público "
+     "mais diverso. Como as duas rodadas usaram participantes distintos, a comparação é "
+     "exploratória e carrega um confundidor: a variação entre rodadas mistura o efeito das "
+     "mudanças no produto com a diferença de composição das coortes. A avaliação foi "
+     "conduzida na perspectiva do consultor, perfil central do observatório; a aplicação, "
+     "porém, oferece telas para os três perfis, consultor, administrador e cliente, "
+     "conforme o Apêndice C. Os resultados são reportados como casos, sem inferência "
+     "estatística.", first=True)
 
 # 4. Estudo de Caso
 heading("4. Estudo de Caso")
