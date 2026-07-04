@@ -6,6 +6,18 @@ Data: 2026-07-04. Alvo: `backend/` (Java 21/Spring Boot) + `frontend/` (React 19
 
 Fazer a **jornada completa do ObiOne** ser **demoável e replicável de ponta a ponta**, adaptada por papel, **sem cortar funcionalidades**. Hoje a app está atrás do conceito em três pontos: (1) o cliente vê o portfólio inteiro (não há isolamento); (2) o reaproveitamento cross-projeto não aflora; (3) nada puxa o cliente para a comunidade. Corrigir os três para que a demonstração alcance o objetivo do artigo (observatório de projetos com participação segura do cliente).
 
+## Motivação e valor por gap
+
+O maior *claim* do artigo é a **dimensão comunitária (consultoria + cliente)** — e foi governança/comunidade que teve nota máxima (5,0) na avaliação. É exatamente aí que a app está mais atrás.
+
+| # | Gap | O que quebra sem isso | Valor de resolver agora | Custo |
+|---|---|---|---|---|
+| 1 | Isolamento do cliente | Na demo, o cliente vê projetos de outros clientes (confirmado: cliente id 3 abre os 4 projetos, HTTP 200). "Semi-aberto" cai por terra; em uso real, quebra de confidencialidade. O diferencial fica não-demoável. | Alto. Converte o principal claim de "descrito" para "demonstrado ao vivo" e permite restaurar no artigo a alegação de isolamento (suavizada no PR #93). | Baixo (client_id já existe; é filtragem) |
+| 2 | Reaproveitamento cross-projeto | O ciclo termina em "consolidar"; o problema que o artigo abre (perda de conhecimento entre projetos) não é resolvido na tela. | Médio-alto. Fecha o arco problema→solução→payoff; torna tangível o reuso. | Médio |
+| 3 | Engajamento do cliente | Nada puxa o cliente; a comunidade fica passiva. | Médio. Faz a comunidade parecer viva. | Baixo-médio |
+
+**Por que agora:** (a) destrava a demonstração do diferencial; (b) fecha o arco de valor; (c) reduz o risco de credibilidade do artigo (a auditoria mostrou o texto à frente da app); (d) o #1 tem custo baixo e impacto alto. Prioridade: #1 (bloqueador da demo) → #2 → #3.
+
 ## Fato-chave do código (mapa)
 
 - O vínculo **projeto → cliente já existe**: `projects/entity/Project.java` tem `@ManyToOne User client` (coluna `client_id`), populado no `ProjectDataSeeder` e exposto como `clientId`/`clientName` no `ProjectResponseDTO`. **Isolamento é lacuna de filtragem, não de modelo — sem migração.**
