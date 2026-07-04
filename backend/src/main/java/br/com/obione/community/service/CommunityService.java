@@ -338,7 +338,15 @@ public class CommunityService {
                 .map(CommunityMapper::toPhenomenonDTO)
                 .toList();
 
-        long contributionCount = contributionRepository.countByDiscussionDomainId(domainId);
+        // Fix B: for a CLIENT, derive the count from the already-filtered discussions so it
+        // matches the visible list. For staff (myProjectIds == null) keep the domain-wide
+        // count unchanged so their numbers are unaffected.
+        long contributionCount;
+        if (myProjectIds != null) {
+            contributionCount = contributionCounts.values().stream().mapToLong(Integer::longValue).sum();
+        } else {
+            contributionCount = contributionRepository.countByDiscussionDomainId(domainId);
+        }
 
         return new DomainCommunityDTO(
                 domainId,

@@ -50,4 +50,17 @@ public class ProjectAccessGuard {
                 .map(Project::getId)
                 .collect(Collectors.toUnmodifiableSet());
     }
+
+    /**
+     * Returns the set of domain IDs that the currently authenticated CLIENT belongs to
+     * (i.e. domains that contain at least one project assigned to this client).
+     * Returns an empty set for non-CLIENT users.
+     */
+    public Set<Long> clientDomainIds() {
+        if (!currentUser.isClient()) return Set.of();
+        return projectRepository.findByClient_Id(currentUser.id()).stream()
+                .map(p -> p.getDomain() != null ? p.getDomain().getId() : null)
+                .filter(id -> id != null)
+                .collect(Collectors.toUnmodifiableSet());
+    }
 }

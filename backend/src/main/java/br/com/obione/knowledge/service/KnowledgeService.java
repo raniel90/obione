@@ -62,12 +62,14 @@ public class KnowledgeService {
     public List<KnowledgeResponseDTO> findAll() {
         List<Knowledge> all = knowledgeRepository.findAll();
         if (currentUser.isClient()) {
-            // A CLIENT sees only knowledge that is not tied to any project (domain-level)
-            // or that belongs to one of their own projects.
+            // A CLIENT sees knowledge tied to their own projects, OR domain-level knowledge
+            // (project == null) that belongs to one of their own domains.
             Set<Long> myProjectIds = guard.clientProjectIds();
+            Set<Long> myDomainIds = guard.clientDomainIds();
             all = all.stream()
-                    .filter(k -> k.getProject() == null
-                            || myProjectIds.contains(k.getProject().getId()))
+                    .filter(k -> k.getProject() != null
+                            ? myProjectIds.contains(k.getProject().getId())
+                            : myDomainIds.contains(k.getDomain().getId()))
                     .collect(Collectors.toList());
         }
         return all.stream()
@@ -90,12 +92,15 @@ public class KnowledgeService {
         ensureDomainExists(domainId);
         List<Knowledge> all = knowledgeRepository.findByDomain_IdOrderByCreatedAtDesc(domainId);
         if (currentUser.isClient()) {
-            // B7: for a CLIENT, show only domain-level knowledge (project == null, semi-open
-            // community) and knowledge belonging to the client's own project(s).
+            // B7: for a CLIENT, show only knowledge belonging to their own projects, OR
+            // domain-level knowledge (project == null) from this domain — but only if the
+            // queried domain is one of the client's own domains.
             Set<Long> myProjectIds = guard.clientProjectIds();
+            boolean domainVisible = guard.clientDomainIds().contains(domainId);
             all = all.stream()
-                    .filter(k -> k.getProject() == null
-                            || myProjectIds.contains(k.getProject().getId()))
+                    .filter(k -> k.getProject() != null
+                            ? myProjectIds.contains(k.getProject().getId())
+                            : domainVisible)
                     .collect(Collectors.toList());
         }
         return all.stream()
