@@ -227,8 +227,12 @@ function ProjectsCatalog() {
   return (
     <AppShell>
       <PageHeader
-        title="Projetos"
-        description="Casos observados pelo ObiOne dentro dos domínios organizacionais."
+        title={isClient ? "Meu projeto" : "Projetos"}
+        description={
+          isClient
+            ? "O caso do seu projeto observado pelo ObiOne."
+            : "Casos observados pelo ObiOne dentro dos domínios organizacionais."
+        }
         actions={
           isClient ? undefined : (
             <Button asChild size="sm" className="gap-1.5">
