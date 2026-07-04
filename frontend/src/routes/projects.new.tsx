@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -97,6 +98,15 @@ type StoryForm = z.infer<typeof storySchema>;
 
 function NewProjectPage() {
   const navigate = useNavigate();
+  const { isClient, loading: userLoading } = useCurrentUser();
+
+  // Clients cannot create projects — redirect to home.
+  useEffect(() => {
+    if (!userLoading && isClient) {
+      navigate({ to: "/" });
+    }
+  }, [isClient, userLoading, navigate]);
+
   const [step, setStep] = useState<1 | 2>(1);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);

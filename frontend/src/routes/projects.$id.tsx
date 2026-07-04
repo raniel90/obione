@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/status-badge";
@@ -321,10 +322,7 @@ function ProjectDetailPage() {
   }, [id]);
 
   // MPO coverage is the consultant's measurement instrument — hidden from clients.
-  const [isClient, setIsClient] = useState(false);
-  useEffect(() => {
-    getCurrentUser().then((user) => setIsClient(user?.profileCode === "CLIENT"));
-  }, []);
+  const { isClient } = useCurrentUser();
 
   // Discussions/knowledge are fetched at page level so the funnel and the
   // Comunidade tab share the same data.

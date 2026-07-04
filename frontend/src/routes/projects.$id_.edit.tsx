@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -111,6 +112,14 @@ function toDateInput(value: string | undefined): string {
 function EditProjectPage() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
+  const { isClient, loading: userLoading } = useCurrentUser();
+
+  // Clients cannot edit projects — redirect to the project detail.
+  useEffect(() => {
+    if (!userLoading && isClient) {
+      navigate({ to: "/projects/$id", params: { id } });
+    }
+  }, [isClient, userLoading, id, navigate]);
 
   const [project, setProject] = useState<Project | null>(null);
   const [domains, setDomains] = useState<SvcDomain[]>([]);

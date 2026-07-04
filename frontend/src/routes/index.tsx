@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { createFileRoute } from "@tanstack/react-router";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import type { Project as LegacyProject, ProjectStatus } from "@/lib/mock-data";
 import type { Project as SvcProject, ProjectStatusCode, ProjectTypeCode } from "@/types/project";
 import type { Domain as SvcDomain } from "@/types/domain";
@@ -200,6 +201,7 @@ function SectionHeader({
 }
 
 function ObservatoryDashboard() {
+  const { isClient } = useCurrentUser();
   const [projects, setProjects] = useState<LegacyProject[]>([]);
   const [domains, setDomains] = useState<SvcDomain[]>([]);
   const [knowledge, setKnowledge] = useState<Knowledge[]>([]);
@@ -245,15 +247,21 @@ function ObservatoryDashboard() {
   return (
     <AppShell>
       <PageHeader
-        title="Observatório de Projetos"
-        description="O que a consultoria está observando agora e o que a comunidade já aprendeu com isso."
+        title={isClient ? "Meu projeto" : "Observatório de Projetos"}
+        description={
+          isClient
+            ? "Acompanhe o andamento do seu projeto e veja o que a comunidade aprendeu."
+            : "O que a consultoria está observando agora e o que a comunidade já aprendeu com isso."
+        }
         actions={
-          <Button asChild size="sm" className="gap-1.5">
-            <Link to="/projects/new">
-              <Plus className="h-3.5 w-3.5" />
-              Novo projeto
-            </Link>
-          </Button>
+          isClient ? undefined : (
+            <Button asChild size="sm" className="gap-1.5">
+              <Link to="/projects/new">
+                <Plus className="h-3.5 w-3.5" />
+                Novo projeto
+              </Link>
+            </Button>
+          )
         }
       />
 
