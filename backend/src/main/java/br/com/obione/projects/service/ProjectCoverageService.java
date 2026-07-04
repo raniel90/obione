@@ -1,6 +1,7 @@
 package br.com.obione.projects.service;
 
 import br.com.obione.common.exception.ResourceNotFoundException;
+import br.com.obione.common.security.CurrentUser;
 import br.com.obione.mpo.MpoCatalog;
 import br.com.obione.mpo.dto.MpoAttributeDTO;
 import br.com.obione.observations.entity.Observation;
@@ -27,17 +28,20 @@ public class ProjectCoverageService {
     private final MpoCatalog catalog;
     private final ObservationRepository observationRepository;
     private final ProjectRepository projectRepository;
+    private final CurrentUser currentUser;
     private final ProjectAccessGuard guard;
 
     public ProjectCoverageService(
             MpoCatalog catalog,
             ObservationRepository observationRepository,
             ProjectRepository projectRepository,
+            CurrentUser currentUser,
             ProjectAccessGuard guard
     ) {
         this.catalog = catalog;
         this.observationRepository = observationRepository;
         this.projectRepository = projectRepository;
+        this.currentUser = currentUser;
         this.guard = guard;
     }
 
@@ -47,7 +51,7 @@ public class ProjectCoverageService {
         // exist or isn't theirs (intentionally indistinguishable from not-found).
         // For staff: no-op — fall through to the explicit existence check below.
         guard.assertCanRead(projectId);
-        if (!projectRepository.existsById(projectId)) {
+        if (!currentUser.isClient() && !projectRepository.existsById(projectId)) {
             throw new ResourceNotFoundException("Projeto não encontrado: " + projectId);
         }
 

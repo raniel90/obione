@@ -63,7 +63,7 @@ public class PhenomenonService {
         if (currentUser.isClient()) {
             // A CLIENT sees only phenomena that are not tied to any project (domain-level)
             // or that belong to one of their own projects.
-            Set<Long> myProjectIds = clientProjectIds();
+            Set<Long> myProjectIds = guard.clientProjectIds();
             all = all.stream()
                     .filter(p -> p.getProject() == null
                             || myProjectIds.contains(p.getProject().getId()))
@@ -87,7 +87,9 @@ public class PhenomenonService {
     @Transactional(readOnly = true)
     public List<PhenomenonResponseDTO> findByProjectId(Long projectId) {
         guard.assertCanRead(projectId);
-        ensureProjectExists(projectId);
+        if (!currentUser.isClient()) {
+            ensureProjectExists(projectId);
+        }
         return phenomenonRepository.findByProject_IdOrderByCreatedAtDesc(projectId).stream()
                 .map(this::toDto)
                 .toList();
@@ -220,10 +222,4 @@ public class PhenomenonService {
         }
     }
 
-    /** Returns the set of project IDs owned by the currently authenticated CLIENT. */
-    private Set<Long> clientProjectIds() {
-        return projectRepository.findByClient_Id(currentUser.id()).stream()
-                .map(Project::getId)
-                .collect(Collectors.toSet());
-    }
 }

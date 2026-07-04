@@ -74,7 +74,7 @@ public class DiscussionService {
         if (currentUser.isClient()) {
             // A CLIENT sees only discussions that are not tied to any project (domain-level)
             // or that belong to one of their own projects.
-            Set<Long> myProjectIds = clientProjectIds();
+            Set<Long> myProjectIds = guard.clientProjectIds();
             all = all.stream()
                     .filter(d -> d.getProject() == null
                             || myProjectIds.contains(d.getProject().getId()))
@@ -107,7 +107,9 @@ public class DiscussionService {
     @Transactional(readOnly = true)
     public List<DiscussionResponseDTO> findByProjectId(Long projectId) {
         guard.assertCanRead(projectId);
-        ensureProjectExists(projectId);
+        if (!currentUser.isClient()) {
+            ensureProjectExists(projectId);
+        }
         return discussionRepository.findByProject_IdOrderByCreatedAtDesc(projectId).stream()
                 .map(this::toResponseWithContributions)
                 .toList();
@@ -263,10 +265,4 @@ public class DiscussionService {
         }
     }
 
-    /** Returns the set of project IDs owned by the currently authenticated CLIENT. */
-    private Set<Long> clientProjectIds() {
-        return projectRepository.findByClient_Id(currentUser.id()).stream()
-                .map(Project::getId)
-                .collect(Collectors.toSet());
-    }
 }

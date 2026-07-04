@@ -2,9 +2,13 @@ package br.com.obione.projects.service;
 
 import br.com.obione.common.exception.ResourceNotFoundException;
 import br.com.obione.common.security.CurrentUser;
+import br.com.obione.projects.entity.Project;
 import br.com.obione.projects.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Reusable guard that enforces per-project read access for CLIENT users.
@@ -34,5 +38,16 @@ public class ProjectAccessGuard {
         if (!currentUser.isClient()) return;
         projectRepository.findByIdAndClient_Id(projectId, currentUser.id())
                 .orElseThrow(() -> new ResourceNotFoundException("Projeto não encontrado: " + projectId));
+    }
+
+    /**
+     * Returns the set of project IDs owned by the currently authenticated CLIENT.
+     * Returns an empty set for non-CLIENT users.
+     */
+    public Set<Long> clientProjectIds() {
+        if (!currentUser.isClient()) return Set.of();
+        return projectRepository.findByClient_Id(currentUser.id()).stream()
+                .map(Project::getId)
+                .collect(Collectors.toUnmodifiableSet());
     }
 }

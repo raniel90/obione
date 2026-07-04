@@ -64,7 +64,7 @@ public class KnowledgeService {
         if (currentUser.isClient()) {
             // A CLIENT sees only knowledge that is not tied to any project (domain-level)
             // or that belongs to one of their own projects.
-            Set<Long> myProjectIds = clientProjectIds();
+            Set<Long> myProjectIds = guard.clientProjectIds();
             all = all.stream()
                     .filter(k -> k.getProject() == null
                             || myProjectIds.contains(k.getProject().getId()))
@@ -96,7 +96,9 @@ public class KnowledgeService {
     @Transactional(readOnly = true)
     public List<KnowledgeResponseDTO> findByProjectId(Long projectId) {
         guard.assertCanRead(projectId);
-        ensureProjectExists(projectId);
+        if (!currentUser.isClient()) {
+            ensureProjectExists(projectId);
+        }
         return knowledgeRepository.findByProject_IdOrderByCreatedAtDesc(projectId).stream()
                 .map(KnowledgeMapper::toResponseDTO)
                 .toList();
@@ -104,7 +106,11 @@ public class KnowledgeService {
 
     @Transactional(readOnly = true)
     public List<KnowledgeResponseDTO> findByDiscussionId(Long discussionId) {
-        ensureDiscussionExists(discussionId);
+        Discussion discussion = discussionRepository.findById(discussionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Discussão não encontrada: " + discussionId));
+        if (discussion.getProject() != null) {
+            guard.assertCanRead(discussion.getProject().getId());
+        }
         return knowledgeRepository.findByDiscussion_IdOrderByCreatedAtDesc(discussionId).stream()
                 .map(KnowledgeMapper::toResponseDTO)
                 .toList();
@@ -238,12 +244,6 @@ public class KnowledgeService {
         }
     }
 
-    private void ensureDiscussionExists(Long discussionId) {
-        if (!discussionRepository.existsById(discussionId)) {
-            throw new ResourceNotFoundException("Discussão não encontrada: " + discussionId);
-        }
-    }
-
     private Domain resolveDomain(Long domainId) {
         return domainRepository.findById(domainId)
                 .orElseThrow(() -> new ResourceNotFoundException("Domínio não encontrado: " + domainId));
@@ -292,10 +292,4 @@ public class KnowledgeService {
         }
     }
 
-    /** Returns the set of project IDs owned by the currently authenticated CLIENT. */
-    private Set<Long> clientProjectIds() {
-        return projectRepository.findByClient_Id(currentUser.id()).stream()
-                .map(Project::getId)
-                .collect(Collectors.toSet());
-    }
 }

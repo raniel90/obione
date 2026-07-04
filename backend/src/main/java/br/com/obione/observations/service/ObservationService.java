@@ -3,6 +3,7 @@ package br.com.obione.observations.service;
 import br.com.obione.ai.service.AiSuggestionAcceptanceService;
 import br.com.obione.common.exception.BadRequestException;
 import br.com.obione.common.exception.ResourceNotFoundException;
+import br.com.obione.common.security.CurrentUser;
 import br.com.obione.observations.dto.CreateObservationRequestDTO;
 import br.com.obione.observations.dto.ObservationResponseDTO;
 import br.com.obione.observations.dto.UpdateObservationRequestDTO;
@@ -32,6 +33,7 @@ public class ObservationService {
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final AiSuggestionAcceptanceService acceptanceService;
+    private final CurrentUser currentUser;
     private final ProjectAccessGuard guard;
 
     public ObservationService(
@@ -39,19 +41,23 @@ public class ObservationService {
             ProjectRepository projectRepository,
             UserRepository userRepository,
             AiSuggestionAcceptanceService acceptanceService,
+            CurrentUser currentUser,
             ProjectAccessGuard guard
     ) {
         this.observationRepository = observationRepository;
         this.projectRepository = projectRepository;
         this.userRepository = userRepository;
         this.acceptanceService = acceptanceService;
+        this.currentUser = currentUser;
         this.guard = guard;
     }
 
     @Transactional(readOnly = true)
     public List<ObservationResponseDTO> findByProjectId(Long projectId) {
         guard.assertCanRead(projectId);
-        ensureProjectExists(projectId);
+        if (!currentUser.isClient()) {
+            ensureProjectExists(projectId);
+        }
         return observationRepository.findByProject_IdOrderByCreatedAtDesc(projectId).stream()
                 .map(ObservationMapper::toResponseDTO)
                 .toList();
