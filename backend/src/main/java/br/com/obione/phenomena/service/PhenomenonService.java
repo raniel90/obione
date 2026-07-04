@@ -76,9 +76,12 @@ public class PhenomenonService {
 
     @Transactional(readOnly = true)
     public PhenomenonResponseDTO findById(Long id) {
-        return phenomenonRepository.findById(id)
-                .map(this::toDto)
+        Phenomenon phenomenon = phenomenonRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Fenômeno não encontrado: " + id));
+        if (phenomenon.getProject() != null) {
+            guard.assertCanRead(phenomenon.getProject().getId());
+        }
+        return toDto(phenomenon);
     }
 
     @Transactional(readOnly = true)

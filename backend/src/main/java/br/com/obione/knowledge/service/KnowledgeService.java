@@ -77,9 +77,12 @@ public class KnowledgeService {
 
     @Transactional(readOnly = true)
     public KnowledgeResponseDTO findById(Long id) {
-        return knowledgeRepository.findById(id)
-                .map(KnowledgeMapper::toResponseDTO)
+        Knowledge knowledge = knowledgeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Conhecimento não encontrado: " + id));
+        if (knowledge.getProject() != null) {
+            guard.assertCanRead(knowledge.getProject().getId());
+        }
+        return KnowledgeMapper.toResponseDTO(knowledge);
     }
 
     @Transactional(readOnly = true)
