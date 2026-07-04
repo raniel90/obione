@@ -102,10 +102,10 @@ A camada de IA é o principal diferencial do ObiOne e atua de forma assistiva so
 | Papel | Função | Entrada | Saída |
 |---|---|---|---|
 | Categorizadora | Sugere o domínio do projeto | resumo, objetivo, domínios disponíveis | domínio sugerido e confiança |
-| Observadora | Sugere observações ancoradas no MPO | resumo, objetivo, lente MPO, atributos prioritários | observações mapeadas a atributos, com impacto e trecho literal |
+| Observadora | Sugere observações ancoradas no MPO (implementada; não exposta na interface atual) | resumo, objetivo, lente MPO, atributos prioritários | observações mapeadas a atributos, com impacto e trecho literal |
 | Sintetizadora | Rascunha um aprendizado a partir da conversa | título, pergunta, contribuições | rascunho com resumo, evidência e recomendação |
 | Conectora | Sintetiza padrões entre projetos do domínio (implementada; não avaliada) | resumos dos projetos do domínio | padrões e lições anonimizados |
-| Configuradora | Sugere o setup inicial no cadastro | nome, descrição, objetivo | domínio, atributos e fenômenos esperados |
+| Configuradora | Sugere o setup inicial no cadastro | nome, descrição, objetivo | domínio e atributos a acompanhar |
 
 O processamento de um projeto segue um fluxo comum. A partir do texto do projeto, o serviço assistente reúne o contexto e o analisa à luz dos atributos de observação do MPO; aciona a IA, que devolve uma sugestão estruturada; registra essa sugestão de forma auditável, com sua proveniência; e a devolve ao consultor para revisão. A Figura 1 ilustra esse fluxo.
 
@@ -113,7 +113,7 @@ O processamento de um projeto segue um fluxo comum. A partir do texto do projeto
 
 `Descrição do projeto → Análise pela IA à luz do MPO → Sugestão estruturada e auditável → Revisão do consultor → Observação ou aprendizado publicado`
 
-Três técnicas sustentam a confiabilidade das sugestões. A primeira é a saída estruturada: o modelo é obrigado a responder no formato de um objeto de dados, que o sistema mapeia diretamente, sem interpretação livre do texto. A segunda é o grounding pela lente do MPO, reforçado por instruções que orientam o modelo a não inventar atributos fora da lista fornecida e a citar o trecho literal do resumo que motivou cada observação. A terceira é uma validação determinística em código: na configuração inicial de um projeto, identificadores de atributo ou de domínio inexistentes no catálogo são descartados antes de a resposta ser devolvida; nos demais papéis, essa restrição é reforçada pelas instruções do prompt. O provedor é configurável: um modo determinístico, sem chave e voltado a testes, e o provedor da OpenAI, com o modelo gpt-4o-mini e temperatura baixa, para uso real.
+Três técnicas sustentam a confiabilidade das sugestões. A primeira é a saída estruturada: o modelo é obrigado a responder no formato de um objeto de dados, que o sistema mapeia diretamente, sem interpretação livre do texto. A segunda é o grounding pela lente do MPO, reforçado por instruções que orientam o modelo a não inventar atributos fora da lista fornecida e a citar o trecho literal do resumo que motivou cada observação. A terceira é uma validação determinística em código: na configuração inicial de um projeto, identificadores de atributo ou de domínio inexistentes no catálogo são descartados antes de a resposta ser devolvida; nos demais papéis, essa restrição é reforçada pelas instruções do prompt. O modelo usado é o gpt-4o-mini, com temperatura baixa para favorecer respostas conservadoras e reproduzíveis.
 
 A IA nunca escreve diretamente nas observações ou nos aprendizados. Ela apenas sugere e registra cada sugestão em um log de auditoria, com o provedor, o modelo, o instante e a indicação de aceite, o que dá reprodutibilidade ao uso da IA. A persistência só ocorre quando o consultor aceita a sugestão, e a observação é então gravada com a origem marcada como assistida pela IA. A taxa de aceite por tipo de sugestão é observável no sistema, permitindo acompanhar o quanto as sugestões são de fato aproveitadas.
 
@@ -123,7 +123,7 @@ Antes do desenvolvimento final, as telas foram prototipadas com apoio de ferrame
 
 ### 4.5 Governança por papel
 
-O acesso ao observatório é semi-aberto e governado pelo papel do usuário. As leituras exigem autenticação; as mutações são restritas aos papéis de consultor e administrador, enquanto o cliente contribui nas conversas e enxerga apenas o seu próprio projeto. O consultor conduz a curadoria e vê todo o portfólio; o administrador acumula as permissões de gestão; o cliente participa da comunidade do seu caso sem acesso às ações de equipe nem à visão consolidada do portfólio. Esse arranjo garante o isolamento entre clientes e materializa, na prática, o acesso semi-aberto previsto no MPO. As telas correspondentes a cada perfil estão no Apêndice C.
+O acesso ao observatório é governado pelo papel do usuário. As leituras exigem autenticação e as mutações são restritas aos papéis de consultor e administrador: o consultor conduz a curadoria do portfólio e o administrador acumula as permissões de gestão, enquanto o cliente participa das conversas, mas não cria nem edita observações, projetos ou aprendizados. O isolamento por cliente previsto no acesso semi-aberto do MPO, em que cada cliente enxergaria apenas o seu próprio projeto, ainda não foi implementado nesta versão: hoje qualquer usuário autenticado lê o portfólio, e a governança por papel incide sobre as mutações. Consolidar esse isolamento é um passo necessário antes de abrir o observatório a clientes reais. As telas de cada perfil estão no Apêndice C.
 
 ### 4.6 Jornada do usuário e construção do MVP
 
@@ -170,7 +170,7 @@ As duas rodadas somam oito participantes de uma mesma consultoria, em ciclos dis
 
 Os resultados confirmam o MPO como base válida e mostram que ele é implementável com IA generativa a um custo viável para uma consultoria de pequeno e médio porte. Estudos anteriores avaliaram o modelo conceitualmente e em casos (de Farias Junior et al., 2025); o ObiOne acrescenta uma implementação operacional com IA. A IA reduz a fricção de iniciar o ciclo; à objeção de que criaria dependência, o desenho responde com o human-in-the-loop, e as respostas abertas sustentam que o valor percebido está no que a comunidade produz e no aprendizado consolidado com apoio da IA. A segunda rodada, mais crítica, deixa claro que a restrição dominante para a adoção não está no ciclo em si, mas na experiência inicial: enquanto a clareza e a navegação não forem resolvidas, o valor demora a ser percebido. O fato de o onboarding não ter movido a clareza indica que o próximo passo é uma navegação guiada, com menu evidente, fluxo em etapas e exemplos práticos.
 
-Como decisões arquiteturais, destacam-se a IA estritamente assistiva e a governança por papel, que viabiliza o acesso semi-aberto com isolamento entre clientes. Entre vantagens e limitações das ferramentas, o desenvolvimento em código deu controle sobre o pipeline e a governança, ao custo de mais esforço do que uma abordagem low-code. A experiência de uso do MPO mostrou que traduzir 44 atributos em uma interface sem jargão é mais difícil do que implementá-los.
+Como decisões arquiteturais, destacam-se a IA estritamente assistiva e a governança por papel, que restringe as ações de criação e edição a consultor e administrador. Entre vantagens e limitações das ferramentas, o desenvolvimento em código deu controle sobre o pipeline e a governança, ao custo de mais esforço do que uma abordagem low-code. A experiência de uso do MPO mostrou que traduzir 44 atributos em uma interface sem jargão é mais difícil do que implementá-los.
 
 A lição mais marcante foi de escopo. O projeto passou por um pivô: a proposta inicial foi reescopada para refinar o propósito da solução, deslocando o foco de um extrator de atributos para um observatório de projetos com participação dos clientes. Esse refino exigiu bastante trabalho ao longo de várias validações com os orientadores, e foi ele, mais do que qualquer ganho de ferramenta, que destravou o valor percebido. A IA generativa acelerou a construção, mas mostrou um limite claro: sem uma definição nítida do que se está construindo, a velocidade da IA não leva a lugar nenhum; ela amplifica a direção que já existe, não a substitui.
 
@@ -248,16 +248,16 @@ A arquitetura em camadas do backend, com controladores, serviços, repositórios
 
 ### Apêndice C - Telas por perfil
 
-A Tabela C.1 resume quais perfis acessam cada tela; em seguida, as Figuras C.1 a C.6 ilustram as telas principais. O conjunto completo de telas está em Principais_Telas_ObiOne.pdf, no repositório.
+A Tabela C.1 resume o que cada perfil pode fazer em cada tela. A leitura é aberta a qualquer usuário autenticado; as ações de criação e edição são restritas a consultor e administrador, e o cliente contribui comentando. Em seguida, as Figuras C.1 a C.6 ilustram as telas principais. O conjunto completo de telas está em Principais_Telas_ObiOne.pdf, no repositório.
 
-**Tabela C.1. Telas e perfis que as acessam.**
+**Tabela C.1. Ações permitidas por perfil em cada tela.**
 
 | Tela | Consultor | Administrador | Cliente |
 |---|---|---|---|
-| Observatório (home) | sim | sim | visão limitada |
-| Comunidade | sim | sim | sim (seu domínio) |
-| Detalhe do projeto | sim (todos atributos) | sim | sim (seu projeto) |
-| Feed de novidades | sim | sim | sim |
+| Observatório (home) | sim | sim | lê |
+| Comunidade | sim | sim | lê e comenta |
+| Detalhe do projeto | sim | sim | lê e comenta |
+| Feed de novidades | sim | sim | lê |
 | Consolidar com IA | sim | sim | não |
 | Wizard de cadastro | sim | sim | não |
 

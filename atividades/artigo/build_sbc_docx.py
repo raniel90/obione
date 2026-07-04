@@ -402,10 +402,10 @@ table(
     ["Papel", "Função", "Entrada", "Saída"],
     [
         ["Categorizadora", "Sugere o domínio do projeto", "resumo, objetivo, domínios disponíveis", "domínio sugerido e confiança"],
-        ["Observadora", "Sugere observações ancoradas no MPO", "resumo, objetivo, lente MPO, atributos prioritários", "observações mapeadas a atributos, com impacto e trecho literal"],
+        ["Observadora", "Sugere observações ancoradas no MPO (implementada; não exposta na interface atual)", "resumo, objetivo, lente MPO, atributos prioritários", "observações mapeadas a atributos, com impacto e trecho literal"],
         ["Sintetizadora", "Rascunha um aprendizado a partir da conversa", "título, pergunta, contribuições", "rascunho com resumo, evidência e recomendação"],
         ["Conectora", "Sintetiza padrões entre projetos do domínio (implementada; não avaliada)", "resumos dos projetos do domínio", "padrões e lições anonimizados"],
-        ["Configuradora", "Sugere o setup inicial no cadastro", "nome, descrição, objetivo", "domínio, atributos e fenômenos esperados"],
+        ["Configuradora", "Sugere o setup inicial no cadastro", "nome, descrição, objetivo", "domínio e atributos a acompanhar"],
     ],
     widths=[3.0, 4.5, 3.75, 3.75])
 body("O processamento de um projeto segue um fluxo comum. A partir do texto do projeto, o "
@@ -425,10 +425,9 @@ body("Três técnicas sustentam a confiabilidade das sugestões. A primeira é a
      "motivou cada observação. A terceira é uma validação determinística em código: na "
      "configuração inicial de um projeto, identificadores de atributo ou de domínio "
      "inexistentes no catálogo são descartados antes de a resposta ser devolvida; nos "
-     "demais papéis, essa restrição é reforçada pelas instruções do prompt. O provedor é "
-     "configurável: um modo determinístico, sem chave e "
-     "voltado a testes, e o provedor da OpenAI, com o modelo gpt-4o-mini e temperatura "
-     "baixa, para uso real.", first=True)
+     "demais papéis, essa restrição é reforçada pelas instruções do prompt. O modelo "
+     "usado é o gpt-4o-mini, com temperatura baixa para favorecer respostas conservadoras "
+     "e reproduzíveis.", first=True)
 body("A IA nunca escreve diretamente nas observações ou nos aprendizados. Ela apenas "
      "sugere e registra cada sugestão em um log de auditoria, com o provedor, o modelo, o "
      "instante e a indicação de aceite, o que dá reprodutibilidade ao uso da IA. A "
@@ -445,15 +444,16 @@ body("Antes do desenvolvimento final, as telas foram prototipadas com apoio de "
      "orientadores, encurtando o ciclo entre uma ideia de tela e uma versão navegável.",
      first=True)
 subheading("4.5. Governança por papel")
-body("O acesso ao observatório é semi-aberto e governado pelo papel do usuário. As "
-     "leituras exigem autenticação; as mutações são restritas aos papéis de consultor e "
-     "administrador, enquanto o cliente contribui nas conversas e enxerga apenas o seu "
-     "próprio projeto. O consultor conduz a curadoria e vê todo o portfólio; o "
-     "administrador acumula as permissões de gestão; o cliente participa da comunidade do "
-     "seu caso sem acesso às ações de equipe nem à visão consolidada do portfólio. Esse "
-     "arranjo garante o isolamento entre clientes e materializa, na prática, o acesso "
-     "semi-aberto previsto no MPO. As telas correspondentes a cada perfil estão no "
-     "Apêndice C.", first=True)
+body("O acesso ao observatório é governado pelo papel do usuário. As leituras exigem "
+     "autenticação e as mutações são restritas aos papéis de consultor e administrador: o "
+     "consultor conduz a curadoria do portfólio e o administrador acumula as permissões de "
+     "gestão, enquanto o cliente participa das conversas, mas não cria nem edita "
+     "observações, projetos ou aprendizados. O isolamento por cliente previsto no acesso "
+     "semi-aberto do MPO, em que cada cliente enxergaria apenas o seu próprio projeto, "
+     "ainda não foi implementado nesta versão: hoje qualquer usuário autenticado lê o "
+     "portfólio, e a governança por papel incide sobre as mutações. Consolidar esse "
+     "isolamento é um passo necessário antes de abrir o observatório a clientes reais. As "
+     "telas de cada perfil estão no Apêndice C.", first=True)
 subheading("4.6. Jornada do usuário e construção do MVP")
 body("A jornada central percorre quatro momentos: o cadastro de um projeto assistido por "
      "um wizard com apoio de IA, o registro de observações ancoradas no MPO, a conversa da "
@@ -549,8 +549,8 @@ body("Os resultados confirmam o MPO como base válida e mostram que ele é imple
      "onboarding não ter movido a clareza indica que o próximo passo é uma navegação "
      "guiada, com menu evidente, fluxo em etapas e exemplos práticos.", first=True)
 body("Como decisões arquiteturais, destacam-se a IA estritamente assistiva e a "
-     "governança por papel, que viabiliza o acesso semi-aberto com isolamento entre "
-     "clientes. Entre vantagens e limitações das ferramentas, o desenvolvimento em código "
+     "governança por papel, que restringe as ações de criação e edição a consultor e "
+     "administrador. Entre vantagens e limitações das ferramentas, o desenvolvimento em código "
      "deu controle sobre o pipeline e a governança, ao custo de mais esforço do que uma "
      "abordagem low-code. A experiência de uso do MPO mostrou que traduzir 44 atributos "
      "em uma interface sem jargão é mais difícil do que implementá-los.")
@@ -651,17 +651,19 @@ link_line("Pipeline da camada de IA", "https://github.com/raniel90/obione/blob/m
 link_line("Diagrama da arquitetura", "https://github.com/raniel90/obione/blob/main/atividades/arquitetura_diagrama.md")
 
 subheading("Apêndice C - Telas por perfil")
-body("A Tabela C.1 resume quais perfis acessam cada tela; em seguida, as Figuras C.1 a "
-     "C.6 ilustram as telas principais. O conjunto completo de telas está em "
-     "Principais_Telas_ObiOne.pdf, no repositório.", first=True)
-caption("Tabela C.1. Telas e perfis que as acessam.")
+body("A Tabela C.1 resume o que cada perfil pode fazer em cada tela. A leitura é aberta a "
+     "qualquer usuário autenticado; as ações de criação e edição são restritas a consultor "
+     "e administrador, e o cliente contribui comentando. Em seguida, as Figuras C.1 a C.6 "
+     "ilustram as telas principais. O conjunto completo está em Principais_Telas_ObiOne."
+     "pdf, no repositório.", first=True)
+caption("Tabela C.1. Ações permitidas por perfil em cada tela.")
 table(
     ["Tela", "Consultor", "Administrador", "Cliente"],
     [
-        ["Observatório (home)", "sim", "sim", "visão limitada"],
-        ["Comunidade", "sim", "sim", "sim (seu domínio)"],
-        ["Detalhe do projeto", "sim (todos atributos)", "sim", "sim (seu projeto)"],
-        ["Feed de novidades", "sim", "sim", "sim"],
+        ["Observatório (home)", "sim", "sim", "lê"],
+        ["Comunidade", "sim", "sim", "lê e comenta"],
+        ["Detalhe do projeto", "sim", "sim", "lê e comenta"],
+        ["Feed de novidades", "sim", "sim", "lê"],
         ["Consolidar com IA", "sim", "sim", "não"],
         ["Wizard de cadastro", "sim", "sim", "não"],
     ])
