@@ -73,11 +73,8 @@ def abstract_block(label, text):
     _run(p, text, italic=True)
 
 
-def heading(text, new_page=True):
+def heading(text):
     p = doc.add_paragraph()
-    if new_page:
-        # Cada seção de nível 1 começa no topo de uma nova página.
-        p.paragraph_format.page_break_before = True
     p.paragraph_format.space_before = Pt(12)
     p.paragraph_format.space_after = Pt(6)
     p.alignment = WD_ALIGN_PARAGRAPH.LEFT
@@ -178,8 +175,22 @@ def figure(img_path, caption_text, width_cm=13.0):
     caption(caption_text)
 
 
+def flow_box(text):
+    """Caixa única (bordada) com o fluxo em uma linha, setas → entre etapas.
+    Um 'diagrama simples' de pipeline, sem imagem."""
+    t = doc.add_table(rows=1, cols=1)
+    t.style = "Table Grid"
+    t.autofit = False
+    t.allow_autofit = False
+    cell = t.rows[0].cells[0]
+    cell.width = Cm(15.0)
+    cell.paragraphs[0].clear()
+    cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+    _run(cell.paragraphs[0], text, size=11)
+
+
 # ====================== CONTEÚDO ======================
-title("ObiOne: um observatório-comunidade de projetos viabilizado por IA Generativa")
+title("ObiOne: um observatório de projetos viabilizado por IA Generativa")
 centered("Bruno Rocha, Cynthia Oliveira, Moisés Júnior, Raniel Silva", size=12, bold=True, after=12)
 centered("Escola Politécnica de Pernambuco — Universidade de Pernambuco (UPE)", after=0)
 centered("Recife — PE — Brasil", after=0)
@@ -191,7 +202,7 @@ abstract_block(
     "Resumo.",
     "Consultorias acumulam conhecimento valioso a cada projeto, mas raramente dispõem "
     "de um sistema leve o bastante para preservá-lo e reaproveitá-lo entre clientes. "
-    "Este artigo apresenta o ObiOne, um observatório-comunidade de projetos construído "
+    "Este artigo apresenta o ObiOne, um observatório de projetos construído "
     "sobre o Modelo de Observatório de Projetos (MPO) e potencializado por IA "
     "Generativa. O trabalho segue a Design Science Research: além de construir o "
     "artefato, avalia seu funcionamento real (ciclo exercitado de ponta a ponta com IA "
@@ -202,66 +213,106 @@ abstract_block(
     "atenção. A principal contribuição é a demonstração empírica de que o MPO é "
     "implementável com IA generativa em uma consultoria real.")
 
-# 1. Introdução (fica na primeira página, logo após o Resumo)
-heading("1. Introdução", new_page=False)
-body("Em consultorias, o conhecimento produzido em um projeto tende a ficar com quem o "
-     "viveu. Lições sobre o que deu certo, riscos que se materializaram e decisões que "
-     "mudaram o rumo do trabalho raramente são capturadas de forma reaproveitável. "
-     "Revisões sistemáticas a respeito da gestão do conhecimento mostram que a captura, "
-     "análise e aplicação de lições aprendidas dependem mais de fatores culturais e "
-     "organizacionais do que de ferramentas (Henz, 2024; Kamudyariwa et al., 2025). O "
-     "obstáculo prático é o custo, visto que manter um repositório vivo de conhecimento "
-     "exige um esforço contínuo que poucas consultorias de pequeno e médio porte "
-     "conseguem sustentar.", first=True)
+# 1. Introdução
+heading("1. Introdução")
+body("Consultorias entregam, ano após ano, dezenas de projetos para clientes distintos, "
+     "e cada projeto produz um conhecimento valioso: o que funcionou, os riscos que se "
+     "materializaram e as decisões que mudaram o rumo do trabalho. Esse conhecimento, "
+     "porém, tende a permanecer tácito, preso a quem viveu o projeto, e raramente é "
+     "capturado de forma reaproveitável. Revisões sistemáticas sobre gestão do "
+     "conhecimento mostram que a captura, a análise e a aplicação de lições aprendidas "
+     "dependem mais de fatores culturais e organizacionais do que das ferramentas "
+     "adotadas (Henz, 2024; Kamudyariwa et al., 2025). O obstáculo prático é o custo: "
+     "manter um repositório vivo de conhecimento exige um esforço contínuo que poucas "
+     "consultorias de pequeno e médio porte conseguem sustentar. A consequência é "
+     "conhecida: erros se repetem entre projetos, há retrabalho e parte do aprendizado se "
+     "perde na transição de um caso para o outro.", first=True)
 body("Observatórios de projetos são uma resposta a esse problema. São sistemas de "
-     "informação que apoiam a coleta, organização, armazenamento, análise e a publicação "
-     "de observações, promovendo transparência (Vieira et al., 2021). O Modelo de "
-     "Observatório de Projetos (MPO) consolida essa abordagem em um conjunto de conceitos "
-     "hierárquicos que orienta a concepção desses sistemas (Vieira, 2022; de Farias "
-     "Junior et al., 2025).")
-body("Diante desse cenário, sobressaem-se duas lacunas principais. A primeira é técnica "
-     "e empírica: embora o MPO tenha sido validado conceitualmente e em estudos de caso "
-     "(de Farias Junior et al., 2025), nenhuma implementação conhecida o operacionaliza "
-     "com IA generativa. A segunda é comunitária: os observatórios descritos na "
-     "literatura tratam da organização executora, sem explorar a participação do cliente "
-     "como ator do ciclo de conhecimento. Nesse contexto, a IA generativa surge como uma "
-     "janela de oportunidade, pois reduz o custo de extrair e sintetizar informação "
-     "textual.")
-body("Ferramentas usuais de gestão de projetos, como quadros de tarefas e painéis, "
-     "registram o que foi feito, mas não capturam o porquê das decisões nem transformam "
-     "observações em conhecimento compartilhado; o MPO endereça essa lacuna ao tratar a "
-     "observação, e não apenas a execução, como objeto de primeira classe.")
-body("Alinhado a essa oportunidade, o propósito do observatório é fornecer à consultoria "
-     "um ambiente intuitivo para observar seus projetos, debater achados e consolidar "
-     "aprendizados reaproveitáveis. Diante disso, o objetivo deste artigo é investigar "
-     "como a IA generativa pode viabilizar um observatório-comunidade de projetos, de "
-     "modo a reduzir a fricção de manutenção e promover o engajamento entre a organização "
-     "executora e seus clientes. Para isso, o trabalho apresenta o ObiOne, detalhando sua "
-     "construção e trazendo uma avaliação de uso e percepção.")
+     "informação que apoiam a coleta, a organização, o armazenamento, a análise e a "
+     "publicação de observações, sistematizando a transparência sobre o andamento e as "
+     "decisões dos projetos (Vieira et al., 2021). O Modelo de Observatório de Projetos "
+     "(MPO) consolida essa abordagem em um conjunto de conceitos hierárquicos que orienta "
+     "a concepção desses sistemas (Vieira, 2022; de Farias Junior et al., 2025). O que "
+     "distingue um observatório de uma ferramenta comum de gestão é justamente tratar a "
+     "observação, e não apenas a execução, como objeto de primeira classe: ferramentas "
+     "usuais, como quadros de tarefas e painéis, registram o que foi feito, mas não "
+     "capturam o porquê das decisões nem transformam observações em conhecimento "
+     "compartilhado.")
+body("No contexto de uma consultoria, o portfólio se organiza por áreas de atuação e os "
+     "clientes se renovam a cada engajamento, o que torna o reaproveitamento de "
+     "aprendizados entre casos especialmente valioso. Além disso, o cliente não é apenas "
+     "destinatário do resultado: ele participa das decisões e detém informação que "
+     "enriquece a observação. Abrir o observatório, de forma controlada, à participação "
+     "do cliente cria uma dimensão comunitária que a literatura de observatórios, "
+     "centrada na organização executora, ainda não explora.")
+body("Diante desse cenário, sobressaem-se duas lacunas. A primeira é técnica e empírica: "
+     "embora o MPO tenha sido validado conceitualmente e em estudos de caso (de Farias "
+     "Junior et al., 2025), nenhuma implementação conhecida o operacionaliza com IA "
+     "generativa. A segunda é comunitária: os observatórios descritos na literatura "
+     "tratam da organização executora, sem explorar a participação do cliente como ator "
+     "do ciclo de conhecimento. A IA generativa surge, nesse ponto, como uma janela de "
+     "oportunidade, pois reduz o custo de extrair e sintetizar informação textual, tarefa "
+     "antes cara e manual.")
+body("Este artigo investiga como a IA generativa pode viabilizar um observatório de "
+     "projetos, de modo a reduzir a fricção de manutenção e promover o "
+     "engajamento entre a organização executora e seus clientes. Desse objetivo geral "
+     "derivam três objetivos específicos: demonstrar a viabilidade técnica de "
+     "operacionalizar o MPO com IA generativa; construir e exercitar a dimensão "
+     "comunitária, em que consultoria e clientes debatem observações e consolidam "
+     "aprendizados; e avaliar a percepção de valor da solução por usuários reais.")
+body("Para responder a essa pergunta, o trabalho apresenta o ObiOne, um observatório "
+     "de projetos construído sobre o MPO e potencializado por IA generativa, e segue a "
+     "Design Science Research, que trata a construção do artefato como forma legítima de "
+     "investigação. O restante do artigo está organizado como segue: a Seção 2 apresenta "
+     "a fundamentação teórica; a Seção 3, o método; a Seção 4, a implementação do "
+     "artefato; a Seção 5, os resultados da avaliação; a Seção 6, a discussão e as lições "
+     "aprendidas; e a Seção 7, a conclusão.")
 
 # 2. Fundamentação Teórica
 heading("2. Fundamentação Teórica")
 subheading("2.1. Observatórios de projetos e o MPO")
-body("Observatórios de projetos são sistemas de informação que sistematizam a "
-     "transparência por meio da observação (Vieira et al., 2021). O MPO é um modelo "
-     "conceitual para esses observatórios, organizado a partir de conceitos estruturados "
-     "em três níveis, geral, intermediário e específico (de Farias Junior et al., 2025). "
-     "Sua versão de tese sistematiza atributos de observação no Quadro 37, abrangendo "
-     "dimensões que vão de dados estruturais do projeto a registros narrativos como "
-     "escopo, riscos e lições aprendidas (Vieira, 2022).", first=True)
+body("A observação é um elemento antigo da gestão, e a transparência é o construto que, "
+     "na literatura recente, traduz a observação no contexto de projetos: tornar visíveis "
+     "o andamento, as decisões e os riscos fortalece o alinhamento entre a organização e "
+     "seus interessados (Vieira et al., 2021). Observatórios de projetos são os sistemas "
+     "de informação que sistematizam essa transparência, apoiando a coleta, a "
+     "organização, o armazenamento, a análise e a publicação de observações.", first=True)
+body("O Modelo de Observatório de Projetos (MPO) é um modelo conceitual para esses "
+     "sistemas, organizado a partir de 61 conceitos estruturados em três níveis "
+     "hierárquicos, do geral ao específico (de Farias Junior et al., 2025). Sua versão de "
+     "tese sistematiza os atributos de observação no Quadro 37, que reúne 44 atributos "
+     "distribuídos em oito dimensões, abrangendo desde dados estruturais do projeto até "
+     "registros narrativos como escopo, riscos e lições aprendidas (Vieira, 2022). O "
+     "modelo parte de uma perspectiva sociotécnica e relaciona transparência e governança "
+     "a sistemas de apoio à gestão de projetos; foi avaliado conceitualmente e em estudos "
+     "de caso (de Farias Junior et al., 2025), mas ainda não havia sido operacionalizado "
+     "com apoio de IA generativa.")
 subheading("2.2. Gestão do conhecimento em projetos")
-body("A literatura de gestão do conhecimento trata da captura e do reaproveitamento do "
-     "que se aprende ao longo do trabalho. Revisões recentes apontam que a implementação "
-     "efetiva depende de cultura, apoio gerencial e melhoria contínua (Henz, 2024), e que "
-     "em projetos complexos a aprendizagem se sustenta quando a captura, análise e a "
-     "aplicação de lições são sistemáticas (Kamudyariwa et al., 2025).", first=True)
+body("A gestão do conhecimento trata da captura e do reaproveitamento do que se aprende "
+     "ao longo do trabalho, e as lições aprendidas são uma de suas práticas centrais em "
+     "projetos. Revisões sistemáticas recentes indicam que a implementação efetiva "
+     "depende sobretudo de fatores humanos e organizacionais, como cultura, apoio "
+     "gerencial e melhoria contínua, e que, sem esses fatores, as práticas de lições "
+     "aprendidas tendem a falhar independentemente das ferramentas empregadas (Henz, "
+     "2024).", first=True)
+body("Em projetos complexos, a aprendizagem organizacional se sustenta quando a captura, "
+     "a análise e a aplicação de lições são conduzidas de forma sistemática, e não "
+     "pontual (Kamudyariwa et al., 2025). Esse é o ponto em que as ferramentas usuais de "
+     "gestão mostram seu limite: elas registram o que foi feito, mas não o porquê, e não "
+     "oferecem um lugar nem um ritual para que o conhecimento seja debatido e "
+     "consolidado. O observatório atua exatamente sobre essa lacuna.")
 subheading("2.3. IA Generativa como assistente")
-body("Modelos de linguagem têm sido estudados como apoio à análise textual. Estudos "
-     "recentes mostram que a IA acelera a identificação de temas descritivos e reduz o "
-     "esforço operacional, mas perde nuances que dependem de conhecimento contextual "
-     "humano (CHI, 2026; medRxiv, 2024). O consenso emergente é o de uma parceria guiada, "
-     "em que o humano permanece como líder intelectual, princípio conhecido como "
-     "human-in-the-loop.", first=True)
+body("Modelos de linguagem de grande porte têm sido estudados como apoio a tarefas de "
+     "análise textual, entre elas a codificação e a síntese qualitativa. Estudos recentes "
+     "mostram que a IA acelera a identificação de temas descritivos e reduz o esforço "
+     "operacional, mas perde nuances que dependem de conhecimento contextual humano (CHI, "
+     "2026; medRxiv, 2024).", first=True)
+body("Daí emerge um consenso de parceria guiada: a IA assume tarefas estruturadas "
+     "enquanto o humano permanece como líder intelectual da interpretação, princípio "
+     "conhecido como human-in-the-loop. Para um observatório, isso sugere um papel "
+     "assistivo para a IA, capaz de reduzir a fricção de registrar e sintetizar "
+     "conhecimento sem substituir o julgamento de quem conduz o projeto. É essa a posição "
+     "adotada pelo ObiOne.")
 
 # 3. Método
 heading("3. Método")
@@ -323,7 +374,8 @@ table(
         ["Registro e acompanhamento", "Processos Acompanhar e Avaliar (Vieira, 2022)", "ciclo observação → conversa → aprendizado"],
         ["Consolidação de aprendizados", "Transparência e disseminação (de Farias Junior et al., 2025)", "comunidade por domínio"],
     ])
-body("A cobertura resultante abrange os 44 atributos do Quadro 37 em 8 dimensões. "
+body("A cobertura resultante abrange os 44 atributos de observação previstos pelo MPO, "
+     "distribuídos em oito dimensões. "
      "Trata-se de cobertura arquitetural: o sistema provê os campos e os fluxos "
      "correspondentes. A avaliação empírica da qualidade da extração é uma frente "
      "prevista no protocolo, ainda não executada (Seção 5.4).", first=True)
@@ -341,17 +393,49 @@ body("O ObiOne é uma aplicação web dividida em backend e frontend. O backend 
      "encaminha as chamadas de API ao backend, o que simplifica o acesso remoto para as "
      "sessões de validação.", first=True)
 subheading("4.3. Camada de IA")
-body("A IA é uma camada assistiva sobre o ciclo de observação, conversa e aprendizado, "
-     "organizada em quatro papéis. A Observadora sugere observações ancoradas na gramática "
-     "do MPO; a Sintetizadora consolida conversas em aprendizados reaproveitáveis; a "
-     "Configuradora apoia o cadastro e a categorização de domínio; e a Consultora apoia a "
-     "leitura do portfólio. A integração usa Spring AI, com o provedor selecionável por "
-     "configuração: um modo determinístico, sem chave e voltado a testes, e o provedor da "
-     "OpenAI para uso real. Cada sugestão é registrada com sua proveniência, provedor, "
-     "modelo e instante, e com a indicação de aceite pelo consultor, o que torna o uso da "
-     "IA auditável. Toda sugestão é apenas uma proposta: a decisão de publicar é sempre "
-     "humana, em linha com o princípio human-in-the-loop (CHI, 2026; medRxiv, 2024).",
-     first=True)
+body("A camada de IA é o principal diferencial do ObiOne e atua de forma assistiva sobre "
+     "o ciclo de observação, conversa e aprendizado. Está organizada em cinco papéis; em "
+     "todos, a saída é uma sugestão, nunca uma ação publicada automaticamente. A Tabela 3 "
+     "resume os papéis, com suas entradas e saídas.", first=True)
+caption("Tabela 3. Papéis da camada de IA, com entradas e saídas.")
+table(
+    ["Papel", "Função", "Entrada", "Saída"],
+    [
+        ["Categorizadora", "Sugere o domínio do projeto", "resumo, objetivo, domínios disponíveis", "domínio sugerido e confiança"],
+        ["Observadora", "Sugere observações ancoradas no MPO", "resumo, objetivo, lente MPO, atributos prioritários", "observações mapeadas a atributos, com impacto e trecho literal"],
+        ["Sintetizadora", "Rascunha um aprendizado a partir da conversa", "título, pergunta, contribuições", "rascunho com resumo, evidência e recomendação"],
+        ["Conectora", "Sintetiza padrões entre projetos do domínio (implementada; não avaliada)", "resumos dos projetos do domínio", "padrões e lições anonimizados"],
+        ["Configuradora", "Sugere o setup inicial no cadastro", "nome, descrição, objetivo", "domínio, atributos e fenômenos esperados"],
+    ],
+    widths=[3.0, 4.5, 3.75, 3.75])
+body("O processamento de um projeto segue um fluxo comum. A partir do texto do projeto, o "
+     "serviço assistente reúne o contexto e o analisa à luz dos atributos de observação "
+     "do MPO; aciona a IA, que devolve uma sugestão estruturada; registra essa sugestão "
+     "de forma auditável, com sua proveniência; e a devolve ao consultor para revisão. A "
+     "Figura 1 ilustra esse fluxo.", first=True)
+flow_box("Descrição do projeto  →  Análise pela IA à luz do MPO  →  "
+         "Sugestão estruturada e auditável  →  Revisão do consultor  →  "
+         "Observação ou aprendizado publicado")
+caption("Figura 1. Pipeline da camada de IA.")
+body("Três técnicas sustentam a confiabilidade das sugestões. A primeira é a saída "
+     "estruturada: o modelo é obrigado a responder no formato de um objeto de dados, que "
+     "o sistema mapeia diretamente, sem interpretação livre do texto. A segunda é o "
+     "grounding pela lente do MPO, reforçado por instruções que orientam o modelo a não "
+     "inventar atributos fora da lista fornecida e a citar o trecho literal do resumo que "
+     "motivou cada observação. A terceira é uma validação determinística em código: na "
+     "configuração inicial de um projeto, identificadores de atributo ou de domínio "
+     "inexistentes no catálogo são descartados antes de a resposta ser devolvida; nos "
+     "demais papéis, essa restrição é reforçada pelas instruções do prompt. O provedor é "
+     "configurável: um modo determinístico, sem chave e "
+     "voltado a testes, e o provedor da OpenAI, com o modelo gpt-4o-mini e temperatura "
+     "baixa, para uso real.", first=True)
+body("A IA nunca escreve diretamente nas observações ou nos aprendizados. Ela apenas "
+     "sugere e registra cada sugestão em um log de auditoria, com o provedor, o modelo, o "
+     "instante e a indicação de aceite, o que dá reprodutibilidade ao uso da IA. A "
+     "persistência só ocorre quando o consultor aceita a sugestão, e a observação é então "
+     "gravada com a origem marcada como assistida pela IA. A taxa de aceite por tipo de "
+     "sugestão é observável no sistema, permitindo acompanhar o quanto as sugestões são de "
+     "fato aproveitadas.", first=True)
 subheading("4.4. Prototipação")
 body("Antes do desenvolvimento final, as telas foram prototipadas com apoio de "
      "ferramentas de geração assistida por IA no ecossistema React, incluindo o Lovable, "
@@ -399,9 +483,9 @@ body("A percepção de valor foi medida em duas rodadas de piloto com quatro con
      "obteve média 4,48 de 5, com 44 de 48 respostas nas notas 4 ou 5 e 29 máximas. A "
      "segunda foi mais crítica: média 4,1, com 36 de 48 respostas positivas e 19 "
      "máximas. No acumulado dos oito participantes, a média foi 4,3 de 5, com 80 de 96 "
-     "respostas positivas. A Tabela 3 apresenta o comparativo por dimensão entre as duas "
+     "respostas positivas. A Tabela 4 apresenta o comparativo por dimensão entre as duas "
      "rodadas.", first=True)
-caption("Tabela 3. Médias por dimensão nas duas rodadas (escala 1 a 5, N=4 por rodada).")
+caption("Tabela 4. Médias por dimensão nas duas rodadas (escala 1 a 5, N=4 por rodada).")
 table(
     ["Dimensão", "1ª rodada", "2ª rodada", "Δ"],
     [
@@ -472,7 +556,8 @@ body("Como decisões arquiteturais, destacam-se a IA estritamente assistiva e a 
      "em uma interface sem jargão é mais difícil do que implementá-los.")
 body("A lição mais marcante foi de escopo. O projeto passou por um pivô: a proposta "
      "inicial foi reescopada para refinar o propósito da solução, deslocando o foco de um "
-     "extrator de atributos para um observatório-comunidade. Esse refino exigiu bastante "
+     "extrator de atributos para um observatório de projetos com participação dos "
+     "clientes. Esse refino exigiu bastante "
      "trabalho ao longo de várias validações com os orientadores, e foi ele, mais do que "
      "qualquer ganho de ferramenta, que destravou o valor percebido. A IA generativa "
      "acelerou a construção, mas mostrou um limite claro: sem uma definição nítida do que "
@@ -510,8 +595,8 @@ body("A leitura comparativa das duas rodadas deixa cinco questões que delimitam
 body("Essas questões orientam os trabalhos futuros: realizar uma nova rodada controlada, "
      "com os mesmos usuários antes e depois de uma navegação guiada; ampliar a validação "
      "com mais participantes e domínios; executar o protocolo de avaliação da extração do "
-     "MPO; e explorar a síntese cross-projeto, que reconhece padrões entre clientes e "
-     "ficou fora do escopo deste estudo.")
+     "MPO; e avaliar a síntese cross-projeto (Conectora), já implementada com mitigações "
+     "de anonimização e gate de publicação, cuja avaliação de valor permanece em aberto.")
 
 # Referências
 heading("Referências")
