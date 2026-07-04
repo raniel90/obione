@@ -2,6 +2,7 @@ package br.com.obione.knowledge.service;
 
 import br.com.obione.common.exception.BadRequestException;
 import br.com.obione.common.exception.ResourceNotFoundException;
+import br.com.obione.common.security.CurrentUser;
 import br.com.obione.discussions.entity.Discussion;
 import br.com.obione.discussions.enums.DiscussionStatus;
 import br.com.obione.discussions.repository.DiscussionRepository;
@@ -20,10 +21,13 @@ import br.com.obione.phenomena.entity.Phenomenon;
 import br.com.obione.phenomena.repository.PhenomenonRepository;
 import br.com.obione.projects.entity.Project;
 import br.com.obione.projects.repository.ProjectRepository;
+import br.com.obione.projects.service.ProjectAccessGuard;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class KnowledgeService {
@@ -33,24 +37,40 @@ public class KnowledgeService {
     private final ProjectRepository projectRepository;
     private final DiscussionRepository discussionRepository;
     private final PhenomenonRepository phenomenonRepository;
+    private final CurrentUser currentUser;
+    private final ProjectAccessGuard guard;
 
     public KnowledgeService(
             KnowledgeRepository knowledgeRepository,
             DomainRepository domainRepository,
             ProjectRepository projectRepository,
             DiscussionRepository discussionRepository,
-            PhenomenonRepository phenomenonRepository
+            PhenomenonRepository phenomenonRepository,
+            CurrentUser currentUser,
+            ProjectAccessGuard guard
     ) {
         this.knowledgeRepository = knowledgeRepository;
         this.domainRepository = domainRepository;
         this.projectRepository = projectRepository;
         this.discussionRepository = discussionRepository;
         this.phenomenonRepository = phenomenonRepository;
+        this.currentUser = currentUser;
+        this.guard = guard;
     }
 
     @Transactional(readOnly = true)
     public List<KnowledgeResponseDTO> findAll() {
-        return knowledgeRepository.findAll().stream()
+        List<Knowledge> all = knowledgeRepository.findAll();
+        if (currentUser.isClient()) {
+            // A CLIENT sees only knowledge that is not tied to any project (domain-level)
+            // or that belongs to one of their own projects.
+            Set<Long> myProjectIds = clientProjectIds();
+            all = all.stream()
+                    .filter(k -> k.getProject() == null
+                            || myProjectIds.contains(k.getProject().getId()))
+                    .collect(Collectors.toList());
+        }
+        return all.stream()
                 .map(KnowledgeMapper::toResponseDTO)
                 .toList();
     }
@@ -72,6 +92,7 @@ public class KnowledgeService {
 
     @Transactional(readOnly = true)
     public List<KnowledgeResponseDTO> findByProjectId(Long projectId) {
+        guard.assertCanRead(projectId);
         ensureProjectExists(projectId);
         return knowledgeRepository.findByProject_IdOrderByCreatedAtDesc(projectId).stream()
                 .map(KnowledgeMapper::toResponseDTO)
@@ -266,5 +287,12 @@ public class KnowledgeService {
         if (phenomenon != null && !phenomenon.getDomain().getId().equals(domain.getId())) {
             throw new BadRequestException("O fenômeno informado não pertence ao domínio selecionado");
         }
+    }
+
+    /** Returns the set of project IDs owned by the currently authenticated CLIENT. */
+    private Set<Long> clientProjectIds() {
+        return projectRepository.findByClient_Id(currentUser.id()).stream()
+                .map(Project::getId)
+                .collect(Collectors.toSet());
     }
 }

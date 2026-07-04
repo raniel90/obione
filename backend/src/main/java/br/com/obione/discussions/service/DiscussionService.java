@@ -2,6 +2,7 @@ package br.com.obione.discussions.service;
 
 import br.com.obione.common.exception.BadRequestException;
 import br.com.obione.common.exception.ResourceNotFoundException;
+import br.com.obione.common.security.CurrentUser;
 import br.com.obione.discussions.dto.CreateDiscussionContributionRequestDTO;
 import br.com.obione.discussions.dto.CreateDiscussionRequestDTO;
 import br.com.obione.discussions.dto.DiscussionContributionResponseDTO;
@@ -21,6 +22,7 @@ import br.com.obione.phenomena.entity.Phenomenon;
 import br.com.obione.phenomena.repository.PhenomenonRepository;
 import br.com.obione.projects.entity.Project;
 import br.com.obione.projects.repository.ProjectRepository;
+import br.com.obione.projects.service.ProjectAccessGuard;
 import br.com.obione.users.entity.User;
 import br.com.obione.users.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class DiscussionService {
@@ -39,6 +43,8 @@ public class DiscussionService {
     private final PhenomenonRepository phenomenonRepository;
     private final ObservationRepository observationRepository;
     private final UserRepository userRepository;
+    private final CurrentUser currentUser;
+    private final ProjectAccessGuard guard;
 
     public DiscussionService(
             DiscussionRepository discussionRepository,
@@ -47,7 +53,9 @@ public class DiscussionService {
             ProjectRepository projectRepository,
             PhenomenonRepository phenomenonRepository,
             ObservationRepository observationRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            CurrentUser currentUser,
+            ProjectAccessGuard guard
     ) {
         this.discussionRepository = discussionRepository;
         this.contributionRepository = contributionRepository;
@@ -56,11 +64,23 @@ public class DiscussionService {
         this.phenomenonRepository = phenomenonRepository;
         this.observationRepository = observationRepository;
         this.userRepository = userRepository;
+        this.currentUser = currentUser;
+        this.guard = guard;
     }
 
     @Transactional(readOnly = true)
     public List<DiscussionResponseDTO> findAll() {
-        return discussionRepository.findAll().stream()
+        List<Discussion> all = discussionRepository.findAll();
+        if (currentUser.isClient()) {
+            // A CLIENT sees only discussions that are not tied to any project (domain-level)
+            // or that belong to one of their own projects.
+            Set<Long> myProjectIds = clientProjectIds();
+            all = all.stream()
+                    .filter(d -> d.getProject() == null
+                            || myProjectIds.contains(d.getProject().getId()))
+                    .collect(Collectors.toList());
+        }
+        return all.stream()
                 .map(this::toResponseWithContributions)
                 .toList();
     }
@@ -68,6 +88,11 @@ public class DiscussionService {
     @Transactional(readOnly = true)
     public DiscussionResponseDTO findById(Long id) {
         Discussion discussion = loadDiscussion(id);
+        // If the discussion is tied to a project, enforce per-project access for clients.
+        // Domain-level discussions (project == null) are visible to all authenticated users.
+        if (discussion.getProject() != null) {
+            guard.assertCanRead(discussion.getProject().getId());
+        }
         return toResponseWithContributions(discussion);
     }
 
@@ -81,6 +106,7 @@ public class DiscussionService {
 
     @Transactional(readOnly = true)
     public List<DiscussionResponseDTO> findByProjectId(Long projectId) {
+        guard.assertCanRead(projectId);
         ensureProjectExists(projectId);
         return discussionRepository.findByProject_IdOrderByCreatedAtDesc(projectId).stream()
                 .map(this::toResponseWithContributions)
@@ -235,5 +261,12 @@ public class DiscussionService {
                 }
             });
         }
+    }
+
+    /** Returns the set of project IDs owned by the currently authenticated CLIENT. */
+    private Set<Long> clientProjectIds() {
+        return projectRepository.findByClient_Id(currentUser.id()).stream()
+                .map(Project::getId)
+                .collect(Collectors.toSet());
     }
 }

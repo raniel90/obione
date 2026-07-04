@@ -27,19 +27,26 @@ public class ProjectCoverageService {
     private final MpoCatalog catalog;
     private final ObservationRepository observationRepository;
     private final ProjectRepository projectRepository;
+    private final ProjectAccessGuard guard;
 
     public ProjectCoverageService(
             MpoCatalog catalog,
             ObservationRepository observationRepository,
-            ProjectRepository projectRepository
+            ProjectRepository projectRepository,
+            ProjectAccessGuard guard
     ) {
         this.catalog = catalog;
         this.observationRepository = observationRepository;
         this.projectRepository = projectRepository;
+        this.guard = guard;
     }
 
     @Transactional(readOnly = true)
     public ProjectCoverageDTO coverage(Long projectId) {
+        // For a CLIENT: assertCanRead throws ResourceNotFoundException if the project doesn't
+        // exist or isn't theirs (intentionally indistinguishable from not-found).
+        // For staff: no-op — fall through to the explicit existence check below.
+        guard.assertCanRead(projectId);
         if (!projectRepository.existsById(projectId)) {
             throw new ResourceNotFoundException("Projeto não encontrado: " + projectId);
         }
