@@ -240,6 +240,10 @@ public class ProjectService {
         return ProjectMapper.toResponseDTO(projectRepository.save(project));
     }
 
+    /**
+     * Staff-only load (no client isolation). Only call from write operations already guarded by
+     * {@code hasAnyRole("CONSULTANT","ADMIN")} in {@code SecurityConfig}.
+     */
     private Project loadProject(Long id) {
         return projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Projeto não encontrado: " + id));
