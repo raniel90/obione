@@ -88,7 +88,17 @@ public class KnowledgeService {
     @Transactional(readOnly = true)
     public List<KnowledgeResponseDTO> findByDomainId(Long domainId) {
         ensureDomainExists(domainId);
-        return knowledgeRepository.findByDomain_IdOrderByCreatedAtDesc(domainId).stream()
+        List<Knowledge> all = knowledgeRepository.findByDomain_IdOrderByCreatedAtDesc(domainId);
+        if (currentUser.isClient()) {
+            // B7: for a CLIENT, show only domain-level knowledge (project == null, semi-open
+            // community) and knowledge belonging to the client's own project(s).
+            Set<Long> myProjectIds = guard.clientProjectIds();
+            all = all.stream()
+                    .filter(k -> k.getProject() == null
+                            || myProjectIds.contains(k.getProject().getId()))
+                    .collect(Collectors.toList());
+        }
+        return all.stream()
                 .map(KnowledgeMapper::toResponseDTO)
                 .toList();
     }

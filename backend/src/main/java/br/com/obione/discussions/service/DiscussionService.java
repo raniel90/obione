@@ -99,7 +99,17 @@ public class DiscussionService {
     @Transactional(readOnly = true)
     public List<DiscussionResponseDTO> findByDomainId(Long domainId) {
         ensureDomainExists(domainId);
-        return discussionRepository.findByDomain_IdOrderByCreatedAtDesc(domainId).stream()
+        List<Discussion> all = discussionRepository.findByDomain_IdOrderByCreatedAtDesc(domainId);
+        if (currentUser.isClient()) {
+            // B7: for a CLIENT, show only domain-level discussions (project == null, semi-open
+            // community) and discussions belonging to the client's own project(s).
+            Set<Long> myProjectIds = guard.clientProjectIds();
+            all = all.stream()
+                    .filter(d -> d.getProject() == null
+                            || myProjectIds.contains(d.getProject().getId()))
+                    .collect(Collectors.toList());
+        }
+        return all.stream()
                 .map(this::toResponseWithContributions)
                 .toList();
     }

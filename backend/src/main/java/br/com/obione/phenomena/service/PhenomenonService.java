@@ -98,7 +98,17 @@ public class PhenomenonService {
     @Transactional(readOnly = true)
     public List<PhenomenonResponseDTO> findByDomainId(Long domainId) {
         ensureDomainExists(domainId);
-        return phenomenonRepository.findByDomain_IdOrderByCreatedAtDesc(domainId).stream()
+        List<Phenomenon> all = phenomenonRepository.findByDomain_IdOrderByCreatedAtDesc(domainId);
+        if (currentUser.isClient()) {
+            // B7: for a CLIENT, show only domain-level phenomena (project == null, semi-open
+            // community) and phenomena belonging to the client's own project(s).
+            Set<Long> myProjectIds = guard.clientProjectIds();
+            all = all.stream()
+                    .filter(p -> p.getProject() == null
+                            || myProjectIds.contains(p.getProject().getId()))
+                    .collect(Collectors.toList());
+        }
+        return all.stream()
                 .map(this::toDto)
                 .toList();
     }
