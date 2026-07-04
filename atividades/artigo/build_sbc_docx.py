@@ -470,10 +470,10 @@ body("A jornada central percorre quatro momentos: o cadastro de um projeto assis
 heading("5. Resultados")
 subheading("5.1. Viabilidade técnica")
 body("Em junho de 2026, o ciclo foi exercitado de ponta a ponta com a IA da OpenAI e "
-     "dados de simulação. As quatro frentes assistivas operaram de forma integrada: "
-     "cadastro, sugestão de observações priorizadas pelos riscos declarados, aceite pelo "
-     "consultor, alimentação da cobertura, conversa com participação do cliente e "
-     "atualização do feed. A governança por papel foi confirmada na interface.", first=True)
+     "dados de projetos reais da consultoria. As quatro frentes assistivas operaram de "
+     "forma integrada: cadastro, sugestão de observações priorizadas pelos riscos "
+     "declarados, aceite pelo consultor, alimentação da cobertura, conversa com "
+     "participação do cliente e atualização do feed.", first=True)
 subheading("5.2. Percepção de valor")
 body("A percepção de valor foi medida em duas rodadas de piloto com quatro consultores "
      "cada, aplicando o mesmo instrumento de doze afirmações Likert e três perguntas "

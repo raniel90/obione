@@ -133,7 +133,7 @@ A jornada central percorre quatro momentos: o cadastro de um projeto assistido p
 
 ### 5.1 Viabilidade técnica
 
-Em junho de 2026, o ciclo foi exercitado de ponta a ponta com a IA da OpenAI e dados de simulação. As quatro frentes assistivas operaram de forma integrada: cadastro, sugestão de observações priorizadas pelos riscos declarados, aceite pelo consultor, alimentação da cobertura, conversa com participação do cliente e atualização do feed. A governança por papel foi confirmada na interface.
+Em junho de 2026, o ciclo foi exercitado de ponta a ponta com a IA da OpenAI e dados de projetos reais da consultoria. As quatro frentes assistivas operaram de forma integrada: cadastro, sugestão de observações priorizadas pelos riscos declarados, aceite pelo consultor, alimentação da cobertura, conversa com participação do cliente e atualização do feed.
 
 ### 5.2 Percepção de valor
 
