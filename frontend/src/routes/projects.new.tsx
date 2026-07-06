@@ -19,7 +19,7 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { getDomains } from "@/services/domainService";
 import { createProject } from "@/services/projectService";
-import { getUsersByProfile } from "@/services/userService";
+import { getUsersByProfile, createUser } from "@/services/userService";
 import { getMpoCategories } from "@/services/mpoAttributeService";
 import { suggestProjectSetup } from "@/services/aiService";
 import type { ProjectSetupSuggestion } from "@/services/aiService";
@@ -118,6 +118,12 @@ function NewProjectPage() {
   const [consultants, setConsultants] = useState<User[]>([]);
   const [mpoCategories, setMpoCategories] = useState<MpoCategory[]>([]);
 
+  // Inline "novo cliente" (mantém o cadastro do cliente dentro do fluxo do wizard).
+  const [showNewClient, setShowNewClient] = useState(false);
+  const [newClient, setNewClient] = useState({ name: "", email: "", password: "" });
+  const [creatingClient, setCreatingClient] = useState(false);
+  const [newClientError, setNewClientError] = useState<string | undefined>();
+
   const {
     register,
     handleSubmit,
@@ -147,6 +153,41 @@ function NewProjectPage() {
     startDate?: string;
     endDate?: string;
   }>({});
+
+  const handleCreateClient = async () => {
+    const name = newClient.name.trim();
+    const email = newClient.email.trim();
+    const password = newClient.password;
+    if (!name || !email || !password) {
+      setNewClientError("Preencha nome, e-mail e senha.");
+      return;
+    }
+    setCreatingClient(true);
+    setNewClientError(undefined);
+    try {
+      const created = await createUser({
+        name,
+        email,
+        password,
+        profileCode: "CLIENT",
+        status: "ACTIVE",
+        domainIds: [],
+        projectIds: [],
+      });
+      setClients((cs) => [...cs, created]);
+      setReview((r) => ({ ...r, clientId: created.id }));
+      setReviewErrors((e) => ({ ...e, clientId: undefined }));
+      setNewClient({ name: "", email: "", password: "" });
+      setShowNewClient(false);
+      toast.success(`Cliente "${created.name}" criado e selecionado.`);
+    } catch (err) {
+      setNewClientError(
+        err instanceof Error ? err.message : "Não foi possível criar o cliente.",
+      );
+    } finally {
+      setCreatingClient(false);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -453,25 +494,79 @@ function NewProjectPage() {
             >
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Cliente" required>
-                  <Select
-                    value={review.clientId}
-                    onValueChange={(v) => {
-                      setReview((r) => ({ ...r, clientId: v }));
-                      setReviewErrors((e) => ({ ...e, clientId: undefined }));
-                    }}
-                  >
-                    <SelectTrigger aria-invalid={!!reviewErrors.clientId}>
-                      <SelectValue placeholder="Selecione o cliente" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {clients.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>
-                          {c.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <Select
+                        value={review.clientId}
+                        onValueChange={(v) => {
+                          setReview((r) => ({ ...r, clientId: v }));
+                          setReviewErrors((e) => ({ ...e, clientId: undefined }));
+                        }}
+                      >
+                        <SelectTrigger aria-invalid={!!reviewErrors.clientId} className="w-full">
+                          <SelectValue placeholder="Selecione o cliente" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {clients.map((c) => (
+                            <SelectItem key={c.id} value={c.id}>
+                              {c.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setShowNewClient((s) => !s);
+                        setNewClientError(undefined);
+                      }}
+                    >
+                      {showNewClient ? "Cancelar" : "+ Novo cliente"}
+                    </Button>
+                  </div>
                   {reviewErrors.clientId && <FieldError>{reviewErrors.clientId}</FieldError>}
+                  {showNewClient && (
+                    <div className="mt-3 space-y-2 rounded-md border border-border/60 bg-muted/30 p-3">
+                      <p className="text-xs text-muted-foreground">
+                        Cadastre um cliente novo. Ele poderá entrar com este e-mail e senha.
+                      </p>
+                      <Input
+                        placeholder="Nome do cliente"
+                        value={newClient.name}
+                        onChange={(e) =>
+                          setNewClient((c) => ({ ...c, name: e.target.value }))
+                        }
+                      />
+                      <Input
+                        type="email"
+                        placeholder="E-mail"
+                        value={newClient.email}
+                        onChange={(e) =>
+                          setNewClient((c) => ({ ...c, email: e.target.value }))
+                        }
+                      />
+                      <Input
+                        type="password"
+                        placeholder="Senha provisória"
+                        value={newClient.password}
+                        onChange={(e) =>
+                          setNewClient((c) => ({ ...c, password: e.target.value }))
+                        }
+                      />
+                      {newClientError && <FieldError>{newClientError}</FieldError>}
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={handleCreateClient}
+                        disabled={creatingClient}
+                      >
+                        {creatingClient ? "Criando..." : "Criar e selecionar"}
+                      </Button>
+                    </div>
+                  )}
                 </Field>
                 <Field label="Consultor responsável">
                   <Select
