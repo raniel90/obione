@@ -92,10 +92,12 @@ public class OpenAiLlmClient implements LlmClient {
             List<String> availableDomainSlugs, String mpoLens) {
         return chat.prompt()
                 .system("Você ajuda a configurar um novo projeto em um observatório de projetos baseado no MPO. "
-                        + "A partir da descrição, sugira: o domínio (exatamente um dos slugs disponíveis, com confiança 0-1), "
-                        + "de 3 a 8 attributeIds da lente fornecida que valem acompanhar (não invente ids fora da lista), "
-                        + "de 2 a 4 fenômenos esperados (frases curtas em pt-BR, ex.: 'Risco de atraso') "
-                        + "e um rationale breve.")
+                        + "A partir da descrição, sugira: o domínio (exatamente um dos slugs disponíveis, com confiança 0-1); "
+                        + "os attributeIds da lente fornecida que valem acompanhar — inclua TODOS os atributos para os quais a "
+                        + "descrição traz conteúdo concreto e observável, sem limite fixo: se a descrição for rica e detalhada, "
+                        + "selecione muitos; se for vaga, selecione poucos. Não force um número mínimo nem máximo e não invente "
+                        + "ids fora da lista. Sugira ainda de 2 a 6 fenômenos esperados (frases curtas em pt-BR, ex.: 'Risco de "
+                        + "atraso') e um rationale breve explicando os critérios da seleção.")
                 .user("Nome do projeto: " + name
                         + "\nDescrição: " + description
                         + "\nObjetivo observacional: " + (objective == null ? "" : objective)
