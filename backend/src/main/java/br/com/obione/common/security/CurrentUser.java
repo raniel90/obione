@@ -3,27 +3,36 @@ package br.com.obione.common.security;
 import br.com.obione.common.exception.UnauthorizedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 
 /**
  * Spring-managed helper that exposes the authenticated user's identity and role
  * from the SecurityContext without coupling callers to Spring Security types.
- * The principal is a {@code Long} userId set by {@link br.com.obione.auth.MockTokenAuthFilter}.
+ * The principal is a {@link Jwt} set by the OAuth2 Resource Server JWT filter.
  */
 @Component
 public class CurrentUser {
 
     /**
-     * Returns the authenticated user's id.
+     * Returns the authenticated user's id, extracted from the JWT subject claim.
      *
      * @throws UnauthorizedException if there is no valid authenticated principal.
      */
     public Long id() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof Long)) {
+        if (auth == null || !auth.isAuthenticated()) {
             throw new UnauthorizedException("Usuário não autenticado.");
         }
-        return (Long) auth.getPrincipal();
+        Object p = auth.getPrincipal();
+        if (p instanceof Jwt jwt) {
+            return Long.valueOf(jwt.getSubject());
+        }
+        if (p instanceof Long l) {
+            // Backward-compatibility guard — should not be reached in production.
+            return l;
+        }
+        throw new UnauthorizedException("Usuário não autenticado.");
     }
 
     /**
