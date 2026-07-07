@@ -3,6 +3,7 @@ package br.com.obione.observations.service;
 import br.com.obione.ai.service.AiSuggestionAcceptanceService;
 import br.com.obione.common.exception.BadRequestException;
 import br.com.obione.common.exception.ResourceNotFoundException;
+import br.com.obione.common.security.CurrentUser;
 import br.com.obione.observations.dto.CreateObservationRequestDTO;
 import br.com.obione.observations.dto.ObservationResponseDTO;
 import br.com.obione.observations.dto.UpdateObservationRequestDTO;
@@ -16,6 +17,7 @@ import br.com.obione.projects.entity.Project;
 import br.com.obione.projects.enums.ProjectStatus;
 import br.com.obione.projects.enums.RiskLevel;
 import br.com.obione.projects.repository.ProjectRepository;
+import br.com.obione.projects.service.ProjectAccessGuard;
 import br.com.obione.users.entity.User;
 import br.com.obione.users.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -31,22 +33,31 @@ public class ObservationService {
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final AiSuggestionAcceptanceService acceptanceService;
+    private final CurrentUser currentUser;
+    private final ProjectAccessGuard guard;
 
     public ObservationService(
             ObservationRepository observationRepository,
             ProjectRepository projectRepository,
             UserRepository userRepository,
-            AiSuggestionAcceptanceService acceptanceService
+            AiSuggestionAcceptanceService acceptanceService,
+            CurrentUser currentUser,
+            ProjectAccessGuard guard
     ) {
         this.observationRepository = observationRepository;
         this.projectRepository = projectRepository;
         this.userRepository = userRepository;
         this.acceptanceService = acceptanceService;
+        this.currentUser = currentUser;
+        this.guard = guard;
     }
 
     @Transactional(readOnly = true)
     public List<ObservationResponseDTO> findByProjectId(Long projectId) {
-        ensureProjectExists(projectId);
+        guard.assertCanRead(projectId);
+        if (!currentUser.isClient()) {
+            ensureProjectExists(projectId);
+        }
         return observationRepository.findByProject_IdOrderByCreatedAtDesc(projectId).stream()
                 .map(ObservationMapper::toResponseDTO)
                 .toList();
@@ -54,9 +65,11 @@ public class ObservationService {
 
     @Transactional(readOnly = true)
     public ObservationResponseDTO findById(Long id) {
-        return observationRepository.findById(id)
-                .map(ObservationMapper::toResponseDTO)
+        Observation observation = observationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Observação não encontrada: " + id));
+        // Observation always has a non-null project (optional=false on the entity).
+        guard.assertCanRead(observation.getProject().getId());
+        return ObservationMapper.toResponseDTO(observation);
     }
 
     @Transactional

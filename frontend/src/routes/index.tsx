@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { createFileRoute } from "@tanstack/react-router";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import type { Project as LegacyProject, ProjectStatus } from "@/lib/mock-data";
 import type { Project as SvcProject, ProjectStatusCode, ProjectTypeCode } from "@/types/project";
 import type { Domain as SvcDomain } from "@/types/domain";
@@ -200,10 +201,13 @@ function SectionHeader({
 }
 
 function ObservatoryDashboard() {
+  const { isClient, user } = useCurrentUser();
   const [projects, setProjects] = useState<LegacyProject[]>([]);
   const [domains, setDomains] = useState<SvcDomain[]>([]);
   const [knowledge, setKnowledge] = useState<Knowledge[]>([]);
   const [feedEvents, setFeedEvents] = useState<FeedEvent[]>([]);
+  const [feedLoaded, setFeedLoaded] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -219,11 +223,24 @@ function ObservatoryDashboard() {
       setDomains(svcDomains);
       setKnowledge(knowledgeList.slice(0, 4));
       setFeedEvents(feed);
+      setFeedLoaded(true);
     });
     return () => {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!feedLoaded || !isClient || !user?.email) return;
+    if (typeof window === "undefined") return;
+    const key = `obione-novidades-seen:${user.email}`;
+    const lastSeen = localStorage.getItem(key);
+    const count = lastSeen
+      ? feedEvents.filter((e) => new Date(e.createdAt) > new Date(lastSeen)).length
+      : feedEvents.length;
+    setUnreadCount(count);
+    localStorage.setItem(key, new Date().toISOString());
+  }, [feedEvents, feedLoaded, isClient, user?.email]);
 
   const domainNameById = new Map(domains.map((d) => [d.id, d.name] as const));
   const domainSlugById = new Map(domains.map((d) => [d.id, d.slug] as const));
@@ -245,19 +262,66 @@ function ObservatoryDashboard() {
   return (
     <AppShell>
       <PageHeader
-        title="Observatório de Projetos"
-        description="O que a consultoria está observando agora e o que a comunidade já aprendeu com isso."
+        title={isClient ? "Meu projeto" : "Observatório de Projetos"}
+        description={
+          isClient
+            ? "Acompanhe o andamento do seu projeto e veja o que a comunidade aprendeu."
+            : "O que a consultoria está observando agora e o que a comunidade já aprendeu com isso."
+        }
         actions={
-          <Button asChild size="sm" className="gap-1.5">
-            <Link to="/projects/new">
-              <Plus className="h-3.5 w-3.5" />
-              Novo projeto
-            </Link>
-          </Button>
+          isClient ? undefined : (
+            <Button asChild size="sm" className="gap-1.5">
+              <Link to="/projects/new">
+                <Plus className="h-3.5 w-3.5" />
+                Novo projeto
+              </Link>
+            </Button>
+          )
         }
       />
 
       <div className="px-6 py-6 md:px-10">
+        {/* ---------- Novidades (somente cliente) ---------- */}
+        {isClient && (
+          <section className="mb-10">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <h2 className="text-[18px] font-semibold tracking-tight text-foreground">
+                  Novidades no seu projeto
+                </h2>
+                {unreadCount > 0 && (
+                  <span className="rounded-full bg-info/15 px-2 py-0.5 text-[10px] font-medium text-info">
+                    {unreadCount} {unreadCount === 1 ? "nova" : "novas"}
+                  </span>
+                )}
+              </div>
+              <Link
+                to="/feed"
+                className="inline-flex items-center gap-1 text-[12px] text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Ver todas
+                <ArrowRight className="h-3 w-3" />
+              </Link>
+            </div>
+            <p className="mt-1 text-[13px] text-muted-foreground">
+              Acompanhe e participe da conversa do seu projeto.
+            </p>
+            <div className="mt-4 rounded-xl border border-border bg-muted/30">
+              {feedEvents.length === 0 ? (
+                <p className="p-5 text-[12.5px] leading-relaxed text-muted-foreground">
+                  Ainda não há novidades no seu projeto.
+                </p>
+              ) : (
+                <ul className="divide-y divide-border px-4">
+                  {feedEvents.slice(0, 5).map((e) => (
+                    <FeedEventItem key={`${e.kind}-${e.id}`} e={e} />
+                  ))}
+                </ul>
+              )}
+            </div>
+          </section>
+        )}
+
         {/* ---------- Visão Operacional ---------- */}
         <section>
           <SectionHeader
@@ -313,8 +377,8 @@ function ObservatoryDashboard() {
         </section>
 
         {/* ---------- Insights do Observatório ---------- */}
-        <section className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2">
+        <section className={`mt-12 grid grid-cols-1 gap-6 ${isClient ? "" : "lg:grid-cols-3"}`}>
+          <div className={isClient ? "" : "lg:col-span-2"}>
             <SectionHeader
               title="Aprendizados"
               tooltip="Aprendizados que a comunidade consolidou a partir das conversas dos projetos. Abra um card para vê-lo na comunidade."
@@ -348,36 +412,38 @@ function ObservatoryDashboard() {
             )}
           </div>
 
-          {/* Atividade recente */}
-          <aside>
-            <SectionHeader
-              title="Atividade recente"
-              tooltip="Observações, conversas e aprendizados registrados nos projetos, do mais recente ao mais antigo."
-              action={
-                <Link
-                  to="/feed"
-                  className="inline-flex items-center gap-1 text-[12px] text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  Ver todos
-                  <ArrowRight className="h-3 w-3" />
-                </Link>
-              }
-            />
-            <div className="mt-4 rounded-xl border border-border bg-card">
-              {feedEvents.length === 0 ? (
-                <p className="p-4 text-[12.5px] leading-relaxed text-muted-foreground">
-                  Sem atividade registrada ainda: observações, conversas e aprendizados aparecerão
-                  aqui.
-                </p>
-              ) : (
-                <ul className="divide-y divide-border px-4">
-                  {feedEvents.map((e) => (
-                    <FeedEventItem key={`${e.kind}-${e.id}`} e={e} />
-                  ))}
-                </ul>
-              )}
-            </div>
-          </aside>
+          {/* Atividade recente (somente staff) */}
+          {!isClient && (
+            <aside>
+              <SectionHeader
+                title="Atividade recente"
+                tooltip="Observações, conversas e aprendizados registrados nos projetos, do mais recente ao mais antigo."
+                action={
+                  <Link
+                    to="/feed"
+                    className="inline-flex items-center gap-1 text-[12px] text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    Ver todos
+                    <ArrowRight className="h-3 w-3" />
+                  </Link>
+                }
+              />
+              <div className="mt-4 rounded-xl border border-border bg-card">
+                {feedEvents.length === 0 ? (
+                  <p className="p-4 text-[12.5px] leading-relaxed text-muted-foreground">
+                    Sem atividade registrada ainda: observações, conversas e aprendizados aparecerão
+                    aqui.
+                  </p>
+                ) : (
+                  <ul className="divide-y divide-border px-4">
+                    {feedEvents.map((e) => (
+                      <FeedEventItem key={`${e.kind}-${e.id}`} e={e} />
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </aside>
+          )}
         </section>
       </div>
     </AppShell>

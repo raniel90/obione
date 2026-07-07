@@ -1,6 +1,7 @@
 package br.com.obione.community.service;
 
 import br.com.obione.common.exception.ResourceNotFoundException;
+import br.com.obione.common.security.CurrentUser;
 import br.com.obione.community.dto.CommunityDiscussionDTO;
 import br.com.obione.community.dto.CommunityKnowledgeDTO;
 import br.com.obione.community.dto.CommunityOverviewDTO;
@@ -22,6 +23,7 @@ import br.com.obione.phenomena.entity.Phenomenon;
 import br.com.obione.phenomena.repository.PhenomenonRepository;
 import br.com.obione.projects.entity.Project;
 import br.com.obione.projects.repository.ProjectRepository;
+import br.com.obione.projects.service.ProjectAccessGuard;
 import br.com.obione.users.entity.User;
 import br.com.obione.users.enums.UserStatus;
 import br.com.obione.users.repository.UserRepository;
@@ -33,11 +35,33 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+/**
+ * Aggregated community view of the observatory.
+ *
+ * <p><strong>Client isolation (B7):</strong>
+ * <ul>
+ *   <li><em>Overview ({@code GET /community})</em>: a CLIENT sees only the
+ *       domain(s) that contain their project(s). Recent discussions and knowledge
+ *       are filtered to their domain(s)/project(s).</li>
+ *   <li><em>Domain detail ({@code GET /community/domains/…})</em>: a CLIENT sees
+ *       only their project(s) in that domain. Discussions, knowledge and phenomena
+ *       are filtered to domain-level items ({@code project == null} — semi-open
+ *       community) plus items belonging to the client's own project(s). Hard 404
+ *       is NOT raised for foreign domains — the response is filtered in place
+ *       (prefer filtering over denial for a semi-open observatory).</li>
+ * </ul>
+ * Staff (CONSULTANT/ADMIN) are unaffected.
+ */
 @Service
 public class CommunityService {
 
     private static final int RECENT_LIMIT = 10;
+    // Over-fetch factor used when filtering recent items for clients to ensure
+    // we collect enough items after the client-scoping filter is applied.
+    private static final int CLIENT_OVERFETCH = 5;
     private static final int TOP_PHENOMENA_LIMIT = 6;
 
     private final DomainRepository domainRepository;
@@ -47,6 +71,8 @@ public class CommunityService {
     private final DiscussionContributionRepository contributionRepository;
     private final KnowledgeRepository knowledgeRepository;
     private final PhenomenonRepository phenomenonRepository;
+    private final CurrentUser currentUser;
+    private final ProjectAccessGuard guard;
 
     public CommunityService(
             DomainRepository domainRepository,
@@ -55,7 +81,9 @@ public class CommunityService {
             DiscussionRepository discussionRepository,
             DiscussionContributionRepository contributionRepository,
             KnowledgeRepository knowledgeRepository,
-            PhenomenonRepository phenomenonRepository
+            PhenomenonRepository phenomenonRepository,
+            CurrentUser currentUser,
+            ProjectAccessGuard guard
     ) {
         this.domainRepository = domainRepository;
         this.userRepository = userRepository;
@@ -64,6 +92,8 @@ public class CommunityService {
         this.contributionRepository = contributionRepository;
         this.knowledgeRepository = knowledgeRepository;
         this.phenomenonRepository = phenomenonRepository;
+        this.currentUser = currentUser;
+        this.guard = guard;
     }
 
     @Transactional(readOnly = true)
@@ -71,11 +101,47 @@ public class CommunityService {
         List<Domain> domains = domainRepository.findAll();
         List<User> users = userRepository.findAll();
 
+        // B7.1 — compute client scope once; null means no restriction (staff).
+        Set<Long> myProjectIds = null;
+        Set<Long> myDomainIds = null;
+        if (currentUser.isClient()) {
+            List<Project> clientProjects = projectRepository.findByClient_Id(currentUser.id());
+            myProjectIds = clientProjects.stream()
+                    .map(Project::getId)
+                    .collect(Collectors.toUnmodifiableSet());
+            myDomainIds = clientProjects.stream()
+                    .filter(p -> p.getDomain() != null)
+                    .map(p -> p.getDomain().getId())
+                    .collect(Collectors.toUnmodifiableSet());
+            final Set<Long> visibleDomainIds = myDomainIds;
+            domains = domains.stream()
+                    .filter(d -> visibleDomainIds.contains(d.getId()))
+                    .toList();
+        }
+
         long totalDomains = domains.size();
         long totalParticipants = userRepository.countByStatus(UserStatus.ACTIVE);
-        long totalDiscussions = discussionRepository.countByStatusNot(DiscussionStatus.ARCHIVED);
-        long totalKnowledge = knowledgeRepository.count();
-        long totalContributions = contributionRepository.count();
+
+        // Aggregate counts — scoped to the client's visible domains when applicable.
+        long totalDiscussions;
+        long totalKnowledge;
+        long totalContributions;
+        if (currentUser.isClient()) {
+            final Set<Long> visibleDomainIds = myDomainIds;
+            totalDiscussions = visibleDomainIds.stream()
+                    .mapToLong(did -> discussionRepository.countByDomain_IdAndStatusNot(did, DiscussionStatus.ARCHIVED))
+                    .sum();
+            totalKnowledge = visibleDomainIds.stream()
+                    .mapToLong(knowledgeRepository::countByDomain_Id)
+                    .sum();
+            totalContributions = visibleDomainIds.stream()
+                    .mapToLong(contributionRepository::countByDiscussionDomainId)
+                    .sum();
+        } else {
+            totalDiscussions = discussionRepository.countByStatusNot(DiscussionStatus.ARCHIVED);
+            totalKnowledge = knowledgeRepository.count();
+            totalContributions = contributionRepository.count();
+        }
 
         List<DomainCommunityDTO> domainCommunities = domains.stream()
                 .map(domain -> buildDomainSummary(domain, users))
@@ -85,19 +151,46 @@ public class CommunityService {
                 .filter(summary -> summary.projectCount() > 0 || summary.discussionCount() > 0)
                 .count();
 
+        // Recent discussions — over-fetch then filter for clients.
+        int discussionFetchSize = currentUser.isClient() ? RECENT_LIMIT * CLIENT_OVERFETCH : RECENT_LIMIT;
         List<Discussion> recentDiscussionEntities = discussionRepository.findByStatusNotOrderByUpdatedAtDesc(
                 DiscussionStatus.ARCHIVED,
-                PageRequest.of(0, RECENT_LIMIT)
+                PageRequest.of(0, discussionFetchSize)
         );
+        if (currentUser.isClient()) {
+            final Set<Long> finalMyProjectIds = myProjectIds;
+            final Set<Long> finalMyDomainIds = myDomainIds;
+            recentDiscussionEntities = recentDiscussionEntities.stream()
+                    .filter(d -> clientVisible(
+                            d.getProject() != null ? d.getProject().getId() : null,
+                            d.getDomain().getId(),
+                            finalMyProjectIds,
+                            finalMyDomainIds))
+                    .limit(RECENT_LIMIT)
+                    .toList();
+        }
         Map<Long, Integer> recentContributionCounts = buildContributionCounts(recentDiscussionEntities);
-
         List<CommunityDiscussionDTO> recentDiscussions = recentDiscussionEntities.stream()
                 .map(discussion -> CommunityMapper.toDiscussionDTO(discussion, recentContributionCounts))
                 .toList();
 
-        List<CommunityKnowledgeDTO> recentKnowledge = knowledgeRepository
-                .findAllByOrderByCreatedAtDesc(PageRequest.of(0, RECENT_LIMIT))
-                .stream()
+        // Recent knowledge — over-fetch then filter for clients.
+        int knowledgeFetchSize = currentUser.isClient() ? RECENT_LIMIT * CLIENT_OVERFETCH : RECENT_LIMIT;
+        List<Knowledge> knowledgePage = knowledgeRepository
+                .findAllByOrderByCreatedAtDesc(PageRequest.of(0, knowledgeFetchSize));
+        if (currentUser.isClient()) {
+            final Set<Long> finalMyProjectIds = myProjectIds;
+            final Set<Long> finalMyDomainIds = myDomainIds;
+            knowledgePage = knowledgePage.stream()
+                    .filter(k -> clientVisible(
+                            k.getProject() != null ? k.getProject().getId() : null,
+                            k.getDomain().getId(),
+                            finalMyProjectIds,
+                            finalMyDomainIds))
+                    .limit(RECENT_LIMIT)
+                    .toList();
+        }
+        List<CommunityKnowledgeDTO> recentKnowledge = knowledgePage.stream()
                 .map(CommunityMapper::toKnowledgeDTO)
                 .toList();
 
@@ -118,14 +211,16 @@ public class CommunityService {
     public DomainCommunityDTO getByDomainId(Long domainId) {
         Domain domain = domainRepository.findById(domainId)
                 .orElseThrow(() -> new ResourceNotFoundException("Domínio não encontrado: " + domainId));
-        return buildDomainCommunity(domain);
+        Set<Long> myProjectIds = currentUser.isClient() ? guard.clientProjectIds() : null;
+        return buildDomainCommunity(domain, myProjectIds);
     }
 
     @Transactional(readOnly = true)
     public DomainCommunityDTO getByDomainSlug(String slug) {
         Domain domain = domainRepository.findBySlug(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Domínio não encontrado para slug: " + slug));
-        return buildDomainCommunity(domain);
+        Set<Long> myProjectIds = currentUser.isClient() ? guard.clientProjectIds() : null;
+        return buildDomainCommunity(domain, myProjectIds);
     }
 
     private DomainCommunityDTO buildDomainSummary(Domain domain, List<User> allUsers) {
@@ -166,17 +261,36 @@ public class CommunityService {
         );
     }
 
-    private DomainCommunityDTO buildDomainCommunity(Domain domain) {
+    /**
+     * Builds the full domain community detail.
+     *
+     * @param myProjectIds when non-null (CLIENT caller), restricts projects, discussions,
+     *                     knowledge and phenomena to the client's own project(s).
+     *                     Domain-level items ({@code project == null}) remain visible as
+     *                     part of the semi-open community.  Participants are always shown
+     *                     as they are community-level metadata.
+     */
+    private DomainCommunityDTO buildDomainCommunity(Domain domain, Set<Long> myProjectIds) {
         Long domainId = domain.getId();
         List<User> allUsers = userRepository.findAll();
         List<Project> projects = projectRepository.findByDomain_Id(domainId);
 
+        // B7.3: filter projects for a CLIENT
+        if (myProjectIds != null) {
+            final Set<Long> visible = myProjectIds;
+            projects = projects.stream()
+                    .filter(p -> visible.contains(p.getId()))
+                    .toList();
+        }
+
+        // Capture effectively-final alias after the conditional reassignment above.
+        final List<Project> visibleProjects = projects;
         List<CommunityParticipantDTO> participants = allUsers.stream()
-                .filter(user -> UserAffiliationHelper.isParticipantForDomain(user, domainId, projects))
+                .filter(user -> UserAffiliationHelper.isParticipantForDomain(user, domainId, visibleProjects))
                 .map(CommunityMapper::toParticipantDTO)
                 .toList();
 
-        List<CommunityProjectDTO> projectDtos = projects.stream()
+        List<CommunityProjectDTO> projectDtos = visibleProjects.stream()
                 .map(CommunityMapper::toProjectDTO)
                 .toList();
 
@@ -184,19 +298,39 @@ public class CommunityService {
                 domainId,
                 DiscussionStatus.ARCHIVED
         );
+        // B7.3: domain-level discussions (project==null) stay visible; project-tied ones
+        // are restricted to the client's projects.
+        if (myProjectIds != null) {
+            final Set<Long> visible = myProjectIds;
+            discussions = discussions.stream()
+                    .filter(d -> d.getProject() == null || visible.contains(d.getProject().getId()))
+                    .toList();
+        }
         Map<Long, Integer> contributionCounts = buildContributionCounts(discussions);
 
         List<CommunityDiscussionDTO> discussionDtos = discussions.stream()
                 .map(discussion -> CommunityMapper.toDiscussionDTO(discussion, contributionCounts))
                 .toList();
 
-        List<CommunityKnowledgeDTO> knowledgeDtos = knowledgeRepository
-                .findByDomain_IdOrderByCreatedAtDesc(domainId)
-                .stream()
+        List<Knowledge> knowledgeEntities = knowledgeRepository
+                .findByDomain_IdOrderByCreatedAtDesc(domainId);
+        if (myProjectIds != null) {
+            final Set<Long> visible = myProjectIds;
+            knowledgeEntities = knowledgeEntities.stream()
+                    .filter(k -> k.getProject() == null || visible.contains(k.getProject().getId()))
+                    .toList();
+        }
+        List<CommunityKnowledgeDTO> knowledgeDtos = knowledgeEntities.stream()
                 .map(CommunityMapper::toKnowledgeDTO)
                 .toList();
 
         List<Phenomenon> domainPhenomena = phenomenonRepository.findByDomain_IdOrderByCreatedAtDesc(domainId);
+        if (myProjectIds != null) {
+            final Set<Long> visible = myProjectIds;
+            domainPhenomena = domainPhenomena.stream()
+                    .filter(p -> p.getProject() == null || visible.contains(p.getProject().getId()))
+                    .toList();
+        }
 
         List<CommunityPhenomenonDTO> topPhenomena = domainPhenomena.stream()
                 .sorted(Comparator.comparingInt(Phenomenon::getEvidenceCount).reversed())
@@ -204,7 +338,15 @@ public class CommunityService {
                 .map(CommunityMapper::toPhenomenonDTO)
                 .toList();
 
-        long contributionCount = contributionRepository.countByDiscussionDomainId(domainId);
+        // Fix B: for a CLIENT, derive the count from the already-filtered discussions so it
+        // matches the visible list. For staff (myProjectIds == null) keep the domain-wide
+        // count unchanged so their numbers are unaffected.
+        long contributionCount;
+        if (myProjectIds != null) {
+            contributionCount = contributionCounts.values().stream().mapToLong(Integer::longValue).sum();
+        } else {
+            contributionCount = contributionRepository.countByDiscussionDomainId(domainId);
+        }
 
         return new DomainCommunityDTO(
                 domainId,
@@ -224,6 +366,23 @@ public class CommunityService {
                 knowledgeDtos,
                 topPhenomena
         );
+    }
+
+    /**
+     * Whether an item is visible to the currently authenticated CLIENT.
+     * An item is visible when:
+     * <ul>
+     *   <li>it is domain-level ({@code itemProjectId == null}) <em>and</em> belongs to
+     *       one of the client's domains (semi-open community rule), or</li>
+     *   <li>it is tied to one of the client's own projects.</li>
+     * </ul>
+     */
+    private boolean clientVisible(Long itemProjectId, Long itemDomainId,
+                                   Set<Long> myProjectIds, Set<Long> myDomainIds) {
+        if (itemProjectId == null) {
+            return myDomainIds.contains(itemDomainId);
+        }
+        return myProjectIds.contains(itemProjectId);
     }
 
     private Map<Long, Integer> buildContributionCounts(List<Discussion> discussions) {

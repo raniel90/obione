@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { StatusBadge } from "@/components/status-badge";
 import { type ProjectStatus, type Project as LegacyProject } from "@/lib/mock-data";
 import type { Project as SvcProject, ProjectStatusCode, ProjectTypeCode } from "@/types/project";
@@ -178,6 +179,7 @@ function ObservedProjectCard({
 }
 
 function ProjectsCatalog() {
+  const { isClient } = useCurrentUser();
   const [query, setQuery] = useState("");
   const [domains, setDomains] = useState<SvcDomain[]>([]);
   const [svcProjects, setSvcProjects] = useState<SvcProject[]>([]);
@@ -225,15 +227,21 @@ function ProjectsCatalog() {
   return (
     <AppShell>
       <PageHeader
-        title="Projetos"
-        description="Casos observados pelo ObiOne dentro dos domínios organizacionais."
+        title={isClient ? "Meu projeto" : "Projetos"}
+        description={
+          isClient
+            ? "O caso do seu projeto observado pelo ObiOne."
+            : "Casos observados pelo ObiOne dentro dos domínios organizacionais."
+        }
         actions={
-          <Button asChild size="sm" className="gap-1.5">
-            <Link to="/projects/new">
-              <Plus className="h-3.5 w-3.5" />
-              Novo projeto
-            </Link>
-          </Button>
+          isClient ? undefined : (
+            <Button asChild size="sm" className="gap-1.5">
+              <Link to="/projects/new">
+                <Plus className="h-3.5 w-3.5" />
+                Novo projeto
+              </Link>
+            </Button>
+          )
         }
       />
 

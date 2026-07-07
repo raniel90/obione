@@ -2,6 +2,7 @@ package br.com.obione.phenomena.service;
 
 import br.com.obione.common.exception.BadRequestException;
 import br.com.obione.common.exception.ResourceNotFoundException;
+import br.com.obione.common.security.CurrentUser;
 import br.com.obione.domains.entity.Domain;
 import br.com.obione.domains.repository.DomainRepository;
 import br.com.obione.phenomena.dto.CreatePhenomenonRequestDTO;
@@ -16,10 +17,13 @@ import br.com.obione.observations.repository.ObservationRepository;
 import br.com.obione.phenomena.repository.PhenomenonRepository;
 import br.com.obione.projects.entity.Project;
 import br.com.obione.projects.repository.ProjectRepository;
+import br.com.obione.projects.service.ProjectAccessGuard;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class PhenomenonService {
@@ -28,17 +32,23 @@ public class PhenomenonService {
     private final DomainRepository domainRepository;
     private final ProjectRepository projectRepository;
     private final ObservationRepository observationRepository;
+    private final CurrentUser currentUser;
+    private final ProjectAccessGuard guard;
 
     public PhenomenonService(
             PhenomenonRepository phenomenonRepository,
             DomainRepository domainRepository,
             ProjectRepository projectRepository,
-            ObservationRepository observationRepository
+            ObservationRepository observationRepository,
+            CurrentUser currentUser,
+            ProjectAccessGuard guard
     ) {
         this.phenomenonRepository = phenomenonRepository;
         this.domainRepository = domainRepository;
         this.projectRepository = projectRepository;
         this.observationRepository = observationRepository;
+        this.currentUser = currentUser;
+        this.guard = guard;
     }
 
     /** Evidence is what the observatory actually registered: observations linked to the phenomenon. */
@@ -49,21 +59,39 @@ public class PhenomenonService {
 
     @Transactional(readOnly = true)
     public List<PhenomenonResponseDTO> findAll() {
-        return phenomenonRepository.findAll().stream()
+        List<Phenomenon> all = phenomenonRepository.findAll();
+        if (currentUser.isClient()) {
+            // A CLIENT sees phenomena tied to their own projects, OR domain-level phenomena
+            // (project == null) that belong to one of their own domains.
+            Set<Long> myProjectIds = guard.clientProjectIds();
+            Set<Long> myDomainIds = guard.clientDomainIds();
+            all = all.stream()
+                    .filter(p -> p.getProject() != null
+                            ? myProjectIds.contains(p.getProject().getId())
+                            : myDomainIds.contains(p.getDomain().getId()))
+                    .collect(Collectors.toList());
+        }
+        return all.stream()
                 .map(this::toDto)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public PhenomenonResponseDTO findById(Long id) {
-        return phenomenonRepository.findById(id)
-                .map(this::toDto)
+        Phenomenon phenomenon = phenomenonRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Fenômeno não encontrado: " + id));
+        if (phenomenon.getProject() != null) {
+            guard.assertCanRead(phenomenon.getProject().getId());
+        }
+        return toDto(phenomenon);
     }
 
     @Transactional(readOnly = true)
     public List<PhenomenonResponseDTO> findByProjectId(Long projectId) {
-        ensureProjectExists(projectId);
+        guard.assertCanRead(projectId);
+        if (!currentUser.isClient()) {
+            ensureProjectExists(projectId);
+        }
         return phenomenonRepository.findByProject_IdOrderByCreatedAtDesc(projectId).stream()
                 .map(this::toDto)
                 .toList();
@@ -72,7 +100,20 @@ public class PhenomenonService {
     @Transactional(readOnly = true)
     public List<PhenomenonResponseDTO> findByDomainId(Long domainId) {
         ensureDomainExists(domainId);
-        return phenomenonRepository.findByDomain_IdOrderByCreatedAtDesc(domainId).stream()
+        List<Phenomenon> all = phenomenonRepository.findByDomain_IdOrderByCreatedAtDesc(domainId);
+        if (currentUser.isClient()) {
+            // B7: for a CLIENT, show only phenomena belonging to their own projects, OR
+            // domain-level phenomena (project == null) from this domain — but only if the
+            // queried domain is one of the client's own domains.
+            Set<Long> myProjectIds = guard.clientProjectIds();
+            boolean domainVisible = guard.clientDomainIds().contains(domainId);
+            all = all.stream()
+                    .filter(p -> p.getProject() != null
+                            ? myProjectIds.contains(p.getProject().getId())
+                            : domainVisible)
+                    .collect(Collectors.toList());
+        }
+        return all.stream()
                 .map(this::toDto)
                 .toList();
     }
@@ -195,4 +236,5 @@ public class PhenomenonService {
             throw new BadRequestException("A contagem de evidências não pode ser negativa");
         }
     }
+
 }

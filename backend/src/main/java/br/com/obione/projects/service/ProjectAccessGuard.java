@@ -1,0 +1,66 @@
+package br.com.obione.projects.service;
+
+import br.com.obione.common.exception.ResourceNotFoundException;
+import br.com.obione.common.security.CurrentUser;
+import br.com.obione.projects.entity.Project;
+import br.com.obione.projects.repository.ProjectRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import java.util.Set;
+import java.util.stream.Collectors;
+
+/**
+ * Reusable guard that enforces per-project read access for CLIENT users.
+ * Staff (CONSULTANT/ADMIN) always pass.  Inject into controllers or services
+ * that expose per-project endpoints that require client isolation.
+ *
+ * <p>Wire-in deferred to later tasks — this component is created here to be
+ * available when needed.
+ */
+@Component
+@RequiredArgsConstructor
+public class ProjectAccessGuard {
+
+    private final CurrentUser currentUser;
+    private final ProjectRepository projectRepository;
+
+    /**
+     * Asserts the current user may read the given project.
+     * No-op for staff.  For a CLIENT, throws {@link ResourceNotFoundException}
+     * if the project does not exist or its {@code client_id} does not match
+     * the caller's userId (intentionally indistinguishable from not-found).
+     *
+     * @param projectId the project to check
+     * @throws ResourceNotFoundException if the client cannot see this project
+     */
+    public void assertCanRead(Long projectId) {
+        if (!currentUser.isClient()) return;
+        projectRepository.findByIdAndClient_Id(projectId, currentUser.id())
+                .orElseThrow(() -> new ResourceNotFoundException("Projeto não encontrado: " + projectId));
+    }
+
+    /**
+     * Returns the set of project IDs owned by the currently authenticated CLIENT.
+     * Returns an empty set for non-CLIENT users.
+     */
+    public Set<Long> clientProjectIds() {
+        if (!currentUser.isClient()) return Set.of();
+        return projectRepository.findByClient_Id(currentUser.id()).stream()
+                .map(Project::getId)
+                .collect(Collectors.toUnmodifiableSet());
+    }
+
+    /**
+     * Returns the set of domain IDs that the currently authenticated CLIENT belongs to
+     * (i.e. domains that contain at least one project assigned to this client).
+     * Returns an empty set for non-CLIENT users.
+     */
+    public Set<Long> clientDomainIds() {
+        if (!currentUser.isClient()) return Set.of();
+        return projectRepository.findByClient_Id(currentUser.id()).stream()
+                .map(p -> p.getDomain() != null ? p.getDomain().getId() : null)
+                .filter(id -> id != null)
+                .collect(Collectors.toUnmodifiableSet());
+    }
+}

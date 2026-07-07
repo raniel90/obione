@@ -47,7 +47,7 @@ spring:
       api-key: ${OPENAI_API_KEY:}
       chat:
         options:
-          model: gpt-4o-mini
+          model: ${OBIONE_LLM_MODEL:gpt-5.4-mini}
           temperature: 0.3
 
 # AI assistant provider: "mock" (default, deterministic, no network — CI/demo)

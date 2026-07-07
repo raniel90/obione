@@ -46,18 +46,16 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    @Operation(summary = "Encerrar a sessão do token atual")
+    @Operation(summary = "Encerrar a sessão (stateless: cliente descarta o token)")
     public void logout(
             @RequestHeader(value = "Authorization", required = false) String authorization
     ) {
-        authService.logout(authorization);
+        authService.logout();
     }
 
     @GetMapping("/me")
-    @Operation(summary = "Obter usuário autenticado da sessão mock")
-    public CurrentUserDTO getCurrentUser(
-            @RequestHeader(value = "Authorization", required = false) String authorization
-    ) {
-        return authService.getCurrentUser(authorization);
+    @Operation(summary = "Obter o usuário autenticado a partir do JWT")
+    public CurrentUserDTO getCurrentUser() {
+        return authService.currentUser();
     }
 }
