@@ -52,4 +52,14 @@ public class MockTokenAuthFilter extends OncePerRequestFilter {
         }
         filterChain.doFilter(request, response);
     }
+
+    /**
+     * Run on the ERROR dispatch too. Otherwise this OncePerRequestFilter is skipped when
+     * the container forwards to /error, leaving that request unauthenticated — which turns
+     * every real error (404, 500) into a misleading empty 401 and bounces the user to login.
+     */
+    @Override
+    protected boolean shouldNotFilterErrorDispatch() {
+        return false;
+    }
 }
