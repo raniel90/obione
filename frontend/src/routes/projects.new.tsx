@@ -257,7 +257,6 @@ function NewProjectPage() {
     const errors: typeof reviewErrors = {};
     if (!review.clientId) errors.clientId = "Selecione o cliente do projeto.";
     if (!review.startDate) errors.startDate = "Informe a data de início.";
-    if (!review.endDate) errors.endDate = "Informe a previsão de conclusão.";
     if (review.startDate && review.endDate && review.endDate < review.startDate) {
       errors.endDate = "A conclusão não pode ser antes do início.";
     }
@@ -601,7 +600,7 @@ function NewProjectPage() {
                   />
                   {reviewErrors.startDate && <FieldError>{reviewErrors.startDate}</FieldError>}
                 </Field>
-                <Field label="Previsão de conclusão" required>
+                <Field label="Conclusão">
                   <Input
                     type="date"
                     value={review.endDate}
