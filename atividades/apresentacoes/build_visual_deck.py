@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Reconstrói o miolo da apresentação final com layouts visuais (diagramas,
-prints reais, cards de número), reaproveitando capa/agenda/obrigado e a
-identidade UPE/POLI do template status-report."""
+prints reais, cards de número, camada de IA e experimento detalhado),
+reaproveitando capa/agenda/obrigado e a identidade UPE/POLI."""
 import sys
 from pathlib import Path
 
@@ -13,7 +13,7 @@ from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
-from pptx_helpers import update_footers
+from pptx_helpers import update_footers, delete_slide_by_index
 
 HERE = Path(__file__).resolve().parent
 PRINTS = HERE / "prints"
@@ -31,7 +31,6 @@ FONT = "Arial"
 
 
 def txt(slide, l, t, w, h, runs, align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.TOP):
-    """runs: list of paragraphs; each paragraph is list of (text,size,color,bold,italic)."""
     tb = slide.shapes.add_textbox(Inches(l), Inches(t), Inches(w), Inches(h))
     tf = tb.text_frame
     tf.word_wrap = True
@@ -57,7 +56,11 @@ def eyebrow(slide, text):
 
 
 def title(slide, text, size=30):
-    txt(slide, 0.55, 0.88, 11.2, 1.0, [[(text, size, NAVY, True, False)]])
+    txt(slide, 0.55, 0.88, 12.2, 1.0, [[(text, size, NAVY, True, False)]])
+
+
+def subtitle(slide, text):
+    txt(slide, 0.55, 1.9, 12.2, 0.4, [[(text, 15.5, GRAY, False, False)]])
 
 
 def rect(slide, l, t, w, h, fill, line=None, rounded=True):
@@ -78,18 +81,18 @@ def rect(slide, l, t, w, h, fill, line=None, rounded=True):
     return shp
 
 
-def set_text(shp, paras, anchor=MSO_ANCHOR.MIDDLE):
+def set_text(shp, paras, anchor=MSO_ANCHOR.MIDDLE, align=PP_ALIGN.CENTER):
     tf = shp.text_frame
     tf.word_wrap = True
     tf.vertical_anchor = anchor
-    tf.margin_left = Inches(0.12)
-    tf.margin_right = Inches(0.12)
+    for m in ("margin_left", "margin_right"):
+        setattr(tf, m, Inches(0.14))
     tf.margin_top = Inches(0.06)
     tf.margin_bottom = Inches(0.06)
     for i, para in enumerate(paras):
         p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
-        p.alignment = PP_ALIGN.CENTER
-        p.space_after = Pt(2)
+        p.alignment = align
+        p.space_after = Pt(3)
         for (text, size, color, bold) in para:
             r = p.add_run()
             r.text = text
@@ -121,12 +124,37 @@ def picture(slide, path, l, t, h=None, w=None):
     return pic
 
 
+def stat_card(slide, l, t, w, h, big, label, accent):
+    rect(slide, l, t, w, h, CARD, line=BORDER)
+    rect(slide, l, t, w, 0.12, accent, rounded=False)
+    inner = txt(slide, l, t + 0.28, w, h - 0.4,
+                [[(big, 42, NAVY, True, False)], [(label, 13, GRAY, False, False)]],
+                align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
+    return inner
+
+
+def panel(slide, l, t, w, h, header, rows):
+    rect(slide, l, t, w, h, CARD, line=BORDER)
+    tb = slide.shapes.add_textbox(Inches(l + 0.25), Inches(t + 0.22), Inches(w - 0.5), Inches(h - 0.4))
+    tf = tb.text_frame
+    tf.word_wrap = True
+    p = tf.paragraphs[0]
+    r = p.add_run(); r.text = header.upper()
+    r.font.name = FONT; r.font.size = Pt(12); r.font.bold = True; r.font.color.rgb = RED
+    p.space_after = Pt(10)
+    for head, desc in rows:
+        ph = tf.add_paragraph(); ph.space_before = Pt(6); ph.space_after = Pt(1)
+        rh = ph.add_run(); rh.text = head
+        rh.font.name = FONT; rh.font.size = Pt(14.5); rh.font.bold = True; rh.font.color.rgb = NAVY
+        pd = tf.add_paragraph(); pd.space_after = Pt(4)
+        rd = pd.add_run(); rd.text = desc
+        rd.font.name = FONT; rd.font.size = Pt(12.5); rd.font.color.rgb = GRAY
+
+
 def clean_content_slide(slide):
-    """Mantém logo (picture) e rodapé (top>6.8in); remove eyebrow/título/bullets."""
     for sh in list(slide.shapes):
         is_pic = sh.shape_type == 13
         top_in = sh.top / 914400 if sh.top is not None else 0
-        # mantém só o logo (imagem no topo) e o rodapé (rodapé/paginação embaixo)
         if (is_pic and top_in < 0.6) or top_in > 6.8:
             continue
         sh._element.getparent().remove(sh._element)
@@ -136,26 +164,24 @@ def clean_content_slide(slide):
 def slide_problema(s):
     eyebrow(s, "O problema")
     title(s, "O conhecimento dos projetos se perde")
-    txt(s, 0.55, 1.95, 12.0, 0.4,
-        [[("Consultorias vivem de conhecimento, e ele evapora entre um projeto e o outro.", 16, GRAY, False, False)]])
+    subtitle(s, "Consultorias vivem de conhecimento, e ele evapora entre um projeto e o outro.")
     cards = [
         ("Fica na cabeça das pessoas", "O próximo projeto recomeça do zero"),
-        ("O sênior vira gargalo", "Só ele conecta os pontos entre projetos"),
+        ("Depende sempre dos mesmos", "Só quem tem estrada liga os pontos entre projetos"),
         ("O cliente fica fora do laço", "E não dá para abrir tudo entre clientes"),
     ]
     w, gap, t, h = 3.85, 0.28, 3.0, 2.5
     x = 0.55
     for head, sub in cards:
         c = rect(s, x, t, w, h, CARD, line=BORDER)
-        set_text(c, [[(head, 16, NAVY, True)], [(sub, 12.5, GRAY, False)]], anchor=MSO_ANCHOR.MIDDLE)
+        set_text(c, [[(head, 16, NAVY, True)], [(sub, 12.5, GRAY, False)]])
         x += w + gap
 
 
 def slide_solucao(s):
     eyebrow(s, "A solução")
     title(s, "Um observatório que vira memória viva")
-    txt(s, 0.55, 1.95, 12.0, 0.4,
-        [[("O ciclo do valor, ancorado no MPO (Vieira, 2022), com comunidade e IA assistiva.", 16, GRAY, False, False)]])
+    subtitle(s, "O ciclo do valor, ancorado no MPO (Vieira, 2022), com comunidade e IA assistiva.")
     steps = ["Observação", "Discussão", "Conhecimento"]
     w, t, h = 3.3, 3.1, 1.25
     xs = [0.9, 5.0, 9.1]
@@ -168,100 +194,81 @@ def slide_solucao(s):
     set_text(band, [[("Vira base de conhecimento reaproveitável por projetos futuros", 15, NAVY, True)]])
 
 
-def slide_jornada(s):
-    eyebrow(s, "A jornada")
-    title(s, "Do cadastro ao aprendizado, com a IA acelerando")
-    steps = [("Cadastro", True), ("Observação", False), ("Conversa", False),
-             ("Consolidação", True), ("Reuso", False)]
-    w, t, h = 2.15, 3.2, 1.15
-    xs = [0.55, 3.02, 5.49, 7.96, 10.43]
-    for i, (x, (st, ia)) in enumerate(zip(xs, steps)):
-        b = rect(s, x, t, w, h, NAVY if not ia else RED)
-        label = [[(st, 15, WHITE, True)]]
-        if ia:
-            label.append([("com IA", 11, WHITE, False)])
-        set_text(b, label)
-        if i < 4:
-            arrow(s, x + w + 0.02, t + 0.4, 0.4, 0.35, color=MUTED)
-    txt(s, 0.55, 5.0, 12.0, 0.5,
-        [[("A IA acelera as pontas trabalhosas; o consultor decide.", 16, GRAY, False, False)]])
+def slide_ia_layer(s):
+    eyebrow(s, "A camada de IA")
+    title(s, "Assistiva, ancorada e auditável")
+    subtitle(s, "A IA acelera cada ponta do ciclo, sempre com o consultor no comando.")
+    panel(s, 0.55, 2.5, 5.9, 4.05, "Papéis da IA no ciclo", [
+        ("Configuradora", "No cadastro: propõe o domínio e o que acompanhar"),
+        ("Observadora", "Sugere observações à luz do MPO"),
+        ("Sintetizadora", "Consolida o aprendizado da conversa"),
+        ("Conectora", "Sintetiza padrões entre projetos do domínio"),
+    ])
+    panel(s, 6.9, 2.5, 5.9, 4.05, "Como confiamos", [
+        ("A IA propõe, o humano decide", "Nunca escreve direto: o consultor revisa e publica"),
+        ("Grounding no MPO + saída estruturada", "Responde no formato de dados e não inventa atributos"),
+        ("Proveniência registrada", "Cada sugestão guarda provedor, modelo e momento"),
+    ])
 
 
 def slide_shot(s, eb, ttl, img, caption_lines):
     eyebrow(s, eb)
     title(s, ttl)
-    picture(s, img, 5.35, 2.15, 4.75)
-    # caption à esquerda
-    paras = []
-    for line in caption_lines:
-        paras.append([("›  ", 15, RED, True, False), (line, 15, NAVY, False, False)])
+    picture(s, img, 5.35, 2.15, h=4.75)
+    paras = [[("›  ", 15, RED, True, False), (line, 15, NAVY, False, False)] for line in caption_lines]
     txt(s, 0.55, 2.7, 4.5, 4.0, paras, anchor=MSO_ANCHOR.TOP)
 
 
 def slide_shot_wide(s, eb, ttl, img, caption):
     eyebrow(s, eb)
     title(s, ttl)
-    txt(s, 0.55, 1.95, 12.2, 0.4, [[(caption, 15.5, GRAY, False, False)]])
+    subtitle(s, caption)
     w = 10.4
     picture(s, img, (13.33 - w) / 2, 2.6, w=w)
 
 
-def slide_ia(s):
-    eyebrow(s, "IA com revisão humana")
-    title(s, "A IA sugere, o humano decide")
-    steps = [("IA propõe\no rascunho", RED), ("O consultor\nrevisa", NAVY), ("Publicado\ne auditável", NAVY)]
-    w, t, h = 3.1, 3.15, 1.35
-    xs = [1.0, 5.1, 9.2]
-    for i, (x, (st, col)) in enumerate(zip(xs, steps)):
-        b = rect(s, x, t, w, h, col)
-        set_text(b, [[(seg, 16, WHITE, True)] for seg in st.split("\n")])
+def slide_experimento(s):
+    eyebrow(s, "O experimento")
+    title(s, "Design Science Research, avaliado em uso real")
+    steps = ["Construir\no artefato", "Demonstrar\nem uso real", "Avaliar\na percepção"]
+    w, t, h = 3.2, 2.35, 1.15
+    xs = [0.9, 5.06, 9.22]
+    for i, (x, st) in enumerate(zip(xs, steps)):
+        b = rect(s, x, t, w, h, NAVY)
+        set_text(b, [[(seg, 15, WHITE, True)] for seg in st.split("\n")])
         if i < 2:
-            arrow(s, x + w + 0.02, t + 0.48, 0.55, 0.4, color=MUTED)
-    txt(s, 0.55, 5.05, 12.0, 0.6,
-        [[("A IA nunca escreve direto: propõe, o consultor publica. Cada sugestão fica registrada com provedor, modelo e momento.", 15, GRAY, False, False)]])
+            arrow(s, x + w + 0.02, t + 0.4, 0.55, 0.36, color=MUTED)
+    c1 = rect(s, 0.9, 4.0, 5.55, 1.55, CARD, line=BORDER)
+    set_text(c1, [[("Instrumento", 14.5, RED, True)],
+                  [("12 afirmações Likert (1 a 5) e 3 perguntas abertas, após um walkthrough", 13, NAVY, False)]],
+             anchor=MSO_ANCHOR.MIDDLE)
+    c2 = rect(s, 6.85, 4.0, 5.55, 1.55, CARD, line=BORDER)
+    set_text(c2, [[("Amostra", 14.5, RED, True)],
+                  [("2 rodadas de 4 consultores (N=8), uma consultoria real; 2ª rodada após onboarding", 13, NAVY, False)]],
+             anchor=MSO_ANCHOR.MIDDLE)
+    txt(s, 0.9, 5.75, 11.5, 0.5,
+        [[("Perspectiva do consultor. Reportado como casos, sem inferência estatística.", 13, MUTED, False, True)]])
 
 
-def slide_validacao(s):
-    eyebrow(s, "Validação")
-    title(s, "Valor percebido, com um alerta honesto")
-    txt(s, 0.55, 1.95, 12.0, 0.4,
-        [[("Design Science Research, reportado como casos (sem inferência estatística).", 15, GRAY, False, False)]])
+def slide_resultados(s):
+    eyebrow(s, "Resultados")
+    title(s, "Valor percebido, com um ponto de atenção")
     cards = [
-        ("N = 8", "participantes · duas rodadas", NAVY),
-        ("5,0", "governança e comunidade · nota máxima", GREEN),
-        ("3,8", "clareza · o ponto a evoluir", RED),
+        ("4,3 / 5", "média acumulada (8 consultores)", GREEN),
+        ("N = 8", "2 rodadas de 4 · uma consultoria", NAVY),
+        ("83%", "das respostas foram nota 4 ou 5", NAVY),
     ]
-    w, gap, t, h = 3.85, 0.28, 2.95, 2.5
+    w, gap, t, h = 3.85, 0.28, 2.35, 2.15
     x = 0.55
     for big, label, accent in cards:
-        c = rect(s, x, t, w, h, CARD, line=BORDER)
-        bar = rect(s, x, t, w, 0.12, accent, rounded=False)
-        set_text(c, [[(big, 46, NAVY, True)], [(label, 13.5, GRAY, False)]])
+        stat_card(s, x, t, w, h, big, label, accent)
         x += w + gap
-
-
-def slide_demo(s):
-    eyebrow(s, "Demonstração")
-    title(s, "Agora, o fluxo real")
-    steps = ["Cadastro\ncom IA", "Observação", "Conversa", "Consolidação\ncom IA", "Reaprovei-\ntamento", "Cliente\nisolado"]
-    w, t, h = 1.92, 3.3, 1.5
-    xs = [0.5, 2.56, 4.62, 6.68, 8.74, 10.8]
-    for i, (x, st) in enumerate(zip(xs, steps)):
-        circ = slide_circle(s, x + w / 2 - 0.28, t - 0.7, 0.56, str(i + 1))
-        b = rect(s, x, t, w, h, LIGHT, line=BORDER)
-        set_text(b, [[(seg, 13.5, NAVY, True)] for seg in st.split("\n")])
-    txt(s, 0.55, 5.15, 12.0, 0.5,
-        [[("O golden path completo, ao vivo: da entrada do projeto à participação segura do cliente.", 16, GRAY, False, False)]])
-
-
-def slide_circle(s, l, t, d, num):
-    c = s.shapes.add_shape(MSO_SHAPE.OVAL, Inches(l), Inches(t), Inches(d), Inches(d))
-    c.shadow.inherit = False
-    c.fill.solid()
-    c.fill.fore_color.rgb = RED
-    c.line.fill.background()
-    set_text(c, [[(num, 18, WHITE, True)]])
-    return c
+    txt(s, 0.55, 4.75, 12.3, 0.7,
+        [[("1ª rodada 4,48; a 2ª foi mais crítica (4,1). Aprendizados e governança no topo "
+           "(5,0 na 1ª rodada); clareza estável em 3,8, a fronteira de adoção.", 15, NAVY, False, False)]])
+    txt(s, 0.55, 5.85, 12.3, 0.6,
+        [[("Nas respostas abertas o valor apareceu no aprendizado consolidado com IA; "
+           "as críticas convergem para clareza e navegação.", 13.5, GRAY, False, True)]])
 
 
 def slide_valor(s):
@@ -274,25 +281,28 @@ def slide_valor(s):
         c = rect(s, x, t, w, h, CARD, line=BORDER)
         set_text(c, [[("✓", 20, GREEN, True)], [(it, 14, NAVY, True)]])
         x += w + gap
-    txt(s, 0.55, 5.2, 12.0, 0.9,
+    txt(s, 0.55, 5.2, 12.2, 0.9,
         [[("Replicável e demoável. ", 16, NAVY, True, False),
           ("A seguir: navegação guiada e avaliação da fidelidade da extração do MPO.", 16, GRAY, False, False)]])
 
 
 BUILDERS = [
-    slide_problema, slide_solucao, slide_jornada,
+    slide_problema,
+    slide_solucao,
+    slide_ia_layer,
     lambda s: slide_shot(s, "O diferencial · cliente com muralha", "O cliente dentro, sem ver os outros",
                          PRINTS / "cliente_novidades.png",
                          ["Vê e acessa só o seu projeto", "Participa da conversa", "As novidades o trazem de volta"]),
     lambda s: slide_shot_wide(s, "Reaproveitamento", "O conhecimento atravessa projetos",
                               PRINTS / "aprendizados_dominio_bloco.png",
                               "Aprendizados de outros projetos afloram no domínio; a Conectora sintetiza padrões sob demanda."),
-    slide_ia, slide_validacao, slide_demo, slide_valor,
+    slide_experimento,
+    slide_resultados,
+    slide_valor,
 ]
 
 
 def sub_runs(prs, replacements):
-    """Substituição de substring em todos os runs (capa, rodapé, encerramento)."""
     for slide in prs.slides:
         for sh in slide.shapes:
             if not sh.has_text_frame:
@@ -307,21 +317,31 @@ def sub_runs(prs, replacements):
 def main():
     src = HERE / "ObiOne_Apresentacao_Final.pptx"
     prs = Presentation(str(src))
-    content_idx = list(range(2, 2 + len(BUILDERS)))  # slides 2..10
-    for idx, build in zip(content_idx, BUILDERS):
-        s = prs.slides[idx]
+    n = len(BUILDERS)
+    obrigado_idx = len(prs.slides._sldIdLst) - 1  # último slide é o "Obrigado"
+    for i, build in enumerate(BUILDERS):
+        s = prs.slides[2 + i]
         clean_content_slide(s)
         build(s)
+    # remove slides de conteúdo em excesso (entre o último construído e o Obrigado)
+    for idx in range(obrigado_idx - 1, 2 + n - 1, -1):
+        delete_slide_by_index(prs, idx)
     sub_runs(prs, [
         ("Doutorado PPGEC · Tópicos Avançados em Engenharia de Software",
          "Tópicos Avançados em Engenharia de Software"),
         ("Doutorado PPGEC", "TAES"),
         ("Discussão e perguntas", "Veremos ao vivo"),
+        # agenda alinhada à nova estrutura
+        ("A jornada de valor", "A camada de IA"),
+        ("O ciclo funcionando", "IA assistiva, com revisão humana"),
+        ("Diferencial e IA", "Diferencial e reaproveitamento"),
+        ("Cliente dentro, IA copiloto", "Cliente com muralha e reuso"),
+        ("Validação e valor", "Experimento e valor"),
+        ("Evidência e entrega", "Método, resultados e entrega"),
     ])
     update_footers(prs)
-    out = HERE / "ObiOne_Apresentacao_Final.pptx"
-    prs.save(str(out))
-    print(f"✓ {out}")
+    prs.save(str(src))
+    print(f"✓ {src} · {len(prs.slides._sldIdLst)} slides")
 
 
 if __name__ == "__main__":
