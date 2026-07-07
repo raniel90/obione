@@ -253,18 +253,23 @@ class ClientIsolationTest extends ApiTestSupport {
     // ── /knowledge ────────────────────────────────────────────────────────────
 
     /**
-     * 3 knowledge items are seeded; only one ("Baixa participação do cliente
-     * aumenta risco de atraso") is tied to the Athos project.
+     * The client sees their own project's knowledge plus domain-level
+     * (project==null) consolidated learnings of their domain (reusable wisdom),
+     * but never another client's project-linked knowledge.
      */
     @Test
-    void clientListKnowledgeReturnsOnlyTheirProjectKnowledge() {
+    void clientListKnowledgeReturnsOwnProjectAndDomainLevel() {
         ResponseEntity<List<Map<String, Object>>> res = getList("/knowledge", client.token());
 
         assertThat(res.getStatusCode()).isEqualTo(HttpStatus.OK);
-        List<Map<String, Object>> knowledge = res.getBody();
-        assertThat(knowledge).hasSize(1);
-        assertThat(((Number) knowledge.get(0).get("projectId")).longValue())
-                .isEqualTo(athosId);
+        List<Long> projectIds = res.getBody().stream()
+                .map(k -> k.get("projectId"))
+                .filter(java.util.Objects::nonNull)
+                .map(p -> ((Number) p).longValue())
+                .toList();
+        // Own project's knowledge is present; no other client's leaks (domain-level
+        // items carry a null projectId and are filtered out above).
+        assertThat(projectIds).containsOnly(athosId);
     }
 
     @Test
