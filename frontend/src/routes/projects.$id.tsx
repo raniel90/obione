@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/status-badge";
@@ -64,8 +65,16 @@ import { getCurrentUser } from "@/services/authService";
 import { getMpoAttributes, getMpoCategories } from "@/services/mpoAttributeService";
 import type { MpoCategory } from "@/types/mpoAttribute";
 import { type DiscussionStatus, type VisibilityScope } from "@/lib/community-data";
-import { getKnowledgeByProject, toCommunityKnowledge } from "@/services/knowledgeService";
+import {
+  getKnowledgeByProject,
+  getKnowledgeByDomain,
+  toCommunityKnowledge,
+} from "@/services/knowledgeService";
 import type { CommunityKnowledge } from "@/lib/community-data";
+import type { Knowledge } from "@/types/knowledge";
+import { synthesizeDomain } from "@/services/aiService";
+import type { DomainSynthesis } from "@/services/aiService";
+import { KnowledgeCard } from "@/components/community-pieces";
 import { BookOpen } from "lucide-react";
 import type { ProjectObservation } from "@/lib/project-observatory";
 import {
@@ -77,6 +86,7 @@ import {
   CheckCircle2,
   Plus,
   PenSquare,
+  Loader2,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { relativeTime } from "@/components/feed-event-item";
@@ -321,10 +331,7 @@ function ProjectDetailPage() {
   }, [id]);
 
   // MPO coverage is the consultant's measurement instrument — hidden from clients.
-  const [isClient, setIsClient] = useState(false);
-  useEffect(() => {
-    getCurrentUser().then((user) => setIsClient(user?.profileCode === "CLIENT"));
-  }, []);
+  const { isClient } = useCurrentUser();
 
   // Discussions/knowledge are fetched at page level so the funnel and the
   // Comunidade tab share the same data.
@@ -545,6 +552,9 @@ function ProjectDetailPage() {
             <ProjectDiscussionsAndKnowledge
               projectKnowledge={projectKnowledge}
               domainSlug={domain?.slug}
+              domainId={domain?.id ?? ""}
+              domainName={domain?.name ?? "—"}
+              isStaff={!isClient}
             />
           </TabsContent>
           <TabsContent value="timeline" className="mt-6">
@@ -1535,10 +1545,53 @@ function Meta({ label, value, className }: { label: string; value: string; class
 function ProjectDiscussionsAndKnowledge({
   projectKnowledge,
   domainSlug,
+  domainId,
+  domainName,
+  isStaff,
 }: {
   projectKnowledge: CommunityKnowledge[];
   domainSlug?: string;
+  domainId: string;
+  domainName: string;
+  isStaff: boolean;
 }) {
+  const [rawDomainItems, setRawDomainItems] = useState<Knowledge[]>([]);
+  const [synthesis, setSynthesis] = useState<DomainSynthesis | null>(null);
+  const [synthLoading, setSynthLoading] = useState(false);
+
+  useEffect(() => {
+    if (!domainId) return;
+    let cancelled = false;
+    getKnowledgeByDomain(domainId)
+      .then((items) => {
+        if (!cancelled) setRawDomainItems(items);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [domainId]);
+
+  const domainKnowledge = useMemo(() => {
+    const ownIds = new Set(projectKnowledge.map((k) => k.id));
+    return rawDomainItems
+      .filter((k) => !ownIds.has(k.id))
+      .map((k) => toCommunityKnowledge(k, { domain: domainName }));
+  }, [rawDomainItems, projectKnowledge, domainName]);
+
+  const handleSynthesize = async () => {
+    if (synthLoading || !domainId) return;
+    setSynthLoading(true);
+    try {
+      const result = await synthesizeDomain(domainId);
+      setSynthesis(result);
+    } catch {
+      toast.error("Nao foi possivel sintetizar o dominio. Tente novamente.");
+    } finally {
+      setSynthLoading(false);
+    }
+  };
+
   const communityLink = domainSlug ? (
     <Link to="/community/$slug" params={{ slug: domainSlug }}>
       Ir para a comunidade <ArrowRight className="h-3 w-3" />
@@ -1549,53 +1602,127 @@ function ProjectDiscussionsAndKnowledge({
     </Link>
   );
 
-  if (projectKnowledge.length === 0) {
-    return (
-      <div className="rounded-xl border border-dashed border-border bg-muted/20 p-5 text-[12.5px] leading-relaxed text-muted-foreground">
-        Nenhum aprendizado consolidado ainda. Quando as conversas das observações amadurecem, o
-        consultor as consolida na comunidade e o resultado aparece aqui.
-      </div>
-    );
-  }
-
   return (
-    <section>
-      <SectionTitle
-        eyebrow="O que este projeto ensinou"
-        title="Aprendizados do projeto"
-        description="Consolidações que nasceram das conversas sobre as observações."
-        action={
-          <Button asChild size="sm" variant="outline" className="gap-1.5">
-            {communityLink}
-          </Button>
-        }
-      />
-      <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
-        {projectKnowledge.map((k) => (
-          <article key={k.id} className="rounded-xl border border-border bg-card p-5">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-wider text-muted-foreground">
-                <BookOpen className="h-3 w-3" /> Aprendizado
+    <section className="space-y-10">
+      {/* Aprendizados do projeto */}
+      <div>
+        <SectionTitle
+          eyebrow="O que este projeto ensinou"
+          title="Aprendizados do projeto"
+          description="Consolidacoes que nasceram das conversas sobre as observacoes."
+          action={
+            <Button asChild size="sm" variant="outline" className="gap-1.5">
+              {communityLink}
+            </Button>
+          }
+        />
+        {projectKnowledge.length === 0 ? (
+          <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/20 p-5 text-[12.5px] leading-relaxed text-muted-foreground">
+            Nenhum aprendizado consolidado ainda. Quando as conversas das observacoes amadurecem, o
+            consultor as consolida na comunidade e o resultado aparece aqui.
+          </div>
+        ) : (
+          <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
+            {projectKnowledge.map((k) => (
+              <article key={k.id} className="rounded-xl border border-border bg-card p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-wider text-muted-foreground">
+                    <BookOpen className="h-3 w-3" /> Aprendizado
+                  </div>
+                  <span className="rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                    {k.status}
+                  </span>
+                </div>
+                <h3 className="mt-2 text-[14.5px] font-semibold leading-snug text-foreground">
+                  {k.title}
+                </h3>
+                <p className="mt-2 text-[13px] leading-relaxed text-foreground/90">{k.summary}</p>
+                <div className="mt-3 rounded-md border border-border bg-muted/30 p-3 text-[12px] text-foreground">
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                    recomendacao ·{" "}
+                  </span>
+                  {k.recommendation}
+                </div>
+                <p className="mt-3 text-[11px] text-muted-foreground">
+                  Confianca: <span className="font-medium text-foreground">{k.confidence}</span>
+                </p>
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Aprendizados do dominio (T2.1) + Conectora sob demanda (T2.2) */}
+      <div>
+        <SectionTitle
+          eyebrow="Reaproveitamento"
+          title="Aprendizados do dominio"
+          description="Aprendizados consolidados de projetos deste dominio — reaproveitaveis aqui."
+          action={
+            isStaff ? (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleSynthesize}
+                disabled={synthLoading || !domainId}
+                className="gap-1.5"
+              >
+                {synthLoading ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Sparkles className="h-3.5 w-3.5" />
+                )}
+                Sintetizar padroes do dominio
+              </Button>
+            ) : undefined
+          }
+        />
+
+        {synthesis && (
+          <div className="mt-4 space-y-4 rounded-xl border border-border bg-card p-5">
+            <p className="text-[13px] leading-relaxed text-foreground/90">{synthesis.summary}</p>
+            {synthesis.patterns.length > 0 && (
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  // padroes identificados
+                </p>
+                <ul className="mt-2 space-y-1">
+                  {synthesis.patterns.map((p, i) => (
+                    <li key={i} className="text-[12.5px] leading-relaxed text-foreground/90">
+                      {p}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <span className="rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                {k.status}
-              </span>
-            </div>
-            <h3 className="mt-2 text-[14.5px] font-semibold leading-snug text-foreground">
-              {k.title}
-            </h3>
-            <p className="mt-2 text-[13px] leading-relaxed text-foreground/90">{k.summary}</p>
-            <div className="mt-3 rounded-md border border-border bg-muted/30 p-3 text-[12px] text-foreground">
-              <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                recomendação ·{" "}
-              </span>
-              {k.recommendation}
-            </div>
-            <p className="mt-3 text-[11px] text-muted-foreground">
-              Confiança: <span className="font-medium text-foreground">{k.confidence}</span>
-            </p>
-          </article>
-        ))}
+            )}
+            {synthesis.lessons.length > 0 && (
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  // licoes aprendidas
+                </p>
+                <ul className="mt-2 space-y-1">
+                  {synthesis.lessons.map((l, i) => (
+                    <li key={i} className="text-[12.5px] leading-relaxed text-foreground/90">
+                      {l}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
+        {domainKnowledge.length === 0 ? (
+          <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/20 p-5 text-[12.5px] leading-relaxed text-muted-foreground">
+            Ainda nao ha aprendizados consolidados neste dominio para reaproveitar.
+          </div>
+        ) : (
+          <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
+            {domainKnowledge.map((k) => (
+              <KnowledgeCard key={k.id} k={k} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

@@ -2,6 +2,7 @@ package br.com.obione.knowledge.seed;
 
 import br.com.obione.discussions.entity.Discussion;
 import br.com.obione.discussions.repository.DiscussionRepository;
+import br.com.obione.domains.entity.Domain;
 import br.com.obione.knowledge.entity.Knowledge;
 import br.com.obione.knowledge.enums.KnowledgeConfidence;
 import br.com.obione.knowledge.enums.KnowledgeStatus;
@@ -79,6 +80,32 @@ public class KnowledgeDataSeeder implements CommandLineRunner {
                         .recommendation("Incentivar documentação mínima obrigatória por ciclo do projeto e vincular artefatos às observações registradas.")
                         .confidence(KnowledgeConfidence.HIGH)
                         .status(KnowledgeStatus.PROPOSED)
+                        .build()
+        );
+
+        // Aprendizados de nível-domínio (sem projeto): sabedoria consolidada do domínio,
+        // reaproveitável por qualquer projeto — aflora no bloco "Aprendizados do domínio".
+        Domain marketing = baixaParticipacao.getDomain();
+        knowledgeRepository.save(
+                Knowledge.builder()
+                        .domain(marketing)
+                        .title("Alinhar narrativa e critérios de sucesso no kickoff reduz retrabalho")
+                        .summary("Projetos de reposicionamento que fecham a narrativa central e os critérios de sucesso logo no início evitam grandes revisões nas fases finais.")
+                        .evidence("Padrão recorrente em projetos de marketing estratégico da consultoria: revisões tardias concentram-se onde o alinhamento inicial ficou implícito.")
+                        .recommendation("Formalizar no kickoff a narrativa central, o público e os critérios de sucesso, validados com o cliente antes da execução.")
+                        .confidence(KnowledgeConfidence.HIGH)
+                        .status(KnowledgeStatus.CONSOLIDATED)
+                        .build()
+        );
+        knowledgeRepository.save(
+                Knowledge.builder()
+                        .domain(marketing)
+                        .title("Checkpoints em datas fixas melhoram a resposta do cliente")
+                        .summary("Definir checkpoints recorrentes, com pauta objetiva e responsáveis nomeados, aumenta a taxa e a qualidade das respostas do cliente em decisões estratégicas.")
+                        .evidence("Casos do domínio mostram que decisões sem ritual definido acumulam pendências e adiam marcos.")
+                        .recommendation("Agendar checkpoints recorrentes com pauta e responsáveis, evitando validações ad hoc.")
+                        .confidence(KnowledgeConfidence.MEDIUM)
+                        .status(KnowledgeStatus.CONSOLIDATED)
                         .build()
         );
     }

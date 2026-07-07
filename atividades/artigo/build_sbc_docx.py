@@ -625,7 +625,7 @@ caption("Tabela A.1. Rastreabilidade dos requisitos funcionais ao MPO.")
 table(
     ["RF", "Requisito", "Âncora no MPO (Vieira, 2022)", "Implementação"],
     [
-        ["RF01", "Autenticar usuário", "Segurança (p. 192)", "auth por token; SecurityConfig"],
+        ["RF01", "Autenticar usuário", "Segurança (p. 192)", "auth por token JWT stateless; SecurityConfig"],
         ["RF02", "Perfis e acesso semi-aberto", "Acesso semi-aberto (p. 189); agentes (pp. 200-201)", "papéis consultor/admin/cliente"],
         ["RF03", "Cadastrar projeto (descrição textual)", "Coletar (p. 195)", "wizard de cadastro"],
         ["RF04", "Governança de visibilidade por papel", "Acesso semi-aberto (p. 189); Segurança (p. 192)", "enforcement por papel"],

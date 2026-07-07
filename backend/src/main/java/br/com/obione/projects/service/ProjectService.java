@@ -2,6 +2,7 @@ package br.com.obione.projects.service;
 
 import br.com.obione.ai.service.AiSuggestionAcceptanceService;
 import br.com.obione.common.exception.BadRequestException;
+import br.com.obione.common.security.CurrentUser;
 import br.com.obione.phenomena.entity.Phenomenon;
 import br.com.obione.phenomena.enums.PhenomenonImpact;
 import br.com.obione.phenomena.enums.PhenomenonStatus;
@@ -36,33 +37,42 @@ public class ProjectService {
     private final UserRepository userRepository;
     private final AiSuggestionAcceptanceService acceptanceService;
     private final PhenomenonRepository phenomenonRepository;
+    private final CurrentUser currentUser;
 
     public ProjectService(
             ProjectRepository projectRepository,
             DomainRepository domainRepository,
             UserRepository userRepository,
             AiSuggestionAcceptanceService acceptanceService,
-            PhenomenonRepository phenomenonRepository
+            PhenomenonRepository phenomenonRepository,
+            CurrentUser currentUser
     ) {
         this.projectRepository = projectRepository;
         this.domainRepository = domainRepository;
         this.userRepository = userRepository;
         this.acceptanceService = acceptanceService;
         this.phenomenonRepository = phenomenonRepository;
+        this.currentUser = currentUser;
     }
 
     @Transactional(readOnly = true)
     public List<ProjectResponseDTO> findAll() {
-        return projectRepository.findAll().stream()
+        List<Project> projects = currentUser.isClient()
+                ? projectRepository.findByClient_Id(currentUser.id())
+                : projectRepository.findAll();
+        return projects.stream()
                 .map(ProjectMapper::toResponseDTO)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public ProjectResponseDTO findById(Long id) {
-        return projectRepository.findById(id)
-                .map(ProjectMapper::toResponseDTO)
-                .orElseThrow(() -> new ResourceNotFoundException("Projeto não encontrado: " + id));
+        Project project = currentUser.isClient()
+                ? projectRepository.findByIdAndClient_Id(id, currentUser.id())
+                        .orElseThrow(() -> new ResourceNotFoundException("Projeto não encontrado: " + id))
+                : projectRepository.findById(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("Projeto não encontrado: " + id));
+        return ProjectMapper.toResponseDTO(project);
     }
 
     @Transactional(readOnly = true)
@@ -70,7 +80,10 @@ public class ProjectService {
         if (!domainRepository.existsById(domainId)) {
             throw new ResourceNotFoundException("Domínio não encontrado: " + domainId);
         }
-        return projectRepository.findByDomain_Id(domainId).stream()
+        List<Project> projects = currentUser.isClient()
+                ? projectRepository.findByDomain_IdAndClient_Id(domainId, currentUser.id())
+                : projectRepository.findByDomain_Id(domainId);
+        return projects.stream()
                 .map(ProjectMapper::toResponseDTO)
                 .toList();
     }
@@ -227,6 +240,10 @@ public class ProjectService {
         return ProjectMapper.toResponseDTO(projectRepository.save(project));
     }
 
+    /**
+     * Staff-only load (no client isolation). Only call from write operations already guarded by
+     * {@code hasAnyRole("CONSULTANT","ADMIN")} in {@code SecurityConfig}.
+     */
     private Project loadProject(Long id) {
         return projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Projeto não encontrado: " + id));

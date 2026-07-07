@@ -69,8 +69,12 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
     headers.set("Content-Type", "application/json");
   }
 
+  // Login/register are public. Never attach a bearer token to them: a stale or
+  // invalid token would otherwise be rejected by the resource server (401) and
+  // lock the user out of re-authenticating.
+  const isPublicAuth = path === "/auth/login" || path === "/auth/register";
   const token = getAuthToken();
-  if (token) {
+  if (token && !isPublicAuth) {
     headers.set("Authorization", `Bearer ${token}`);
   }
 

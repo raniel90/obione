@@ -2,6 +2,7 @@ package br.com.obione.knowledge.service;
 
 import br.com.obione.common.exception.BadRequestException;
 import br.com.obione.common.exception.ResourceNotFoundException;
+import br.com.obione.common.security.CurrentUser;
 import br.com.obione.discussions.entity.Discussion;
 import br.com.obione.discussions.enums.DiscussionStatus;
 import br.com.obione.discussions.repository.DiscussionRepository;
@@ -20,10 +21,13 @@ import br.com.obione.phenomena.entity.Phenomenon;
 import br.com.obione.phenomena.repository.PhenomenonRepository;
 import br.com.obione.projects.entity.Project;
 import br.com.obione.projects.repository.ProjectRepository;
+import br.com.obione.projects.service.ProjectAccessGuard;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class KnowledgeService {
@@ -33,46 +37,83 @@ public class KnowledgeService {
     private final ProjectRepository projectRepository;
     private final DiscussionRepository discussionRepository;
     private final PhenomenonRepository phenomenonRepository;
+    private final CurrentUser currentUser;
+    private final ProjectAccessGuard guard;
 
     public KnowledgeService(
             KnowledgeRepository knowledgeRepository,
             DomainRepository domainRepository,
             ProjectRepository projectRepository,
             DiscussionRepository discussionRepository,
-            PhenomenonRepository phenomenonRepository
+            PhenomenonRepository phenomenonRepository,
+            CurrentUser currentUser,
+            ProjectAccessGuard guard
     ) {
         this.knowledgeRepository = knowledgeRepository;
         this.domainRepository = domainRepository;
         this.projectRepository = projectRepository;
         this.discussionRepository = discussionRepository;
         this.phenomenonRepository = phenomenonRepository;
+        this.currentUser = currentUser;
+        this.guard = guard;
     }
 
     @Transactional(readOnly = true)
     public List<KnowledgeResponseDTO> findAll() {
-        return knowledgeRepository.findAll().stream()
+        List<Knowledge> all = knowledgeRepository.findAll();
+        if (currentUser.isClient()) {
+            // A CLIENT sees knowledge tied to their own projects, OR domain-level knowledge
+            // (project == null) that belongs to one of their own domains.
+            Set<Long> myProjectIds = guard.clientProjectIds();
+            Set<Long> myDomainIds = guard.clientDomainIds();
+            all = all.stream()
+                    .filter(k -> k.getProject() != null
+                            ? myProjectIds.contains(k.getProject().getId())
+                            : myDomainIds.contains(k.getDomain().getId()))
+                    .collect(Collectors.toList());
+        }
+        return all.stream()
                 .map(KnowledgeMapper::toResponseDTO)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public KnowledgeResponseDTO findById(Long id) {
-        return knowledgeRepository.findById(id)
-                .map(KnowledgeMapper::toResponseDTO)
+        Knowledge knowledge = knowledgeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Conhecimento não encontrado: " + id));
+        if (knowledge.getProject() != null) {
+            guard.assertCanRead(knowledge.getProject().getId());
+        }
+        return KnowledgeMapper.toResponseDTO(knowledge);
     }
 
     @Transactional(readOnly = true)
     public List<KnowledgeResponseDTO> findByDomainId(Long domainId) {
         ensureDomainExists(domainId);
-        return knowledgeRepository.findByDomain_IdOrderByCreatedAtDesc(domainId).stream()
+        List<Knowledge> all = knowledgeRepository.findByDomain_IdOrderByCreatedAtDesc(domainId);
+        if (currentUser.isClient()) {
+            // B7: for a CLIENT, show only knowledge belonging to their own projects, OR
+            // domain-level knowledge (project == null) from this domain — but only if the
+            // queried domain is one of the client's own domains.
+            Set<Long> myProjectIds = guard.clientProjectIds();
+            boolean domainVisible = guard.clientDomainIds().contains(domainId);
+            all = all.stream()
+                    .filter(k -> k.getProject() != null
+                            ? myProjectIds.contains(k.getProject().getId())
+                            : domainVisible)
+                    .collect(Collectors.toList());
+        }
+        return all.stream()
                 .map(KnowledgeMapper::toResponseDTO)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public List<KnowledgeResponseDTO> findByProjectId(Long projectId) {
-        ensureProjectExists(projectId);
+        guard.assertCanRead(projectId);
+        if (!currentUser.isClient()) {
+            ensureProjectExists(projectId);
+        }
         return knowledgeRepository.findByProject_IdOrderByCreatedAtDesc(projectId).stream()
                 .map(KnowledgeMapper::toResponseDTO)
                 .toList();
@@ -80,7 +121,11 @@ public class KnowledgeService {
 
     @Transactional(readOnly = true)
     public List<KnowledgeResponseDTO> findByDiscussionId(Long discussionId) {
-        ensureDiscussionExists(discussionId);
+        Discussion discussion = discussionRepository.findById(discussionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Discussão não encontrada: " + discussionId));
+        if (discussion.getProject() != null) {
+            guard.assertCanRead(discussion.getProject().getId());
+        }
         return knowledgeRepository.findByDiscussion_IdOrderByCreatedAtDesc(discussionId).stream()
                 .map(KnowledgeMapper::toResponseDTO)
                 .toList();
@@ -214,12 +259,6 @@ public class KnowledgeService {
         }
     }
 
-    private void ensureDiscussionExists(Long discussionId) {
-        if (!discussionRepository.existsById(discussionId)) {
-            throw new ResourceNotFoundException("Discussão não encontrada: " + discussionId);
-        }
-    }
-
     private Domain resolveDomain(Long domainId) {
         return domainRepository.findById(domainId)
                 .orElseThrow(() -> new ResourceNotFoundException("Domínio não encontrado: " + domainId));
@@ -267,4 +306,5 @@ public class KnowledgeService {
             throw new BadRequestException("O fenômeno informado não pertence ao domínio selecionado");
         }
     }
+
 }

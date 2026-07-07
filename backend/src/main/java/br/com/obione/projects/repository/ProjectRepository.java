@@ -11,4 +11,11 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     List<Project> findByDomain_Id(Long domainId);
 
     Optional<Project> findByName(String name);
+
+    // Client-scoped finders — used when the authenticated user has role CLIENT
+    List<Project> findByClient_Id(Long clientId);
+
+    Optional<Project> findByIdAndClient_Id(Long id, Long clientId);
+
+    List<Project> findByDomain_IdAndClient_Id(Long domainId, Long clientId);
 }
