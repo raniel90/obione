@@ -1100,24 +1100,14 @@ function ManualObservationSection({
                           onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
                         />
                       </div>
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <div className="space-y-1.5">
-                          <Label htmlFor="obs-date">Data da observação</Label>
-                          <Input
-                            id="obs-date"
-                            type="date"
-                            value={form.date}
-                            onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-                          />
-                        </div>
-                        <div className="space-y-1.5">
-                          <Label htmlFor="obs-author">Responsável pelo registro</Label>
-                          <Input
-                            id="obs-author"
-                            value={form.author}
-                            onChange={(e) => setForm((f) => ({ ...f, author: e.target.value }))}
-                          />
-                        </div>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="obs-date">Data da observação</Label>
+                        <Input
+                          id="obs-date"
+                          type="date"
+                          value={form.date}
+                          onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
+                        />
                       </div>
                       <div className="space-y-1.5">
                         <Label htmlFor="obs-desc">Descrição da evidência</Label>
