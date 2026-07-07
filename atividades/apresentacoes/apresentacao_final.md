@@ -2,8 +2,8 @@
 titulo: ObiOne · Seminário TAES
 titulo_principal: ObiOne
 autor: Bruno Rocha · Cynthia Oliveira · Moisés Júnior · Raniel Silva
-programa: Doutorado PPGEC
-programa_longo: Doutorado PPGEC · Tópicos Avançados em Engenharia de Software
+programa: TAES
+programa_longo: Tópicos Avançados em Engenharia de Software
 instituicao: UPE/POLI
 instituicao_longa: Universidade de Pernambuco · Escola Politécnica de Pernambuco
 data: 2026-07-07
@@ -12,7 +12,7 @@ contexto: Seminário TAES
 rotulo_orientador: Professor
 orientador: Prof. Ivaldir Honório de Farias Júnior
 rotulo_agenda: AGENDA
-mensagem_final: Discussão e perguntas
+mensagem_final: Veremos ao vivo
 template: status-report
 ---
 
@@ -102,4 +102,4 @@ bullets:
   - A seguir: navegação guiada e avaliar a fidelidade da extração do MPO
 
 # slide:obrigado
-mensagem: Discussão e perguntas
+mensagem: Veremos ao vivo

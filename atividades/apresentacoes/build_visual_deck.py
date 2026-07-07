@@ -184,8 +184,7 @@ def slide_jornada(s):
         if i < 4:
             arrow(s, x + w + 0.02, t + 0.4, 0.4, 0.35, color=MUTED)
     txt(s, 0.55, 5.0, 12.0, 0.5,
-        [[("A IA acelera as pontas trabalhosas; o consultor decide. ", 16, GRAY, False, False),
-          ("Veremos ao vivo.", 16, NAVY, True, False)]])
+        [[("A IA acelera as pontas trabalhosas; o consultor decide.", 16, GRAY, False, False)]])
 
 
 def slide_shot(s, eb, ttl, img, caption_lines):
@@ -292,6 +291,19 @@ BUILDERS = [
 ]
 
 
+def sub_runs(prs, replacements):
+    """Substituição de substring em todos os runs (capa, rodapé, encerramento)."""
+    for slide in prs.slides:
+        for sh in slide.shapes:
+            if not sh.has_text_frame:
+                continue
+            for para in sh.text_frame.paragraphs:
+                for run in para.runs:
+                    for old, new in replacements:
+                        if old in run.text:
+                            run.text = run.text.replace(old, new)
+
+
 def main():
     src = HERE / "ObiOne_Apresentacao_Final.pptx"
     prs = Presentation(str(src))
@@ -300,6 +312,12 @@ def main():
         s = prs.slides[idx]
         clean_content_slide(s)
         build(s)
+    sub_runs(prs, [
+        ("Doutorado PPGEC · Tópicos Avançados em Engenharia de Software",
+         "Tópicos Avançados em Engenharia de Software"),
+        ("Doutorado PPGEC", "TAES"),
+        ("Discussão e perguntas", "Veremos ao vivo"),
+    ])
     update_footers(prs)
     out = HERE / "ObiOne_Apresentacao_Final.pptx"
     prs.save(str(out))
