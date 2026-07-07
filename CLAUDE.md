@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ObiOne is an **observatório-comunidade de conhecimento** for project consultancies, grounded in the *Modelo de Observatório de Projetos* (MPO — Vieira, 2022). The consultancy organizes its portfolio by **domains**; each project is observed and produces **observations** (evidence anchored to MPO attributes and phenomena); a **semi-open community** (consultancy + clients, role-scoped) debates them in typed **discussions** and consolidates them into reusable **knowledge**. GenAI is an **assistive layer** over the `observation → discussion → knowledge` pipeline (suggest observations on the MPO grammar, categorize domains, synthesize knowledge), always human-in-the-loop.
 
-> **v2 reality vs. original proposal:** the current build implements the observatory roadmap of `atividades/aderencia_observatorio_v2.md` (§7, delivered): canonical **MPO 44/8 catalog** (`mpo/MpoCatalog`), per-project **coverage** (`GET /projects/{id}/coverage`), an **assistive AI layer** (`ai/` — 4 roles, suggestions journaled in `ai_suggestion_logs` with provider/model/timestamp and acceptance tracking, `GET /ai/stats`), **role-based governance** (reads authenticated, mutations consultant/admin — no per-attribute CBAC from the v1 spec), and a real **temporal feed**. The AI provider is selected by `obione.llm.provider`: `mock` (default, deterministic, no key) or `openai` (Spring AI; requires `OPENAI_API_KEY`). Auth is still mock-token (no JWT).
+> **v2 reality vs. original proposal:** the current build implements the observatory roadmap of `atividades/aderencia_observatorio_v2.md` (§7, delivered): canonical **MPO 44/8 catalog** (`mpo/MpoCatalog`), per-project **coverage** (`GET /projects/{id}/coverage`), an **assistive AI layer** (`ai/` — 4 roles, suggestions journaled in `ai_suggestion_logs` with provider/model/timestamp and acceptance tracking, `GET /ai/stats`), **role-based governance** (reads authenticated, mutations consultant/admin — no per-attribute CBAC from the v1 spec), and a real **temporal feed**. The AI provider is selected by `obione.llm.provider`: `mock` (default, deterministic, no key) or `openai` (Spring AI; requires `OPENAI_API_KEY`). Auth is stateless JWT (HS256) via Spring Security's OAuth2 Resource Server.
 
 Repository: `raniel90/obione` (this repo). The application is a **v2 rewrite**:
 
@@ -29,7 +29,7 @@ Repository: `raniel90/obione` (this repo). The application is a **v2 rewrite**:
 │   │   ├── ObioneBackendApplication.java
 │   │   ├── config/            # SecurityConfig (CORS, BCrypt, filter chain)
 │   │   ├── common/            # HealthController, exception/ (+ GlobalExceptionHandler)
-│   │   ├── auth/              # mock-token login (controller/dto/service)
+│   │   ├── auth/              # JWT login (controller/dto/service)
 │   │   ├── users/  profiles/  permissions/                # identity & access
 │   │   ├── projects/  domains/  observations/             # core observatory
 │   │   ├── phenomena/  knowledge/  governance/            # cross-project insight
@@ -65,7 +65,7 @@ Repository: `raniel90/obione` (this repo). The application is a **v2 rewrite**:
 | ORM | Spring Data JPA / Hibernate | `ddl-auto: update` |
 | DB (dev) | **H2 file-based** (`jdbc:h2:file:./data/obione_dev`, gitignored) | survives restarts; seeded on first boot (delete `backend/data/` to reseed); console at `/api/h2-console`. Tests use in-memory H2 (`src/test/resources/application.yml`) |
 | DB (prod) | PostgreSQL | driver present, not wired into the active config |
-| Security | Spring Security + BCrypt | CORS, CSRF off; **mock-token** auth (no JWT yet) |
+| Security | Spring Security + BCrypt | CORS, CSRF off; **stateless JWT** (HS256, OAuth2 Resource Server) |
 | API docs | springdoc-openapi | Swagger UI at `/api/swagger-ui.html` |
 | Boilerplate | Lombok | annotation processing configured in `pom.xml` |
 
@@ -126,7 +126,7 @@ bun run format   # Prettier --write
 - Backend listens on **`http://localhost:8080`** with **context-path `/api`** → every endpoint is under `/api/...` (e.g. `GET /api/health`, Swagger `/api/swagger-ui.html`, H2 console `/api/h2-console`).
 - CORS allows the frontend origins `http://localhost:5173`, `:3000`, `:8081` (see `config/SecurityConfig.java`).
 - Frontend talks to the backend via `frontend/src/services/apiClient.ts` → `API_BASE_URL = "http://localhost:8080/api"` (hardcoded; no `.env` needed). Auth token is stored in `localStorage["obione-auth"]`.
-- **Auth is a mock token**: `AuthService` validates email + BCrypt password against the `users` table and returns a fixed token whose session is held **in memory** (`ConcurrentHashMap`). Restarting the backend invalidates all sessions. `SecurityConfig` enforces **role-based governance**: reads require authentication, mutations require CONSULTANT/ADMIN (clients may POST discussion contributions); only health/auth/swagger/h2-console stay `permitAll`.
+- **Auth is stateless JWT** (HS256): `AuthService` validates email + BCrypt password against the `users` table, then mints a signed JWT (`sub`=userId, `role` claim) via `JwtConfig`'s `NimbusJwtEncoder`. Validation is by signature (Spring Security OAuth2 Resource Server — `oauth2ResourceServer().jwt()` + `NimbusJwtDecoder`), so **tokens survive backend restarts**. Secret in `obione.auth.jwt-secret` (dev default in `JwtConfig`; override via `OBIONE_JWT_SECRET`); TTL `obione.auth.jwt-ttl-hours` (12h). `SecurityConfig` enforces **role-based governance**: reads require authentication, mutations require CONSULTANT/ADMIN (clients may POST discussion contributions); only health/auth/swagger/h2-console/error stay `permitAll`. `CurrentUser` reads the JWT `sub` for per-client isolation.
 - **Demo data is seeded on first boot**: each context ships a `*DataSeeder` (e.g. `users/seed/UserDataSeeder`, `projects/seed/ProjectDataSeeder`), guarded by `count() > 0` — the file-based H2 keeps data across restarts; delete `backend/data/` for a fresh seed. There is no separate seed/migration step.
 - `backend/docker-compose.yml` is **broken** (its contents are a copy of `application.yml`, not a Compose file). Ignore it; dev needs no DB container because H2 is embedded (file-based).
 
