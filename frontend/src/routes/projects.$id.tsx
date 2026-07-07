@@ -500,7 +500,7 @@ function ProjectDetailPage() {
                 value={rawProject?.startDate ? formatDate(rawProject.startDate) : "—"}
               />
               <MetaItem
-                label="Previsão"
+                label="Conclusão"
                 value={rawProject?.expectedEndDate ? formatDate(rawProject.expectedEndDate) : "—"}
               />
             </div>
