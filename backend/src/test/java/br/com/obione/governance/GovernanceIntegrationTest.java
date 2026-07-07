@@ -36,11 +36,10 @@ class GovernanceIntegrationTest extends ApiTestSupport {
         Session client = login(CLIENT_EMAIL, CLIENT_PASSWORD);
         // Body is irrelevant: the role check runs before the controller. The
         // client is authenticated (see clientCanContributeToDiscussion) but
-        // lacks CONSULTANT/ADMIN, so the mutation is denied. The mock-auth
-        // stack currently surfaces that denial as 401 rather than 403; either
-        // way the guarantee — clients cannot mutate — holds.
+        // lacks CONSULTANT/ADMIN, so Spring Security's accessDeniedHandler
+        // correctly surfaces the denial as 403 FORBIDDEN (not 401).
         ResponseEntity<Map> res = post("/projects", Map.of(), client.token());
-        assertThat(res.getStatusCode()).isIn(HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN);
+        assertThat(res.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test

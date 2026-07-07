@@ -52,7 +52,7 @@ public class AuthService {
         this.ttlHours = ttlHours;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public LoginResponseDTO login(LoginRequestDTO request) {
         User user = userRepository.findByEmailIgnoreCase(request.email().trim())
                 .orElseThrow(() -> new UnauthorizedException("E-mail ou senha incorretos"));

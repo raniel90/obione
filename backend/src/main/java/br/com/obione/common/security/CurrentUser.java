@@ -26,7 +26,11 @@ public class CurrentUser {
         }
         Object p = auth.getPrincipal();
         if (p instanceof Jwt jwt) {
-            return Long.valueOf(jwt.getSubject());
+            try {
+                return Long.valueOf(jwt.getSubject());
+            } catch (NumberFormatException e) {
+                throw new UnauthorizedException("Token inválido.");
+            }
         }
         if (p instanceof Long l) {
             // Backward-compatibility guard — should not be reached in production.
