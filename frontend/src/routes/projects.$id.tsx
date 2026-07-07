@@ -466,7 +466,9 @@ function ProjectDetailPage() {
               <h1 className="mt-1.5 text-[22px] font-semibold tracking-tight text-foreground">
                 {project.name}
               </h1>
-              <p className="mt-1 max-w-3xl text-[13px] text-muted-foreground">{project.summary}</p>
+              <p className="mt-1 max-w-3xl text-[13px] leading-relaxed text-muted-foreground line-clamp-2">
+                {project.summary}
+              </p>
             </div>
             <div className="flex shrink-0 flex-wrap items-center gap-2">
               {domain?.slug && (
