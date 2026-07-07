@@ -1101,15 +1101,6 @@ function ManualObservationSection({
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <Label htmlFor="obs-date">Data da observação</Label>
-                        <Input
-                          id="obs-date"
-                          type="date"
-                          value={form.date}
-                          onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-                        />
-                      </div>
-                      <div className="space-y-1.5">
                         <Label htmlFor="obs-desc">Descrição da evidência</Label>
                         <Textarea
                           id="obs-desc"
@@ -1119,72 +1110,30 @@ function ManualObservationSection({
                           onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                         />
                       </div>
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <div className="space-y-1.5">
-                          <Label>Atributo relacionado</Label>
-                          <Select
-                            value={form.attribute}
-                            onValueChange={(v) => setForm((f) => ({ ...f, attribute: v }))}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione um aspecto do projeto" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {mpoCategories.map((cat) => (
-                                <SelectGroup key={cat.key}>
-                                  <SelectLabel>{cat.label}</SelectLabel>
-                                  {cat.attributes
-                                    .filter((a) => a.type !== "fora_de_escopo")
-                                    .map((a) => (
-                                      <SelectItem key={a.id} value={a.id}>
-                                        {a.name}
-                                      </SelectItem>
-                                    ))}
-                                </SelectGroup>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-1.5">
-                          <Label>Impacto</Label>
-                          <Select
-                            value={form.impact}
-                            onValueChange={(v) =>
-                              setForm((f) => ({ ...f, impact: v as ProjectObservation["impact"] }))
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {["Baixo", "Médio", "Alto"].map((v) => (
-                                <SelectItem key={v} value={v}>
-                                  {v}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-1.5">
-                          <Label>Risco</Label>
-                          <Select
-                            value={form.risk}
-                            onValueChange={(v) =>
-                              setForm((f) => ({ ...f, risk: v as ProjectObservation["risk"] }))
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {["Baixo", "Moderado", "Elevado", "Crítico"].map((v) => (
-                                <SelectItem key={v} value={v}>
-                                  {v}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
+                      <div className="space-y-1.5">
+                        <Label>Atributo relacionado</Label>
+                        <Select
+                          value={form.attribute}
+                          onValueChange={(v) => setForm((f) => ({ ...f, attribute: v }))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione um aspecto do projeto" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {mpoCategories.map((cat) => (
+                              <SelectGroup key={cat.key}>
+                                <SelectLabel>{cat.label}</SelectLabel>
+                                {cat.attributes
+                                  .filter((a) => a.type !== "fora_de_escopo")
+                                  .map((a) => (
+                                    <SelectItem key={a.id} value={a.id}>
+                                      {a.name}
+                                    </SelectItem>
+                                  ))}
+                              </SelectGroup>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div className="space-y-1.5">
                         <Label htmlFor="obs-interp">Interpretação inicial</Label>
