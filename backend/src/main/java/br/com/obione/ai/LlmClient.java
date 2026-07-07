@@ -5,6 +5,7 @@ import br.com.obione.ai.dto.DomainSynthesisDTO;
 import br.com.obione.ai.dto.KnowledgeDraftDTO;
 import br.com.obione.ai.dto.ObservationSuggestionsDTO;
 import br.com.obione.ai.dto.ProjectSetupSuggestionDTO;
+import br.com.obione.ai.dto.StructureObservationDTO;
 
 import java.util.List;
 
@@ -34,4 +35,11 @@ public interface LlmClient {
     ProjectSetupSuggestionDTO suggestProjectSetup(
             String name, String description, String objective,
             List<String> availableDomainSlugs, String mpoLens);
+
+    /**
+     * Structures a free-text observation into a title, best-matching MPO attribute id,
+     * and an initial interpretation. {@code mpoLens} is the in-scope attribute list in
+     * "attributeId — label (categoria)" format, one per line.
+     */
+    StructureObservationDTO structureObservation(String description, String mpoLens);
 }

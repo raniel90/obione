@@ -5,6 +5,7 @@ import br.com.obione.ai.dto.DomainSynthesisDTO;
 import br.com.obione.ai.dto.KnowledgeDraftDTO;
 import br.com.obione.ai.dto.ObservationSuggestionsDTO;
 import br.com.obione.ai.dto.ProjectSetupSuggestionDTO;
+import br.com.obione.ai.dto.StructureObservationDTO;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -116,5 +117,20 @@ public class OpenAiLlmClient implements LlmClient {
                         + "\nResumos dos projetos:\n" + String.join("\n", projectSummaries))
                 .call()
                 .entity(DomainSynthesisDTO.class);
+    }
+
+    @Override
+    public StructureObservationDTO structureObservation(String description, String mpoLens) {
+        return chat.prompt()
+                .system("A partir do texto de uma observação registrada num projeto, gere: "
+                        + "title (um título curto e objetivo em pt-BR, máximo 10 palavras); "
+                        + "attributeId (exatamente UM id da lente MPO fornecida que melhor se relaciona com a "
+                        + "observação — não invente ids fora da lista; deixe vazio se nenhum se aplica); "
+                        + "e interpretation (uma frase em pt-BR com a interpretação inicial do que isso significa "
+                        + "para o projeto, focada no impacto observacional).")
+                .user("Texto da observação: " + description
+                        + "\n\nLente MPO (attributeId — rótulo (categoria)):\n" + mpoLens)
+                .call()
+                .entity(StructureObservationDTO.class);
     }
 }
