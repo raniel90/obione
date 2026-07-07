@@ -427,7 +427,7 @@ body("Três técnicas sustentam a confiabilidade das sugestões. A primeira é a
      "inexistentes no catálogo são descartados antes de a resposta ser devolvida; nos "
      "demais papéis, essa restrição é reforçada pelas instruções do prompt. O provedor é "
      "configurável: um modo determinístico, sem chave e "
-     "voltado a testes, e o provedor da OpenAI, com o modelo gpt-4o-mini e temperatura "
+     "voltado a testes, e o provedor da OpenAI, com o modelo gpt-5.4-mini e temperatura "
      "baixa, para uso real.", first=True)
 body("A IA nunca escreve diretamente nas observações ou nos aprendizados. Ela apenas "
      "sugere e registra cada sugestão em um log de auditoria, com o provedor, o modelo, o "
