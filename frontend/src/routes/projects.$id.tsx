@@ -818,21 +818,6 @@ const riskToCode: Record<ProjectObservation["risk"], SvcObsRisk> = {
   Crítico: "CRITICAL",
 };
 
-const DISCUSSION_VISIBILITY: VisibilityScope[] = [
-  "Comunidade do domínio",
-  "Participantes do projeto",
-  "Consultores vinculados",
-  "Administradores",
-];
-
-const DISCUSSION_STATUS: DiscussionStatus[] = [
-  "Aberta",
-  "Em análise",
-  "Revisada",
-  "Consolidada",
-  "Arquivada",
-];
-
 function ManualObservationSection({
   projectId,
   domainId,
@@ -1491,48 +1476,6 @@ function ManualObservationSection({
                 value={discussionForm.question}
                 onChange={(e) => setDiscussionForm((f) => ({ ...f, question: e.target.value }))}
               />
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label>Visibilidade</Label>
-                <Select
-                  value={discussionForm.visibility}
-                  onValueChange={(v) =>
-                    setDiscussionForm((f) => ({ ...f, visibility: v as VisibilityScope }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {DISCUSSION_VISIBILITY.map((v) => (
-                      <SelectItem key={v} value={v}>
-                        {v}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label>Status</Label>
-                <Select
-                  value={discussionForm.status}
-                  onValueChange={(v) =>
-                    setDiscussionForm((f) => ({ ...f, status: v as DiscussionStatus }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {DISCUSSION_STATUS.map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {s}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
             <DialogFooter>
               <Button type="submit" size="sm" disabled={discussionSubmitting}>
