@@ -64,6 +64,23 @@ export function synthesizeDomain(domainId: string): Promise<DomainSynthesis> {
   return request<DomainSynthesis>(`/domains/${domainId}/ai/synthesize`, { method: "POST" });
 }
 
+/** Estruturadora — structure a free-text observation into a titled, MPO-attributed record. */
+export interface StructuredObservation extends AiSuggestionMeta {
+  title: string;
+  attributeId: string;
+  interpretation: string;
+}
+
+export function structureObservation(
+  projectId: string,
+  description: string,
+): Promise<StructuredObservation> {
+  return request<StructuredObservation>(`/projects/${projectId}/ai/structure-observation`, {
+    method: "POST",
+    json: { description },
+  });
+}
+
 export interface ProjectSetupSuggestion extends AiSuggestionMeta {
   suggestedDomainSlug: string | null;
   suggestedDomainId: number | null;

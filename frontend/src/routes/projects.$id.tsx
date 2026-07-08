@@ -72,7 +72,7 @@ import {
 } from "@/services/knowledgeService";
 import type { CommunityKnowledge } from "@/lib/community-data";
 import type { Knowledge } from "@/types/knowledge";
-import { synthesizeDomain } from "@/services/aiService";
+import { synthesizeDomain, structureObservation } from "@/services/aiService";
 import type { DomainSynthesis } from "@/services/aiService";
 import { KnowledgeCard } from "@/components/community-pieces";
 import { BookOpen } from "lucide-react";
@@ -876,6 +876,9 @@ function ManualObservationSection({
     interpretation: "",
     author: "Você",
   });
+  const [structureLoading, setStructureLoading] = useState(false);
+  const [reviewRevealed, setReviewRevealed] = useState(false);
+  const [fromAi, setFromAi] = useState(false);
   const [editForm, setEditForm] = useState({
     title: "",
     description: "",
@@ -946,10 +949,33 @@ function ManualObservationSection({
           title: "",
           description: "",
           interpretation: "",
+          attribute: "",
         }));
+        setReviewRevealed(false);
+        setFromAi(false);
       }, 1400);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleStructure = async () => {
+    if (structureLoading || form.description.trim().length < 15) return;
+    setStructureLoading(true);
+    try {
+      const result = await structureObservation(projectId, form.description.trim());
+      setForm((f) => ({
+        ...f,
+        title: result.title,
+        attribute: result.attributeId ?? "",
+        interpretation: result.interpretation,
+      }));
+      setFromAi(true);
+      setReviewRevealed(true);
+    } catch {
+      toast.error("Não foi possível estruturar a observação. Tente novamente.");
+    } finally {
+      setStructureLoading(false);
     }
   };
 
@@ -1070,7 +1096,17 @@ function ManualObservationSection({
         action={
           isClient ? undefined : (
             <div className="flex items-center gap-2">
-              <Dialog open={open} onOpenChange={setOpen}>
+              <Dialog
+                open={open}
+                onOpenChange={(o) => {
+                  setOpen(o);
+                  if (!o) {
+                    setReviewRevealed(false);
+                    setFromAi(false);
+                    setStructureLoading(false);
+                  }
+                }}
+              >
                 <DialogTrigger asChild>
                   <Button size="sm" className="gap-1.5">
                     <Plus className="h-3.5 w-3.5" /> Registrar observação
@@ -1080,8 +1116,8 @@ function ManualObservationSection({
                   <DialogHeader>
                     <DialogTitle>Registrar nova observação</DialogTitle>
                     <DialogDescription>
-                      Registre uma evidência observada no projeto: descrição, atributo afetado e sua
-                      interpretação inicial.
+                      Descreva o que você observou e deixe a IA estruturar o registro para você
+                      revisar.
                     </DialogDescription>
                   </DialogHeader>
                   {success ? (
@@ -1092,63 +1128,101 @@ function ManualObservationSection({
                   ) : (
                     <form onSubmit={handleSubmit} className="space-y-4">
                       <div className="space-y-1.5">
-                        <Label htmlFor="obs-title">Título da observação</Label>
-                        <Input
-                          id="obs-title"
-                          placeholder="Ex.: Cliente solicitou nova alteração de escopo após aprovação inicial"
-                          value={form.title}
-                          onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="obs-desc">Descrição da evidência</Label>
+                        <Label htmlFor="obs-desc">O que você observou?</Label>
                         <Textarea
                           id="obs-desc"
-                          rows={3}
-                          placeholder="Descreva o que aconteceu, qual evidência foi observada e por que isso é relevante para o projeto."
+                          rows={4}
+                          placeholder="Descreva em suas palavras o que aconteceu e por que é relevante para o projeto."
                           value={form.description}
                           onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                         />
                       </div>
-                      <div className="space-y-1.5">
-                        <Label>Atributo relacionado</Label>
-                        <Select
-                          value={form.attribute}
-                          onValueChange={(v) => setForm((f) => ({ ...f, attribute: v }))}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione um aspecto do projeto" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {mpoCategories.map((cat) => (
-                              <SelectGroup key={cat.key}>
-                                <SelectLabel>{cat.label}</SelectLabel>
-                                {cat.attributes
-                                  .filter((a) => a.type !== "fora_de_escopo")
-                                  .map((a) => (
-                                    <SelectItem key={a.id} value={a.id}>
-                                      {a.name}
-                                    </SelectItem>
-                                  ))}
-                              </SelectGroup>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="obs-interp">Interpretação inicial</Label>
-                        <Textarea
-                          id="obs-interp"
-                          rows={2}
-                          placeholder="Descreva a interpretação inicial sobre essa observação."
-                          value={form.interpretation}
-                          onChange={(e) =>
-                            setForm((f) => ({ ...f, interpretation: e.target.value }))
-                          }
-                        />
-                      </div>
+                      {!reviewRevealed && (
+                        <div className="flex items-center gap-3">
+                          <Button
+                            type="button"
+                            size="sm"
+                            disabled={structureLoading || form.description.trim().length < 15}
+                            onClick={handleStructure}
+                            className="gap-1.5"
+                          >
+                            {structureLoading ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <Sparkles className="h-3.5 w-3.5" />
+                            )}
+                            {structureLoading ? "Estruturando…" : "Estruturar com IA"}
+                          </Button>
+                          <button
+                            type="button"
+                            className="text-[12.5px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+                            onClick={() => setReviewRevealed(true)}
+                          >
+                            preencher manualmente
+                          </button>
+                        </div>
+                      )}
+                      {reviewRevealed && (
+                        <div className="space-y-4">
+                          {fromAi && (
+                            <p className="text-[12px] text-muted-foreground">
+                              Revise as sugestões da IA antes de salvar.
+                            </p>
+                          )}
+                          <div className="space-y-1.5">
+                            <Label htmlFor="obs-title">Título</Label>
+                            <Input
+                              id="obs-title"
+                              placeholder="Ex.: Cliente solicitou nova alteração de escopo após aprovação inicial"
+                              value={form.title}
+                              onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label>Atributo relacionado</Label>
+                            <Select
+                              value={form.attribute}
+                              onValueChange={(v) => setForm((f) => ({ ...f, attribute: v }))}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione um aspecto do projeto" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {mpoCategories.map((cat) => (
+                                  <SelectGroup key={cat.key}>
+                                    <SelectLabel>{cat.label}</SelectLabel>
+                                    {cat.attributes
+                                      .filter((a) => a.type !== "fora_de_escopo")
+                                      .map((a) => (
+                                        <SelectItem key={a.id} value={a.id}>
+                                          {a.name}
+                                        </SelectItem>
+                                      ))}
+                                  </SelectGroup>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label htmlFor="obs-interp">Interpretação inicial</Label>
+                            <Textarea
+                              id="obs-interp"
+                              rows={2}
+                              placeholder="Descreva a interpretação inicial sobre essa observação."
+                              value={form.interpretation}
+                              onChange={(e) =>
+                                setForm((f) => ({ ...f, interpretation: e.target.value }))
+                              }
+                            />
+                          </div>
+                        </div>
+                      )}
                       <DialogFooter>
-                        <Button type="submit" size="sm" disabled={submitting}>
+                        <Button
+                          type="submit"
+                          size="sm"
+                          disabled={submitting || !reviewRevealed || !form.title.trim()}
+                        >
                           {submitting ? "Registrando…" : "Registrar observação"}
                         </Button>
                       </DialogFooter>
