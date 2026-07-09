@@ -736,18 +736,21 @@ export function ConsolidateKnowledgeDialog({
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title.trim() || !form.summary.trim()) return;
-    onConsolidate({
-      id: `kn-${Date.now()}`,
-      title: form.title,
-      domain: discussion.domain,
-      project: discussion.project,
-      summary: form.summary,
-      evidences: form.evidences,
-      recommendation: form.recommendation,
-      confidence: form.confidence,
-      status: form.status,
-      originDiscussion: discussion.id,
-    }, draftSuggestionId ?? undefined);
+    onConsolidate(
+      {
+        id: `kn-${Date.now()}`,
+        title: form.title,
+        domain: discussion.domain,
+        project: discussion.project,
+        summary: form.summary,
+        evidences: form.evidences,
+        recommendation: form.recommendation,
+        confidence: form.confidence,
+        status: form.status,
+        originDiscussion: discussion.id,
+      },
+      draftSuggestionId ?? undefined,
+    );
     setSuccess(true);
     setTimeout(() => {
       setSuccess(false);
@@ -795,8 +798,8 @@ export function ConsolidateKnowledgeDialog({
               <div className="flex items-start gap-2 rounded-lg border border-warning/40 bg-warning/10 p-3 text-[12px] leading-relaxed text-foreground">
                 <Info className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
                 <span>
-                  Esta conversa ainda não tem contribuições. Um aprendizado consolidado agora
-                  terá pouca evidência; considere aguardar a participação da comunidade.
+                  Esta conversa ainda não tem contribuições. Um aprendizado consolidado agora terá
+                  pouca evidência; considere aguardar a participação da comunidade.
                 </span>
               </div>
             )}
