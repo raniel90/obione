@@ -162,7 +162,7 @@ def clean_content_slide(slide):
 
 # ─────────────────────────────────────────────────────────────────────────────
 def slide_problema(s):
-    eyebrow(s, "O problema")
+    eyebrow(s, "O ponto de partida")
     title(s, "O conhecimento dos projetos se perde")
     subtitle(s, "Consultorias vivem de conhecimento, e ele evapora entre um projeto e o outro.")
     cards = [
@@ -179,7 +179,7 @@ def slide_problema(s):
 
 
 def slide_solucao(s):
-    eyebrow(s, "A solução")
+    eyebrow(s, "O que construímos")
     title(s, "Um observatório que vira memória viva")
     subtitle(s, "O ciclo do valor, ancorado no MPO (Vieira, 2022), com comunidade e IA assistiva.")
     steps = ["Observação", "Discussão", "Conhecimento"]
@@ -211,6 +211,35 @@ def slide_ia_layer(s):
     ])
 
 
+
+def slide_pivo(s):
+    eyebrow(s, "A concepção")
+    title(s, "O projeto mudou no meio do caminho")
+    subtitle(s, "A proposta inicial foi reescopada após a crítica dos orientadores: refinar o propósito.")
+    b1 = rect(s, 0.9, 3.0, 4.6, 1.6, LIGHT, line=BORDER)
+    set_text(b1, [[("Proposta inicial", 13, RED, True)], [("Extrator de atributos do MPO a partir de documentos", 14, NAVY, True)]])
+    arrow(s, 5.7, 3.55, 0.9, 0.5)
+    b2 = rect(s, 6.85, 3.0, 5.55, 1.6, NAVY)
+    set_text(b2, [[("Depois do pivô", 13, WHITE, False)], [("Observatório de projetos com o cliente dentro da comunidade", 14.5, WHITE, True)]])
+    txt(s, 0.9, 5.1, 11.5, 0.9,
+        [[("O refino deslocou o foco da extração para o ciclo de conhecimento e a participação segura do cliente, e definiu a pergunta: a IA generativa viabiliza um observatório de projetos?", 14.5, GRAY, False, False)]])
+
+
+def slide_desafios(s):
+    eyebrow(s, "Principais desafios")
+    title(s, "O que enfrentamos e como resolvemos")
+    panel(s, 0.55, 2.0, 5.9, 4.75, "Desafios", [
+        ("Escopo amplo e pivô no meio do projeto", "Reescopo formal com os orientadores e disciplina de cronograma"),
+        ("Entender o MPO a fundo e traduzi-lo sem jargão", "Catálogo canônico dos 44 atributos e linguagem simples na interface"),
+        ("Confiar na IA sem perder o controle", "Saída estruturada, grounding no MPO, validação em código e revisão humana"),
+    ])
+    panel(s, 6.9, 2.0, 5.9, 4.75, "E mais", [
+        ("Validar com usuários reais a distância", "Acesso remoto por túnel e dados de demonstração replicáveis"),
+        ("Clareza do primeiro acesso (3,8 nas 2 rodadas)", "Onboarding incluído; o próximo passo é navegação guiada"),
+        ("Coordenar 4 frentes em equipe", "Comunicação constante entre extração, front, avaliação e escrita"),
+    ])
+
+
 def slide_shot(s, eb, ttl, img, caption_lines):
     eyebrow(s, eb)
     title(s, ttl)
@@ -228,7 +257,7 @@ def slide_shot_wide(s, eb, ttl, img, caption):
 
 
 def slide_experimento(s):
-    eyebrow(s, "O experimento")
+    eyebrow(s, "Como avaliamos")
     title(s, "Design Science Research, avaliado em uso real")
     steps = ["Construir\no artefato", "Demonstrar\nem uso real", "Avaliar\na percepção"]
     w, t, h = 3.2, 2.35, 1.15
@@ -272,8 +301,8 @@ def slide_resultados(s):
 
 
 def slide_valor(s):
-    eyebrow(s, "Valor entregue")
-    title(s, "A jornada roda de ponta a ponta")
+    eyebrow(s, "Onde chegamos")
+    title(s, "O que o ObiOne entrega hoje")
     items = ["Isolamento do cliente", "Reaproveitamento", "Engajamento", "IA copiloto"]
     w, gap, t, h = 2.85, 0.22, 3.05, 1.5
     x = 0.55
@@ -288,6 +317,8 @@ def slide_valor(s):
 
 BUILDERS = [
     slide_problema,
+    slide_pivo,
+    slide_experimento,
     slide_solucao,
     slide_ia_layer,
     lambda s: slide_shot(s, "O diferencial · cliente com muralha", "O cliente dentro, sem ver os outros",
@@ -296,8 +327,8 @@ BUILDERS = [
     lambda s: slide_shot_wide(s, "Reaproveitamento", "O conhecimento atravessa projetos",
                               PRINTS / "aprendizados_dominio_bloco.png",
                               "Aprendizados de outros projetos afloram no domínio; a Conectora sintetiza padrões sob demanda."),
-    slide_experimento,
     slide_resultados,
+    slide_desafios,
     slide_valor,
 ]
 
@@ -318,7 +349,11 @@ def main():
     src = HERE / "ObiOne_Apresentacao_Final.pptx"
     prs = Presentation(str(src))
     n = len(BUILDERS)
-    obrigado_idx = len(prs.slides._sldIdLst) - 1  # último slide é o "Obrigado"
+    # garante slots de conteúdo suficientes (capa+agenda = 0-1; último = Obrigado)
+    from pptx_helpers import duplicate_slide
+    while len(prs.slides._sldIdLst) - 3 < n:
+        duplicate_slide(prs, 2, len(prs.slides._sldIdLst) - 1)
+    obrigado_idx = len(prs.slides._sldIdLst) - 1
     for i, build in enumerate(BUILDERS):
         s = prs.slides[2 + i]
         clean_content_slide(s)
@@ -331,13 +366,22 @@ def main():
          "Tópicos Avançados em Engenharia de Software"),
         ("Doutorado PPGEC", "TAES"),
         ("Discussão e perguntas", "Veremos ao vivo"),
-        # agenda alinhada à nova estrutura
-        ("A jornada de valor", "A camada de IA"),
-        ("O ciclo funcionando", "IA assistiva, com revisão humana"),
-        ("Diferencial e IA", "Diferencial e reaproveitamento"),
-        ("Cliente dentro, IA copiloto", "Cliente com muralha e reuso"),
-        ("Validação e valor", "Experimento e valor"),
-        ("Evidência e entrega", "Método, resultados e entrega"),
+        # agenda alinhada à trajetória (apresentação de projeto, não pitch)
+        ("O problema e a solução", "De onde partimos"),
+        ("Por que um observatório", "Contexto, concepção e pivô"),
+        ("A jornada de valor", "O que construímos"),
+        ("O ciclo funcionando", "O ciclo, a IA e a comunidade"),
+        ("Diferencial e IA", "Como avaliamos"),
+        ("Cliente dentro, IA copiloto", "Método e resultados"),
+        ("Validação e valor", "Desafios e demo"),
+        ("Evidência e entrega", "O que enfrentamos e o observatório ao vivo"),
+        # valores já gravados no pptx committado (idempotência)
+        ("A camada de IA", "O que construímos"),
+        ("IA assistiva, com revisão humana", "O ciclo, a IA e a comunidade"),
+        ("Diferencial e reaproveitamento", "Como avaliamos"),
+        ("Cliente com muralha e reuso", "Método e resultados"),
+        ("Experimento e valor", "Desafios e demo"),
+        ("Método, resultados e entrega", "O que enfrentamos e o observatório ao vivo"),
     ])
     update_footers(prs)
     prs.save(str(src))
