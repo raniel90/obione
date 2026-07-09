@@ -864,6 +864,7 @@ function ManualObservationSection({
   const [structureLoading, setStructureLoading] = useState(false);
   const [reviewRevealed, setReviewRevealed] = useState(false);
   const [fromAi, setFromAi] = useState(false);
+  const [aiSuggestionId, setAiSuggestionId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState({
     title: "",
     description: "",
@@ -922,6 +923,9 @@ function ManualObservationSection({
         interpretation: form.interpretation.trim(),
         status: "REGISTERED",
         createdBy: currentUserId,
+        // Provenance: when the draft came from the AI, the backend flips the
+        // suggestion log to accepted and stamps origin AI_SUGGESTED.
+        suggestionId: fromAi && aiSuggestionId != null ? aiSuggestionId : undefined,
       });
 
       prependObservation(created);
@@ -938,6 +942,7 @@ function ManualObservationSection({
         }));
         setReviewRevealed(false);
         setFromAi(false);
+        setAiSuggestionId(null);
       }, 1400);
     } finally {
       setSubmitting(false);
@@ -955,6 +960,7 @@ function ManualObservationSection({
         attribute: result.attributeId ?? "",
         interpretation: result.interpretation,
       }));
+      setAiSuggestionId(result.suggestionId ?? null);
       setFromAi(true);
       setReviewRevealed(true);
     } catch {
@@ -1088,6 +1094,7 @@ function ManualObservationSection({
                   if (!o) {
                     setReviewRevealed(false);
                     setFromAi(false);
+                    setAiSuggestionId(null);
                     setStructureLoading(false);
                   }
                 }}

@@ -8,6 +8,7 @@ public record ConsolidateKnowledgeRequestDTO(
         @NotBlank String summary,
         String evidence,
         String recommendation,
-        KnowledgeConfidence confidence
+        KnowledgeConfidence confidence,
+        Long suggestionId
 ) {
 }
