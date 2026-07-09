@@ -279,7 +279,9 @@ function NewProjectPage() {
         summary: story.summary,
         observationObjective: story.observationalGoal,
         initialAttributeIds: review.attributes,
-        expectedPhenomena: [],
+        // Expected phenomena suggested by the Configuradora become hypotheses
+        // under observation (the backend seeds them as Phenomenon entities).
+        expectedPhenomena: suggestion?.expectedPhenomena ?? [],
         progress: review.progress,
         riskLevel: review.risk,
         clientEngagement: review.engagement,

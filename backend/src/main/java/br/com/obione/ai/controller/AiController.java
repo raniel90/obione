@@ -7,6 +7,8 @@ import br.com.obione.ai.dto.KnowledgeDraftResponseDTO;
 import br.com.obione.ai.dto.ObservationSuggestionsResponseDTO;
 import br.com.obione.ai.dto.ProjectSetupRequestDTO;
 import br.com.obione.ai.dto.ProjectSetupSuggestionResponseDTO;
+import br.com.obione.ai.dto.StructureObservationRequestDTO;
+import br.com.obione.ai.dto.StructureObservationResponseDTO;
 import br.com.obione.ai.service.AiAssistantService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -62,6 +64,14 @@ public class AiController {
     public ProjectSetupSuggestionResponseDTO suggestProjectSetup(
             @Valid @RequestBody ProjectSetupRequestDTO request) {
         return ai.suggestProjectSetup(request);
+    }
+
+    @PostMapping("/projects/{id}/ai/structure-observation")
+    @Operation(summary = "IA: estruturar uma observação em texto livre (título + atributo MPO + interpretação)")
+    public StructureObservationResponseDTO structureObservation(
+            @PathVariable Long id,
+            @Valid @RequestBody StructureObservationRequestDTO request) {
+        return ai.structureObservation(id, request);
     }
 
     @GetMapping("/ai/stats")

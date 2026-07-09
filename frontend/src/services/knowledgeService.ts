@@ -53,6 +53,8 @@ export interface ConsolidateKnowledgeInput {
   evidence?: string;
   recommendation?: string;
   confidence?: KnowledgeConfidenceCode;
+  /** AI suggestion log id — flips the Sintetizadora draft to accepted (provenance). */
+  suggestionId?: number;
 }
 
 function buildConsolidateBody(data: ConsolidateKnowledgeInput) {
@@ -64,6 +66,7 @@ function buildConsolidateBody(data: ConsolidateKnowledgeInput) {
   if (data.evidence) body.evidence = data.evidence;
   if (data.recommendation) body.recommendation = data.recommendation;
   if (data.confidence) body.confidence = data.confidence;
+  if (data.suggestionId !== undefined) body.suggestionId = data.suggestionId;
 
   return body;
 }

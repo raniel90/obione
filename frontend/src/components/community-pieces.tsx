@@ -695,10 +695,11 @@ export function ConsolidateKnowledgeDialog({
   discussion: Discussion | null;
   open: boolean;
   onOpenChange: (o: boolean) => void;
-  onConsolidate: (k: CommunityKnowledge) => void;
+  onConsolidate: (k: CommunityKnowledge, suggestionId?: number) => void;
 }) {
   const [success, setSuccess] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
+  const [draftSuggestionId, setDraftSuggestionId] = useState<number | null>(null);
   const [form, setForm] = useState({
     title: "",
     summary: "",
@@ -716,6 +717,7 @@ export function ConsolidateKnowledgeDialog({
     setAiLoading(true);
     try {
       const draft = await suggestKnowledge(discussion.id);
+      setDraftSuggestionId(draft.suggestionId ?? null);
       setForm((f) => ({
         ...f,
         title: draft.title || f.title,
@@ -745,11 +747,12 @@ export function ConsolidateKnowledgeDialog({
       confidence: form.confidence,
       status: form.status,
       originDiscussion: discussion.id,
-    });
+    }, draftSuggestionId ?? undefined);
     setSuccess(true);
     setTimeout(() => {
       setSuccess(false);
       onOpenChange(false);
+      setDraftSuggestionId(null);
       setForm({
         title: "",
         summary: "",
