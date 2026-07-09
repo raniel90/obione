@@ -791,6 +791,15 @@ export function ConsolidateKnowledgeDialog({
                 {discussion.project ?? "—"}
               </span>
             </div>
+            {discussion.contributions === 0 && (
+              <div className="flex items-start gap-2 rounded-lg border border-warning/40 bg-warning/10 p-3 text-[12px] leading-relaxed text-foreground">
+                <Info className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
+                <span>
+                  Esta conversa ainda não tem contribuições. Um aprendizado consolidado agora
+                  terá pouca evidência; considere aguardar a participação da comunidade.
+                </span>
+              </div>
+            )}
             <div className="flex items-center justify-between gap-3 rounded-lg border border-dashed border-border bg-muted/20 p-3">
               <p className="text-[11.5px] leading-relaxed text-muted-foreground">
                 Deixe a IA propor um rascunho a partir desta conversa. Você revisa antes de
