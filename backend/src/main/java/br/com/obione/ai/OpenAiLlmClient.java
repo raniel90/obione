@@ -94,11 +94,12 @@ public class OpenAiLlmClient implements LlmClient {
         return chat.prompt()
                 .system("Você ajuda a configurar um novo projeto em um observatório de projetos baseado no MPO. "
                         + "A partir da descrição, sugira: o domínio (exatamente um dos slugs disponíveis, com confiança 0-1); "
-                        + "os attributeIds da lente fornecida que valem acompanhar — inclua TODOS os atributos para os quais a "
-                        + "descrição traz conteúdo concreto e observável, sem limite fixo: se a descrição for rica e detalhada, "
-                        + "selecione muitos; se for vaga, selecione poucos. Não force um número mínimo nem máximo e não invente "
-                        + "ids fora da lista. Sugira ainda de 2 a 6 fenômenos esperados (frases curtas em pt-BR, ex.: 'Risco de "
-                        + "atraso') e um rationale breve explicando os critérios da seleção.")
+                        + "os attributeIds da lente fornecida que valem acompanhar, sem limite fixo. Critério estrito: selecione "
+                        + "um atributo APENAS se a descrição mencionar concretamente o assunto dele (fato, número, prazo, risco ou "
+                        + "intenção explícita); não selecione por inferência genérica nem por 'seria bom acompanhar'. Uma descrição "
+                        + "rica em detalhes leva a muitos atributos; uma descrição curta ou vaga leva a poucos. Não invente ids "
+                        + "fora da lista. Sugira ainda de 2 a 6 fenômenos esperados (frases curtas em pt-BR, ex.: 'Risco de "
+                        + "atraso') e um rationale breve que justifique a seleção citando os trechos da descrição.")
                 .user("Nome do projeto: " + name
                         + "\nDescrição: " + description
                         + "\nObjetivo observacional: " + (objective == null ? "" : objective)
