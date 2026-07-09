@@ -1279,10 +1279,10 @@ function ManualObservationSection({
               </span>
             </div>
 
-            <div className="mt-4 grid grid-cols-3 gap-3 border-t border-border pt-3">
+            {/* Impacto/Risco saíram do card: o formulário não os coleta mais, então
+                exibiam sempre os defaults — ruído sem informação. */}
+            <div className="mt-4 border-t border-border pt-3">
               <Meta label="Atributo" value={o.attribute} />
-              <Meta label="Impacto" value={o.impact} className={impactTone[o.impact]} />
-              <Meta label="Risco" value={o.risk} className={riskTone[o.risk]} />
             </div>
 
             {o.interpretation && (
