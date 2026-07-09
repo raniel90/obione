@@ -181,9 +181,7 @@ function NewProjectPage() {
       setShowNewClient(false);
       toast.success(`Cliente "${created.name}" criado e selecionado.`);
     } catch (err) {
-      setNewClientError(
-        err instanceof Error ? err.message : "Não foi possível criar o cliente.",
-      );
+      setNewClientError(err instanceof Error ? err.message : "Não foi possível criar o cliente.");
     } finally {
       setCreatingClient(false);
     }
@@ -537,25 +535,19 @@ function NewProjectPage() {
                       <Input
                         placeholder="Nome do cliente"
                         value={newClient.name}
-                        onChange={(e) =>
-                          setNewClient((c) => ({ ...c, name: e.target.value }))
-                        }
+                        onChange={(e) => setNewClient((c) => ({ ...c, name: e.target.value }))}
                       />
                       <Input
                         type="email"
                         placeholder="E-mail"
                         value={newClient.email}
-                        onChange={(e) =>
-                          setNewClient((c) => ({ ...c, email: e.target.value }))
-                        }
+                        onChange={(e) => setNewClient((c) => ({ ...c, email: e.target.value }))}
                       />
                       <Input
                         type="password"
                         placeholder="Senha provisória"
                         value={newClient.password}
-                        onChange={(e) =>
-                          setNewClient((c) => ({ ...c, password: e.target.value }))
-                        }
+                        onChange={(e) => setNewClient((c) => ({ ...c, password: e.target.value }))}
                       />
                       {newClientError && <FieldError>{newClientError}</FieldError>}
                       <Button
