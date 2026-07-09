@@ -6,6 +6,7 @@ import br.com.obione.ai.dto.KnowledgeDraftDTO;
 import br.com.obione.ai.dto.ObservationSuggestionDTO;
 import br.com.obione.ai.dto.ObservationSuggestionsDTO;
 import br.com.obione.ai.dto.ProjectSetupSuggestionDTO;
+import br.com.obione.ai.dto.StructureObservationDTO;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -99,5 +100,44 @@ public class MockLlmClient implements LlmClient {
                         + projectSummaries.size() + " projeto(s).",
                 List.of("Padrão recorrente de mudanças de escopo", "Validações tardias do cliente"),
                 List.of("Alinhar critérios de aceite no início", "Reforçar rituais de validação"));
+    }
+
+    @Override
+    public StructureObservationDTO structureObservation(String description, String mpoLens) {
+        // Deterministic title: first 8 words of the description (trimmed to ~60 chars).
+        String title = titleOf(description);
+        // Deterministic attributeId: first key from the lens string (format: "key — label (cat)").
+        String attributeId = firstKeyOf(mpoLens);
+        String interpretation = "Observação registrada sugere impacto direto no projeto. "
+                + "Ative obione.llm.provider=openai para interpretação por IA real.";
+        return new StructureObservationDTO(title, attributeId, interpretation);
+    }
+
+    /** Extracts a short title from the description (first ~8 words, max 60 chars). */
+    private String titleOf(String description) {
+        if (description == null || description.isBlank()) {
+            return "Observação sem título";
+        }
+        String[] words = description.strip().split("\\s+");
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < Math.min(8, words.length); i++) {
+            if (i > 0) sb.append(' ');
+            sb.append(words[i]);
+        }
+        String title = sb.toString();
+        if (title.length() > 60) {
+            title = title.substring(0, 57) + "...";
+        }
+        return title;
+    }
+
+    /** Extracts the first attribute key from a lens string ("key — label (cat)\n..."). */
+    private String firstKeyOf(String mpoLens) {
+        if (mpoLens == null || mpoLens.isBlank()) {
+            return "";
+        }
+        String firstLine = mpoLens.strip().split("\n")[0];
+        int sep = firstLine.indexOf(" — ");
+        return sep > 0 ? firstLine.substring(0, sep).strip() : "";
     }
 }

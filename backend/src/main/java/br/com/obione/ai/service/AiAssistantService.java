@@ -13,6 +13,9 @@ import br.com.obione.ai.dto.ObservationSuggestionsResponseDTO;
 import br.com.obione.ai.dto.ProjectSetupRequestDTO;
 import br.com.obione.ai.dto.ProjectSetupSuggestionDTO;
 import br.com.obione.ai.dto.ProjectSetupSuggestionResponseDTO;
+import br.com.obione.ai.dto.StructureObservationDTO;
+import br.com.obione.ai.dto.StructureObservationRequestDTO;
+import br.com.obione.ai.dto.StructureObservationResponseDTO;
 import br.com.obione.ai.entity.AiSuggestionLog;
 import br.com.obione.ai.enums.AiSuggestionType;
 import br.com.obione.ai.repository.AiSuggestionLogRepository;
@@ -146,6 +149,38 @@ public class AiAssistantService {
         AiSuggestionLog log = journal(AiSuggestionType.PROJECT_SETUP, validated, null, null, domainId);
         return ProjectSetupSuggestionResponseDTO.of(
                 validated, domainId, log.getId(), llm.provider(), llm.model(), log.getCreatedAt());
+    }
+
+    /**
+     * Structures a free-text observation: suggests a title, best-matching MPO attribute
+     * and an initial interpretation from the consultant's plain-language description.
+     * The returned attributeId is validated against the catalog — hallucinated ids are
+     * replaced with null before returning (human-in-the-loop check preserved).
+     */
+    @Transactional
+    public StructureObservationResponseDTO structureObservation(
+            Long projectId, StructureObservationRequestDTO request) {
+        // Verify project exists (throws ResourceNotFoundException if not).
+        projectService.findById(projectId);
+
+        String lens = catalog.inScopeAttributes().stream()
+                .map(this::lensLine)
+                .collect(Collectors.joining("\n"));
+
+        StructureObservationDTO raw = llm.structureObservation(request.description(), lens);
+
+        // Validate attributeId — drop if not a real catalog key (avoids hallucinations).
+        var validKeys = catalog.inScopeAttributes().stream()
+                .map(MpoAttributeDTO::key)
+                .collect(Collectors.toSet());
+        String safeAttributeId = (raw.attributeId() != null && validKeys.contains(raw.attributeId()))
+                ? raw.attributeId() : null;
+        StructureObservationDTO validated = new StructureObservationDTO(
+                raw.title(), safeAttributeId, raw.interpretation());
+
+        AiSuggestionLog log = journal(AiSuggestionType.OBSERVATIONS, validated, projectId, null, null);
+        return StructureObservationResponseDTO.of(
+                validated, log.getId(), llm.provider(), llm.model(), log.getCreatedAt());
     }
 
     /** Acceptance metrics per assistant role, derived on the fly from the log. */

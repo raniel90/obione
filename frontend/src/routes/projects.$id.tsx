@@ -72,7 +72,7 @@ import {
 } from "@/services/knowledgeService";
 import type { CommunityKnowledge } from "@/lib/community-data";
 import type { Knowledge } from "@/types/knowledge";
-import { synthesizeDomain } from "@/services/aiService";
+import { synthesizeDomain, structureObservation } from "@/services/aiService";
 import type { DomainSynthesis } from "@/services/aiService";
 import { KnowledgeCard } from "@/components/community-pieces";
 import { BookOpen } from "lucide-react";
@@ -466,7 +466,9 @@ function ProjectDetailPage() {
               <h1 className="mt-1.5 text-[22px] font-semibold tracking-tight text-foreground">
                 {project.name}
               </h1>
-              <p className="mt-1 max-w-3xl text-[13px] text-muted-foreground">{project.summary}</p>
+              <p className="mt-1 max-w-3xl text-[13px] leading-relaxed text-muted-foreground line-clamp-2">
+                {project.summary}
+              </p>
             </div>
             <div className="flex shrink-0 flex-wrap items-center gap-2">
               {domain?.slug && (
@@ -498,7 +500,7 @@ function ProjectDetailPage() {
                 value={rawProject?.startDate ? formatDate(rawProject.startDate) : "—"}
               />
               <MetaItem
-                label="Previsão"
+                label="Conclusão"
                 value={rawProject?.expectedEndDate ? formatDate(rawProject.expectedEndDate) : "—"}
               />
             </div>
@@ -816,21 +818,6 @@ const riskToCode: Record<ProjectObservation["risk"], SvcObsRisk> = {
   Crítico: "CRITICAL",
 };
 
-const DISCUSSION_VISIBILITY: VisibilityScope[] = [
-  "Comunidade do domínio",
-  "Participantes do projeto",
-  "Consultores vinculados",
-  "Administradores",
-];
-
-const DISCUSSION_STATUS: DiscussionStatus[] = [
-  "Aberta",
-  "Em análise",
-  "Revisada",
-  "Consolidada",
-  "Arquivada",
-];
-
 function ManualObservationSection({
   projectId,
   domainId,
@@ -874,6 +861,10 @@ function ManualObservationSection({
     interpretation: "",
     author: "Você",
   });
+  const [structureLoading, setStructureLoading] = useState(false);
+  const [reviewRevealed, setReviewRevealed] = useState(false);
+  const [fromAi, setFromAi] = useState(false);
+  const [aiSuggestionId, setAiSuggestionId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState({
     title: "",
     description: "",
@@ -932,6 +923,9 @@ function ManualObservationSection({
         interpretation: form.interpretation.trim(),
         status: "REGISTERED",
         createdBy: currentUserId,
+        // Provenance: when the draft came from the AI, the backend flips the
+        // suggestion log to accepted and stamps origin AI_SUGGESTED.
+        suggestionId: fromAi && aiSuggestionId != null ? aiSuggestionId : undefined,
       });
 
       prependObservation(created);
@@ -944,10 +938,35 @@ function ManualObservationSection({
           title: "",
           description: "",
           interpretation: "",
+          attribute: "",
         }));
+        setReviewRevealed(false);
+        setFromAi(false);
+        setAiSuggestionId(null);
       }, 1400);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleStructure = async () => {
+    if (structureLoading || form.description.trim().length < 15) return;
+    setStructureLoading(true);
+    try {
+      const result = await structureObservation(projectId, form.description.trim());
+      setForm((f) => ({
+        ...f,
+        title: result.title,
+        attribute: result.attributeId ?? "",
+        interpretation: result.interpretation,
+      }));
+      setAiSuggestionId(result.suggestionId ?? null);
+      setFromAi(true);
+      setReviewRevealed(true);
+    } catch {
+      toast.error("Não foi possível estruturar a observação. Tente novamente.");
+    } finally {
+      setStructureLoading(false);
     }
   };
 
@@ -1068,7 +1087,18 @@ function ManualObservationSection({
         action={
           isClient ? undefined : (
             <div className="flex items-center gap-2">
-              <Dialog open={open} onOpenChange={setOpen}>
+              <Dialog
+                open={open}
+                onOpenChange={(o) => {
+                  setOpen(o);
+                  if (!o) {
+                    setReviewRevealed(false);
+                    setFromAi(false);
+                    setAiSuggestionId(null);
+                    setStructureLoading(false);
+                  }
+                }}
+              >
                 <DialogTrigger asChild>
                   <Button size="sm" className="gap-1.5">
                     <Plus className="h-3.5 w-3.5" /> Registrar observação
@@ -1078,8 +1108,8 @@ function ManualObservationSection({
                   <DialogHeader>
                     <DialogTitle>Registrar nova observação</DialogTitle>
                     <DialogDescription>
-                      Registre uma evidência observada no projeto: descrição, atributo afetado e sua
-                      interpretação inicial.
+                      Descreva o que você observou e deixe a IA estruturar o registro para você
+                      revisar.
                     </DialogDescription>
                   </DialogHeader>
                   {success ? (
@@ -1090,124 +1120,101 @@ function ManualObservationSection({
                   ) : (
                     <form onSubmit={handleSubmit} className="space-y-4">
                       <div className="space-y-1.5">
-                        <Label htmlFor="obs-title">Título da observação</Label>
-                        <Input
-                          id="obs-title"
-                          placeholder="Ex.: Cliente solicitou nova alteração de escopo após aprovação inicial"
-                          value={form.title}
-                          onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                        />
-                      </div>
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <div className="space-y-1.5">
-                          <Label htmlFor="obs-date">Data da observação</Label>
-                          <Input
-                            id="obs-date"
-                            type="date"
-                            value={form.date}
-                            onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-                          />
-                        </div>
-                        <div className="space-y-1.5">
-                          <Label htmlFor="obs-author">Responsável pelo registro</Label>
-                          <Input
-                            id="obs-author"
-                            value={form.author}
-                            onChange={(e) => setForm((f) => ({ ...f, author: e.target.value }))}
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="obs-desc">Descrição da evidência</Label>
+                        <Label htmlFor="obs-desc">O que você observou?</Label>
                         <Textarea
                           id="obs-desc"
-                          rows={3}
-                          placeholder="Descreva o que aconteceu, qual evidência foi observada e por que isso é relevante para o projeto."
+                          rows={4}
+                          placeholder="Descreva em suas palavras o que aconteceu e por que é relevante para o projeto."
                           value={form.description}
                           onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                         />
                       </div>
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <div className="space-y-1.5">
-                          <Label>Atributo relacionado</Label>
-                          <Select
-                            value={form.attribute}
-                            onValueChange={(v) => setForm((f) => ({ ...f, attribute: v }))}
+                      {!reviewRevealed && (
+                        <div className="flex items-center gap-3">
+                          <Button
+                            type="button"
+                            size="sm"
+                            disabled={structureLoading || form.description.trim().length < 15}
+                            onClick={handleStructure}
+                            className="gap-1.5"
                           >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione um aspecto do projeto" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {mpoCategories.map((cat) => (
-                                <SelectGroup key={cat.key}>
-                                  <SelectLabel>{cat.label}</SelectLabel>
-                                  {cat.attributes
-                                    .filter((a) => a.type !== "fora_de_escopo")
-                                    .map((a) => (
-                                      <SelectItem key={a.id} value={a.id}>
-                                        {a.name}
-                                      </SelectItem>
-                                    ))}
-                                </SelectGroup>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-1.5">
-                          <Label>Impacto</Label>
-                          <Select
-                            value={form.impact}
-                            onValueChange={(v) =>
-                              setForm((f) => ({ ...f, impact: v as ProjectObservation["impact"] }))
-                            }
+                            {structureLoading ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <Sparkles className="h-3.5 w-3.5" />
+                            )}
+                            {structureLoading ? "Estruturando…" : "Estruturar com IA"}
+                          </Button>
+                          <button
+                            type="button"
+                            className="text-[12.5px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+                            onClick={() => setReviewRevealed(true)}
                           >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {["Baixo", "Médio", "Alto"].map((v) => (
-                                <SelectItem key={v} value={v}>
-                                  {v}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                            preencher manualmente
+                          </button>
                         </div>
-                        <div className="space-y-1.5">
-                          <Label>Risco</Label>
-                          <Select
-                            value={form.risk}
-                            onValueChange={(v) =>
-                              setForm((f) => ({ ...f, risk: v as ProjectObservation["risk"] }))
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {["Baixo", "Moderado", "Elevado", "Crítico"].map((v) => (
-                                <SelectItem key={v} value={v}>
-                                  {v}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                      )}
+                      {reviewRevealed && (
+                        <div className="space-y-4">
+                          {fromAi && (
+                            <p className="text-[12px] text-muted-foreground">
+                              Revise as sugestões da IA antes de salvar.
+                            </p>
+                          )}
+                          <div className="space-y-1.5">
+                            <Label htmlFor="obs-title">Título</Label>
+                            <Input
+                              id="obs-title"
+                              placeholder="Ex.: Cliente solicitou nova alteração de escopo após aprovação inicial"
+                              value={form.title}
+                              onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label>Atributo relacionado</Label>
+                            <Select
+                              value={form.attribute}
+                              onValueChange={(v) => setForm((f) => ({ ...f, attribute: v }))}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione um aspecto do projeto" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {mpoCategories.map((cat) => (
+                                  <SelectGroup key={cat.key}>
+                                    <SelectLabel>{cat.label}</SelectLabel>
+                                    {cat.attributes
+                                      .filter((a) => a.type !== "fora_de_escopo")
+                                      .map((a) => (
+                                        <SelectItem key={a.id} value={a.id}>
+                                          {a.name}
+                                        </SelectItem>
+                                      ))}
+                                  </SelectGroup>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label htmlFor="obs-interp">Interpretação inicial</Label>
+                            <Textarea
+                              id="obs-interp"
+                              rows={2}
+                              placeholder="Descreva a interpretação inicial sobre essa observação."
+                              value={form.interpretation}
+                              onChange={(e) =>
+                                setForm((f) => ({ ...f, interpretation: e.target.value }))
+                              }
+                            />
+                          </div>
                         </div>
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="obs-interp">Interpretação inicial</Label>
-                        <Textarea
-                          id="obs-interp"
-                          rows={2}
-                          placeholder="Descreva a interpretação inicial sobre essa observação."
-                          value={form.interpretation}
-                          onChange={(e) =>
-                            setForm((f) => ({ ...f, interpretation: e.target.value }))
-                          }
-                        />
-                      </div>
+                      )}
                       <DialogFooter>
-                        <Button type="submit" size="sm" disabled={submitting}>
+                        <Button
+                          type="submit"
+                          size="sm"
+                          disabled={submitting || !reviewRevealed || !form.title.trim()}
+                        >
                           {submitting ? "Registrando…" : "Registrar observação"}
                         </Button>
                       </DialogFooter>
@@ -1476,48 +1483,6 @@ function ManualObservationSection({
                 value={discussionForm.question}
                 onChange={(e) => setDiscussionForm((f) => ({ ...f, question: e.target.value }))}
               />
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label>Visibilidade</Label>
-                <Select
-                  value={discussionForm.visibility}
-                  onValueChange={(v) =>
-                    setDiscussionForm((f) => ({ ...f, visibility: v as VisibilityScope }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {DISCUSSION_VISIBILITY.map((v) => (
-                      <SelectItem key={v} value={v}>
-                        {v}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label>Status</Label>
-                <Select
-                  value={discussionForm.status}
-                  onValueChange={(v) =>
-                    setDiscussionForm((f) => ({ ...f, status: v as DiscussionStatus }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {DISCUSSION_STATUS.map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {s}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
             <DialogFooter>
               <Button type="submit" size="sm" disabled={discussionSubmitting}>

@@ -68,7 +68,7 @@ public class Project {
     @Column(nullable = false, length = 50)
     private ProjectStatus status;
 
-    @Column(length = 2000)
+    @Column(length = 50000)
     private String summary;
 
     @Column(length = 2000)

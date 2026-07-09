@@ -1,5 +1,6 @@
 package br.com.obione.knowledge.service;
 
+import br.com.obione.ai.service.AiSuggestionAcceptanceService;
 import br.com.obione.common.exception.BadRequestException;
 import br.com.obione.common.exception.ResourceNotFoundException;
 import br.com.obione.common.security.CurrentUser;
@@ -39,6 +40,7 @@ public class KnowledgeService {
     private final PhenomenonRepository phenomenonRepository;
     private final CurrentUser currentUser;
     private final ProjectAccessGuard guard;
+    private final AiSuggestionAcceptanceService acceptanceService;
 
     public KnowledgeService(
             KnowledgeRepository knowledgeRepository,
@@ -47,7 +49,8 @@ public class KnowledgeService {
             DiscussionRepository discussionRepository,
             PhenomenonRepository phenomenonRepository,
             CurrentUser currentUser,
-            ProjectAccessGuard guard
+            ProjectAccessGuard guard,
+            AiSuggestionAcceptanceService acceptanceService
     ) {
         this.knowledgeRepository = knowledgeRepository;
         this.domainRepository = domainRepository;
@@ -56,6 +59,7 @@ public class KnowledgeService {
         this.phenomenonRepository = phenomenonRepository;
         this.currentUser = currentUser;
         this.guard = guard;
+        this.acceptanceService = acceptanceService;
     }
 
     @Transactional(readOnly = true)
@@ -175,6 +179,7 @@ public class KnowledgeService {
                 .build();
 
         Knowledge saved = knowledgeRepository.save(knowledge);
+        acceptanceService.markAccepted(request.suggestionId());
 
         discussion.setStatus(DiscussionStatus.CONSOLIDATED);
         discussionRepository.save(discussion);

@@ -628,7 +628,7 @@ function DomainCommunityPage() {
           setConsolidateOpen(o);
           if (!o) setSelectedDiscussion(null);
         }}
-        onConsolidate={(k) => {
+        onConsolidate={(k, suggestionId) => {
           if (!selectedDiscussion) return;
 
           const discussionId = selectedDiscussion.id;
@@ -638,6 +638,7 @@ function DomainCommunityPage() {
             evidence: k.evidences,
             recommendation: k.recommendation,
             confidence: confidenceToCode[k.confidence],
+            suggestionId,
           }).then((created) => {
             const projectNameById = new Map(svcProjects.map((p) => [p.id, p.name] as const));
             setKnowledge((list) => [
