@@ -12,7 +12,7 @@ Abra http://localhost:5173/login
 
 ```
 consultor@obione.dev
-```
+```uia
 ```
 consultor123
 ```
@@ -83,13 +83,13 @@ Clique **Estruturar com IA**.
 
 ---
 
-## PASSO 3 — Iniciar a conversa
+## PASSO 3 — Iniciar a conversa (1 clique)
 
 No card da observação recém-criada, clique **Iniciar conversa**.
 
-✅ Título e pergunta já vêm preenchidos (só 2 campos — sem status/visibilidade). Clique **Iniciar conversa**.
+✅ **Sem modal:** a conversa nasce na hora e o quadro abre ali mesmo, com a caixa "Contribua com a conversa".
 
-💡 *Se abrir "Consolidar aprendizado" agora, aparece o aviso "esta conversa ainda não tem contribuições" — mostre e feche (governança da evidência).*
+💡 *Opcional (Observadora): no topo da aba Observações há outro **Sugerir com IA** — a IA propõe observações a partir do resumo do projeto num painel; clique **Aceitar** numa delas e ela vira observação com o selo "Sugerida pela IA".*
 
 ---
 
@@ -124,13 +124,13 @@ Envie. ✅ Comentário aparece como **Cliente Vitalis Saúde**.
 
 ## PASSO 5 — Consolidar com IA (o momento-ouro)
 
-De volta à janela do **consultor**: menu **Comunidade → Comunicação Digital**, ache a conversa "Conversa sobre: Atraso na aprovação..." e clique **Consolidar aprendizado**.
+De volta à janela do **consultor**, no próprio projeto (recarregue a página): no quadro da conversa, clique **Consolidar aprendizado** — o diálogo abre ali mesmo, sem trocar de tela.
 
 Clique **Sugerir com IA**.
 
 ✅ **Esperado (o clímax):** o rascunho **cita o cliente** — a causa vira "falta de contexto na solicitação" (não "cliente lento"), a recomendação vira "enviar solicitações já com o contexto e a decisão esperada", com confiança alta. **Um comentário do cliente inverteu o aprendizado.**
 
-Revise e clique **Consolidar aprendizado**.
+Revise e clique **Consolidar aprendizado**. ✅ O aprendizado aparece na aba **Aprendizados** do projeto.
 
 ---
 
@@ -156,7 +156,7 @@ admin123
 
 Menu **Configurações**.
 
-✅ **Esperado:** "Sugestões da IA × aceites" mostrando **3/3 aceitas** (PROJECT SETUP 1/1 · OBSERVATIONS 1/1 · KNOWLEDGE 1/1, 100%) — cada sugestão da IA da jornada foi auditada, revisada e aceita.
+✅ **Esperado:** "Sugestões da IA × aceites" com **todos os aceites da jornada em 100%** (project setup, observações e conhecimento) — cada sugestão da IA foi auditada, revisada e aceita por um humano.
 
 ---
 
