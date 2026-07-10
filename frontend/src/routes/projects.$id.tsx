@@ -90,7 +90,7 @@ import {
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { relativeTime } from "@/components/feed-event-item";
-import { cn } from "@/lib/utils";
+import { cn, toBrDate } from "@/lib/utils";
 
 function ProjectRouteError({ reset }: { reset: () => void }) {
   const router = useRouter();
@@ -426,8 +426,7 @@ function ProjectDetailPage() {
 
   const observationsList: ProjectObservation[] = svcObservations;
 
-  const formatDate = (d: string) =>
-    new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+  const formatDate = toBrDate;
 
   // Switch to the Observações tab and bring a specific observation into view
   // (used by the timeline so conversations are reachable).
@@ -1395,7 +1394,7 @@ function ManualObservationSection({
                     </>
                   )}
                   <span className="h-1 w-1 rounded-full bg-border" />
-                  <span className="font-mono">{o.date}</span>
+                  <span className="font-mono">{toBrDate(o.date)}</span>
                 </div>
                 <h3 className="mt-1.5 text-[14px] font-semibold leading-snug text-foreground">
                   {o.title}

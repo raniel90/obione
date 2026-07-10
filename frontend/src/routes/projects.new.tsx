@@ -33,17 +33,7 @@ import type {
   RiskLevel as RiskCode,
 } from "@/types/project";
 import { toast } from "sonner";
-import {
-  Telescope,
-  Sparkles,
-  Users,
-  ArrowLeft,
-  ArrowRight,
-  CheckCircle2,
-  ChevronsUpDown,
-  Info,
-  Loader2,
-} from "lucide-react";
+import { Telescope, Sparkles, Users, ArrowLeft, ChevronsUpDown, Info, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -108,7 +98,6 @@ function NewProjectPage() {
   }, [isClient, userLoading, navigate]);
 
   const [step, setStep] = useState<1 | 2>(1);
-  const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [suggestion, setSuggestion] = useState<ProjectSetupSuggestion | null>(null);
@@ -282,41 +271,13 @@ function NewProjectPage() {
         expectedEndDate: review.endDate,
         suggestionId: suggestion?.suggestionId,
       });
-      setSubmitted(true);
-      setTimeout(() => navigate({ to: "/projects/$id", params: { id: created.id } }), 1800);
+      toast.success("Projeto cadastrado com sucesso.");
+      navigate({ to: "/projects/$id", params: { id: created.id } });
     } catch {
       toast.error("Não foi possível cadastrar o projeto.");
       setSubmitting(false);
     }
   };
-
-  if (submitted) {
-    return (
-      <AppShell>
-        <div className="flex min-h-[70vh] items-center justify-center px-6 py-12">
-          <div className="max-w-md rounded-xl border border-border bg-card p-8 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-success/30 bg-success/10">
-              <CheckCircle2 className="h-6 w-6 text-success" />
-            </div>
-            <h2 className="mt-5 text-[17px] font-semibold tracking-tight text-foreground">
-              Projeto cadastrado com sucesso
-            </h2>
-            <p className="mt-2 text-[12.5px] leading-relaxed text-muted-foreground">
-              Levando você ao detalhe do projeto…
-            </p>
-            <div className="mt-6">
-              <Button asChild size="sm" className="text-[12px]">
-                <Link to="/">
-                  Ir para o observatório
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </AppShell>
-    );
-  }
 
   return (
     <AppShell>
@@ -711,8 +672,17 @@ function NewProjectPage() {
                   <Link to="/">Cancelar</Link>
                 </Button>
                 <Button type="button" onClick={onCreate} disabled={submitting} className="gap-1.5">
-                  <Telescope className="h-3.5 w-3.5" />
-                  {submitting ? "Cadastrando…" : "Cadastrar projeto"}
+                  {submitting ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      Cadastrando…
+                    </>
+                  ) : (
+                    <>
+                      <Telescope className="h-3.5 w-3.5" />
+                      Cadastrar projeto
+                    </>
+                  )}
                 </Button>
               </div>
             </div>

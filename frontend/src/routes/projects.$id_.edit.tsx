@@ -193,7 +193,6 @@ function EditProjectPage() {
     if (!f.name.trim()) next.name = "Informe o nome do projeto.";
     if (!f.clientId) next.clientId = "Selecione o cliente do projeto.";
     if (!f.startDate) next.startDate = "Informe a data de início.";
-    if (!f.endDate) next.endDate = "Informe a previsão de conclusão.";
     if (f.startDate && f.endDate && f.endDate < f.startDate) {
       next.endDate = "A previsão de conclusão deve ser igual ou posterior à data de início.";
     }
@@ -469,7 +468,7 @@ function EditProjectPage() {
                 />
                 {errors.startDate && <FieldError>{errors.startDate}</FieldError>}
               </Field>
-              <Field label="Previsão de conclusão" required>
+              <Field label="Previsão de conclusão">
                 <Input
                   type="date"
                   value={form.endDate}

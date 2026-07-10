@@ -12,7 +12,7 @@ import { getDomains } from "@/services/domainService";
 import { getPhenomena } from "@/services/phenomenonService";
 import type { Phenomenon } from "@/types/phenomenon";
 import { Plus, Search, ArrowUpRight, AlertTriangle, Radar } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, toBrDate } from "@/lib/utils";
 
 export const Route = createFileRoute("/projects/")({
   head: () => ({
@@ -86,12 +86,7 @@ function ObservedProjectCard({
   phenomenaCount: number;
 }) {
   const risk = deriveRisk(project);
-  const updated = new Date(project.updatedAt).toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    timeZone: "UTC",
-  });
+  const updated = toBrDate(project.updatedAt);
 
   return (
     <Link
