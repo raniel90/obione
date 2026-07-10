@@ -21,6 +21,12 @@ Stop everything:
 .claude/skills/run-app/scripts/stop.sh
 ```
 
+Reset the demo data (stop → wipe `backend/data/` → start; seeders repopulate on boot):
+
+```bash
+.claude/skills/run-app/scripts/reset.sh
+```
+
 ## What you get
 
 | | URL |
