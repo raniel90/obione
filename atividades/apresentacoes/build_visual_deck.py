@@ -166,9 +166,9 @@ def slide_problema(s):
     title(s, "O conhecimento dos projetos se perde")
     subtitle(s, "Consultorias vivem de conhecimento, e ele evapora entre um projeto e o outro.")
     cards = [
-        ("Fica na cabeça das pessoas", "O próximo projeto recomeça do zero"),
-        ("Depende sempre dos mesmos", "Só quem tem estrada liga os pontos entre projetos"),
-        ("O cliente fica fora do laço", "E não dá para abrir tudo entre clientes"),
+        ("Fica na cabeça das pessoas", "O que um projeto ensinou raramente chega ao próximo"),
+        ("Concentrado em poucos", "A conexão entre projetos depende dos consultores mais experientes"),
+        ("O cliente participa pouco", "E abrir tudo comprometeria a confidencialidade entre clientes"),
     ]
     w, gap, t, h = 3.85, 0.28, 3.0, 2.5
     x = 0.55
@@ -180,8 +180,8 @@ def slide_problema(s):
 
 def slide_solucao(s):
     eyebrow(s, "O que construímos")
-    title(s, "Um observatório que vira memória viva")
-    subtitle(s, "O ciclo do valor, ancorado no MPO (Vieira, 2022), com comunidade e IA assistiva.")
+    title(s, "O ciclo do conhecimento no observatório")
+    subtitle(s, "Observações viram discussões na comunidade e se consolidam em conhecimento, ancorado no MPO (Vieira, 2022).")
     steps = ["Observação", "Discussão", "Conhecimento"]
     w, t, h = 3.3, 3.1, 1.25
     xs = [0.9, 5.0, 9.1]
@@ -191,7 +191,7 @@ def slide_solucao(s):
         if i < 2:
             arrow(s, x + w + 0.02, t + 0.42, 0.62, 0.42)
     band = rect(s, 0.9, 5.05, 11.5, 0.95, LIGHT, line=BORDER)
-    set_text(band, [[("Vira base de conhecimento reaproveitável por projetos futuros", 15, NAVY, True)]])
+    set_text(band, [[("O conhecimento consolidado fica disponível para os próximos projetos do domínio", 15, NAVY, True)]])
 
 
 def slide_ia_layer(s):
@@ -206,7 +206,7 @@ def slide_ia_layer(s):
     ])
     panel(s, 6.9, 2.5, 5.9, 4.05, "Como confiamos", [
         ("A IA propõe, o humano decide", "Nunca escreve direto: o consultor revisa e publica"),
-        ("Grounding no MPO + saída estruturada", "Responde no formato de dados e não inventa atributos"),
+        ("Ancorada no MPO, com saída estruturada", "A resposta segue um formato definido e usa apenas atributos do catálogo"),
         ("Proveniência registrada", "Cada sugestão guarda provedor, modelo e momento"),
     ])
 
@@ -214,26 +214,26 @@ def slide_ia_layer(s):
 
 def slide_pivo(s):
     eyebrow(s, "A concepção")
-    title(s, "O projeto mudou no meio do caminho")
-    subtitle(s, "A proposta inicial foi reescopada após a crítica dos orientadores: refinar o propósito.")
+    title(s, "Da proposta inicial ao observatório")
+    subtitle(s, "A crítica dos orientadores levou a um reescopo: refinar o propósito do artefato.")
     b1 = rect(s, 0.9, 3.0, 4.6, 1.6, LIGHT, line=BORDER)
     set_text(b1, [[("Proposta inicial", 13, RED, True)], [("Extrator de atributos do MPO a partir de documentos", 14, NAVY, True)]])
     arrow(s, 5.7, 3.55, 0.9, 0.5)
     b2 = rect(s, 6.85, 3.0, 5.55, 1.6, NAVY)
-    set_text(b2, [[("Depois do pivô", 13, WHITE, False)], [("Observatório de projetos com o cliente dentro da comunidade", 14.5, WHITE, True)]])
+    set_text(b2, [[("Proposta refinada", 13, WHITE, False)], [("Observatório de projetos com participação do cliente na comunidade", 14.5, WHITE, True)]])
     txt(s, 0.9, 5.1, 11.5, 0.9,
-        [[("O refino deslocou o foco da extração para o ciclo de conhecimento e a participação segura do cliente, e definiu a pergunta: a IA generativa viabiliza um observatório de projetos?", 14.5, GRAY, False, False)]])
+        [[("O foco deslocou-se da extração de documentos para o ciclo de conhecimento, e a pergunta de pesquisa passou a ser: a IA generativa viabiliza um observatório de projetos?", 14.5, GRAY, False, False)]])
 
 
 def slide_desafios(s):
     eyebrow(s, "Principais desafios")
     title(s, "O que enfrentamos e como resolvemos")
-    panel(s, 0.55, 2.0, 5.9, 4.75, "Desafios", [
+    panel(s, 0.55, 2.0, 5.9, 4.75, "Escopo, modelo e IA", [
         ("Escopo amplo e pivô no meio do projeto", "Reescopo formal com os orientadores e disciplina de cronograma"),
         ("Entender o MPO a fundo e traduzi-lo sem jargão", "Catálogo canônico dos 44 atributos e linguagem simples na interface"),
         ("Confiar na IA sem perder o controle", "Saída estruturada, grounding no MPO, validação em código e revisão humana"),
     ])
-    panel(s, 6.9, 2.0, 5.9, 4.75, "E mais", [
+    panel(s, 6.9, 2.0, 5.9, 4.75, "Validação, adoção e equipe", [
         ("Validar com usuários reais a distância", "Acesso remoto por túnel e dados de demonstração replicáveis"),
         ("Clareza do primeiro acesso (3,8 nas 2 rodadas)", "Onboarding incluído; o próximo passo é navegação guiada"),
         ("Coordenar 4 frentes em equipe", "Comunicação constante entre extração, front, avaliação e escrita"),
@@ -258,7 +258,7 @@ def slide_shot_wide(s, eb, ttl, img, caption):
 
 def slide_experimento(s):
     eyebrow(s, "Como avaliamos")
-    title(s, "Design Science Research, avaliado em uso real")
+    title(s, "Método: Design Science Research")
     steps = ["Construir\no artefato", "Demonstrar\nem uso real", "Avaliar\na percepção"]
     w, t, h = 3.2, 2.35, 1.15
     xs = [0.9, 5.06, 9.22]
@@ -269,7 +269,7 @@ def slide_experimento(s):
             arrow(s, x + w + 0.02, t + 0.4, 0.55, 0.36, color=MUTED)
     c1 = rect(s, 0.9, 4.0, 5.55, 1.55, CARD, line=BORDER)
     set_text(c1, [[("Instrumento", 14.5, RED, True)],
-                  [("12 afirmações Likert (1 a 5) e 3 perguntas abertas, após um walkthrough", 13, NAVY, False)]],
+                  [("12 afirmações em escala Likert (1 a 5) e 3 perguntas abertas, após demonstração guiada", 13, NAVY, False)]],
              anchor=MSO_ANCHOR.MIDDLE)
     c2 = rect(s, 6.85, 4.0, 5.55, 1.55, CARD, line=BORDER)
     set_text(c2, [[("Amostra", 14.5, RED, True)],
@@ -294,7 +294,7 @@ def slide_resultados(s):
         x += w + gap
     txt(s, 0.55, 4.75, 12.3, 0.7,
         [[("1ª rodada 4,48; a 2ª foi mais crítica (4,1). Aprendizados e governança no topo "
-           "(5,0 na 1ª rodada); clareza estável em 3,8, a fronteira de adoção.", 15, NAVY, False, False)]])
+           "(5,0 na 1ª rodada); a clareza permaneceu em 3,8 e segue como o principal ponto de atenção.", 15, NAVY, False, False)]])
     txt(s, 0.55, 5.85, 12.3, 0.6,
         [[("Nas respostas abertas o valor apareceu no aprendizado consolidado com IA; "
            "as críticas convergem para clareza e navegação.", 13.5, GRAY, False, True)]])
@@ -303,7 +303,7 @@ def slide_resultados(s):
 def slide_valor(s):
     eyebrow(s, "Onde chegamos")
     title(s, "O que o ObiOne entrega hoje")
-    items = ["Isolamento do cliente", "Reaproveitamento", "Engajamento", "IA copiloto"]
+    items = ["Isolamento entre clientes", "Reaproveitamento", "Engajamento do cliente", "IA assistiva"]
     w, gap, t, h = 2.85, 0.22, 3.05, 1.5
     x = 0.55
     for it in items:
@@ -311,8 +311,8 @@ def slide_valor(s):
         set_text(c, [[("✓", 20, GREEN, True)], [(it, 14, NAVY, True)]])
         x += w + gap
     txt(s, 0.55, 5.2, 12.2, 0.9,
-        [[("Replicável e demoável. ", 16, NAVY, True, False),
-          ("A seguir: navegação guiada e avaliação da fidelidade da extração do MPO.", 16, GRAY, False, False)]])
+        [[("Ciclo completo, replicável e demonstrável ao vivo. ", 16, NAVY, True, False),
+          ("Próximos passos: navegação guiada e avaliação da fidelidade da extração do MPO.", 16, GRAY, False, False)]])
 
 
 BUILDERS = [
@@ -321,12 +321,12 @@ BUILDERS = [
     slide_experimento,
     slide_solucao,
     slide_ia_layer,
-    lambda s: slide_shot(s, "O diferencial · cliente com muralha", "O cliente dentro, sem ver os outros",
+    lambda s: slide_shot(s, "O diferencial · acesso semi-aberto", "O cliente participa, sem ver outros clientes",
                          PRINTS / "cliente_novidades.png",
-                         ["Vê e acessa só o seu projeto", "Participa da conversa", "As novidades o trazem de volta"]),
+                         ["Vê e acessa apenas o próprio projeto", "Contribui nas conversas da comunidade", "As novidades do projeto o convidam a voltar"]),
     lambda s: slide_shot_wide(s, "Reaproveitamento", "O conhecimento atravessa projetos",
                               PRINTS / "aprendizados_dominio_bloco.png",
-                              "Aprendizados de outros projetos afloram no domínio; a Conectora sintetiza padrões sob demanda."),
+                              "Aprendizados consolidados em um projeto aparecem nos demais projetos do domínio; a Conectora sintetiza padrões sob demanda."),
     slide_resultados,
     slide_desafios,
     slide_valor,
