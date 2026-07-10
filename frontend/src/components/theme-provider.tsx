@@ -11,14 +11,16 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("dark");
-
-  useEffect(() => {
-    const stored = (typeof window !== "undefined" &&
-      localStorage.getItem("obione-theme")) as Theme | null;
-    const initial: Theme = stored ?? "dark";
-    setThemeState(initial);
-  }, []);
+  // Lazy init straight from storage: no post-mount flip (which flashed the UI)
+  // and no effect-ordering race that overwrote the saved choice with the default.
+  const [theme, setThemeState] = useState<Theme>(() => {
+    if (typeof window === "undefined") return "dark";
+    try {
+      return localStorage.getItem("obione-theme") === "light" ? "light" : "dark";
+    } catch {
+      return "dark";
+    }
+  });
 
   useEffect(() => {
     const root = document.documentElement;
