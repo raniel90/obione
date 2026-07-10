@@ -240,7 +240,7 @@ function SettingsPage() {
                   .map((t) => (
                     <Stat
                       key={t.type}
-                      label={t.type.toLowerCase().replace("_", " ")}
+                      label={aiTypeLabels[t.type] ?? t.type}
                       value={`${t.accepted}/${t.total} · ${t.acceptanceRatePercent}%`}
                     />
                   ))}
@@ -441,6 +441,14 @@ function SettingsPage() {
     </AppShell>
   );
 }
+
+const aiTypeLabels: Record<string, string> = {
+  DOMAIN: "Domínio",
+  OBSERVATIONS: "Observações",
+  KNOWLEDGE: "Conhecimento",
+  SYNTHESIS: "Síntese do domínio",
+  PROJECT_SETUP: "Configuração de projeto",
+};
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return <p className="text-[11px] font-medium text-muted-foreground">{children}</p>;
