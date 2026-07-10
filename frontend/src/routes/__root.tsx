@@ -129,6 +129,14 @@ function RootShell({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
       <head>
+        {/* Applies the saved theme before first paint — prevents the light/dark
+            flash on every full page load (the SSR HTML ships without the class). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              '(function(){try{var t=localStorage.getItem("obione-theme");if(t!=="light")document.documentElement.classList.add("dark");}catch(e){document.documentElement.classList.add("dark");}})();',
+          }}
+        />
         <HeadContent />
       </head>
       <body>
