@@ -64,18 +64,18 @@ import type { Discussion as SvcDiscussion } from "@/types/discussion";
 import { getCurrentUser } from "@/services/authService";
 import { getMpoAttributes, getMpoCategories } from "@/services/mpoAttributeService";
 import type { MpoCategory } from "@/types/mpoAttribute";
-import { type DiscussionStatus, type VisibilityScope } from "@/lib/community-data";
 import {
   getKnowledgeByProject,
   getKnowledgeByDomain,
   toCommunityKnowledge,
+  consolidateKnowledge,
 } from "@/services/knowledgeService";
 import type { CommunityKnowledge } from "@/lib/community-data";
 import type { Knowledge } from "@/types/knowledge";
-import { synthesizeDomain, structureObservation } from "@/services/aiService";
-import type { DomainSynthesis } from "@/services/aiService";
-import { KnowledgeCard } from "@/components/community-pieces";
-import { BookOpen } from "lucide-react";
+import { suggestObservations, synthesizeDomain, structureObservation } from "@/services/aiService";
+import type { DomainSynthesis, ObservationSuggestions } from "@/services/aiService";
+import { KnowledgeCard, ConsolidateKnowledgeDialog } from "@/components/community-pieces";
+import { BookOpen, Lightbulb } from "lucide-react";
 import type { ProjectObservation } from "@/lib/project-observatory";
 import {
   ArrowLeft,
@@ -538,6 +538,7 @@ function ProjectDetailPage() {
             <ManualObservationSection
               projectId={id}
               domainId={project.domainId}
+              domainName={domain?.name ?? "—"}
               isClient={isClient}
               initial={observationsList}
               rawObservations={rawObservations}
@@ -579,10 +580,14 @@ function ObservationThread({
   discussion,
   currentUserId,
   onChanged,
+  canConsolidate,
+  onConsolidate,
 }: {
   discussion: SvcDiscussion;
   currentUserId: string;
   onChanged: () => void;
+  canConsolidate?: boolean;
+  onConsolidate?: () => void;
 }) {
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
@@ -607,10 +612,22 @@ function ObservationThread({
 
   return (
     <div className="mt-3 rounded-lg border border-border bg-muted/20 p-3">
-      <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-wider text-muted-foreground">
-        <MessageSquare className="h-3 w-3" />
-        Conversa · {discussion.contributions.length} comentário
-        {discussion.contributions.length === 1 ? "" : "s"}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground">
+          <MessageSquare className="h-3 w-3" />
+          Conversa · {discussion.contributions.length} comentário
+          {discussion.contributions.length === 1 ? "" : "s"}
+        </div>
+        {canConsolidate && onConsolidate && (
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 gap-1 px-2.5 text-[11px]"
+            onClick={onConsolidate}
+          >
+            <Lightbulb className="h-3 w-3" /> Consolidar aprendizado
+          </Button>
+        )}
       </div>
       {discussion.question && (
         <p className="mt-2 text-[12.5px] italic text-muted-foreground">“{discussion.question}”</p>
@@ -821,6 +838,7 @@ const riskToCode: Record<ProjectObservation["risk"], SvcObsRisk> = {
 function ManualObservationSection({
   projectId,
   domainId,
+  domainName,
   isClient,
   initial,
   rawObservations,
@@ -831,6 +849,7 @@ function ManualObservationSection({
 }: {
   projectId: string;
   domainId: string;
+  domainName: string;
   isClient: boolean;
   initial: ProjectObservation[];
   rawObservations: SvcObservation[];
@@ -848,7 +867,6 @@ function ManualObservationSection({
   const [editOpen, setEditOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editSubmitting, setEditSubmitting] = useState(false);
-  const [discussionOpen, setDiscussionOpen] = useState(false);
   const [discussionObsId, setDiscussionObsId] = useState<string | null>(null);
   const [discussionSubmitting, setDiscussionSubmitting] = useState(false);
   const [form, setForm] = useState({
@@ -865,6 +883,10 @@ function ManualObservationSection({
   const [reviewRevealed, setReviewRevealed] = useState(false);
   const [fromAi, setFromAi] = useState(false);
   const [aiSuggestionId, setAiSuggestionId] = useState<number | null>(null);
+  const [consolidating, setConsolidating] = useState<SvcDiscussion | null>(null);
+  const [aiPanel, setAiPanel] = useState<ObservationSuggestions | null>(null);
+  const [aiPanelLoading, setAiPanelLoading] = useState(false);
+  const [acceptingIdx, setAcceptingIdx] = useState<number | null>(null);
   const [editForm, setEditForm] = useState({
     title: "",
     description: "",
@@ -872,12 +894,6 @@ function ManualObservationSection({
     impact: "Médio" as ProjectObservation["impact"],
     risk: "Moderado" as ProjectObservation["risk"],
     interpretation: "",
-  });
-  const [discussionForm, setDiscussionForm] = useState({
-    title: "",
-    question: "",
-    visibility: "Participantes do projeto" as VisibilityScope,
-    status: "Aberta" as DiscussionStatus,
   });
 
   const [mpoCategories, setMpoCategories] = useState<MpoCategory[]>([]);
@@ -1017,50 +1033,105 @@ function ManualObservationSection({
     }
   };
 
-  const openDiscussion = (observationId: string) => {
-    const raw = rawObservations.find((o) => o.id === observationId);
-    const display = items.find((o) => o.id === observationId);
-    setDiscussionForm({
-      title: `Conversa sobre: ${display?.title ?? raw?.title ?? "observação"}`,
-      question: "O que esta observação revela e o que devemos fazer a respeito?",
-      visibility: "Participantes do projeto",
-      status: "Aberta",
-    });
-    setDiscussionObsId(observationId);
-    setDiscussionOpen(true);
-  };
-
-  const handleDiscussionSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!discussionObsId || !discussionForm.title.trim() || !discussionForm.question.trim()) {
-      return;
-    }
+  // Um clique: os padrões eram sempre aceitos, então o modal só adicionava
+  // fricção. Cria a conversa e abre o thread inline na própria observação.
+  const startDiscussion = async (observationId: string) => {
     if (discussionSubmitting) return;
-
+    const display = items.find((o) => o.id === observationId);
+    setDiscussionObsId(observationId);
     setDiscussionSubmitting(true);
     try {
       const created = await createDiscussion({
-        title: discussionForm.title.trim(),
-        question: discussionForm.question.trim(),
+        title: `Conversa sobre: ${display?.title ?? "observação"}`,
+        question: "O que esta observação revela e o que devemos fazer a respeito?",
         domainId,
         projectId,
-        observationId: discussionObsId,
-        status: statusCodes[discussionForm.status],
-        visibility: visibilityCodes[discussionForm.visibility],
+        observationId,
+        status: statusCodes["Aberta"],
+        visibility: visibilityCodes["Participantes do projeto"],
         createdBy: currentUserId,
       });
-
-      const linked = await linkObservationToDiscussion(discussionObsId, created.id);
+      const linked = await linkObservationToDiscussion(observationId, created.id);
       if (linked) applyObservationUpdate(linked);
-
       onDiscussionCreated();
-      toast.success("Conversa iniciada com sucesso.");
-      setDiscussionOpen(false);
-      setDiscussionObsId(null);
+      toast.success("Conversa iniciada. Contribua no quadro abaixo.");
     } catch {
-      toast.error("Não foi possível criar a discussão.");
+      toast.error("Não foi possível iniciar a conversa.");
     } finally {
       setDiscussionSubmitting(false);
+      setDiscussionObsId(null);
+    }
+  };
+
+  const confidenceToCode = { Baixo: "LOW", Médio: "MEDIUM", Alto: "HIGH" } as const;
+
+  // A Sintetizadora agora mora onde a conversa acontece: o diálogo de revisão
+  // (human-in-the-loop) abre no próprio projeto, sem trocar de tela.
+  const handleConsolidate = async (k: CommunityKnowledge, suggestionId?: number) => {
+    if (!consolidating) return;
+    try {
+      await consolidateKnowledge(consolidating.id, {
+        title: k.title,
+        summary: k.summary,
+        evidence: k.evidences,
+        recommendation: k.recommendation,
+        confidence: confidenceToCode[k.confidence],
+        suggestionId,
+      });
+      toast.success("Aprendizado consolidado. Veja na aba Aprendizados.");
+      onDiscussionCreated();
+    } catch {
+      toast.error("Não foi possível consolidar o aprendizado.");
+    }
+  };
+
+  // Observadora: sugere observações a partir do resumo do projeto; cada
+  // sugestão é aceita individualmente (human-in-the-loop, painel inline).
+  const handleSuggestObservations = async () => {
+    if (aiPanelLoading) return;
+    setAiPanelLoading(true);
+    try {
+      const res = await suggestObservations(projectId);
+      if (!res.suggestions?.length) {
+        toast.info("A IA não encontrou novas observações para sugerir.");
+        return;
+      }
+      setAiPanel(res);
+    } catch {
+      toast.error("Não foi possível obter sugestões da IA.");
+    } finally {
+      setAiPanelLoading(false);
+    }
+  };
+
+  const acceptSuggestion = async (idx: number) => {
+    if (!aiPanel || acceptingIdx !== null) return;
+    const s = aiPanel.suggestions[idx];
+    setAcceptingIdx(idx);
+    try {
+      const impact = (
+        ["LOW", "MEDIUM", "HIGH"].includes(s.impact) ? s.impact : "MEDIUM"
+      ) as SvcObsImpact;
+      const created = await createObservation(projectId, {
+        title: s.title,
+        description: s.description,
+        attributeId: s.attributeId,
+        impact,
+        risk: "MODERATE",
+        interpretation: "",
+        status: "REGISTERED",
+        createdBy: currentUserId,
+        sourceExcerpt: s.sourceExcerpt,
+        suggestionId: aiPanel.suggestionId,
+      });
+      prependObservation(created);
+      const rest = aiPanel.suggestions.filter((_, i) => i !== idx);
+      setAiPanel(rest.length ? { ...aiPanel, suggestions: rest } : null);
+      toast.success("Observação aceita e registrada.");
+    } catch {
+      toast.error("Não foi possível registrar a sugestão.");
+    } finally {
+      setAcceptingIdx(null);
     }
   };
 
@@ -1087,6 +1158,20 @@ function ManualObservationSection({
         action={
           isClient ? undefined : (
             <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5"
+                disabled={aiPanelLoading}
+                onClick={handleSuggestObservations}
+              >
+                {aiPanelLoading ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Sparkles className="h-3.5 w-3.5" />
+                )}
+                Sugerir com IA
+              </Button>
               <Dialog
                 open={open}
                 onOpenChange={(o) => {
@@ -1240,6 +1325,56 @@ function ManualObservationSection({
           )}
         </div>
       )}
+      {aiPanel && (
+        <div className="mt-4 rounded-xl border border-border bg-muted/20 p-4">
+          <div className="flex items-center justify-between gap-2">
+            <p className="flex items-center gap-1.5 text-[12px] font-medium text-foreground">
+              <Sparkles className="h-3.5 w-3.5" />
+              Sugestões da Observadora · revise e aceite as que fizerem sentido
+            </p>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-7 px-2 text-[11px] text-muted-foreground"
+              onClick={() => setAiPanel(null)}
+            >
+              Dispensar
+            </Button>
+          </div>
+          <ul className="mt-3 space-y-2">
+            {aiPanel.suggestions.map((sug, idx) => (
+              <li
+                key={`${sug.title}-${idx}`}
+                className="rounded-lg border border-border bg-background p-3"
+              >
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[13px] font-semibold text-foreground">{sug.title}</p>
+                    <p className="mt-1 text-[12.5px] leading-relaxed text-muted-foreground">
+                      {sug.description}
+                    </p>
+                    <p className="mt-1.5 text-[11px] text-muted-foreground">
+                      {attrNameById.get(sug.attributeId) ?? sug.attributeId}
+                      {sug.sourceExcerpt && (
+                        <span className="italic"> · “{sug.sourceExcerpt}”</span>
+                      )}
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    className="h-7 gap-1 px-2.5 text-[11px]"
+                    disabled={acceptingIdx !== null}
+                    onClick={() => acceptSuggestion(idx)}
+                  >
+                    <CheckCircle2 className="h-3 w-3" />
+                    {acceptingIdx === idx ? "Registrando…" : "Aceitar"}
+                  </Button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <div className="mt-4 space-y-3">
         {items.map((o) => (
           <article
@@ -1306,9 +1441,13 @@ function ManualObservationSection({
                       size="sm"
                       variant="outline"
                       className="h-7 gap-1 px-2.5 text-[11px]"
-                      onClick={() => openDiscussion(o.id)}
+                      disabled={discussionSubmitting && discussionObsId === o.id}
+                      onClick={() => startDiscussion(o.id)}
                     >
-                      <MessageSquare className="h-3 w-3" /> Iniciar conversa
+                      <MessageSquare className="h-3 w-3" />
+                      {discussionSubmitting && discussionObsId === o.id
+                        ? "Iniciando…"
+                        : "Iniciar conversa"}
                     </Button>
                   )}
                   <Button
@@ -1341,6 +1480,8 @@ function ManualObservationSection({
                   discussion={d}
                   currentUserId={currentUserId}
                   onChanged={onDiscussionCreated}
+                  canConsolidate={!isClient && d.status !== "CONSOLIDATED"}
+                  onConsolidate={() => setConsolidating(d)}
                 />
               ))}
           </article>
@@ -1458,40 +1599,23 @@ function ManualObservationSection({
         </DialogContent>
       </Dialog>
 
-      <Dialog open={discussionOpen} onOpenChange={setDiscussionOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[640px]">
-          <DialogHeader>
-            <DialogTitle>Iniciar conversa</DialogTitle>
-            <DialogDescription>
-              Comece uma conversa a partir desta observação registrada no projeto.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleDiscussionSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="dis-title">Título da conversa</Label>
-              <Input
-                id="dis-title"
-                value={discussionForm.title}
-                onChange={(e) => setDiscussionForm((f) => ({ ...f, title: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="dis-question">Pergunta investigativa</Label>
-              <Textarea
-                id="dis-question"
-                rows={3}
-                value={discussionForm.question}
-                onChange={(e) => setDiscussionForm((f) => ({ ...f, question: e.target.value }))}
-              />
-            </div>
-            <DialogFooter>
-              <Button type="submit" size="sm" disabled={discussionSubmitting}>
-                {discussionSubmitting ? "Iniciando…" : "Iniciar conversa"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <ConsolidateKnowledgeDialog
+        discussion={
+          consolidating
+            ? toCommunityDiscussion(consolidating, {
+                domain: domainName,
+                originObservation: consolidating.observationId
+                  ? items.find((o) => o.id === consolidating.observationId)?.title
+                  : undefined,
+              })
+            : null
+        }
+        open={consolidating !== null}
+        onOpenChange={(o) => {
+          if (!o) setConsolidating(null);
+        }}
+        onConsolidate={handleConsolidate}
+      />
     </section>
   );
 }
