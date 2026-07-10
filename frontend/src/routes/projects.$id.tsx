@@ -979,7 +979,9 @@ function ManualObservationSection({
       setFromAi(true);
       setReviewRevealed(true);
     } catch {
-      toast.error("Não foi possível estruturar a observação. Tente novamente.");
+      // Graceful degradation: the AI failed, so open the review fields for manual fill.
+      toast.error("A IA não respondeu. Preencha os campos e revise manualmente.");
+      setReviewRevealed(true);
     } finally {
       setStructureLoading(false);
     }
@@ -1134,6 +1136,12 @@ function ManualObservationSection({
     }
   };
 
+  const dismissSuggestion = (idx: number) => {
+    if (!aiPanel) return;
+    const rest = aiPanel.suggestions.filter((_, i) => i !== idx);
+    setAiPanel(rest.length ? { ...aiPanel, suggestions: rest } : null);
+  };
+
   const handleMarkAnalyzed = async (observationId: string) => {
     setAnalyzingId(observationId);
     try {
@@ -1214,7 +1222,7 @@ function ManualObservationSection({
                         />
                       </div>
                       {!reviewRevealed && (
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-end">
                           <Button
                             type="button"
                             size="sm"
@@ -1227,15 +1235,8 @@ function ManualObservationSection({
                             ) : (
                               <Sparkles className="h-3.5 w-3.5" />
                             )}
-                            {structureLoading ? "Estruturando…" : "Estruturar com IA"}
+                            {structureLoading ? "Processando…" : "Avançar"}
                           </Button>
-                          <button
-                            type="button"
-                            className="text-[12.5px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
-                            onClick={() => setReviewRevealed(true)}
-                          >
-                            preencher manualmente
-                          </button>
                         </div>
                       )}
                       {reviewRevealed && (
@@ -1293,15 +1294,17 @@ function ManualObservationSection({
                           </div>
                         </div>
                       )}
-                      <DialogFooter>
-                        <Button
-                          type="submit"
-                          size="sm"
-                          disabled={submitting || !reviewRevealed || !form.title.trim()}
-                        >
-                          {submitting ? "Registrando…" : "Registrar observação"}
-                        </Button>
-                      </DialogFooter>
+                      {reviewRevealed && (
+                        <DialogFooter>
+                          <Button
+                            type="submit"
+                            size="sm"
+                            disabled={submitting || !form.title.trim()}
+                          >
+                            {submitting ? "Registrando…" : "Registrar observação"}
+                          </Button>
+                        </DialogFooter>
+                      )}
                     </form>
                   )}
                 </DialogContent>
@@ -1337,7 +1340,7 @@ function ManualObservationSection({
               className="h-7 px-2 text-[11px] text-muted-foreground"
               onClick={() => setAiPanel(null)}
             >
-              Dispensar
+              Dispensar todas
             </Button>
           </div>
           <ul className="mt-3 space-y-2">
@@ -1359,15 +1362,26 @@ function ManualObservationSection({
                       )}
                     </p>
                   </div>
-                  <Button
-                    size="sm"
-                    className="h-7 gap-1 px-2.5 text-[11px]"
-                    disabled={acceptingIdx !== null}
-                    onClick={() => acceptSuggestion(idx)}
-                  >
-                    <CheckCircle2 className="h-3 w-3" />
-                    {acceptingIdx === idx ? "Registrando…" : "Aceitar"}
-                  </Button>
+                  <div className="flex items-center gap-1.5">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 px-2 text-[11px] text-muted-foreground"
+                      disabled={acceptingIdx !== null}
+                      onClick={() => dismissSuggestion(idx)}
+                    >
+                      Dispensar
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="h-7 gap-1 px-2.5 text-[11px]"
+                      disabled={acceptingIdx !== null}
+                      onClick={() => acceptSuggestion(idx)}
+                    >
+                      <CheckCircle2 className="h-3 w-3" />
+                      {acceptingIdx === idx ? "Registrando…" : "Aceitar"}
+                    </Button>
+                  </div>
                 </div>
               </li>
             ))}

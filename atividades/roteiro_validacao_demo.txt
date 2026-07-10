@@ -1,0 +1,183 @@
+ROTEIRO DA DEMO — ObiOne
+Copie e cole cada dado. Tudo abaixo foi testado; o resultado esperado da IA
+está indicado em cada passo.
+
+Antes de começar (estado limpo):
+  .claude/skills/run-app/scripts/stop.sh && rm -rf backend/data/ && .claude/skills/run-app/scripts/run.sh
+
+App: http://localhost:5173
+Plano B sem internet: OBIONE_LLM_PROVIDER=mock no .env e reiniciar o backend.
+
+
+------------------------------------------------------------
+PASSO 0 — LOGIN DO CONSULTOR
+------------------------------------------------------------
+Abra http://localhost:5173/login
+
+E-mail:
+consultor@obione.dev
+
+Senha:
+consultor123
+
+
+------------------------------------------------------------
+PASSO 1 — CADASTRAR PROJETO COM IA (Configuradora)
+------------------------------------------------------------
+Menu Projetos > Novo projeto.
+
+Nome do projeto:
+Expansão Digital Vitalis Saúde
+
+Descrição do projeto:
+A Vitalis, rede de clínicas, quer dobrar a captação de pacientes pelos canais digitais em 6 meses. Vamos reformular o site, criar campanhas de mídia paga e implantar um CRM simples. Cliente novo, nunca trabalhou com agência; orçamento apertado e diretoria ansiosa por resultado rápido.
+
+Clique em "Avançar" (o botão mostra "Processando..." enquanto a IA trabalha).
+
+ESPERADO: domínio Comunicação Digital (~94%), ~16 atributos marcados
+(objetivos, custos, riscos, cronograma...), justificativa citando trechos
+da descrição.
+
+Na etapa 2, criar o cliente novo (inline):
+No campo Cliente, clique em "+ Novo cliente".
+
+Nome:
+Cliente Vitalis Saúde
+
+E-mail:
+vitalis@cliente.dev
+
+Senha provisória:
+vitalis123
+
+Clique em "Criar e selecionar".
+
+Data de início:
+01/07/2026
+
+(Conclusão é opcional — pode deixar vazio.)
+
+Clique em "Cadastrar projeto".
+ESPERADO: toast de sucesso e você cai direto no detalhe do projeto novo.
+
+DICA: já no detalhe, mostre a aba Aprendizados: o bloco "Aprendizados do
+domínio" já traz um aprendizado de outro projeto (Campanha Orion) —
+reuso desde o dia zero.
+
+
+------------------------------------------------------------
+PASSO 2 — OBSERVAÇÃO EM 1 CAMPO (IA estrutura)
+------------------------------------------------------------
+No projeto Vitalis, aba Observações > "Registrar primeira observação"
+(nas próximas, o botão vira "Registrar observação").
+
+O que você observou?
+O cliente demorou mais de duas semanas para aprovar o novo posicionamento, e nesse meio tempo a equipe ficou parada esperando a decisão, o que atrasou o cronograma.
+
+Clique em "Estruturar com IA".
+
+ESPERADO: título parecido com "Atraso por aprovação do cliente", atributo
+"Status do cronograma", interpretação sobre atraso/ociosidade.
+Revise e clique em "Registrar observação". O card entra na lista com o
+selo "Sugerida pela IA".
+
+
+------------------------------------------------------------
+PASSO 3 — INICIAR A CONVERSA (1 clique)
+------------------------------------------------------------
+No card da observação recém-criada, clique em "Iniciar conversa".
+
+ESPERADO: sem modal — a conversa nasce na hora e o quadro abre ali mesmo,
+com a caixa "Contribua com a conversa".
+
+OPCIONAL (Observadora): no topo da aba Observações há outro "Sugerir com
+IA" — a IA propõe observações a partir do resumo do projeto num painel;
+clique em "Aceitar" numa delas e ela vira observação com o selo
+"Sugerida pela IA".
+
+
+------------------------------------------------------------
+PASSO 4 — A VEZ DO CLIENTE (janela anônima / outro navegador)
+------------------------------------------------------------
+Abra http://localhost:5173/login em janela anônima.
+
+E-mail:
+vitalis@cliente.dev
+
+Senha:
+vitalis123
+
+ESPERADO no home: "Meu projeto" + bloco "Novidades no seu projeto" com
+badge "2 novas" (a observação e a conversa que o consultor acabou de criar).
+
+Prova do isolamento — cole na barra de endereço:
+http://localhost:5173/projects/1
+
+ESPERADO: "Projeto não encontrado" (é o projeto de outro cliente).
+
+Volte ao home, clique na conversa nas Novidades (cai na aba Observações do
+projeto), clique em "Comentar" no card da conversa para abrir a caixa e cole:
+
+Da nossa parte, a demora foi porque o material chegou sem o contexto da decisão. Se vier com um resumo do que precisa ser decidido, conseguimos responder em até 2 dias.
+
+Envie.
+ESPERADO: o comentário aparece como Cliente Vitalis Saúde.
+
+
+------------------------------------------------------------
+PASSO 5 — CONSOLIDAR COM IA (o momento-ouro)
+------------------------------------------------------------
+De volta à janela do consultor, no próprio projeto (recarregue a página):
+no quadro da conversa, clique em "Consolidar aprendizado" — o diálogo abre
+ali mesmo, sem trocar de tela.
+
+Clique em "Sugerir com IA".
+
+ESPERADO (o clímax): o rascunho cita o cliente — a causa vira "falta de
+contexto na solicitação" (não "cliente lento"), a recomendação vira
+"enviar solicitações já com o contexto e a decisão esperada", com
+confiança alta. Um comentário do cliente inverteu o aprendizado.
+
+Revise e clique em "Consolidar aprendizado".
+ESPERADO: o aprendizado aparece na aba Aprendizados do projeto.
+
+
+------------------------------------------------------------
+PASSO 6 — REAPROVEITAMENTO (fecha o ciclo)
+------------------------------------------------------------
+Menu Projetos > Campanha Lançamento Orion (mesmo domínio), aba Aprendizados.
+
+ESPERADO: o bloco "Aprendizados do domínio" mostra o aprendizado
+recém-consolidado da Vitalis — o conhecimento atravessou projetos.
+
+OPCIONAL: clique em "Sintetizar padrões do domínio" (a Conectora) e mostre
+o painel de padrões e lições.
+
+
+------------------------------------------------------------
+PASSO 7 — GOVERNANÇA (admin, opcional)
+------------------------------------------------------------
+Saia e entre como:
+
+E-mail:
+admin@obione.dev
+
+Senha:
+admin123
+
+Menu Configurações.
+
+ESPERADO: "Sugestões da IA x aceites" com todos os aceites da jornada em
+100% (configuração de projeto, observações e conhecimento) — cada sugestão
+da IA foi auditada, revisada e aceita por um humano.
+
+
+------------------------------------------------------------
+SE ALGO FALHAR
+------------------------------------------------------------
+Botão de IA com erro ou lento .... sem internet? OBIONE_LLM_PROVIDER=mock
+                                   no .env e reiniciar o backend
+Voltou pro login ................. sessão expirou (12h) — logar de novo
+Dados sujos de ensaio ............ stop.sh, rm -rf backend/data/, run.sh
+Texto da IA diferente do roteiro . normal (modelo real); o sentido se
+                                   mantém — siga o roteiro
