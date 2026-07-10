@@ -679,33 +679,39 @@ export function ConsolidateKnowledgeDialog({
   onOpenChange: (o: boolean) => void;
   onConsolidate: (k: CommunityKnowledge, suggestionId?: number) => void;
 }) {
-  const [success, setSuccess] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [draftSuggestionId, setDraftSuggestionId] = useState<number | null>(null);
-  const [form, setForm] = useState({
+  const emptyForm = {
     title: "",
     summary: "",
     evidences: "",
     recommendation: "",
     confidence: "Médio" as KnowledgeConfidence,
-    status: "Proposto" as KnowledgeStatus,
-  });
+  };
+  const [form, setForm] = useState(emptyForm);
 
   if (!discussion) return null;
 
+  const confidenceFromCode: Record<string, KnowledgeConfidence> = {
+    LOW: "Baixo",
+    MEDIUM: "Médio",
+    HIGH: "Alto",
+  };
+
   // The Sintetizadora drafts a learning from the conversation; the consultant
-  // reviews and edits before consolidating (human-in-the-loop).
+  // reviews and edits before consolidating (human-in-the-loop). Evidences come
+  // from the draft and travel with the knowledge without an extra form field.
   const fillWithAi = async () => {
     setAiLoading(true);
     try {
       const draft = await suggestKnowledge(discussion.id);
       setDraftSuggestionId(draft.suggestionId ?? null);
       setForm((f) => ({
-        ...f,
         title: draft.title || f.title,
         summary: draft.summary || f.summary,
         evidences: draft.evidence || f.evidences,
         recommendation: draft.recommendation || f.recommendation,
+        confidence: confidenceFromCode[draft.confidence] ?? f.confidence,
       }));
       toast.success("Rascunho preenchido pela IA. Revise antes de consolidar.");
     } catch {
@@ -728,25 +734,14 @@ export function ConsolidateKnowledgeDialog({
         evidences: form.evidences,
         recommendation: form.recommendation,
         confidence: form.confidence,
-        status: form.status,
+        status: "Consolidado",
         originDiscussion: discussion.id,
       },
       draftSuggestionId ?? undefined,
     );
-    setSuccess(true);
-    setTimeout(() => {
-      setSuccess(false);
-      onOpenChange(false);
-      setDraftSuggestionId(null);
-      setForm({
-        title: "",
-        summary: "",
-        evidences: "",
-        recommendation: "",
-        confidence: "Médio",
-        status: "Proposto",
-      });
-    }, 1600);
+    onOpenChange(false);
+    setDraftSuggestionId(null);
+    setForm(emptyForm);
   };
 
   return (
@@ -759,135 +754,88 @@ export function ConsolidateKnowledgeDialog({
             futuros.
           </DialogDescription>
         </DialogHeader>
-        {success ? (
-          <div className="flex flex-col items-center gap-2 py-6 text-center">
-            <CheckCircle2 className="h-8 w-8 text-success" />
-            <p className="text-sm font-medium">Conhecimento consolidado com sucesso.</p>
+        <form onSubmit={submit} className="space-y-4">
+          {discussion.contributions === 0 && (
+            <div className="flex items-start gap-2 rounded-lg border border-warning/40 bg-warning/10 p-3 text-[12px] leading-relaxed text-foreground">
+              <Info className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
+              <span>
+                Esta conversa ainda não tem contribuições. Um aprendizado consolidado agora terá
+                pouca evidência; considere aguardar a participação da comunidade.
+              </span>
+            </div>
+          )}
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-dashed border-border bg-muted/20 p-3">
+            <p className="text-[11.5px] leading-relaxed text-muted-foreground">
+              Deixe a IA propor um rascunho a partir desta conversa. Você revisa antes de
+              consolidar.
+            </p>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="shrink-0 gap-1.5"
+              onClick={fillWithAi}
+              disabled={aiLoading}
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              {aiLoading ? "Processando…" : "Sugerir com IA"}
+            </Button>
           </div>
-        ) : (
-          <form onSubmit={submit} className="space-y-4">
-            <div className="grid gap-2 rounded-lg border border-border bg-muted/30 p-3 text-[11.5px] text-muted-foreground sm:grid-cols-3">
-              <span>
-                <span className="font-medium text-foreground/70">Domínio: </span>
-                {discussion.domain}
-              </span>
-              <span>
-                <span className="font-medium text-foreground/70">Projeto: </span>
-                {discussion.project ?? "—"}
-              </span>
-            </div>
-            {discussion.contributions === 0 && (
-              <div className="flex items-start gap-2 rounded-lg border border-warning/40 bg-warning/10 p-3 text-[12px] leading-relaxed text-foreground">
-                <Info className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
-                <span>
-                  Esta conversa ainda não tem contribuições. Um aprendizado consolidado agora terá
-                  pouca evidência; considere aguardar a participação da comunidade.
-                </span>
-              </div>
-            )}
-            <div className="flex items-center justify-between gap-3 rounded-lg border border-dashed border-border bg-muted/20 p-3">
-              <p className="text-[11.5px] leading-relaxed text-muted-foreground">
-                Deixe a IA propor um rascunho a partir desta conversa. Você revisa antes de
-                consolidar.
-              </p>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                className="shrink-0 gap-1.5"
-                onClick={fillWithAi}
-                disabled={aiLoading}
-              >
-                <Sparkles className="h-3.5 w-3.5" />
-                {aiLoading ? "Consultando IA…" : "Sugerir com IA"}
-              </Button>
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="kn-title">Título do conhecimento</Label>
-              <Input
-                id="kn-title"
-                placeholder="Ex.: Baixa participação do cliente aumenta risco de atraso"
-                value={form.title}
-                onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="kn-sum">Resumo do aprendizado</Label>
-              <Textarea
-                id="kn-sum"
-                rows={3}
-                placeholder="Síntese do aprendizado consolidado pela comunidade."
-                value={form.summary}
-                onChange={(e) => setForm((f) => ({ ...f, summary: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="kn-ev">Evidências consideradas</Label>
-              <Textarea
-                id="kn-ev"
-                rows={2}
-                placeholder="Quais observações, contribuições e dados sustentam este aprendizado."
-                value={form.evidences}
-                onChange={(e) => setForm((f) => ({ ...f, evidences: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="kn-rec">Recomendação para projetos futuros</Label>
-              <Textarea
-                id="kn-rec"
-                rows={2}
-                placeholder="Como projetos semelhantes devem agir a partir deste aprendizado."
-                value={form.recommendation}
-                onChange={(e) => setForm((f) => ({ ...f, recommendation: e.target.value }))}
-              />
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label>Nível de confiança</Label>
-                <Select
-                  value={form.confidence}
-                  onValueChange={(v) =>
-                    setForm((f) => ({ ...f, confidence: v as KnowledgeConfidence }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(["Baixo", "Médio", "Alto"] as KnowledgeConfidence[]).map((v) => (
-                      <SelectItem key={v} value={v}>
-                        {v}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label>Status</Label>
-                <Select
-                  value={form.status}
-                  onValueChange={(v) => setForm((f) => ({ ...f, status: v as KnowledgeStatus }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(["Proposto", "Em revisão", "Consolidado"] as KnowledgeStatus[]).map((v) => (
-                      <SelectItem key={v} value={v}>
-                        {v}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button type="submit" size="sm">
-                Consolidar aprendizado
-              </Button>
-            </DialogFooter>
-          </form>
-        )}
+          <div className="space-y-1.5">
+            <Label htmlFor="kn-title">Título do conhecimento</Label>
+            <Input
+              id="kn-title"
+              placeholder="Ex.: Baixa participação do cliente aumenta risco de atraso"
+              value={form.title}
+              onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="kn-sum">Resumo do aprendizado</Label>
+            <Textarea
+              id="kn-sum"
+              rows={3}
+              placeholder="Síntese do aprendizado consolidado pela comunidade."
+              value={form.summary}
+              onChange={(e) => setForm((f) => ({ ...f, summary: e.target.value }))}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="kn-rec">Recomendação para projetos futuros</Label>
+            <Textarea
+              id="kn-rec"
+              rows={2}
+              placeholder="Como projetos semelhantes devem agir a partir deste aprendizado."
+              value={form.recommendation}
+              onChange={(e) => setForm((f) => ({ ...f, recommendation: e.target.value }))}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Nível de confiança</Label>
+            <Select
+              value={form.confidence}
+              onValueChange={(v) =>
+                setForm((f) => ({ ...f, confidence: v as KnowledgeConfidence }))
+              }
+            >
+              <SelectTrigger className="sm:w-56">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {(["Baixo", "Médio", "Alto"] as KnowledgeConfidence[]).map((v) => (
+                  <SelectItem key={v} value={v}>
+                    {v}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter>
+            <Button type="submit" size="sm" disabled={!form.title.trim() || !form.summary.trim()}>
+              Consolidar aprendizado
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

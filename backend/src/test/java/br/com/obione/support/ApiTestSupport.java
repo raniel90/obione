@@ -71,6 +71,11 @@ public abstract class ApiTestSupport {
         return rest.exchange(path, HttpMethod.GET, new HttpEntity<>(headers(token)), Map.class);
     }
 
+    @SuppressWarnings("rawtypes")
+    protected ResponseEntity<Map> delete(String path, String token) {
+        return rest.exchange(path, HttpMethod.DELETE, new HttpEntity<>(headers(token)), Map.class);
+    }
+
     protected ResponseEntity<List<Map<String, Object>>> getList(String path, String token) {
         return rest.exchange(path, HttpMethod.GET, new HttpEntity<>(headers(token)),
                 new ParameterizedTypeReference<List<Map<String, Object>>>() {});

@@ -28,4 +28,6 @@ public interface DiscussionRepository extends JpaRepository<Discussion, Long> {
     );
 
     List<Discussion> findByStatusNotOrderByUpdatedAtDesc(DiscussionStatus status, Pageable pageable);
+
+    boolean existsByObservationId(Long observationId);
 }

@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -64,5 +65,12 @@ public class ObservationController {
     @Operation(summary = "Marcar observação como em análise")
     public ObservationResponseDTO markAsAnalyzed(@PathVariable Long id) {
         return observationService.markAsAnalyzed(id);
+    }
+
+    @DeleteMapping("/observations/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Excluir observação (sem conversa vinculada)")
+    public void delete(@PathVariable Long id) {
+        observationService.delete(id);
     }
 }
