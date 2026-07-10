@@ -2,16 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowLeft,
-  Users,
-  MessageSquare,
-  BookOpen,
-  Plus,
-  Layers,
-  ArrowUpRight,
-  Folder,
-} from "lucide-react";
+import { ArrowLeft, Plus, ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getCommunityByDomainSlug } from "@/services/communityService";
 import { getProjects } from "@/services/projectService";
@@ -52,7 +43,13 @@ import {
   type VisibilityScope,
 } from "@/lib/community-data";
 import {
-  KpiCard,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   SectionHeader,
   DiscussionCard,
   KnowledgeCard,
@@ -179,6 +176,7 @@ function DomainCommunityPage() {
   const [knowledge, setKnowledge] = useState<CommunityKnowledge[]>([]);
   const [selectedDiscussion, setSelectedDiscussion] = useState<Discussion | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
+  const [participantsOpen, setParticipantsOpen] = useState(false);
   const [consolidateOpen, setConsolidateOpen] = useState(false);
 
   const [svcProjects, setSvcProjects] = useState<SvcProject[]>([]);
@@ -292,19 +290,29 @@ function DomainCommunityPage() {
           </Button>
         </div>
 
-        {/* Indicadores */}
-        <section>
-          <SectionHeader
-            title="Indicadores"
-            tooltip="Participação, projetos, conversas e aprendizados desta comunidade."
-          />
-          <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-            <KpiCard label="Participantes" value={domainParticipants.length} icon={Users} />
-            <KpiCard label="Projetos vinculados" value={domainProjects.length} icon={Folder} />
-            <KpiCard label="Conversas abertas" value={openCount} icon={MessageSquare} />
-            <KpiCard label="Aprendizados" value={consolidatedCount} icon={BookOpen} />
-          </div>
-        </section>
+        {/* Indicadores em faixa compacta */}
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-1.5 text-[12.5px] text-muted-foreground">
+          <button
+            type="button"
+            onClick={() => setParticipantsOpen(true)}
+            className="underline-offset-2 hover:text-foreground hover:underline"
+          >
+            <span className="font-semibold text-foreground">{domainParticipants.length}</span>{" "}
+            participante{domainParticipants.length === 1 ? "" : "s"}
+          </button>
+          <span>
+            <span className="font-semibold text-foreground">{domainProjects.length}</span> projeto
+            {domainProjects.length === 1 ? "" : "s"}
+          </span>
+          <span>
+            <span className="font-semibold text-foreground">{openCount}</span> conversa
+            {openCount === 1 ? "" : "s"} aberta{openCount === 1 ? "" : "s"}
+          </span>
+          <span>
+            <span className="font-semibold text-foreground">{consolidatedCount}</span> aprendizado
+            {consolidatedCount === 1 ? "" : "s"}
+          </span>
+        </div>
 
         {/* Projetos vinculados */}
         <section>
@@ -342,79 +350,6 @@ function DomainCommunityPage() {
               ))}
             </div>
           )}
-        </section>
-
-        {/* Participantes do domínio */}
-        <section>
-          <SectionHeader
-            title="Participantes"
-            tooltip="Pessoas autorizadas a interpretar observações e contribuir com evidências neste domínio."
-          />
-
-          <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card">
-            {domainParticipants.length === 0 ? (
-              <div className="p-6 text-center text-[12.5px] text-muted-foreground">
-                Nenhum participante vinculado.
-              </div>
-            ) : (
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border bg-muted/40 text-[11px] font-medium text-muted-foreground">
-                    <th className="px-3 py-2.5 text-left">Participante</th>
-                    <th className="px-3 py-2.5 text-left">Perfil</th>
-                    <th className="px-3 py-2.5 text-left">Participação</th>
-                    <th className="px-3 py-2.5 text-left">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {domainParticipants.map((p) => (
-                    <tr key={p.id} className="border-b border-border last:border-0">
-                      <td className="px-3 py-2.5">
-                        <div className="flex items-center gap-2.5">
-                          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-accent/70 to-info/70 text-[10px] font-semibold text-accent-foreground">
-                            {p.name
-                              .split(" ")
-                              .map((s) => s[0])
-                              .slice(0, 2)
-                              .join("")}
-                          </div>
-                          <span className="text-[13px] text-foreground">{p.name}</span>
-                        </div>
-                      </td>
-                      <td className="px-3 py-2.5 text-[12.5px] text-foreground">
-                        {roleLabels[p.role]}
-                      </td>
-                      <td className="px-3 py-2.5">
-                        <span className="inline-flex items-center rounded-full border border-border bg-background px-2 py-0.5 text-[11px] text-foreground">
-                          {p.participation}
-                        </span>
-                      </td>
-                      <td className="px-3 py-2.5">
-                        <span
-                          className={cn(
-                            "inline-flex items-center gap-1.5 text-[11px] font-medium",
-                            p.status === "ativo" ? "text-foreground" : "text-muted-foreground",
-                          )}
-                        >
-                          <span
-                            className={cn(
-                              "h-1.5 w-1.5 rounded-full",
-                              p.status === "ativo"
-                                ? "bg-success"
-                                : p.status === "convidado"
-                                  ? "bg-info"
-                                  : "bg-warning",
-                            )}
-                          />
-                          {participantStatusLabels[p.status]}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
         </section>
 
         {/* Conversas */}
@@ -495,31 +430,91 @@ function DomainCommunityPage() {
             </div>
           )}
         </section>
+      </div>
 
-        {/* Link related domain */}
-        <section className="rounded-xl border border-border bg-card p-5">
-          <div className="flex items-start gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-muted/40">
-              <Layers className="h-4 w-4" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-[14px] font-semibold tracking-tight text-foreground">
-                Domínio observacional
-              </h3>
-              <p className="mt-1 text-[12.5px] text-muted-foreground">
-                Área de atuação que agrupa os projetos desta comunidade.
-              </p>
-            </div>
+      {/* Modals */}
+      <Dialog open={participantsOpen} onOpenChange={setParticipantsOpen}>
+        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-[640px]">
+          <DialogHeader>
+            <DialogTitle>Participantes de {domainName}</DialogTitle>
+            <DialogDescription>
+              Quem interpreta observações e contribui com evidências neste domínio.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="overflow-hidden rounded-lg border border-border">
+            {domainParticipants.length === 0 ? (
+              <div className="p-6 text-center text-[12.5px] text-muted-foreground">
+                Nenhum participante vinculado.
+              </div>
+            ) : (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-muted/40 text-[11px] font-medium text-muted-foreground">
+                    <th className="px-3 py-2.5 text-left">Participante</th>
+                    <th className="px-3 py-2.5 text-left">Perfil</th>
+                    <th className="px-3 py-2.5 text-left">Participação</th>
+                    <th className="px-3 py-2.5 text-left">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {domainParticipants.map((p) => (
+                    <tr key={p.id} className="border-b border-border last:border-0">
+                      <td className="px-3 py-2.5">
+                        <div className="flex items-center gap-2.5">
+                          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-accent/70 to-info/70 text-[10px] font-semibold text-accent-foreground">
+                            {p.name
+                              .split(" ")
+                              .map((s) => s[0])
+                              .slice(0, 2)
+                              .join("")}
+                          </div>
+                          <span className="text-[13px] text-foreground">{p.name}</span>
+                        </div>
+                      </td>
+                      <td className="px-3 py-2.5 text-[12.5px] text-foreground">
+                        {roleLabels[p.role]}
+                      </td>
+                      <td className="px-3 py-2.5">
+                        <span className="inline-flex items-center rounded-full border border-border bg-background px-2 py-0.5 text-[11px] text-foreground">
+                          {p.participation}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2.5">
+                        <span
+                          className={cn(
+                            "inline-flex items-center gap-1.5 text-[11px] font-medium",
+                            p.status === "ativo" ? "text-foreground" : "text-muted-foreground",
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              "h-1.5 w-1.5 rounded-full",
+                              p.status === "ativo"
+                                ? "bg-success"
+                                : p.status === "convidado"
+                                  ? "bg-info"
+                                  : "bg-warning",
+                            )}
+                          />
+                          {participantStatusLabels[p.status]}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+          <div className="flex items-center justify-between gap-3 border-t border-border pt-3 text-[12.5px] text-muted-foreground">
+            <span>Área de atuação que agrupa os projetos desta comunidade.</span>
             <Button asChild size="sm" variant="outline">
               <Link to="/domains/$id" params={{ id: domainCommunity.domainId }}>
                 Abrir domínio <ArrowUpRight className="h-3 w-3" />
               </Link>
             </Button>
           </div>
-        </section>
-      </div>
-
-      {/* Modals */}
+        </DialogContent>
+      </Dialog>
       <CreateDiscussionDialog
         open={createOpen}
         onOpenChange={setCreateOpen}

@@ -82,7 +82,12 @@ import {
 } from "@/services/knowledgeService";
 import type { CommunityKnowledge } from "@/lib/community-data";
 import type { Knowledge } from "@/types/knowledge";
-import { suggestObservations, synthesizeDomain, structureObservation } from "@/services/aiService";
+import {
+  suggestObservations,
+  synthesizeDomain,
+  getLatestDomainSynthesis,
+  structureObservation,
+} from "@/services/aiService";
 import type { DomainSynthesis, ObservationSuggestions } from "@/services/aiService";
 import { KnowledgeCard, ConsolidateKnowledgeDialog } from "@/components/community-pieces";
 import { BookOpen, Lightbulb } from "lucide-react";
@@ -1642,6 +1647,13 @@ function ProjectDiscussionsAndKnowledge({
         if (!cancelled) setRawDomainItems(items);
       })
       .catch(() => {});
+    // The synthesis is persisted in the suggestion journal: load the saved
+    // version so the panel survives reloads and the action becomes "Regerar".
+    getLatestDomainSynthesis(domainId)
+      .then((latest) => {
+        if (!cancelled && latest) setSynthesis(latest);
+      })
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
@@ -1737,7 +1749,11 @@ function ProjectDiscussionsAndKnowledge({
                 ) : (
                   <Sparkles className="h-3.5 w-3.5" />
                 )}
-                Sintetizar padroes do dominio
+                {synthLoading
+                  ? "Processando…"
+                  : synthesis
+                    ? "Regerar síntese"
+                    : "Sintetizar padrões do domínio"}
               </Button>
             ) : undefined
           }
@@ -1745,19 +1761,16 @@ function ProjectDiscussionsAndKnowledge({
 
         {synthesis && (
           <div className="mt-4 rounded-xl border border-dashed border-foreground/30 bg-foreground/[0.02] p-5">
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex flex-wrap items-start justify-between gap-3">
               <p className="flex items-center gap-1.5 text-[13px] font-medium text-foreground">
                 <Sparkles className="h-3.5 w-3.5" />
-                Padrões do domínio · síntese da IA, revise antes de usar
+                Padrões do domínio · síntese da IA
               </p>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-7 px-2 text-[11px] text-muted-foreground"
-                onClick={() => setSynthesis(null)}
-              >
-                Dispensar
-              </Button>
+              {synthesis.generatedAt && (
+                <span className="text-[11px] text-muted-foreground">
+                  gerada em {toBrDate(synthesis.generatedAt)}
+                </span>
+              )}
             </div>
             <p className="mt-2 text-[13px] leading-relaxed text-foreground/90">
               {synthesis.summary}

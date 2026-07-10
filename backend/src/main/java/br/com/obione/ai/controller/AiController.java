@@ -53,6 +53,12 @@ public class AiController {
         return ai.suggestKnowledge(id);
     }
 
+    @GetMapping("/domains/{id}/ai/synthesize/latest")
+    @Operation(summary = "Última síntese persistida do domínio (Conectora)")
+    public DomainSynthesisResponseDTO latestSynthesis(@PathVariable Long id) {
+        return ai.latestSynthesis(id);
+    }
+
     @PostMapping("/domains/{id}/ai/synthesize")
     @Operation(summary = "IA: síntese cross-projeto do domínio (Conectora)")
     public DomainSynthesisResponseDTO synthesize(@PathVariable Long id) {
