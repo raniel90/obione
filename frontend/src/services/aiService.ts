@@ -64,6 +64,15 @@ export function synthesizeDomain(domainId: string): Promise<DomainSynthesis> {
   return request<DomainSynthesis>(`/domains/${domainId}/ai/synthesize`, { method: "POST" });
 }
 
+/** Latest persisted synthesis for the domain, or null when none was generated yet. */
+export async function getLatestDomainSynthesis(domainId: string): Promise<DomainSynthesis | null> {
+  try {
+    return await request<DomainSynthesis>(`/domains/${domainId}/ai/synthesize/latest`);
+  } catch {
+    return null;
+  }
+}
+
 /** Estruturadora — structure a free-text observation into a titled, MPO-attributed record. */
 export interface StructuredObservation extends AiSuggestionMeta {
   title: string;

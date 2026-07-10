@@ -19,6 +19,7 @@ import br.com.obione.ai.dto.StructureObservationResponseDTO;
 import br.com.obione.ai.entity.AiSuggestionLog;
 import br.com.obione.ai.enums.AiSuggestionType;
 import br.com.obione.ai.repository.AiSuggestionLogRepository;
+import br.com.obione.common.exception.ResourceNotFoundException;
 import br.com.obione.discussions.dto.DiscussionContributionResponseDTO;
 import br.com.obione.discussions.dto.DiscussionResponseDTO;
 import br.com.obione.discussions.service.DiscussionService;
@@ -134,6 +135,30 @@ public class AiAssistantService {
         DomainSynthesisDTO synthesis = llm.synthesize(domain.name(), summaries);
         AiSuggestionLog log = journal(AiSuggestionType.SYNTHESIS, synthesis, null, null, domainId);
         return DomainSynthesisResponseDTO.of(synthesis, log.getId(), llm.provider(), llm.model(), log.getCreatedAt());
+    }
+
+    /**
+     * Latest persisted synthesis for a domain (the journal keeps every run), so
+     * the UI can show the saved version and offer regeneration instead of
+     * treating the Conectora output as ephemeral.
+     */
+    @Transactional(readOnly = true)
+    public DomainSynthesisResponseDTO latestSynthesis(Long domainId) {
+        AiSuggestionLog log = logRepository
+                .findFirstByTypeAndDomainIdOrderByCreatedAtDesc(AiSuggestionType.SYNTHESIS, domainId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Nenhuma síntese gerada para o domínio: " + domainId));
+        DomainSynthesisDTO synthesis = fromJson(log.getPayload(), DomainSynthesisDTO.class);
+        return DomainSynthesisResponseDTO.of(
+                synthesis, log.getId(), log.getProvider(), log.getModel(), log.getCreatedAt());
+    }
+
+    private <T> T fromJson(String payload, Class<T> type) {
+        try {
+            return objectMapper.readValue(payload, type);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Payload de sugestão inválido no journal", e);
+        }
     }
 
     /**

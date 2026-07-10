@@ -4,8 +4,6 @@ import { AppShell, PageHeader } from "@/components/app-shell";
 import {
   Users,
   MessageSquare,
-  Activity,
-  Layers,
   ArrowUpRight,
   BookOpen,
   Eye,
@@ -20,7 +18,7 @@ import {
   type KnowledgeStatus,
   type KnowledgeConfidence,
 } from "@/lib/community-data";
-import { KpiCard, Mini, SectionHeader, discussionStatusTone } from "@/components/community-pieces";
+import { SectionHeader, discussionStatusTone } from "@/components/community-pieces";
 import { getCommunityOverview } from "@/services/communityService";
 import type { CommunityOverview, DomainCommunitySummary } from "@/types/community";
 import type { DiscussionStatusCode } from "@/types/discussion";
@@ -187,33 +185,15 @@ function CommunityPage() {
         description="Espaço onde consultoria e clientes conversam sobre observações e consolidam aprendizados dos projetos."
       />
 
-      <div className="px-6 py-8 md:px-10 space-y-12">
-        {/* KPIs globais */}
-        <section>
-          <SectionHeader
-            title="Indicadores"
-            tooltip="Números agregados de todas as comunidades: participantes, conversas e aprendizados consolidados."
-          />
-          <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-5">
-            <KpiCard label="Comunidades ativas" value={overview.activeCommunities} icon={Layers} />
-            <KpiCard
-              label="Participantes autorizados"
-              value={overview.authorizedParticipants}
-              icon={Users}
-            />
-            <KpiCard
-              label="Conversas"
-              value={overview.observationalDiscussions}
-              icon={MessageSquare}
-            />
-            <KpiCard label="Aprendizados" value={consolidatedKnowledgeCount} icon={BookOpen} />
-            <KpiCard
-              label="Contribuições recentes"
-              value={overview.recentContributions}
-              icon={Activity}
-            />
-          </div>
-        </section>
+      <div className="px-6 py-8 md:px-10 space-y-8">
+        {/* Indicadores em faixa compacta */}
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-1.5 text-[12.5px] text-muted-foreground">
+          <InlineStat value={overview.activeCommunities} label="comunidades ativas" />
+          <InlineStat value={overview.authorizedParticipants} label="participantes" />
+          <InlineStat value={overview.observationalDiscussions} label="conversas" />
+          <InlineStat value={consolidatedKnowledgeCount} label="aprendizados" />
+          <InlineStat value={overview.recentContributions} label="contribuições recentes" />
+        </div>
 
         {/* Comunidades */}
         <section>
@@ -246,15 +226,13 @@ function CommunityPage() {
                     {c.description}
                   </p>
 
-                  <div className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-3">
-                    <Mini label="Participantes" value={c.participants} />
-                    <Mini label="Projetos vinculados" value={c.linkedProjects} />
-                    <Mini label="Discussões abertas" value={c.discussions} />
-                    <Mini label="Aprendizados" value={c.insights} />
-                  </div>
-
-                  <div className="mt-4 flex items-center justify-end border-t border-border pt-3">
-                    <span className="inline-flex items-center gap-1 text-[12px] font-medium text-foreground/80 transition-colors group-hover:text-foreground">
+                  <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-4 text-[12px] text-muted-foreground">
+                    <span>
+                      {c.participants} participante{c.participants === 1 ? "" : "s"} ·{" "}
+                      {c.discussions} conversa{c.discussions === 1 ? "" : "s"} · {c.insights}{" "}
+                      aprendizado{c.insights === 1 ? "" : "s"}
+                    </span>
+                    <span className="inline-flex items-center gap-1 font-medium text-foreground/80 transition-colors group-hover:text-foreground">
                       Ver detalhes
                       <ArrowUpRight className="h-3 w-3" />
                     </span>
@@ -360,5 +338,13 @@ function CommunityPage() {
         </section>
       </div>
     </AppShell>
+  );
+}
+
+function InlineStat({ value, label }: { value: number; label: string }) {
+  return (
+    <span>
+      <span className="font-semibold text-foreground">{value}</span> {label}
+    </span>
   );
 }
