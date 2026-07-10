@@ -70,7 +70,7 @@ Clique **Cadastrar projeto**. ✅ Redireciona para o detalhe do projeto novo.
 
 ## PASSO 2 — Observação em 1 campo (IA estrutura)
 
-No projeto Vitalis, aba **Observações → Registrar observação**.
+No projeto Vitalis, aba **Observações → Registrar primeira observação** (nas próximas, o botão vira "Registrar observação").
 
 **O que você observou?**
 ```
@@ -79,7 +79,7 @@ O cliente demorou mais de duas semanas para aprovar o novo posicionamento, e nes
 
 Clique **Estruturar com IA**.
 
-✅ **Esperado:** Título ~"Atraso na aprovação do cliente" · Atributo **Status do cronograma** · interpretação sobre risco de atraso. Revise e clique **Registrar observação**.
+✅ **Esperado:** Título ~"Atraso por aprovação do cliente" · Atributo **Status do cronograma** · interpretação sobre atraso/ociosidade. Revise e clique **Registrar observação**. O card entra na lista com o selo **"Sugerida pela IA"**.
 
 ---
 
@@ -104,7 +104,7 @@ vitalis@cliente.dev
 vitalis123
 ```
 
-✅ **Esperado no home:** "Meu projeto" + bloco **"Novidades no seu projeto"** com badge de novas (a observação e a conversa que o consultor acabou de criar).
+✅ **Esperado no home:** "Meu projeto" + bloco **"Novidades no seu projeto"** com badge **"2 novas"** (a observação e a conversa que o consultor acabou de criar).
 
 **Prova do isolamento** — cole na barra de endereço:
 ```
@@ -112,7 +112,7 @@ http://localhost:5173/projects/1
 ```
 ✅ **Esperado:** "Projeto não encontrado" (é o projeto de outro cliente).
 
-Volte ao home, clique na **conversa** nas Novidades, clique **Comentar** e cole:
+Volte ao home, clique na **conversa** nas Novidades (cai na aba Observações do projeto), clique **Comentar** no card da conversa para abrir a caixa e cole:
 
 ```
 Da nossa parte, a demora foi porque o material chegou sem o contexto da decisão. Se vier com um resumo do que precisa ser decidido, conseguimos responder em até 2 dias.
@@ -156,7 +156,7 @@ admin123
 
 Menu **Configurações**.
 
-✅ **Esperado:** "Sugestões da IA × aceites" com os contadores desta demo (project setup, observação e conhecimento aceitos) — cada sugestão da IA auditada com proveniência.
+✅ **Esperado:** "Sugestões da IA × aceites" mostrando **3/3 aceitas** (PROJECT SETUP 1/1 · OBSERVATIONS 1/1 · KNOWLEDGE 1/1, 100%) — cada sugestão da IA da jornada foi auditada, revisada e aceita.
 
 ---
 
