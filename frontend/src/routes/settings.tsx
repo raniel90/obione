@@ -168,8 +168,8 @@ function SettingsPage() {
                 <Users className="h-4 w-4 text-foreground" />
               </div>
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-                  camada de participação
+                <p className="text-[11px] font-medium text-muted-foreground">
+                  Camada de participação
                 </p>
                 <h3 className="mt-1.5 text-[14px] font-semibold tracking-tight text-foreground">
                   Comunidade como camada de participação
@@ -188,7 +188,7 @@ function SettingsPage() {
 
         {/* Cards perfis */}
         <section>
-          <SectionLabel>// perfis ativos</SectionLabel>
+          <SectionLabel>Perfis ativos</SectionLabel>
           <div className="mt-3 grid gap-4 md:grid-cols-3">
             {PROFILE_ORDER.map((code) => {
               const profile = profileByCode(code);
@@ -203,10 +203,6 @@ function SettingsPage() {
                     <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-background">
                       <Icon className="h-4 w-4 text-foreground" />
                     </div>
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                      <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                      ativo
-                    </span>
                   </div>
                   <h3 className="mt-4 text-[15px] font-semibold tracking-tight text-foreground">
                     {profile?.name ?? code}
@@ -215,8 +211,8 @@ function SettingsPage() {
                     {profile?.description ?? ""}
                   </p>
                   <div className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-3">
-                    <Stat label="usuários" value={usersCountByProfile(code).toString()} />
-                    <Stat label="nível" value={visual.level} />
+                    <Stat label="Usuários" value={usersCountByProfile(code).toString()} />
+                    <Stat label="Nível" value={visual.level} />
                   </div>
                 </div>
               );
@@ -227,14 +223,14 @@ function SettingsPage() {
         {/* IA — sugestões × aceites */}
         {aiStats && aiStats.totalSuggestions > 0 && (
           <section>
-            <SectionLabel>// camada de IA</SectionLabel>
+            <SectionLabel>Camada de IA</SectionLabel>
             <div className="mt-3 rounded-lg border border-border bg-card p-5">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-foreground" />
                 <h3 className="text-[15px] font-semibold tracking-tight text-foreground">
                   Sugestões da IA × aceites
                 </h3>
-                <span className="ml-auto font-mono text-[11px] text-muted-foreground">
+                <span className="ml-auto text-[11px] font-medium text-muted-foreground">
                   {aiStats.totalAccepted}/{aiStats.totalSuggestions} aceitas
                 </span>
               </div>
@@ -255,7 +251,7 @@ function SettingsPage() {
 
         {/* Matriz */}
         <section>
-          <SectionLabel>// matriz de permissões</SectionLabel>
+          <SectionLabel>Matriz de permissões</SectionLabel>
           <h2 className="mt-2 text-[16px] font-semibold tracking-tight text-foreground">
             Permissões por perfil
           </h2>
@@ -268,13 +264,13 @@ function SettingsPage() {
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/40 hover:bg-muted/40">
-                  <TableHead className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
+                  <TableHead className="text-[11px] font-medium text-muted-foreground">
                     Permissão
                   </TableHead>
                   {PROFILE_ORDER.map((code) => (
                     <TableHead
                       key={code}
-                      className="text-center text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground"
+                      className="text-center text-[11px] font-medium text-muted-foreground"
                     >
                       {labelFor(code)}
                     </TableHead>
@@ -310,9 +306,7 @@ function SettingsPage() {
                 <Layers className="h-4 w-4 text-foreground" />
               </div>
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-                  acesso contextual
-                </p>
+                <p className="text-[11px] font-medium text-muted-foreground">Acesso contextual</p>
                 <h3 className="mt-1.5 text-[14px] font-semibold tracking-tight text-foreground">
                   Perfil define o papel · contexto define o alcance
                 </h3>
@@ -329,7 +323,7 @@ function SettingsPage() {
 
         {/* Usuários por perfil */}
         <section className="pb-8">
-          <SectionLabel>// usuários por perfil</SectionLabel>
+          <SectionLabel>Usuários por perfil</SectionLabel>
           <div className="mt-2 flex items-end justify-between">
             <div>
               <h2 className="text-[16px] font-semibold tracking-tight text-foreground">
@@ -348,16 +342,16 @@ function SettingsPage() {
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/40 hover:bg-muted/40">
-                  <TableHead className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
+                  <TableHead className="text-[11px] font-medium text-muted-foreground">
                     Usuário
                   </TableHead>
-                  <TableHead className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
+                  <TableHead className="text-[11px] font-medium text-muted-foreground">
                     Perfil
                   </TableHead>
-                  <TableHead className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
+                  <TableHead className="text-[11px] font-medium text-muted-foreground">
                     Vínculo contextual
                   </TableHead>
-                  <TableHead className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
+                  <TableHead className="text-[11px] font-medium text-muted-foreground">
                     Status
                   </TableHead>
                   <TableHead className="w-10" />
@@ -390,7 +384,7 @@ function SettingsPage() {
                       </TableCell>
                       <TableCell>
                         <span
-                          className={`inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.18em] ${
+                          className={`inline-flex items-center gap-1.5 text-[11px] font-medium ${
                             active ? "text-foreground" : "text-muted-foreground"
                           }`}
                         >
@@ -440,9 +434,7 @@ function SettingsPage() {
           <div className="mt-4 flex items-center gap-4 text-[11.5px] text-muted-foreground">
             <Legend icon={<Check className="h-3 w-3" />} label="Permissão ativa" />
             <Legend icon={<X className="h-3 w-3" />} label="Permissão restrita" />
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em]">
-              · governança simulada (mock)
-            </span>
+            <span className="text-[11px] italic">· governança simulada</span>
           </div>
         </section>
       </div>
@@ -451,19 +443,13 @@ function SettingsPage() {
 }
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
-      {children}
-    </p>
-  );
+  return <p className="text-[11px] font-medium text-muted-foreground">{children}</p>;
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-        {label}
-      </p>
+      <p className="text-[11px] font-medium text-muted-foreground">{label}</p>
       <p className="mt-0.5 text-[12.5px] text-foreground">{value}</p>
     </div>
   );
