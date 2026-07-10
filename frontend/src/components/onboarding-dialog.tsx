@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import {
   ClipboardList,
   MessageSquare,
@@ -63,7 +64,7 @@ type Step = {
 const steps: Step[] = [
   {
     title: "Bem-vindo ao ObiOne",
-    description: "Um observatório-comunidade dos projetos da consultoria, em um só lugar.",
+    description: "O observatório dos projetos da consultoria, em um só lugar.",
     body: (
       <div className="flex flex-col items-center gap-4 py-2 text-center">
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-card">
@@ -141,6 +142,7 @@ export function OnboardingDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const [step, setStep] = useState(0);
+  const navigate = useNavigate();
 
   // Always start from the first step whenever the dialog is opened.
   useEffect(() => {
@@ -202,8 +204,16 @@ export function OnboardingDialog({
               </Button>
             )}
             {isLast ? (
-              <Button size="sm" className="text-[12px]" onClick={() => onOpenChange(false)}>
-                Começar
+              <Button
+                size="sm"
+                className="text-[12px]"
+                onClick={() => {
+                  onOpenChange(false);
+                  // O onboarding termina em ação: o ciclo começa num projeto.
+                  navigate({ to: "/projects" });
+                }}
+              >
+                Abrir os projetos
               </Button>
             ) : (
               <Button
