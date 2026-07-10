@@ -46,18 +46,6 @@ export const Route = createFileRoute("/community/")({
   component: CommunityPage,
 });
 
-const communityStatusTone: Record<string, string> = {
-  ativa: "bg-success/10 text-success border-success/20",
-  monitorada: "bg-foreground/5 text-foreground/70 border-border",
-  "em-formação": "bg-info/10 text-info border-info/20",
-};
-
-const communityStatusFromCode: Record<DomainCommunitySummary["status"], CommunityStatus> = {
-  ACTIVE: "ativa",
-  MONITORED: "monitorada",
-  FORMING: "em-formação",
-};
-
 const discussionStatusFromCode: Record<DiscussionStatusCode, DiscussionStatus> = {
   OPEN: "Aberta",
   IN_ANALYSIS: "Em análise",
@@ -78,20 +66,6 @@ const confidenceFromCode: Record<KnowledgeConfidenceCode, KnowledgeConfidence> =
   HIGH: "Alto",
 };
 
-function CommunityStatusPill({ status }: { status: CommunityStatus }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider",
-        communityStatusTone[status],
-      )}
-    >
-      <span className="h-1 w-1 rounded-full bg-current" />
-      {communityStatusLabels[status]}
-    </span>
-  );
-}
-
 interface CommunityCard {
   id: string;
   domainId: string;
@@ -102,7 +76,6 @@ interface CommunityCard {
   linkedProjects: number;
   discussions: number;
   insights: number;
-  status: CommunityStatus;
 }
 
 interface DiscussionCard {
@@ -167,7 +140,6 @@ function CommunityPage() {
           linkedProjects: d.projectCount,
           discussions: d.discussionCount,
           insights: d.knowledgeCount,
-          status: communityStatusFromCode[d.status],
         })),
       );
 
@@ -270,16 +242,10 @@ function CommunityPage() {
                       <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-muted/40">
                         <Users className="h-4 w-4" />
                       </div>
-                      <div>
-                        <h3 className="text-[14.5px] font-semibold tracking-tight text-foreground">
-                          {c.domain}
-                        </h3>
-                        <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                          Domínio: {c.domain}
-                        </p>
-                      </div>
+                      <h3 className="text-[14.5px] font-semibold tracking-tight text-foreground">
+                        {c.domain}
+                      </h3>
                     </div>
-                    <CommunityStatusPill status={c.status} />
                   </div>
 
                   <p className="mt-3 text-[12.5px] leading-relaxed text-muted-foreground">
@@ -322,7 +288,7 @@ function CommunityPage() {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex flex-wrap items-center gap-2 text-[10px] text-muted-foreground">
-                      <span className="font-mono uppercase tracking-wider">{d.domain}</span>
+                      <span className="font-medium text-foreground/70">{d.domain}</span>
                     </div>
                     <span
                       className={cn(
@@ -376,7 +342,7 @@ function CommunityPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
                       <BookOpen className="h-3 w-3" />
-                      <span className="font-mono uppercase tracking-wider">{k.domain}</span>
+                      <span className="font-medium text-foreground/70">{k.domain}</span>
                     </div>
                     <span
                       className={cn(

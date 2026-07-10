@@ -78,11 +78,7 @@ export const knowledgeStatusTone: Record<KnowledgeStatus, string> = {
 };
 
 export function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
-      {children}
-    </p>
-  );
+  return <p className="text-[11px] font-medium text-muted-foreground">{children}</p>;
 }
 
 export function SectionHeader({
@@ -142,9 +138,7 @@ export function KpiCard({
 export function Mini({ label, value }: { label: string; value: string | number }) {
   return (
     <div>
-      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-        {label}
-      </p>
+      <p className="text-[11px] font-medium text-muted-foreground">{label}</p>
       <p className="mt-0.5 text-[13px] font-medium text-foreground">{value}</p>
     </div>
   );
@@ -165,7 +159,7 @@ export function DiscussionCard({
     <article className="group rounded-xl border border-border bg-card p-5 transition-colors hover:border-foreground/20">
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2 text-[10px] text-muted-foreground">
-          <span className="font-mono uppercase tracking-wider">{d.domain}</span>
+          <span className="font-medium text-foreground/70">{d.domain}</span>
           {d.project && (
             <>
               <span>·</span>
@@ -204,9 +198,7 @@ export function DiscussionCard({
             {d.lastParticipant}
           </span>
         </div>
-        <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground/80">
-          {d.visibility}
-        </span>
+        <span className="text-[11px] text-muted-foreground/80">{d.visibility}</span>
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-1.5">
@@ -244,7 +236,7 @@ export function KnowledgeCard({ k }: { k: CommunityKnowledge }) {
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2 text-[10px] text-muted-foreground">
           <BookOpen className="h-3 w-3" />
-          <span className="font-mono uppercase tracking-wider">{k.domain}</span>
+          <span className="font-medium text-foreground/70">{k.domain}</span>
           {k.project && (
             <>
               <span>·</span>
@@ -270,18 +262,14 @@ export function KnowledgeCard({ k }: { k: CommunityKnowledge }) {
 
       {k.evidences && (
         <div className="mt-3 rounded-lg border border-dashed border-border bg-background/50 p-3">
-          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-            // evidências consideradas
-          </p>
+          <p className="text-[11px] font-medium text-muted-foreground">Evidências consideradas</p>
           <p className="mt-1 text-[12.5px] leading-relaxed text-foreground/90">{k.evidences}</p>
         </div>
       )}
 
       {k.recommendation && (
         <div className="mt-3 rounded-lg border border-border bg-muted/30 p-3">
-          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-            // recomendação
-          </p>
+          <p className="text-[11px] font-medium text-muted-foreground">Recomendação</p>
           <p className="mt-1 text-[12.5px] leading-relaxed text-foreground">{k.recommendation}</p>
         </div>
       )}
@@ -290,9 +278,7 @@ export function KnowledgeCard({ k }: { k: CommunityKnowledge }) {
         <span>
           Confiança: <span className="font-medium text-foreground">{k.confidence}</span>
         </span>
-        <span className="font-mono uppercase tracking-wider">
-          origem: discussão #{k.originDiscussion}
-        </span>
+        <span className="text-muted-foreground/80">Origem: discussão #{k.originDiscussion}</span>
       </div>
     </article>
   );
@@ -503,7 +489,7 @@ function InfoBlock({
 }) {
   return (
     <div className="rounded-lg border border-border bg-background p-3">
-      <p className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+      <p className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
         <Icon className="h-3 w-3" /> {label}
       </p>
       <p className="mt-1 text-[12.5px] font-medium text-foreground">{value}</p>
@@ -550,8 +536,8 @@ export function DiscussionDetailDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[720px]">
         <DialogHeader>
-          <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-wider text-muted-foreground">
-            <span className="font-mono">{discussion.domain}</span>
+          <div className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground">
+            <span className="text-foreground/70">{discussion.domain}</span>
             {discussion.project && (
               <>
                 <span>·</span>
@@ -568,9 +554,7 @@ export function DiscussionDetailDialog({
         <div className="space-y-4">
           <InfoBlock label="Visibilidade" value={discussion.visibility} icon={Eye} />
           <div className="rounded-lg border border-border bg-muted/30 p-3">
-            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-              // observação de origem
-            </p>
+            <p className="text-[11px] font-medium text-muted-foreground">Observação de origem</p>
             <p className="mt-1 text-[12.5px] leading-relaxed text-foreground">
               {discussion.originObservation}
             </p>
@@ -578,8 +562,8 @@ export function DiscussionDetailDialog({
 
           <div>
             <div className="flex items-center justify-between">
-              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                // contribuições da comunidade
+              <p className="text-[11px] font-medium text-muted-foreground">
+                Contribuições da comunidade
               </p>
               <Select
                 value={discussion.status}
@@ -613,12 +597,12 @@ export function DiscussionDetailDialog({
               )}
               {discussion.contributionsList.map((c) => (
                 <li key={c.id} className="rounded-lg border border-border bg-background p-3">
-                  <div className="flex items-center justify-between text-[10.5px] uppercase tracking-wider text-muted-foreground">
+                  <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                     <span>
                       <span className="font-medium text-foreground">{c.participant}</span> ·{" "}
                       {roleLabels[c.role]}
                     </span>
-                    <span className="font-mono">
+                    <span>
                       {c.type} · {c.date}
                     </span>
                   </div>
@@ -629,9 +613,7 @@ export function DiscussionDetailDialog({
           </div>
 
           <form onSubmit={submit} className="rounded-lg border border-border bg-card p-3">
-            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-              // adicionar contribuição
-            </p>
+            <p className="text-[11px] font-medium text-muted-foreground">Adicionar contribuição</p>
             <Textarea
               rows={2}
               className="mt-2"
@@ -786,11 +768,11 @@ export function ConsolidateKnowledgeDialog({
           <form onSubmit={submit} className="space-y-4">
             <div className="grid gap-2 rounded-lg border border-border bg-muted/30 p-3 text-[11.5px] text-muted-foreground sm:grid-cols-3">
               <span>
-                <span className="font-mono uppercase tracking-wider">Domínio: </span>
+                <span className="font-medium text-foreground/70">Domínio: </span>
                 {discussion.domain}
               </span>
               <span>
-                <span className="font-mono uppercase tracking-wider">Projeto: </span>
+                <span className="font-medium text-foreground/70">Projeto: </span>
                 {discussion.project ?? "—"}
               </span>
             </div>
