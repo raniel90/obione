@@ -102,6 +102,10 @@ export async function markObservationAsAnalyzed(id: string): Promise<Observation
   }
 }
 
+export async function deleteObservation(id: string): Promise<void> {
+  await request<void>(`/observations/${id}`, { method: "DELETE" });
+}
+
 export async function linkObservationToDiscussion(
   observationId: string,
   discussionId: string,

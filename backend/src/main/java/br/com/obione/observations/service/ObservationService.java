@@ -4,6 +4,7 @@ import br.com.obione.ai.service.AiSuggestionAcceptanceService;
 import br.com.obione.common.exception.BadRequestException;
 import br.com.obione.common.exception.ResourceNotFoundException;
 import br.com.obione.common.security.CurrentUser;
+import br.com.obione.discussions.repository.DiscussionRepository;
 import br.com.obione.observations.dto.CreateObservationRequestDTO;
 import br.com.obione.observations.dto.ObservationResponseDTO;
 import br.com.obione.observations.dto.UpdateObservationRequestDTO;
@@ -35,6 +36,7 @@ public class ObservationService {
     private final AiSuggestionAcceptanceService acceptanceService;
     private final CurrentUser currentUser;
     private final ProjectAccessGuard guard;
+    private final DiscussionRepository discussionRepository;
 
     public ObservationService(
             ObservationRepository observationRepository,
@@ -42,7 +44,8 @@ public class ObservationService {
             UserRepository userRepository,
             AiSuggestionAcceptanceService acceptanceService,
             CurrentUser currentUser,
-            ProjectAccessGuard guard
+            ProjectAccessGuard guard,
+            DiscussionRepository discussionRepository
     ) {
         this.observationRepository = observationRepository;
         this.projectRepository = projectRepository;
@@ -50,6 +53,7 @@ public class ObservationService {
         this.acceptanceService = acceptanceService;
         this.currentUser = currentUser;
         this.guard = guard;
+        this.discussionRepository = discussionRepository;
     }
 
     @Transactional(readOnly = true)
@@ -182,6 +186,19 @@ public class ObservationService {
         projectRepository.save(project);
 
         return ObservationMapper.toResponseDTO(saved);
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        Observation observation = loadObservation(id);
+        if (discussionRepository.existsByObservationId(observation.getId())) {
+            throw new BadRequestException(
+                    "Esta observação tem uma conversa vinculada e não pode ser excluída");
+        }
+        Project project = observation.getProject();
+        observationRepository.delete(observation);
+        project.setUpdatedAt(Instant.now());
+        projectRepository.save(project);
     }
 
     private void ensureProjectExists(Long projectId) {

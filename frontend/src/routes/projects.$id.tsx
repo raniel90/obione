@@ -25,6 +25,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import type { Project as LegacyProject, ProjectStatus } from "@/lib/mock-data";
 import type {
   EngagementLevel,
@@ -47,9 +57,9 @@ import type { FeedEvent } from "@/services/feedService";
 import { getDomains } from "@/services/domainService";
 import {
   createObservation,
+  deleteObservation,
   getObservationsByProject,
   linkObservationToDiscussion,
-  markObservationAsAnalyzed,
   updateObservation,
 } from "@/services/observationService";
 import {
@@ -87,6 +97,7 @@ import {
   Plus,
   PenSquare,
   Loader2,
+  Trash2,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { relativeTime } from "@/components/feed-event-item";
@@ -861,7 +872,8 @@ function ManualObservationSection({
   const [open, setOpen] = useState(false);
   const [success, setSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [analyzingId, setAnalyzingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState("");
   const [editOpen, setEditOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -1142,18 +1154,17 @@ function ManualObservationSection({
     setAiPanel(rest.length ? { ...aiPanel, suggestions: rest } : null);
   };
 
-  const handleMarkAnalyzed = async (observationId: string) => {
-    setAnalyzingId(observationId);
+  const handleDelete = async (observationId: string) => {
+    setDeleteTarget(null);
+    setDeletingId(observationId);
     try {
-      const updated = await markObservationAsAnalyzed(observationId);
-      if (!updated) {
-        toast.error("Não foi possível marcar a observação como analisada.");
-        return;
-      }
-      applyObservationUpdate(updated);
-      toast.success("Observação marcada como analisada.");
+      await deleteObservation(observationId);
+      setItems((list) => list.filter((o) => o.id !== observationId));
+      toast.success("Observação excluída.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Não foi possível excluir a observação.");
     } finally {
-      setAnalyzingId(null);
+      setDeletingId(null);
     }
   };
 
@@ -1471,16 +1482,18 @@ function ManualObservationSection({
                   >
                     <PenSquare className="h-3 w-3" /> Editar
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-7 gap-1 px-2 text-[11px] text-muted-foreground"
-                    disabled={analyzingId === o.id || o.status === "em análise"}
-                    onClick={() => handleMarkAnalyzed(o.id)}
-                  >
-                    <CheckCircle2 className="h-3 w-3" />
-                    {analyzingId === o.id ? "Atualizando…" : "Analisada"}
-                  </Button>
+                  {!discussions.some((d) => d.observationId === o.id) && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 gap-1 px-2 text-[11px] text-muted-foreground hover:text-destructive"
+                      disabled={deletingId === o.id}
+                      onClick={() => setDeleteTarget(o.id)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                      {deletingId === o.id ? "Excluindo…" : "Excluir"}
+                    </Button>
+                  )}
                 </div>
               )}
             </div>
@@ -1629,6 +1642,23 @@ function ManualObservationSection({
         }}
         onConsolidate={handleConsolidate}
       />
+
+      <AlertDialog open={deleteTarget !== null} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir observação?</AlertDialogTitle>
+            <AlertDialogDescription>
+              A observação será removida do projeto. Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => deleteTarget && handleDelete(deleteTarget)}>
+              Excluir observação
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </section>
   );
 }

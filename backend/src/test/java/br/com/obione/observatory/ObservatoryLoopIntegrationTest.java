@@ -106,6 +106,54 @@ class ObservatoryLoopIntegrationTest extends ApiTestSupport {
         assertThat(coveredAfter).isGreaterThan(coveredBefore);
     }
 
+    @Test
+    void observationCanBeDeletedUnlessAConversationIsLinked() {
+        Session staff = login(CONSULTANT_EMAIL, CONSULTANT_PASSWORD);
+        Long projectId = anyProjectId(staff.token());
+
+        // A plain manual observation can be deleted.
+        ResponseEntity<Map> created = post(
+                "/projects/" + projectId + "/observations",
+                Map.of("title", "Observação descartável", "description", "Registro de teste",
+                        "impact", "MEDIUM", "status", "REGISTERED"),
+                staff.token());
+        assertThat(created.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        Long observationId = ((Number) created.getBody().get("id")).longValue();
+
+        ResponseEntity<Map> deleted = delete("/observations/" + observationId, staff.token());
+        assertThat(deleted.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(get("/observations/" + observationId, staff.token()).getStatusCode())
+                .isEqualTo(HttpStatus.NOT_FOUND);
+
+        // With a linked conversation, deletion is blocked (evidence under debate).
+        // Runs on the last project so the residue never skews the isolation
+        // tests, which count records on the seeded client's project.
+        List<Map<String, Object>> all = getList("/projects", staff.token()).getBody();
+        Long otherProjectId = ((Number) all.get(all.size() - 1).get("id")).longValue();
+        ResponseEntity<Map> again = post(
+                "/projects/" + otherProjectId + "/observations",
+                Map.of("title", "Observação em debate", "description", "Registro de teste",
+                        "impact", "MEDIUM", "status", "REGISTERED"),
+                staff.token());
+        Long debatedId = ((Number) again.getBody().get("id")).longValue();
+
+        Long domainId = ((Number) get("/projects/" + otherProjectId, staff.token())
+                .getBody().get("domainId")).longValue();
+        ResponseEntity<Map> discussion = post("/discussions",
+                Map.of("title", "Conversa da observação em debate",
+                        "question", "O que explica o padrão observado?",
+                        "domainId", domainId,
+                        "projectId", otherProjectId,
+                        "observationId", debatedId,
+                        "status", "OPEN",
+                        "visibility", "PROJECT"),
+                staff.token());
+        assertThat(discussion.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        ResponseEntity<Map> blocked = delete("/observations/" + debatedId, staff.token());
+        assertThat(blocked.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
     // --- helpers ---
 
     private Long anyProjectId(String token) {
