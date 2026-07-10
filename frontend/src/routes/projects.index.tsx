@@ -9,10 +9,8 @@ import type { Project as SvcProject, ProjectStatusCode, ProjectTypeCode } from "
 import type { Domain as SvcDomain } from "@/types/domain";
 import { getProjects } from "@/services/projectService";
 import { getDomains } from "@/services/domainService";
-import { getPhenomena } from "@/services/phenomenonService";
-import type { Phenomenon } from "@/types/phenomenon";
-import { Plus, Search, ArrowUpRight, AlertTriangle, Radar } from "lucide-react";
-import { cn, toBrDate } from "@/lib/utils";
+import { Plus, Search, ArrowUpRight } from "lucide-react";
+import { toBrDate } from "@/lib/utils";
 
 export const Route = createFileRoute("/projects/")({
   head: () => ({
@@ -27,8 +25,6 @@ export const Route = createFileRoute("/projects/")({
   }),
   component: ProjectsCatalog,
 });
-
-type Risk = "Baixo" | "Moderado" | "Elevado";
 
 const statusCodeToLegacy: Record<ProjectStatusCode, ProjectStatus> = {
   OBSERVATION: "active",
@@ -63,29 +59,7 @@ function toLegacy(p: SvcProject, domainMap: Map<string, string>): LegacyProject 
   };
 }
 
-function deriveRisk(p: LegacyProject): Risk {
-  if (p.status === "completed") return "Baixo";
-  if (p.status === "paused") return "Elevado";
-  if (p.status === "active" && p.progress < 40) return "Elevado";
-  if (p.status === "review" && p.progress < 70) return "Moderado";
-  if (p.status === "planning") return "Moderado";
-  return p.progress < 50 ? "Moderado" : "Baixo";
-}
-
-const riskTone: Record<Risk, string> = {
-  Baixo: "border-success/30 text-success bg-success/5",
-  Moderado: "border-warning/30 text-warning bg-warning/5",
-  Elevado: "border-destructive/30 text-destructive bg-destructive/5",
-};
-
-function ObservedProjectCard({
-  project,
-  phenomenaCount,
-}: {
-  project: LegacyProject;
-  phenomenaCount: number;
-}) {
-  const risk = deriveRisk(project);
+function ObservedProjectCard({ project }: { project: LegacyProject }) {
   const updated = toBrDate(project.updatedAt);
 
   return (
@@ -112,36 +86,13 @@ function ObservedProjectCard({
         {project.summary}
       </p>
 
-      <dl className="mt-4 grid grid-cols-2 gap-x-3 gap-y-2 text-[11.5px]">
-        <div>
-          <dt className="text-muted-foreground">Cliente</dt>
-          <dd className="truncate font-medium text-foreground">{project.clientName ?? "—"}</dd>
+      <div className="mt-4 flex items-center justify-between gap-3 text-[11.5px]">
+        <div className="min-w-0">
+          <span className="text-muted-foreground">Cliente </span>
+          <span className="font-medium text-foreground">{project.clientName ?? "—"}</span>
         </div>
-        <div>
-          <dt className="text-muted-foreground">Consultor</dt>
-          <dd className="truncate font-medium text-foreground">{project.owner}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Status</dt>
-          <dd>
-            <StatusBadge status={project.status} />
-          </dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Risco</dt>
-          <dd>
-            <span
-              className={cn(
-                "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider",
-                riskTone[risk],
-              )}
-            >
-              <AlertTriangle className="h-2.5 w-2.5" />
-              {risk}
-            </span>
-          </dd>
-        </div>
-      </dl>
+        <StatusBadge status={project.status} />
+      </div>
 
       <div className="mt-4">
         <div className="flex items-center justify-between text-[11px] text-muted-foreground">
@@ -156,18 +107,8 @@ function ObservedProjectCard({
         </div>
       </div>
 
-      <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-[11px] text-muted-foreground">
-        <span className="inline-flex items-center gap-1">
-          <Radar className="h-3 w-3" />
-          {phenomenaCount} fenômeno{phenomenaCount === 1 ? "" : "s"} associado
-          {phenomenaCount === 1 ? "" : "s"}
-        </span>
-        <span className="">Últ. obs · {updated}</span>
-      </div>
-
-      <div className="mt-4 inline-flex items-center justify-center gap-1.5 rounded-md border border-border bg-background px-3 py-1.5 text-[12px] font-medium text-foreground transition-colors group-hover:bg-foreground group-hover:text-background">
-        Observar projeto
-        <ArrowUpRight className="h-3.5 w-3.5" />
+      <div className="mt-4 border-t border-border pt-3 text-[11px] text-muted-foreground">
+        Atualizado em {updated}
       </div>
     </Link>
   );
@@ -179,34 +120,17 @@ function ProjectsCatalog() {
   const [domains, setDomains] = useState<SvcDomain[]>([]);
   const [svcProjects, setSvcProjects] = useState<SvcProject[]>([]);
 
-  const [phenomena, setPhenomena] = useState<Phenomenon[]>([]);
-
   useEffect(() => {
     let cancelled = false;
-    Promise.all([getDomains(), getProjects(), getPhenomena().catch(() => [] as Phenomenon[])]).then(
-      ([d, p, phs]) => {
-        if (cancelled) return;
-        setDomains(d);
-        setSvcProjects(p);
-        setPhenomena(phs);
-      },
-    );
+    Promise.all([getDomains(), getProjects()]).then(([d, p]) => {
+      if (cancelled) return;
+      setDomains(d);
+      setSvcProjects(p);
+    });
     return () => {
       cancelled = true;
     };
   }, []);
-
-  // Phenomena linked per project: direct project link or same-domain (portfolio lens).
-  const phenomenaCountByProject = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const p of svcProjects) {
-      counts.set(
-        p.id,
-        phenomena.filter((ph) => ph.projectId === p.id || ph.domainId === p.domainId).length,
-      );
-    }
-    return counts;
-  }, [svcProjects, phenomena]);
 
   const projects = useMemo(() => {
     const map = new Map(domains.map((d) => [d.id, d.name]));
@@ -259,11 +183,7 @@ function ProjectsCatalog() {
         ) : (
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {filtered.map((p) => (
-              <ObservedProjectCard
-                key={p.id}
-                project={p}
-                phenomenaCount={phenomenaCountByProject.get(p.id) ?? 0}
-              />
+              <ObservedProjectCard key={p.id} project={p} />
             ))}
           </div>
         )}
