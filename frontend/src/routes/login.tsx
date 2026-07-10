@@ -61,12 +61,6 @@ function LoginPage() {
           <ObiOneMark size={20} />
           ObiOne
         </Link>
-        <Link
-          to="/register"
-          className="text-[12.5px] text-muted-foreground transition-colors hover:text-foreground"
-        >
-          Criar conta
-        </Link>
       </header>
 
       {/* centered content */}
@@ -84,41 +78,18 @@ function LoginPage() {
               </div>
             </div>
 
-            <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
-              // observatório inteligente
-            </p>
-            <h1 className="mt-3 text-[26px] font-semibold leading-tight tracking-tight text-foreground">
-              Observar. Organizar. Decidir.
+            <h1 className="mt-5 text-[22px] font-semibold leading-tight tracking-tight text-foreground">
+              Acesse o observatório
             </h1>
-            <p className="mt-3 max-w-[340px] text-[13px] leading-relaxed text-muted-foreground">
-              Observe projetos, organize conhecimento e acompanhe decisões estratégicas em um só
-              lugar.
-            </p>
-          </div>
-
-          {/* divider */}
-          <div className="my-8 flex items-center gap-3">
-            <div className="h-px flex-1 bg-border" />
-            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-              acesso
-            </span>
-            <div className="h-px flex-1 bg-border" />
-          </div>
-
-          {/* form */}
-          <div className="text-center">
-            <h2 className="text-[15px] font-semibold tracking-tight text-foreground">
-              Acesse o ObiOne
-            </h2>
-            <p className="mt-1 text-[12.5px] text-muted-foreground">
-              Entre com suas credenciais para acessar o observatório.
+            <p className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+              ObiOne · observatório de projetos
             </p>
           </div>
 
           <form className="mt-6 space-y-4" onSubmit={handleSubmit} noValidate>
             <div className="space-y-1.5">
               <Label htmlFor="email" className="text-[12.5px]">
-                E-mail corporativo
+                E-mail
               </Label>
               <Input
                 id="email"
@@ -132,20 +103,9 @@ function LoginPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-[12.5px]">
-                  Senha
-                </Label>
-                <button
-                  type="button"
-                  className="text-[11.5px] text-muted-foreground transition-colors hover:text-foreground"
-                  onClick={() =>
-                    setError("Solicite a redefinição ao administrador do seu domínio.")
-                  }
-                >
-                  Esqueci minha senha
-                </button>
-              </div>
+              <Label htmlFor="password" className="text-[12.5px]">
+                Senha
+              </Label>
               <Input
                 id="password"
                 type="password"
@@ -175,15 +135,9 @@ function LoginPage() {
                   Autenticando…
                 </>
               ) : (
-                "Entrar no observatório"
+                "Entrar"
               )}
             </Button>
-
-            <p className="rounded-md border border-dashed border-border bg-muted/30 px-3 py-2 text-center text-[11px] leading-relaxed text-muted-foreground">
-              <span className="font-mono text-foreground">demo</span> · use{" "}
-              <span className="font-mono">admin@obione.dev</span> /{" "}
-              <span className="font-mono">admin123</span>
-            </p>
           </form>
 
           <p className="mt-8 text-center text-[12.5px] text-muted-foreground">
@@ -191,10 +145,6 @@ function LoginPage() {
             <Link to="/register" className="text-foreground underline-offset-4 hover:underline">
               Criar conta
             </Link>
-          </p>
-
-          <p className="mt-10 text-center font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
-            © {new Date().getFullYear()} · obione observatory
           </p>
         </div>
       </main>
