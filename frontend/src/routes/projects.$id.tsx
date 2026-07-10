@@ -130,7 +130,7 @@ type ProjectTab = "observacoes" | "aprendizados" | "timeline";
 export const Route = createFileRoute("/projects/$id")({
   head: () => ({
     meta: [
-      { title: "Projeto — ObiOne" },
+      { title: "ObiOne" },
       {
         name: "description",
         content: "Detalhe observacional de projeto no ObiOne.",
@@ -267,7 +267,7 @@ function SectionTitle({
     <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
       <div>
         {eyebrow && (
-          <p className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="text-[10.5px] uppercase tracking-[0.18em] text-muted-foreground">
             {eyebrow}
           </p>
         )}
@@ -467,7 +467,7 @@ function ProjectDetailPage() {
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2 text-[10.5px] text-muted-foreground">
-                <span className="font-mono uppercase tracking-wider">Projeto observado</span>
+                <span className="uppercase tracking-wider">Projeto observado</span>
                 <span className="h-1 w-1 rounded-full bg-border" />
                 <span className="uppercase tracking-wider">{project.model}</span>
                 <span className="h-1 w-1 rounded-full bg-border" />
@@ -621,7 +621,7 @@ function ObservationThread({
   };
 
   return (
-    <div className="mt-3 rounded-lg border border-border bg-muted/20 p-3">
+    <div className="mt-4 border-t border-border pt-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground">
           <MessageSquare className="h-3 w-3" />
@@ -639,20 +639,16 @@ function ObservationThread({
           </Button>
         )}
       </div>
-      {discussion.question && (
-        <p className="mt-2 text-[12.5px] italic text-muted-foreground">“{discussion.question}”</p>
-      )}
-      <ul className="mt-2 space-y-2">
+      <ul className="mt-2 space-y-1.5">
         {discussion.contributions.map((c) => (
-          <li key={c.id} className="rounded-md bg-background p-2.5">
-            <p className="text-[12.5px] leading-relaxed text-foreground">{c.text}</p>
-            <p className="mt-1 text-[10.5px] text-muted-foreground">
-              {c.userName ?? "Participante"}
-            </p>
+          <li key={c.id} className="text-[12.5px] leading-relaxed text-foreground">
+            <span className="font-medium">{c.userName ?? "Participante"}</span>
+            <span className="text-muted-foreground"> · </span>
+            {c.text}
           </li>
         ))}
       </ul>
-      <div className="mt-2 flex gap-2">
+      <div className="mt-3 flex gap-2">
         <Input
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -793,12 +789,12 @@ function ProjectTimeline({
                     <button
                       type="button"
                       onClick={onClick}
-                      className="block w-full rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-muted/50"
+                      className="block w-full rounded-lg py-2.5 pl-6 pr-3 text-left transition-colors hover:bg-muted/50"
                     >
                       {Row}
                     </button>
                   ) : (
-                    <div className="px-3 py-2.5">{Row}</div>
+                    <div className="py-2.5 pl-6 pr-3">{Row}</div>
                   )}
                 </li>
               );
@@ -811,26 +807,6 @@ function ProjectTimeline({
 }
 
 /* --------------------- Manual observation section ------------------------ */
-
-const observationStatusTone: Record<string, string> = {
-  registrada: "border-border text-muted-foreground bg-muted/40",
-  "em análise": "border-warning/30 text-warning bg-warning/5",
-  "associada a discussão": "border-info/30 text-info bg-info/5",
-  consolidada: "border-success/30 text-success bg-success/5",
-};
-
-const impactTone: Record<string, string> = {
-  Baixo: "text-muted-foreground",
-  Médio: "text-info",
-  Alto: "text-warning",
-};
-
-const riskTone: Record<string, string> = {
-  Baixo: "text-muted-foreground",
-  Moderado: "text-info",
-  Elevado: "text-warning",
-  Crítico: "text-destructive",
-};
 
 const impactToCode: Record<ProjectObservation["impact"], SvcObsImpact> = {
   Baixo: "LOW",
@@ -1406,58 +1382,34 @@ function ManualObservationSection({
             id={`obs-${o.id}`}
             className="scroll-mt-24 rounded-xl border border-border bg-card p-5"
           >
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-wider text-muted-foreground">
-                  {o.aiSuggested ? (
-                    <>
-                      <Sparkles className="h-3 w-3" /> Sugerida pela IA · aceita
-                    </>
-                  ) : (
-                    <>
-                      <ClipboardList className="h-3 w-3" /> Observação manual
-                    </>
-                  )}
-                  <span className="h-1 w-1 rounded-full bg-border" />
-                  <span className="font-mono">{toBrDate(o.date)}</span>
-                </div>
-                <h3 className="mt-1.5 text-[14px] font-semibold leading-snug text-foreground">
-                  {o.title}
-                </h3>
-                <p className="mt-1.5 text-[12.5px] leading-relaxed text-muted-foreground">
-                  {o.description}
-                </p>
-              </div>
-              <span
-                className={cn(
-                  "shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium capitalize",
-                  observationStatusTone[o.status],
-                )}
-              >
-                {o.status}
-              </span>
+            <h3 className="text-[14px] font-semibold leading-snug text-foreground">{o.title}</h3>
+            <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11.5px] text-muted-foreground">
+              <span className="font-medium text-foreground/80">{o.attribute}</span>
+              <span aria-hidden>·</span>
+              <span>{toBrDate(o.date)}</span>
+              <span aria-hidden>·</span>
+              <span>por {o.author}</span>
+              {o.aiSuggested && (
+                <>
+                  <span aria-hidden>·</span>
+                  <span className="inline-flex items-center gap-1">
+                    <Sparkles className="h-3 w-3" /> sugerida pela IA
+                  </span>
+                </>
+              )}
             </div>
-
-            {/* Impacto/Risco saíram do card: o formulário não os coleta mais, então
-                exibiam sempre os defaults — ruído sem informação. */}
-            <div className="mt-4 border-t border-border pt-3">
-              <Meta label="Atributo" value={o.attribute} />
-            </div>
+            <p className="mt-2 text-[12.5px] leading-relaxed text-muted-foreground">
+              {o.description}
+            </p>
 
             {o.interpretation && (
-              <div className="mt-3 flex items-start gap-2 rounded-lg border border-border bg-muted/30 p-3">
-                <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-foreground/70" />
-                <p className="text-[12.5px] leading-relaxed text-foreground/90">
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                    Interpretação ·{" "}
-                  </span>
-                  {o.interpretation}
-                </p>
-              </div>
+              <p className="mt-2 text-[12.5px] leading-relaxed text-foreground/80">
+                <span className="font-medium text-foreground">Interpretação: </span>
+                {o.interpretation}
+              </p>
             )}
 
-            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted-foreground">
-              <span>por {o.author}</span>
+            <div className="mt-3 flex flex-wrap items-center justify-end gap-2 text-[11px] text-muted-foreground">
               {!isClient && (
                 <div className="flex items-center gap-1">
                   {!discussions.some((d) => d.observationId === o.id) && (
@@ -1663,15 +1615,6 @@ function ManualObservationSection({
   );
 }
 
-function Meta({ label, value, className }: { label: string; value: string; className?: string }) {
-  return (
-    <div>
-      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className={cn("mt-0.5 text-[12.5px] font-medium text-foreground", className)}>{value}</p>
-    </div>
-  );
-}
-
 /* --------------------------- Aprendizados do Projeto ----------------------- */
 
 function ProjectDiscussionsAndKnowledge({
@@ -1739,7 +1682,6 @@ function ProjectDiscussionsAndKnowledge({
       {/* Aprendizados do projeto */}
       <div>
         <SectionTitle
-          eyebrow="O que este projeto ensinou"
           title="Aprendizados do projeto"
           description="Consolidacoes que nasceram das conversas sobre as observacoes."
           action={
@@ -1757,26 +1699,18 @@ function ProjectDiscussionsAndKnowledge({
           <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
             {projectKnowledge.map((k) => (
               <article key={k.id} className="rounded-xl border border-border bg-card p-5">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-wider text-muted-foreground">
-                    <BookOpen className="h-3 w-3" /> Aprendizado
-                  </div>
-                  <span className="rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                    {k.status}
-                  </span>
-                </div>
-                <h3 className="mt-2 text-[14.5px] font-semibold leading-snug text-foreground">
+                <h3 className="text-[14.5px] font-semibold leading-snug text-foreground">
                   {k.title}
                 </h3>
                 <p className="mt-2 text-[13px] leading-relaxed text-foreground/90">{k.summary}</p>
-                <div className="mt-3 rounded-md border border-border bg-muted/30 p-3 text-[12px] text-foreground">
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                    recomendacao ·{" "}
-                  </span>
-                  {k.recommendation}
-                </div>
+                {k.recommendation && (
+                  <div className="mt-3 rounded-md bg-muted/40 p-3 text-[12.5px] leading-relaxed text-foreground">
+                    <span className="font-medium">Recomendação: </span>
+                    {k.recommendation}
+                  </div>
+                )}
                 <p className="mt-3 text-[11px] text-muted-foreground">
-                  Confianca: <span className="font-medium text-foreground">{k.confidence}</span>
+                  Confiança: <span className="font-medium text-foreground">{k.confidence}</span>
                 </p>
               </article>
             ))}
@@ -1787,9 +1721,8 @@ function ProjectDiscussionsAndKnowledge({
       {/* Aprendizados do dominio (T2.1) + Conectora sob demanda (T2.2) */}
       <div>
         <SectionTitle
-          eyebrow="Reaproveitamento"
           title="Aprendizados do dominio"
-          description="Aprendizados consolidados de projetos deste dominio — reaproveitaveis aqui."
+          description="O que outros projetos deste dominio ja ensinaram — reaproveitaveis aqui."
           action={
             isStaff ? (
               <Button
@@ -1811,14 +1744,30 @@ function ProjectDiscussionsAndKnowledge({
         />
 
         {synthesis && (
-          <div className="mt-4 space-y-4 rounded-xl border border-border bg-card p-5">
-            <p className="text-[13px] leading-relaxed text-foreground/90">{synthesis.summary}</p>
+          <div className="mt-4 rounded-xl border border-dashed border-foreground/30 bg-foreground/[0.02] p-5">
+            <div className="flex items-start justify-between gap-3">
+              <p className="flex items-center gap-1.5 text-[13px] font-medium text-foreground">
+                <Sparkles className="h-3.5 w-3.5" />
+                Padrões do domínio · síntese da IA, revise antes de usar
+              </p>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 px-2 text-[11px] text-muted-foreground"
+                onClick={() => setSynthesis(null)}
+              >
+                Dispensar
+              </Button>
+            </div>
+            <p className="mt-2 text-[13px] leading-relaxed text-foreground/90">
+              {synthesis.summary}
+            </p>
             {synthesis.patterns.length > 0 && (
-              <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                  // padroes identificados
+              <div className="mt-3">
+                <p className="text-[11px] font-medium text-muted-foreground">
+                  Padrões identificados
                 </p>
-                <ul className="mt-2 space-y-1">
+                <ul className="mt-1 list-disc space-y-1 pl-4">
                   {synthesis.patterns.map((p, i) => (
                     <li key={i} className="text-[12.5px] leading-relaxed text-foreground/90">
                       {p}
@@ -1828,11 +1777,9 @@ function ProjectDiscussionsAndKnowledge({
               </div>
             )}
             {synthesis.lessons.length > 0 && (
-              <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                  // licoes aprendidas
-                </p>
-                <ul className="mt-2 space-y-1">
+              <div className="mt-3">
+                <p className="text-[11px] font-medium text-muted-foreground">Lições aprendidas</p>
+                <ul className="mt-1 list-disc space-y-1 pl-4">
                   {synthesis.lessons.map((l, i) => (
                     <li key={i} className="text-[12.5px] leading-relaxed text-foreground/90">
                       {l}

@@ -11,7 +11,7 @@ import { ApiError } from "@/services/apiClient";
 export const Route = createFileRoute("/register")({
   head: () => ({
     meta: [
-      { title: "Solicitar acesso — ObiOne" },
+      { title: "ObiOne" },
       {
         name: "description",
         content: "Solicite acesso ao ObiOne, Observatório Inteligente de Projetos.",
@@ -110,7 +110,7 @@ function RegisterPage() {
               </div>
             </div>
 
-            <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+            <p className="mt-6 text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
               // observatório inteligente
             </p>
             <h1 className="mt-3 text-[26px] font-semibold leading-tight tracking-tight text-foreground">
@@ -123,7 +123,7 @@ function RegisterPage() {
 
           <div className="my-8 flex items-center gap-3">
             <div className="h-px flex-1 bg-border" />
-            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+            <span className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
               {success ? "solicitação enviada" : "solicitação de acesso"}
             </span>
             <div className="h-px flex-1 bg-border" />
@@ -235,9 +235,9 @@ function RegisterPage() {
                 </Button>
 
                 <p className="rounded-md border border-dashed border-border bg-muted/30 px-3 py-2 text-center text-[11px] leading-relaxed text-muted-foreground">
-                  <span className="font-mono text-foreground">governança</span> · você entra como
-                  participante da comunidade. O vínculo com domínios e projetos é definido pelo
-                  administrador na aprovação.
+                  <span className="text-foreground">governança</span> · você entra como participante
+                  da comunidade. O vínculo com domínios e projetos é definido pelo administrador na
+                  aprovação.
                 </p>
               </form>
 
@@ -250,7 +250,7 @@ function RegisterPage() {
             </>
           )}
 
-          <p className="mt-10 text-center font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
+          <p className="mt-10 text-center text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
             © {new Date().getFullYear()} · obione observatory
           </p>
         </div>
@@ -275,12 +275,10 @@ function SuccessState({ email }: { email: string }) {
 
       {email && (
         <div className="mt-6 w-full rounded-md border border-dashed border-border bg-muted/30 px-4 py-3 text-left">
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-            status
-          </p>
+          <p className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">status</p>
           <div className="mt-1.5 flex items-center justify-between gap-3">
             <span className="truncate text-[12.5px] text-foreground">{email}</span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-2 py-0.5 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
               <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
               PENDING
             </span>

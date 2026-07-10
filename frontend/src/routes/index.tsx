@@ -52,7 +52,7 @@ function toLegacyProject(p: SvcProject, domainMap: Map<string, string>): LegacyP
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Observatório de Projetos — ObiOne" },
+      { title: "ObiOne" },
       {
         name: "description",
         content:
@@ -136,7 +136,7 @@ function InsightCard({
       <p className="line-clamp-3 text-[13px] leading-relaxed text-muted-foreground">{k.summary}</p>
 
       <div className="mt-auto flex items-center justify-between pt-2 text-[11px] text-muted-foreground">
-        <span className="font-mono uppercase tracking-wider">{domainName}</span>
+        <span className="uppercase tracking-wider">{domainName}</span>
         <span className="inline-flex items-center gap-1.5">
           <span className={`h-1.5 w-1.5 rounded-full ${confidenceDot[k.confidence]}`} />
           {confidenceLabel[k.confidence]}
@@ -340,7 +340,7 @@ function ObservatoryDashboard() {
                   {topDomains.map((d) => (
                     <span key={d.name} className="inline-flex items-baseline gap-1">
                       {d.name}
-                      <span className="font-mono text-foreground">{d.count}</span>
+                      <span className="text-foreground">{d.count}</span>
                     </span>
                   ))}
                   <span className="ml-auto inline-flex items-center gap-1 text-muted-foreground transition-colors group-hover:text-foreground">

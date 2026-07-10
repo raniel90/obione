@@ -40,7 +40,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 export const Route = createFileRoute("/projects/new")({
   head: () => ({
     meta: [
-      { title: "Novo projeto — ObiOne" },
+      { title: "ObiOne" },
       {
         name: "description",
         content: "Cadastre um projeto como caso observado dentro de um domínio organizacional.",
@@ -387,7 +387,7 @@ function NewProjectPage() {
                 </Select>
                 {suggestion?.suggestedDomainId != null &&
                   String(suggestion.suggestedDomainId) === review.domainId && (
-                    <span className="inline-flex items-center gap-1 rounded-full border border-border bg-background px-2 py-0.5 font-mono text-[10px] text-muted-foreground">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-border bg-background px-2 py-0.5 text-[10px] text-muted-foreground">
                       <Sparkles className="h-3 w-3" />
                       sugerido · {Math.round(suggestion.confidence * 100)}%
                     </span>
@@ -403,7 +403,7 @@ function NewProjectPage() {
               <div className="space-y-4">
                 {mpoCategories.map((cat) => (
                   <div key={cat.key} className="space-y-2">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                       {cat.label}
                     </p>
                     <div className="flex flex-wrap gap-2">

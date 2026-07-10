@@ -24,9 +24,14 @@ public interface LlmClient {
 
     DomainSuggestionDTO suggestDomain(String projectSummary, String objective, List<String> availableDomainSlugs);
 
-    /** {@code priorityAttributeIds}: attributes the consultant declared at project creation — prioritize them. */
+    /**
+     * {@code priorityAttributeIds}: attributes the consultant declared at project creation — prioritize them.
+     * {@code alreadyObserved}: lines "attributeId — título" of the project's existing observations —
+     * these aspects must not be suggested again.
+     */
     ObservationSuggestionsDTO suggestObservations(
-            String projectSummary, String objective, String mpoLens, List<String> priorityAttributeIds);
+            String projectSummary, String objective, String mpoLens,
+            List<String> priorityAttributeIds, List<String> alreadyObserved);
 
     KnowledgeDraftDTO suggestKnowledge(String discussionTitle, String question, List<String> contributions);
 

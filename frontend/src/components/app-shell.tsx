@@ -72,7 +72,7 @@ function Sidebar() {
   const counts = useObservatoryCounts();
 
   return (
-    <aside className="hidden md:flex w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
+    <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col overflow-y-auto border-r border-sidebar-border bg-sidebar md:flex">
       <div className="flex h-14 items-center px-5 border-b border-sidebar-border">
         <Link to="/">
           <ObiOneWordmark />

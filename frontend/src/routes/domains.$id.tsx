@@ -73,7 +73,7 @@ function SectionTitle({ children, hint }: { children: React.ReactNode; hint?: st
       <h2 className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
         {children}
       </h2>
-      {hint && <span className="font-mono text-[11px] text-muted-foreground">{hint}</span>}
+      {hint && <span className="text-[11px] text-muted-foreground">{hint}</span>}
     </div>
   );
 }
@@ -176,7 +176,7 @@ function DomainDetailPage() {
         <div className="flex flex-col gap-4 px-6 py-5 md:flex-row md:items-end md:justify-between md:px-10">
           <div>
             <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-              <span className="font-mono uppercase tracking-wider">{obs?.type}</span>
+              <span className="uppercase tracking-wider">{obs?.type}</span>
               {obs && (
                 <>
                   <span className="h-1 w-1 rounded-full bg-border" />
@@ -207,7 +207,7 @@ function DomainDetailPage() {
       <div className="px-6 py-6 md:px-10 space-y-10">
         {synthesis && (
           <div className="rounded-xl border border-dashed border-foreground/30 bg-foreground/[0.02] p-5">
-            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
               Conectora · síntese cross-projeto (IA)
             </p>
             <p className="mt-2 text-[13px] leading-relaxed text-foreground">{synthesis.summary}</p>
@@ -264,7 +264,7 @@ function DomainDetailPage() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-                          <span className="font-mono uppercase tracking-wider">
+                          <span className="uppercase tracking-wider">
                             {typeCodeToLabel[p.type]}
                           </span>
                         </div>
@@ -277,7 +277,7 @@ function DomainDetailPage() {
                     <div className="mt-3">
                       <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                         <span>Progresso</span>
-                        <span className="font-mono text-foreground">{p.progress}%</span>
+                        <span className="text-foreground">{p.progress}%</span>
                       </div>
                       <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-muted">
                         <div
@@ -385,7 +385,7 @@ function DomainDetailPage() {
                       <span className="h-1 w-1 rounded-full bg-border" />
                       <span>{o.actor}</span>
                       <span className="h-1 w-1 rounded-full bg-border" />
-                      <span className="font-mono">{o.timeAgo}</span>
+                      <span className="">{o.timeAgo}</span>
                     </div>
                   </div>
                 </li>
@@ -457,7 +457,7 @@ function AttrColumn({
         {items.map((i) => (
           <div key={i.label} className="flex items-center justify-between text-[12.5px]">
             <dt className="text-muted-foreground">{i.label}</dt>
-            <dd className="font-mono text-foreground">{i.value}</dd>
+            <dd className="text-foreground">{i.value}</dd>
           </div>
         ))}
       </dl>

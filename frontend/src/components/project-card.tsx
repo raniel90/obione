@@ -20,7 +20,7 @@ export function ProjectCard({ project }: { project: Project }) {
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-            <span className="font-mono uppercase tracking-wider">{project.domain}</span>
+            <span className="uppercase tracking-wider">{project.domain}</span>
             <span className="h-1 w-1 rounded-full bg-border" />
             <span>{project.model}</span>
           </div>
@@ -39,7 +39,7 @@ export function ProjectCard({ project }: { project: Project }) {
       <div className="mt-5">
         <div className="flex items-center justify-between text-[11px] text-muted-foreground">
           <span>Progresso</span>
-          <span className="font-mono text-foreground">{project.progress}%</span>
+          <span className="text-foreground">{project.progress}%</span>
         </div>
         <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-muted">
           <div
@@ -65,7 +65,7 @@ export function ProjectCard({ project }: { project: Project }) {
         <span className="truncate">{project.owner}</span>
         <div className="flex items-center gap-2">
           <StatusBadge status={project.status} />
-          <span className="font-mono">{updated}</span>
+          <span className="">{updated}</span>
         </div>
       </div>
     </Link>

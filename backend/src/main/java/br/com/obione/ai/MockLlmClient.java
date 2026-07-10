@@ -10,7 +10,10 @@ import br.com.obione.ai.dto.StructureObservationDTO;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Deterministic adapter (default). No network/LLM — keeps CI and the demo working
@@ -41,13 +44,23 @@ public class MockLlmClient implements LlmClient {
 
     @Override
     public ObservationSuggestionsDTO suggestObservations(
-            String projectSummary, String objective, String mpoLens, List<String> priorityAttributeIds) {
+            String projectSummary, String objective, String mpoLens,
+            List<String> priorityAttributeIds, List<String> alreadyObserved) {
         String excerpt = excerptOf(projectSummary);
-        // Deterministic priority: suggest on the attributes the consultant declared, when present.
-        String firstAttr = priorityAttributeIds != null && !priorityAttributeIds.isEmpty()
-                ? priorityAttributeIds.get(0) : "riscos_identificados";
-        String secondAttr = priorityAttributeIds != null && priorityAttributeIds.size() > 1
-                ? priorityAttributeIds.get(1) : "escopo_planejado";
+        // Deterministic priority: suggest on the attributes the consultant declared,
+        // skipping the ones that already have observations (mirrors the real prompt rule).
+        Set<String> covered = alreadyObserved == null ? Set.of()
+                : alreadyObserved.stream()
+                        .map(line -> line.split(" — ", 2)[0].trim())
+                        .collect(Collectors.toSet());
+        List<String> pool = new ArrayList<>();
+        if (priorityAttributeIds != null) {
+            pool.addAll(priorityAttributeIds);
+        }
+        pool.addAll(List.of("riscos_identificados", "escopo_planejado"));
+        List<String> free = pool.stream().distinct().filter(a -> !covered.contains(a)).toList();
+        String firstAttr = free.isEmpty() ? "riscos_identificados" : free.get(0);
+        String secondAttr = free.size() > 1 ? free.get(1) : "escopo_planejado";
         return new ObservationSuggestionsDTO(List.of(
                 new ObservationSuggestionDTO(
                         "Possível risco de prazo a observar",

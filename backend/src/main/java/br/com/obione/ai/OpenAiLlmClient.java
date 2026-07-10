@@ -57,19 +57,28 @@ public class OpenAiLlmClient implements LlmClient {
 
     @Override
     public ObservationSuggestionsDTO suggestObservations(
-            String projectSummary, String objective, String mpoLens, List<String> priorityAttributeIds) {
+            String projectSummary, String objective, String mpoLens,
+            List<String> priorityAttributeIds, List<String> alreadyObserved) {
         String priorities = priorityAttributeIds == null || priorityAttributeIds.isEmpty()
                 ? ""
                 : "\nAtributos que o consultor declarou acompanhar neste projeto (priorize-os quando houver "
                         + "material no resumo): " + String.join(", ", priorityAttributeIds);
+        String observed = alreadyObserved == null || alreadyObserved.isEmpty()
+                ? ""
+                : "\nObservações JÁ REGISTRADAS neste projeto (attributeId — título):\n"
+                        + String.join("\n", alreadyObserved);
         return chat.prompt()
                 .system("Você é um observador de projetos baseado no MPO (Quadro 37). "
                         + "Proponha observações relevantes, cada uma mapeada a UM attributeId da lente fornecida. "
                         + "impact deve ser LOW, MEDIUM ou HIGH. Não invente attributeId fora da lista. "
+                        + "Não repita aspectos que já estão sendo observados: não use attributeId presente nas "
+                        + "observações já registradas nem proponha conteúdo equivalente ao delas; se nada novo "
+                        + "houver a observar, retorne a lista vazia. "
                         + "Em sourceExcerpt, cite o trecho LITERAL do resumo que motivou a observação.")
                 .user("Resumo do projeto: " + projectSummary
                         + "\nObjetivo observacional: " + objective
                         + priorities
+                        + observed
                         + "\nLente MPO (attributeId — rótulo (categoria)):\n" + mpoLens)
                 .call()
                 .entity(ObservationSuggestionsDTO.class);
