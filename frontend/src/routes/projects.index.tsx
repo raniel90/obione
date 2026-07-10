@@ -17,7 +17,7 @@ import { cn, toBrDate } from "@/lib/utils";
 export const Route = createFileRoute("/projects/")({
   head: () => ({
     meta: [
-      { title: "Projetos — ObiOne" },
+      { title: "ObiOne" },
       {
         name: "description",
         content:
@@ -97,7 +97,7 @@ function ObservedProjectCard({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-            <span className="font-mono uppercase tracking-wider">{project.domain}</span>
+            <span className="uppercase tracking-wider">{project.domain}</span>
             <span className="h-1 w-1 rounded-full bg-border" />
             <span>{project.model}</span>
           </div>
@@ -146,7 +146,7 @@ function ObservedProjectCard({
       <div className="mt-4">
         <div className="flex items-center justify-between text-[11px] text-muted-foreground">
           <span>Progresso</span>
-          <span className="font-mono text-foreground">{project.progress}%</span>
+          <span className="text-foreground">{project.progress}%</span>
         </div>
         <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-muted">
           <div
@@ -162,7 +162,7 @@ function ObservedProjectCard({
           {phenomenaCount} fenômeno{phenomenaCount === 1 ? "" : "s"} associado
           {phenomenaCount === 1 ? "" : "s"}
         </span>
-        <span className="font-mono">Últ. obs · {updated}</span>
+        <span className="">Últ. obs · {updated}</span>
       </div>
 
       <div className="mt-4 inline-flex items-center justify-center gap-1.5 rounded-md border border-border bg-background px-3 py-1.5 text-[12px] font-medium text-foreground transition-colors group-hover:bg-foreground group-hover:text-background">

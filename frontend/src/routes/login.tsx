@@ -10,7 +10,7 @@ import { login as loginService } from "@/services/authService";
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "Entrar — ObiOne" },
+      { title: "ObiOne" },
       {
         name: "description",
         content: "Acesse o ObiOne, Observatório Inteligente de Projetos.",
@@ -81,7 +81,7 @@ function LoginPage() {
             <h1 className="mt-5 text-[22px] font-semibold leading-tight tracking-tight text-foreground">
               Acesse o observatório
             </h1>
-            <p className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+            <p className="mt-1.5 text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
               ObiOne · observatório de projetos
             </p>
           </div>

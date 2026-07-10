@@ -20,13 +20,7 @@ import {
   type KnowledgeStatus,
   type KnowledgeConfidence,
 } from "@/lib/community-data";
-import {
-  KpiCard,
-  Mini,
-  SectionHeader,
-  discussionStatusTone,
-  knowledgeStatusTone,
-} from "@/components/community-pieces";
+import { KpiCard, Mini, SectionHeader, discussionStatusTone } from "@/components/community-pieces";
 import { getCommunityOverview } from "@/services/communityService";
 import type { CommunityOverview, DomainCommunitySummary } from "@/types/community";
 import type { DiscussionStatusCode } from "@/types/discussion";
@@ -35,7 +29,7 @@ import type { KnowledgeConfidenceCode, KnowledgeStatusCode } from "@/types/knowl
 export const Route = createFileRoute("/community/")({
   head: () => ({
     meta: [
-      { title: "Comunidade — ObiOne" },
+      { title: "ObiOne" },
       {
         name: "description",
         content:
@@ -261,7 +255,7 @@ function CommunityPage() {
 
                   <div className="mt-4 flex items-center justify-end border-t border-border pt-3">
                     <span className="inline-flex items-center gap-1 text-[12px] font-medium text-foreground/80 transition-colors group-hover:text-foreground">
-                      Entrar na comunidade
+                      Ver detalhes
                       <ArrowUpRight className="h-3 w-3" />
                     </span>
                   </div>
@@ -344,14 +338,6 @@ function CommunityPage() {
                       <BookOpen className="h-3 w-3" />
                       <span className="font-medium text-foreground/70">{k.domain}</span>
                     </div>
-                    <span
-                      className={cn(
-                        "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider",
-                        knowledgeStatusTone[k.status],
-                      )}
-                    >
-                      {k.status}
-                    </span>
                   </div>
                   <h3 className="mt-2 text-[13.5px] font-semibold leading-snug tracking-tight text-foreground">
                     {k.title}

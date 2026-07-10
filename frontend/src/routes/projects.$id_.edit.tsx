@@ -44,7 +44,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/projects/$id_/edit")({
   head: () => ({
     meta: [
-      { title: "Editar projeto — ObiOne" },
+      { title: "ObiOne" },
       {
         name: "description",
         content: "Edite os dados cadastrais e o acompanhamento de um projeto observado.",

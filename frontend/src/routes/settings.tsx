@@ -1,21 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import {
-  Shield,
-  UserCog,
-  User,
-  Users,
-  Check,
-  X,
-  MoreHorizontal,
-  Link2,
-  Layers,
-  Power,
-  Sparkles,
-} from "lucide-react";
+import { Shield, UserCog, User, MoreHorizontal, Power, Sparkles } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -29,7 +18,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { getProfiles } from "@/services/profileService";
 import {
@@ -47,7 +35,7 @@ import type { ProfileCode, User as DomainUser } from "@/types/user";
 export const Route = createFileRoute("/settings")({
   head: () => ({
     meta: [
-      { title: "Perfis e Governança — ObiOne" },
+      { title: "ObiOne" },
       {
         name: "description",
         content:
@@ -67,6 +55,8 @@ const PROFILE_VISUAL: Record<ProfileCode, { icon: typeof Shield; level: string }
 const PROFILE_ORDER: ProfileCode[] = ["ADMIN", "CONSULTANT", "CLIENT"];
 
 function SettingsPage() {
+  const { user } = useCurrentUser();
+  const isAdmin = user?.profileCode === "ADMIN";
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [profilePermissions, setProfilePermissions] = useState<ProfilePermission[]>([]);
@@ -160,32 +150,6 @@ function SettingsPage() {
       />
 
       <div className="px-6 py-8 md:px-10 space-y-10">
-        {/* Bloco conceitual comunidade */}
-        <section>
-          <div className="rounded-lg border border-border bg-card p-5">
-            <div className="flex items-start gap-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border bg-muted/40">
-                <Users className="h-4 w-4 text-foreground" />
-              </div>
-              <div>
-                <p className="text-[11px] font-medium text-muted-foreground">
-                  Camada de participação
-                </p>
-                <h3 className="mt-1.5 text-[14px] font-semibold tracking-tight text-foreground">
-                  Comunidade como camada de participação
-                </h3>
-                <p className="mt-2 max-w-3xl text-[12.5px] leading-relaxed text-muted-foreground">
-                  No ObiOne, a comunidade não é um tipo de usuário. Ela representa a camada
-                  sociotécnica do observatório, onde participantes interpretam fenômenos, discutem
-                  evidências e ajudam a transformar observações em conhecimento coletivo. Todos os
-                  perfis podem participar da comunidade, mas suas ações e visibilidade dependem do
-                  perfil e do vínculo com domínios e projetos.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* Cards perfis */}
         <section>
           <SectionLabel>Perfis ativos</SectionLabel>
@@ -251,13 +215,13 @@ function SettingsPage() {
 
         {/* Matriz */}
         <section>
-          <SectionLabel>Matriz de permissões</SectionLabel>
-          <h2 className="mt-2 text-[16px] font-semibold tracking-tight text-foreground">
+          <h2 className="text-[16px] font-semibold tracking-tight text-foreground">
             Permissões por perfil
           </h2>
           <p className="mt-1 max-w-2xl text-[12.5px] text-muted-foreground">
-            Ative ou desative o que cada perfil pode realizar no observatório. As alterações são
-            aplicadas em modo simulado.
+            {isAdmin
+              ? "O administrador tem todas as permissões, fixas. Ajuste o que consultor e cliente podem fazer."
+              : "Como consultor, você ajusta apenas as permissões do cliente."}
           </p>
 
           <div className="mt-5 overflow-hidden rounded-lg border border-border bg-card">
@@ -281,16 +245,21 @@ function SettingsPage() {
                 {permissions.map((p) => (
                   <TableRow key={p.code} className="border-border">
                     <TableCell className="text-[13px] text-foreground">{p.name}</TableCell>
-                    {PROFILE_ORDER.map((code) => (
-                      <TableCell key={code} className="text-center">
-                        <div className="flex justify-center">
-                          <Switch
-                            checked={isEnabled(code, p.code)}
-                            onCheckedChange={() => toggle(p.code, code)}
-                          />
-                        </div>
-                      </TableCell>
-                    ))}
+                    {PROFILE_ORDER.map((code) => {
+                      // ADMIN is fixed (all on); CONSULTANT is editable by admins only.
+                      const locked = code === "ADMIN" || (code === "CONSULTANT" && !isAdmin);
+                      return (
+                        <TableCell key={code} className="text-center">
+                          <div className="flex justify-center">
+                            <Switch
+                              checked={code === "ADMIN" ? true : isEnabled(code, p.code)}
+                              disabled={locked}
+                              onCheckedChange={() => toggle(p.code, code)}
+                            />
+                          </div>
+                        </TableCell>
+                      );
+                    })}
                   </TableRow>
                 ))}
               </TableBody>
@@ -298,45 +267,12 @@ function SettingsPage() {
           </div>
         </section>
 
-        {/* Acesso contextual */}
-        <section>
-          <div className="rounded-lg border border-dashed border-border bg-muted/30 p-5">
-            <div className="flex items-start gap-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border bg-background">
-                <Layers className="h-4 w-4 text-foreground" />
-              </div>
-              <div>
-                <p className="text-[11px] font-medium text-muted-foreground">Acesso contextual</p>
-                <h3 className="mt-1.5 text-[14px] font-semibold tracking-tight text-foreground">
-                  Perfil define o papel · contexto define o alcance
-                </h3>
-                <p className="mt-2 max-w-3xl text-[12.5px] leading-relaxed text-muted-foreground">
-                  O domínio organiza a comunidade observacional, mas o acesso real às informações
-                  depende do vínculo do usuário com cada projeto. Assim, um cliente pode participar
-                  da comunidade do domínio Branding, mas visualizar apenas discussões e dados
-                  relacionados ao projeto ao qual está vinculado.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* Usuários por perfil */}
         <section className="pb-8">
-          <SectionLabel>Usuários por perfil</SectionLabel>
-          <div className="mt-2 flex items-end justify-between">
-            <div>
-              <h2 className="text-[16px] font-semibold tracking-tight text-foreground">
-                Usuários por perfil
-              </h2>
-              <p className="mt-1 text-[12.5px] text-muted-foreground">
-                Lista mockada de usuários do observatório e seus vínculos contextuais.
-              </p>
-            </div>
-            <Button size="sm" variant="outline" className="text-[12px]">
-              Convidar usuário
-            </Button>
-          </div>
+          <h2 className="text-[16px] font-semibold tracking-tight text-foreground">Usuários</h2>
+          <p className="mt-1 text-[12.5px] text-muted-foreground">
+            Quem participa do observatório e seus vínculos.
+          </p>
 
           <div className="mt-5 overflow-hidden rounded-lg border border-border bg-card">
             <Table>
@@ -404,19 +340,6 @@ function SettingsPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="text-[12.5px]">
-                            <DropdownMenuItem>
-                              <UserCog className="h-3.5 w-3.5" />
-                              Alterar perfil
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Layers className="h-3.5 w-3.5" />
-                              Vincular domínio
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Link2 className="h-3.5 w-3.5" />
-                              Vincular projeto
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => toggleActive(u.id)}>
                               <Power className="h-3.5 w-3.5" />
                               {active ? "Desativar" : "Ativar"}
@@ -429,12 +352,6 @@ function SettingsPage() {
                 })}
               </TableBody>
             </Table>
-          </div>
-
-          <div className="mt-4 flex items-center gap-4 text-[11.5px] text-muted-foreground">
-            <Legend icon={<Check className="h-3 w-3" />} label="Permissão ativa" />
-            <Legend icon={<X className="h-3 w-3" />} label="Permissão restrita" />
-            <span className="text-[11px] italic">· governança simulada</span>
           </div>
         </section>
       </div>
@@ -460,16 +377,5 @@ function Stat({ label, value }: { label: string; value: string }) {
       <p className="text-[11px] font-medium text-muted-foreground">{label}</p>
       <p className="mt-0.5 text-[12.5px] text-foreground">{value}</p>
     </div>
-  );
-}
-
-function Legend({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return (
-    <span className="inline-flex items-center gap-1.5">
-      <span className="flex h-4 w-4 items-center justify-center rounded-full border border-border bg-background text-foreground">
-        {icon}
-      </span>
-      {label}
-    </span>
   );
 }

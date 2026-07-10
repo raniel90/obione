@@ -22,7 +22,6 @@ import {
   getDiscussionById,
   statusCodes,
   toCommunityDiscussion,
-  updateDiscussionStatus,
   visibilityCodes,
   contributionTypeCodes,
 } from "@/services/discussionService";
@@ -146,7 +145,7 @@ function mapParticipantToUi(participant: CommunityParticipant, domainName: strin
 export const Route = createFileRoute("/community/$slug")({
   head: () => ({
     meta: [
-      { title: "Comunidade — ObiOne" },
+      { title: "ObiOne" },
       {
         name: "description",
         content: "Comunidade do domínio: projetos, conversas e aprendizados.",
@@ -559,19 +558,6 @@ function DomainCommunityPage() {
         open={!!selectedDiscussion && !consolidateOpen}
         onOpenChange={(o) => !o && setSelectedDiscussion(null)}
         onConsolidate={() => setConsolidateOpen(true)}
-        onUpdateStatus={(status) => {
-          if (!selectedDiscussion) return;
-          void updateDiscussionStatus(selectedDiscussion.id, statusCodes[status]).then(
-            (updated) => {
-              if (!updated) {
-                updateDiscussion(selectedDiscussion.id, { status });
-                setSelectedDiscussion({ ...selectedDiscussion, status });
-                return;
-              }
-              replaceDiscussion(toCommunityDiscussion(updated, mapDiscussionNames(updated)));
-            },
-          );
-        }}
         onAddContribution={(contribution) => {
           if (!selectedDiscussion) return;
           void addContribution(selectedDiscussion.id, {

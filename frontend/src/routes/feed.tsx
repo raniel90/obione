@@ -7,7 +7,7 @@ import { getFeed, type FeedEvent } from "@/services/feedService";
 export const Route = createFileRoute("/feed")({
   head: () => ({
     meta: [
-      { title: "Atividade — ObiOne" },
+      { title: "ObiOne" },
       {
         name: "description",
         content: "Linha do tempo do observatório: observações, conversas e aprendizados.",

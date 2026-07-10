@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/domains/")({
   head: () => ({
     meta: [
-      { title: "Domínios — ObiOne" },
+      { title: "ObiOne" },
       {
         name: "description",
         content: "Áreas de atuação da consultoria que agrupam projetos, fenômenos e aprendizados.",
@@ -287,9 +287,7 @@ function DomainsPage() {
                             <Radar className="h-3 w-3" />
                             Fenômeno observado
                           </span>
-                          {nPhenomena > 1 && (
-                            <span className="font-mono normal-case">+{nPhenomena - 1}</span>
-                          )}
+                          {nPhenomena > 1 && <span className="normal-case">+{nPhenomena - 1}</span>}
                         </div>
                         <p className="mt-1 line-clamp-2 text-[12.5px] leading-snug text-foreground">
                           {mainPhenomenon.name}
@@ -302,17 +300,17 @@ function DomainsPage() {
                         <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
                           <span className="inline-flex items-center gap-1">
                             <LayoutGrid className="h-3 w-3" />
-                            <span className="font-mono text-foreground">{nProjects}</span>
+                            <span className="text-foreground">{nProjects}</span>
                             projeto{nProjects === 1 ? "" : "s"}
                           </span>
                           <span className="inline-flex items-center gap-1">
                             <MessageSquare className="h-3 w-3" />
-                            <span className="font-mono text-foreground">{nDiscussions}</span>
+                            <span className="text-foreground">{nDiscussions}</span>
                             discuss{nDiscussions === 1 ? "ão" : "ões"}
                           </span>
                           <span className="inline-flex items-center gap-1">
                             <BookOpen className="h-3 w-3" />
-                            <span className="font-mono text-foreground">{nKnowledge}</span>
+                            <span className="text-foreground">{nKnowledge}</span>
                             aprendizado{nKnowledge === 1 ? "" : "s"}
                           </span>
                         </span>

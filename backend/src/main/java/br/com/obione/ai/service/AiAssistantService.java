@@ -26,6 +26,8 @@ import br.com.obione.domains.dto.DomainResponseDTO;
 import br.com.obione.domains.service.DomainService;
 import br.com.obione.mpo.MpoCatalog;
 import br.com.obione.mpo.dto.MpoAttributeDTO;
+import br.com.obione.observations.dto.ObservationResponseDTO;
+import br.com.obione.observations.service.ObservationService;
 import br.com.obione.projects.dto.ProjectResponseDTO;
 import br.com.obione.projects.service.ProjectService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -34,6 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -50,6 +53,7 @@ public class AiAssistantService {
     private final ProjectService projectService;
     private final DomainService domainService;
     private final DiscussionService discussionService;
+    private final ObservationService observationService;
     private final MpoCatalog catalog;
     private final AiSuggestionLogRepository logRepository;
     private final ObjectMapper objectMapper;
@@ -59,6 +63,7 @@ public class AiAssistantService {
             ProjectService projectService,
             DomainService domainService,
             DiscussionService discussionService,
+            ObservationService observationService,
             MpoCatalog catalog,
             AiSuggestionLogRepository logRepository,
             ObjectMapper objectMapper
@@ -67,6 +72,7 @@ public class AiAssistantService {
         this.projectService = projectService;
         this.domainService = domainService;
         this.discussionService = discussionService;
+        this.observationService = observationService;
         this.catalog = catalog;
         this.logRepository = logRepository;
         this.objectMapper = objectMapper;
@@ -87,8 +93,23 @@ public class AiAssistantService {
         String lens = catalog.inScopeAttributes().stream()
                 .map(this::lensLine)
                 .collect(Collectors.joining("\n"));
-        ObservationSuggestionsDTO suggestions =
-                llm.suggestObservations(p.summary(), p.observationObjective(), lens, p.initialAttributeIds());
+        // Aspects already under observation must not be suggested again: the
+        // existing observations go into the prompt, and a deterministic filter
+        // below drops anything the model still repeats.
+        List<ObservationResponseDTO> existing = observationService.findByProjectId(projectId);
+        List<String> alreadyObserved = existing.stream()
+                .map(o -> (o.attributeId() == null ? "-" : o.attributeId()) + " — " + o.title())
+                .toList();
+        Set<String> coveredAttributes = existing.stream()
+                .map(ObservationResponseDTO::attributeId)
+                .filter(a -> a != null && !a.isBlank())
+                .collect(Collectors.toSet());
+        ObservationSuggestionsDTO raw = llm.suggestObservations(
+                p.summary(), p.observationObjective(), lens, p.initialAttributeIds(), alreadyObserved);
+        ObservationSuggestionsDTO suggestions = new ObservationSuggestionsDTO(
+                raw.suggestions().stream()
+                        .filter(s -> !coveredAttributes.contains(s.attributeId()))
+                        .toList());
         AiSuggestionLog log = journal(AiSuggestionType.OBSERVATIONS, suggestions, projectId, null, null);
         return ObservationSuggestionsResponseDTO.of(suggestions, log.getId(), llm.provider(), llm.model(), log.getCreatedAt());
     }

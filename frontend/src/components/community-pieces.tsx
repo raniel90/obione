@@ -244,14 +244,6 @@ export function KnowledgeCard({ k }: { k: CommunityKnowledge }) {
             </>
           )}
         </div>
-        <span
-          className={cn(
-            "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider",
-            knowledgeStatusTone[k.status],
-          )}
-        >
-          {k.status}
-        </span>
       </div>
 
       <h3 className="mt-2 text-[14.5px] font-semibold leading-snug tracking-tight text-foreground">
@@ -260,25 +252,26 @@ export function KnowledgeCard({ k }: { k: CommunityKnowledge }) {
 
       <p className="mt-3 text-[13px] leading-relaxed text-foreground/90">{k.summary}</p>
 
-      {k.evidences && (
-        <div className="mt-3 rounded-lg border border-dashed border-border bg-background/50 p-3">
-          <p className="text-[11px] font-medium text-muted-foreground">Evidências consideradas</p>
-          <p className="mt-1 text-[12.5px] leading-relaxed text-foreground/90">{k.evidences}</p>
+      {k.recommendation && (
+        <div className="mt-3 rounded-md bg-muted/40 p-3 text-[12.5px] leading-relaxed text-foreground">
+          <span className="font-medium">Recomendação: </span>
+          {k.recommendation}
         </div>
       )}
 
-      {k.recommendation && (
-        <div className="mt-3 rounded-lg border border-border bg-muted/30 p-3">
-          <p className="text-[11px] font-medium text-muted-foreground">Recomendação</p>
-          <p className="mt-1 text-[12.5px] leading-relaxed text-foreground">{k.recommendation}</p>
-        </div>
+      {k.evidences && (
+        <details className="mt-2 group">
+          <summary className="cursor-pointer list-none text-[11.5px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
+            Ver evidências consideradas
+          </summary>
+          <p className="mt-1.5 text-[12.5px] leading-relaxed text-foreground/90">{k.evidences}</p>
+        </details>
       )}
 
       <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-[11px] text-muted-foreground">
         <span>
           Confiança: <span className="font-medium text-foreground">{k.confidence}</span>
         </span>
-        <span className="text-muted-foreground/80">Origem: discussão #{k.originDiscussion}</span>
       </div>
     </article>
   );
@@ -427,24 +420,6 @@ export function CreateDiscussionDialog({
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1.5 sm:col-span-2">
-                <Label>Status</Label>
-                <Select
-                  value={form.status}
-                  onValueChange={(v) => setForm((f) => ({ ...f, status: v as DiscussionStatus }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(["Aberta", "Em análise", "Consolidada"] as DiscussionStatus[]).map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {s}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="dis-origin">Observação de origem</Label>
@@ -502,14 +477,12 @@ export function DiscussionDetailDialog({
   open,
   onOpenChange,
   onConsolidate,
-  onUpdateStatus,
   onAddContribution,
 }: {
   discussion: Discussion | null;
   open: boolean;
   onOpenChange: (o: boolean) => void;
   onConsolidate: () => void;
-  onUpdateStatus: (s: DiscussionStatus) => void;
   onAddContribution: (c: Discussion["contributionsList"][number]) => void;
 }) {
   const [text, setText] = useState("");
@@ -565,29 +538,14 @@ export function DiscussionDetailDialog({
               <p className="text-[11px] font-medium text-muted-foreground">
                 Contribuições da comunidade
               </p>
-              <Select
-                value={discussion.status}
-                onValueChange={(v) => onUpdateStatus(v as DiscussionStatus)}
+              <span
+                className={cn(
+                  "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider",
+                  discussionStatusTone[discussion.status],
+                )}
               >
-                <SelectTrigger className="h-7 w-[150px] text-[11px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {(
-                    [
-                      "Aberta",
-                      "Em análise",
-                      "Revisada",
-                      "Consolidada",
-                      "Arquivada",
-                    ] as DiscussionStatus[]
-                  ).map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                {discussion.status}
+              </span>
             </div>
             <ul className="mt-3 space-y-2">
               {discussion.contributionsList.length === 0 && (

@@ -74,14 +74,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "ObiOne — Observatório Inteligente de Projetos" },
+      { title: "ObiOne" },
       {
         name: "description",
         content:
           "Observatório inteligente para gestão estratégica, branding e acompanhamento de projetos.",
       },
       { name: "author", content: "ObiOne" },
-      { property: "og:title", content: "ObiOne — Observatório Inteligente de Projetos" },
+      { property: "og:title", content: "ObiOne" },
       {
         property: "og:description",
         content:
@@ -89,7 +89,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:title", content: "ObiOne — Observatório Inteligente de Projetos" },
+      { name: "twitter:title", content: "ObiOne" },
       {
         name: "twitter:description",
         content:
@@ -107,6 +107,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
     ],
     links: [
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
       {
         rel: "stylesheet",
         href: appCss,

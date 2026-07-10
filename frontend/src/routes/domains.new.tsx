@@ -13,7 +13,7 @@ import { CheckCircle2 } from "lucide-react";
 export const Route = createFileRoute("/domains/new")({
   head: () => ({
     meta: [
-      { title: "Novo domínio observacional — ObiOne" },
+      { title: "ObiOne" },
       {
         name: "description",
         content: "Cadastre um novo contexto analítico para observar projetos no ObiOne.",
