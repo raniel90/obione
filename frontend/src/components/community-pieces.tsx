@@ -33,7 +33,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
+import { cn, toBrDate } from "@/lib/utils";
 import { domains, projects } from "@/lib/mock-data";
 import {
   roleLabels,
@@ -603,7 +603,7 @@ export function DiscussionDetailDialog({
                       {roleLabels[c.role]}
                     </span>
                     <span>
-                      {c.type} · {c.date}
+                      {c.type} · {toBrDate(c.date)}
                     </span>
                   </div>
                   <p className="mt-1.5 text-[13px] leading-relaxed text-foreground">{c.text}</p>
