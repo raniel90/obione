@@ -366,11 +366,11 @@ function NewProjectPage() {
                     </p>
                   )}
                 </Field>
-                <Field label="O que você quer acompanhar?">
+                <Field label="O que a IA deve priorizar? (opcional)">
                   <Textarea
                     {...register("observationalGoal")}
-                    rows={3}
-                    placeholder="Em uma frase, diga o que importa observar neste projeto (ex.: risco de atraso, engajamento do cliente, mudanças de escopo)."
+                    rows={2}
+                    placeholder="Direciona as sugestões da IA neste projeto. Ex.: risco de atraso, engajamento do cliente, mudanças de escopo."
                   />
                 </Field>
               </div>
