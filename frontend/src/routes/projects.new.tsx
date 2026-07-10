@@ -244,11 +244,6 @@ function NewProjectPage() {
     }
   });
 
-  const goToReviewManually = handleSubmit(() => {
-    setSuggestion(null);
-    setStep(2);
-  });
-
   const onCreate = async () => {
     if (submitting) return;
 
@@ -361,8 +356,8 @@ function NewProjectPage() {
                   {errors.summary && <FieldError>{errors.summary.message}</FieldError>}
                   {!aiReady && (
                     <p className="text-[11px] text-muted-foreground">
-                      Escreva pelo menos {AI_MIN_DESCRIPTION} caracteres para habilitar as sugestões
-                      da IA.
+                      Escreva pelo menos {AI_MIN_DESCRIPTION} caracteres para avançar; a IA usa a
+                      descrição para preparar o projeto.
                     </p>
                   )}
                 </Field>
@@ -377,23 +372,16 @@ function NewProjectPage() {
             </Section>
 
             <div className="flex flex-wrap items-center justify-end gap-3 border-t border-border pt-6">
-              <button
-                type="button"
-                onClick={goToReviewManually}
-                className="text-[12.5px] text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
-              >
-                Preencher manualmente
-              </button>
               <Button type="submit" disabled={!aiReady || aiLoading} className="gap-1.5">
                 {aiLoading ? (
                   <>
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    Consultando a IA…
+                    Processando…
                   </>
                 ) : (
                   <>
                     <Sparkles className="h-3.5 w-3.5" />
-                    Continuar com IA
+                    Avançar
                   </>
                 )}
               </Button>
