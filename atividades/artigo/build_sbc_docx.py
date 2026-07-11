@@ -402,7 +402,7 @@ table(
     ["Papel", "Função", "Entrada", "Saída"],
     [
         ["Categorizadora", "Sugere o domínio do projeto", "resumo, objetivo, domínios disponíveis", "domínio sugerido e confiança"],
-        ["Observadora", "Sugere observações ancoradas no MPO", "resumo, objetivo, lente MPO, atributos prioritários", "observações mapeadas a atributos, com impacto e trecho literal"],
+        ["Observadora", "Sugere observações ancoradas no MPO", "resumo, objetivo, lente MPO, atributos prioritários, observações já registradas", "observações mapeadas a atributos, com impacto e trecho literal"],
         ["Sintetizadora", "Rascunha um aprendizado a partir da conversa", "título, pergunta, contribuições", "rascunho com resumo, evidência e recomendação"],
         ["Conectora", "Sintetiza padrões entre projetos do domínio (implementada; não avaliada)", "resumos dos projetos do domínio", "padrões e lições anonimizados"],
         ["Configuradora", "Sugere o setup inicial no cadastro", "nome, descrição, objetivo", "domínio, atributos e fenômenos esperados"],
@@ -417,15 +417,18 @@ flow_box("Descrição do projeto  →  Análise pela IA à luz do MPO  →  "
          "Sugestão estruturada e auditável  →  Revisão do consultor  →  "
          "Observação ou aprendizado publicado")
 caption("Figura 1. Pipeline da camada de IA.")
-body("Três técnicas sustentam a confiabilidade das sugestões. A primeira é a saída "
+body("Quatro técnicas sustentam a confiabilidade das sugestões. A primeira é a saída "
      "estruturada: o modelo é obrigado a responder no formato de um objeto de dados, que "
      "o sistema mapeia diretamente, sem interpretação livre do texto. A segunda é o "
      "grounding pela lente do MPO, reforçado por instruções que orientam o modelo a não "
      "inventar atributos fora da lista fornecida e a citar o trecho literal do resumo que "
      "motivou cada observação. A terceira é uma validação determinística em código: na "
      "configuração inicial de um projeto, identificadores de atributo ou de domínio "
-     "inexistentes no catálogo são descartados antes de a resposta ser devolvida; nos "
-     "demais papéis, essa restrição é reforçada pelas instruções do prompt. O provedor é "
+     "inexistentes no catálogo são descartados antes de a resposta ser devolvida. A "
+     "quarta é a consciência do estado do observatório: ao sugerir observações, o modelo "
+     "recebe a lista do que o projeto já registra e é instruído a não repetir aspectos em "
+     "observação, e um filtro determinístico descarta, em código, qualquer sugestão cujo "
+     "atributo já esteja coberto, mesmo que o modelo desobedeça. O provedor é "
      "configurável: um modo determinístico, sem chave e "
      "voltado a testes, e o provedor da OpenAI, com o modelo gpt-5.4-mini e temperatura "
      "baixa, para uso real.", first=True)
@@ -435,7 +438,10 @@ body("A IA nunca escreve diretamente nas observações ou nos aprendizados. Ela 
      "persistência só ocorre quando o consultor aceita a sugestão, e a observação é então "
      "gravada com a origem marcada como assistida pela IA. A taxa de aceite por tipo de "
      "sugestão é observável no sistema, permitindo acompanhar o quanto as sugestões são de "
-     "fato aproveitadas.", first=True)
+     "fato aproveitadas. No caso da Conectora, a própria síntese fica persistida nesse "
+     "log: o sistema recupera a última versão por domínio, com a data de geração, e "
+     "oferece a regeração sob demanda, tratando o resultado como um artefato de "
+     "conhecimento versionado, e não como uma saída efêmera.", first=True)
 subheading("4.4. Prototipação")
 body("Antes do desenvolvimento final, as telas foram prototipadas com apoio de "
      "ferramentas de geração assistida por IA no ecossistema React, incluindo o Lovable, "
@@ -450,7 +456,14 @@ body("O acesso ao observatório é semi-aberto e governado pelo papel do usuári
      "administrador, enquanto o cliente contribui nas conversas e enxerga apenas o seu "
      "próprio projeto. O consultor conduz a curadoria e vê todo o portfólio; o "
      "administrador acumula as permissões de gestão; o cliente participa da comunidade do "
-     "seu caso sem acesso às ações de equipe nem à visão consolidada do portfólio. Esse "
+     "seu caso sem acesso às ações de equipe nem à visão consolidada do portfólio. A "
+     "configuração dessas permissões é, ela própria, governada por regras assimétricas: o "
+     "perfil do administrador é fixo, com todas as permissões habilitadas e imutáveis; "
+     "apenas o administrador altera as permissões do consultor; e o consultor gerencia "
+     "apenas as do cliente, com as regras aplicadas no backend, e não apenas na "
+     "interface. A integridade da evidência segue o mesmo princípio: uma observação com "
+     "conversa vinculada não pode ser excluída, preservando o registro que sustenta o "
+     "debate da comunidade. Esse "
      "arranjo garante o isolamento entre clientes e materializa, na prática, o acesso "
      "semi-aberto previsto no MPO. As telas correspondentes a cada perfil estão no "
      "Apêndice C.", first=True)
@@ -548,6 +561,15 @@ body("Os resultados confirmam o MPO como base válida e mostram que ele é imple
      "navegação não forem resolvidas, o valor demora a ser percebido. O fato de o "
      "onboarding não ter movido a clareza indica que o próximo passo é uma navegação "
      "guiada, com menu evidente, fluxo em etapas e exemplos práticos.", first=True)
+body("Essa leitura já produziu um terceiro ciclo de design, posterior à segunda rodada. "
+     "O cadastro tornou-se IA-first, com a descrição textual como único insumo e "
+     "degradação graciosa quando a IA não responde; o ciclo de observação, conversa e "
+     "consolidação passou a acontecer em uma única tela, com um clique para abrir a "
+     "conversa e o diálogo de consolidação reduzido ao essencial; e as telas foram "
+     "enxugadas para diminuir a carga de leitura. Essas mudanças respondem diretamente à "
+     "restrição de clareza apontada pela avaliação, mas ainda não foram reavaliadas: a "
+     "rodada controlada prevista nas questões em aberto é o teste natural desse "
+     "redesenho.")
 body("Como decisões arquiteturais, destacam-se a IA estritamente assistiva e a "
      "governança por papel, que viabiliza o acesso semi-aberto com isolamento entre "
      "clientes. Entre vantagens e limitações das ferramentas, o desenvolvimento em código "
@@ -593,10 +615,11 @@ body("A leitura comparativa das duas rodadas deixa cinco questões que delimitam
      "outros domínios, com amostra maior e uso prolongado, e o que explica a queda na "
      "percepção de governança na segunda rodada?", first=True)
 body("Essas questões orientam os trabalhos futuros: realizar uma nova rodada controlada, "
-     "com os mesmos usuários antes e depois de uma navegação guiada; ampliar a validação "
-     "com mais participantes e domínios; executar o protocolo de avaliação da extração do "
-     "MPO; e avaliar a síntese cross-projeto (Conectora), já implementada com mitigações "
-     "de anonimização e gate de publicação, cuja avaliação de valor permanece em aberto.")
+     "com os mesmos usuários antes e depois do redesenho IA-first e da navegação guiada; "
+     "ampliar a validação com mais participantes e domínios; executar o protocolo de "
+     "avaliação da extração do MPO; e avaliar a síntese cross-projeto (Conectora), já "
+     "implementada com anonimização e com cada síntese persistida no log de auditoria, "
+     "cuja avaliação de valor permanece em aberto.")
 
 # Referências
 heading("Referências")
