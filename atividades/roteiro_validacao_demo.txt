@@ -74,12 +74,12 @@ No projeto Vitalis, aba Observações > "Registrar primeira observação"
 O que você observou?
 O cliente demorou mais de duas semanas para aprovar o novo posicionamento, e nesse meio tempo a equipe ficou parada esperando a decisão, o que atrasou o cronograma.
 
-Clique em "Estruturar com IA".
+Clique em "Avançar" (o botão mostra "Processando..." enquanto a IA estrutura).
 
 ESPERADO: título parecido com "Atraso por aprovação do cliente", atributo
 "Status do cronograma", interpretação sobre atraso/ociosidade.
 Revise e clique em "Registrar observação". O card entra na lista com o
-selo "Sugerida pela IA".
+selo "sugerida pela IA".
 
 
 ------------------------------------------------------------
@@ -91,9 +91,9 @@ ESPERADO: sem modal — a conversa nasce na hora e o quadro abre ali mesmo,
 com a caixa "Contribua com a conversa".
 
 OPCIONAL (Observadora): no topo da aba Observações há outro "Sugerir com
-IA" — a IA propõe observações a partir do resumo do projeto num painel;
-clique em "Aceitar" numa delas e ela vira observação com o selo
-"Sugerida pela IA".
+IA" — a IA propõe observações num painel (sem repetir aspectos já
+observados); cada sugestão tem "Aceitar" e "Dispensar" individuais.
+Se mostrar, aceite pelo menos uma (mantém os aceites em 100% no passo 7).
 
 
 ------------------------------------------------------------
@@ -150,8 +150,9 @@ Menu Projetos > Campanha Lançamento Orion (mesmo domínio), aba Aprendizados.
 ESPERADO: o bloco "Aprendizados do domínio" mostra o aprendizado
 recém-consolidado da Vitalis — o conhecimento atravessou projetos.
 
-OPCIONAL: clique em "Sintetizar padrões do domínio" (a Conectora) e mostre
-o painel de padrões e lições.
+OPCIONAL: clique em "Sintetizar padrões do domínio" (a Conectora). O painel
+de padrões e lições fica salvo ("gerada em dd/mm/yyyy") e o botão vira
+"Regerar síntese" nas próximas visitas.
 
 
 ------------------------------------------------------------
