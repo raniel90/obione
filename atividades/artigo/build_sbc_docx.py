@@ -167,7 +167,7 @@ def link_line(label, url):
     add_hyperlink(p, url, url)
 
 
-def figure(img_path, caption_text, width_cm=13.0):
+def figure(img_path, caption_text, width_cm=10.5):
     """Insere imagem centralizada + legenda estilo SBC (Helvetica 10 bold)."""
     p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p.paragraph_format.space_before = Pt(6)
@@ -694,7 +694,6 @@ figure(PRINTS / "03-detalhe-projeto.png", "Figura C.3. Detalhe do projeto.")
 figure(PRINTS / "04-feed.png", "Figura C.4. Feed de novidades.")
 figure(PRINTS / "05-consolidar-ia.png", "Figura C.5. Consolidar aprendizado com IA.")
 figure(PRINTS / "06-wizard.png", "Figura C.6. Wizard de cadastro de projeto.")
-link_line("Telas completas", "https://github.com/raniel90/obione/blob/main/atividades/Principais_Telas_ObiOne.pdf")
 
 doc.save(OUT)
 print("OK:", OUT)
